@@ -19,11 +19,11 @@ import { formatCurrency, formatCompactNumber } from '@/lib/utils'
 type MetricKey = 'impressions' | 'clicks' | 'conversions' | 'spent' | 'revenue'
 
 const metrics: { key: MetricKey; label: string; color: string }[] = [
-  { key: 'impressions', label: 'Impressões', color: '#00F5FF' },
-  { key: 'clicks', label: 'Cliques', color: '#BF00FF' },
-  { key: 'conversions', label: 'Conversões', color: '#00FF88' },
-  { key: 'spent', label: 'Investido', color: '#FF6B00' },
-  { key: 'revenue', label: 'Receita', color: '#FFE500' },
+  { key: 'impressions', label: 'Impressões', color: '#3B82F6' },
+  { key: 'clicks', label: 'Cliques', color: '#60A5FA' },
+  { key: 'conversions', label: 'Conversões', color: '#FACC15' },
+  { key: 'spent', label: 'Investido', color: '#1D4ED8' },
+  { key: 'revenue', label: 'Receita', color: '#FDE047' },
 ]
 
 export function PerformanceChart() {
@@ -45,7 +45,7 @@ export function PerformanceChart() {
     if (!active || !payload) return null
 
     return (
-      <div className="bg-[#1A1A25] border border-[#00F5FF]/20 rounded-xl p-4 shadow-2xl">
+      <div className="bg-[#1A1A25] border border-[#3B82F6]/20 rounded-xl p-4 shadow-2xl">
         <p className="text-sm font-medium text-white mb-2">
           {new Date(label).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
         </p>
@@ -75,13 +75,13 @@ export function PerformanceChart() {
     <Card className="col-span-2">
       <CardHeader>
         <CardTitle>Performance ao Longo do Tempo</CardTitle>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {metrics.map((metric) => (
             <motion.button
               key={metric.key}
               whileTap={{ scale: 0.95 }}
               onClick={() => toggleMetric(metric.key)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap ${
                 activeMetrics.includes(metric.key)
                   ? 'text-white'
                   : 'text-[#6B6B7B] hover:text-white'
@@ -89,7 +89,7 @@ export function PerformanceChart() {
               style={{
                 backgroundColor: activeMetrics.includes(metric.key)
                   ? `${metric.color}20`
-                  : 'transparent',
+                  : 'rgba(255,255,255,0.05)',
                 border: `1px solid ${activeMetrics.includes(metric.key) ? metric.color : 'transparent'}`,
               }}
             >
@@ -99,9 +99,9 @@ export function PerformanceChart() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-80">
+        <div className="h-80 mt-4">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={timeSeriesData}>
+            <AreaChart data={timeSeriesData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 {metrics.map((metric) => (
                   <linearGradient key={metric.key} id={`gradient-${metric.key}`} x1="0" y1="0" x2="0" y2="1">

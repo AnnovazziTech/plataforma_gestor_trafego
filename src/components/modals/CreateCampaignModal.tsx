@@ -12,10 +12,10 @@ const objectives: CampaignObjective[] = ['awareness', 'traffic', 'engagement', '
 
 const objectiveLabels: Record<CampaignObjective, string> = {
   awareness: 'Reconhecimento',
-  traffic: 'Trafego',
+  traffic: 'Tráfego',
   engagement: 'Engajamento',
-  leads: 'Geracao de Leads',
-  app_installs: 'Instalacoes de App',
+  leads: 'Geração de Leads',
+  app_installs: 'Instalações de App',
   sales: 'Vendas',
 }
 
@@ -36,7 +36,7 @@ export function CreateCampaignModal() {
     }
 
     if (!budget || parseFloat(budget) <= 0) {
-      showToast('Por favor, informe um orcamento valido', 'error')
+      showToast('Por favor, informe um orçamento válido', 'error')
       return
     }
 
@@ -104,14 +104,14 @@ export function CreateCampaignModal() {
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-[#12121A] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
           >
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
+            <div className="flex items-center justify-between p-5 border-b border-white/10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00F5FF] to-[#BF00FF] flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#1D4ED8] flex items-center justify-center">
                   <Megaphone className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-white">Nova Campanha</h2>
-                  <p className="text-xs text-[#6B6B7B]">Configure sua nova campanha</p>
+                  <p className="text-sm text-[#6B6B7B]">Configure sua nova campanha</p>
                 </div>
               </div>
               <button
@@ -122,7 +122,7 @@ export function CreateCampaignModal() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-4 space-y-4">
+            <form onSubmit={handleSubmit} className="p-5 space-y-5">
               <div>
                 <label className="block text-sm font-medium text-[#A0A0B0] mb-2">
                   Nome da Campanha
@@ -132,7 +132,7 @@ export function CreateCampaignModal() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ex: Black Friday 2024"
-                  className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#00F5FF]/50 transition-all"
+                  className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50 transition-all"
                 />
               </div>
 
@@ -148,7 +148,7 @@ export function CreateCampaignModal() {
                       onClick={() => setPlatform(p)}
                       className={`p-3 rounded-xl border transition-all ${
                         platform === p
-                          ? 'border-[#00F5FF] bg-[#00F5FF]/10'
+                          ? 'border-[#3B82F6] bg-[#3B82F6]/10'
                           : 'border-white/10 bg-white/5 hover:bg-white/10'
                       }`}
                     >
@@ -168,9 +168,9 @@ export function CreateCampaignModal() {
                       key={obj}
                       type="button"
                       onClick={() => setObjective(obj)}
-                      className={`px-3 py-2 rounded-xl text-sm font-medium border transition-all ${
+                      className={`px-3 py-2.5 rounded-xl text-sm font-medium border transition-all ${
                         objective === obj
-                          ? 'border-[#00F5FF] bg-[#00F5FF]/10 text-[#00F5FF]'
+                          ? 'border-[#3B82F6] bg-[#3B82F6]/10 text-[#3B82F6]'
                           : 'border-white/10 bg-white/5 text-white hover:bg-white/10'
                       }`}
                     >
@@ -182,7 +182,7 @@ export function CreateCampaignModal() {
 
               <div>
                 <label className="block text-sm font-medium text-[#A0A0B0] mb-2">
-                  Orcamento Diario (R$)
+                  Orçamento Diário (R$)
                 </label>
                 <input
                   type="number"
@@ -191,7 +191,7 @@ export function CreateCampaignModal() {
                   placeholder="0.00"
                   min="0"
                   step="0.01"
-                  className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#00F5FF]/50 transition-all"
+                  className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50 transition-all"
                 />
               </div>
 

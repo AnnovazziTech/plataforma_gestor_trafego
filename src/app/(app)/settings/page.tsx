@@ -30,18 +30,18 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: 'account', label: 'Conta', icon: User },
-    { id: 'integrations', label: 'Integracoes', icon: Link2 },
-    { id: 'notifications', label: 'Notificacoes', icon: Bell },
-    { id: 'appearance', label: 'Aparencia', icon: Palette },
+    { id: 'integrations', label: 'Integrações', icon: Link2 },
+    { id: 'notifications', label: 'Notificações', icon: Bell },
+    { id: 'appearance', label: 'Aparência', icon: Palette },
     { id: 'billing', label: 'Faturamento', icon: CreditCard },
-    { id: 'security', label: 'Seguranca', icon: Shield },
+    { id: 'security', label: 'Segurança', icon: Shield },
   ]
 
   return (
     <div className="min-h-screen">
       <Header
-        title="Configuracoes"
-        subtitle="Gerencie suas preferencias e conta"
+        title="Configurações"
+        subtitle="Gerencie suas preferências e conta"
       />
 
       <main className="p-8">
@@ -56,7 +56,7 @@ export default function SettingsPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                     activeTab === tab.id
-                      ? 'bg-gradient-to-r from-[#00F5FF]/15 to-transparent text-[#00F5FF] border-l-2 border-[#00F5FF]'
+                      ? 'bg-gradient-to-r from-[#3B82F6]/15 to-transparent text-[#3B82F6] border-l-2 border-[#3B82F6]'
                       : 'text-[#A0A0B0] hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -95,7 +95,7 @@ function AccountSettings() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Informacoes da Conta</CardTitle>
+          <CardTitle>Informações da Conta</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-6 mb-8">
@@ -120,7 +120,7 @@ function AccountSettings() {
               <input
                 type="text"
                 defaultValue={currentUser.name}
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#00F5FF]/50 transition-all"
+                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50 transition-all"
               />
             </div>
             <div>
@@ -128,7 +128,7 @@ function AccountSettings() {
               <input
                 type="email"
                 defaultValue={currentUser.email}
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#00F5FF]/50 transition-all"
+                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50 transition-all"
               />
             </div>
             <div>
@@ -136,7 +136,7 @@ function AccountSettings() {
               <input
                 type="tel"
                 placeholder="+55 (11) 99999-9999"
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#00F5FF]/50 transition-all"
+                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50 transition-all"
               />
             </div>
             <div>
@@ -144,13 +144,13 @@ function AccountSettings() {
               <input
                 type="text"
                 placeholder="Nome da empresa"
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#00F5FF]/50 transition-all"
+                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50 transition-all"
               />
             </div>
           </div>
 
           <div className="flex justify-end mt-6">
-            <Button variant="primary">Salvar Alteracoes</Button>
+            <Button variant="primary">Salvar Alterações</Button>
           </div>
         </CardContent>
       </Card>
@@ -229,16 +229,16 @@ function IntegrationsSettings() {
                   key={platform.platform}
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:border-[#00F5FF]/30 transition-all group"
+                  className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:border-[#3B82F6]/30 transition-all group"
                 >
-                  <div className="p-3 rounded-xl bg-white/5 group-hover:bg-[#00F5FF]/10 transition-colors">
+                  <div className="p-3 rounded-xl bg-white/5 group-hover:bg-[#3B82F6]/10 transition-colors">
                     <PlatformIcon platform={platform.platform} size={24} />
                   </div>
                   <div className="text-left">
                     <h4 className="text-sm font-medium text-white">{platform.name}</h4>
                     <p className="text-xs text-[#6B6B7B]">{platform.description}</p>
                   </div>
-                  <Plus size={18} className="ml-auto text-[#6B6B7B] group-hover:text-[#00F5FF] transition-colors" />
+                  <Plus size={18} className="ml-auto text-[#6B6B7B] group-hover:text-[#3B82F6] transition-colors" />
                 </motion.button>
               ))}
           </div>
@@ -262,13 +262,13 @@ function NotificationsSettings() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Canais de Notificacao</CardTitle>
+          <CardTitle>Canais de Notificação</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {[
-              { key: 'email', label: 'Email', description: 'Receber notificacoes por email' },
-              { key: 'push', label: 'Push', description: 'Notificacoes no navegador' },
+              { key: 'email', label: 'Email', description: 'Receber notificações por email' },
+              { key: 'push', label: 'Push', description: 'Notificações no navegador' },
               { key: 'slack', label: 'Slack', description: 'Integrar com canal do Slack' },
             ].map((channel) => (
               <div
@@ -283,7 +283,7 @@ function NotificationsSettings() {
                   onClick={() => setNotifications(prev => ({ ...prev, [channel.key]: !prev[channel.key as keyof typeof prev] }))}
                   className={`w-12 h-6 rounded-full transition-all ${
                     notifications[channel.key as keyof typeof notifications]
-                      ? 'bg-[#00F5FF]'
+                      ? 'bg-[#3B82F6]'
                       : 'bg-white/20'
                   }`}
                 >
@@ -299,14 +299,14 @@ function NotificationsSettings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Tipos de Notificacao</CardTitle>
+          <CardTitle>Tipos de Notificação</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {[
               { key: 'alerts', label: 'Alertas de Performance', description: 'CPA alto, CTR baixo, etc' },
-              { key: 'reports', label: 'Relatorios', description: 'Quando relatorios sao gerados' },
-              { key: 'updates', label: 'Atualizacoes do Sistema', description: 'Novidades e melhorias' },
+              { key: 'reports', label: 'Relatórios', description: 'Quando relatórios são gerados' },
+              { key: 'updates', label: 'Atualizações do Sistema', description: 'Novidades e melhorias' },
             ].map((type) => (
               <div
                 key={type.key}
@@ -320,7 +320,7 @@ function NotificationsSettings() {
                   onClick={() => setNotifications(prev => ({ ...prev, [type.key]: !prev[type.key as keyof typeof prev] }))}
                   className={`w-12 h-6 rounded-full transition-all ${
                     notifications[type.key as keyof typeof notifications]
-                      ? 'bg-[#00F5FF]'
+                      ? 'bg-[#3B82F6]'
                       : 'bg-white/20'
                   }`}
                 >
@@ -361,7 +361,7 @@ function AppearanceSettings() {
                 onClick={() => setTheme(t.id)}
                 className={`p-4 rounded-xl border transition-all ${
                   theme === t.id
-                    ? 'border-[#00F5FF] bg-[#00F5FF]/10'
+                    ? 'border-[#3B82F6] bg-[#3B82F6]/10'
                     : 'border-white/10 hover:border-white/20'
                 }`}
               >
@@ -404,7 +404,7 @@ function BillingSettings() {
           <CardTitle>Plano Atual</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="p-6 rounded-xl bg-gradient-to-br from-[#00F5FF]/20 to-[#BF00FF]/20 border border-[#00F5FF]/30">
+          <div className="p-6 rounded-xl bg-gradient-to-br from-[#3B82F6]/20 to-[#FACC15]/20 border border-[#3B82F6]/30">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-xl font-bold text-white">Plano Pro</h3>
@@ -412,16 +412,16 @@ function BillingSettings() {
               </div>
               <div className="text-right">
                 <p className="text-3xl font-bold text-white">R$ 297</p>
-                <p className="text-sm text-[#6B6B7B]">/mes</p>
+                <p className="text-sm text-[#6B6B7B]">/mês</p>
               </div>
             </div>
             <div className="space-y-2">
               {[
-                'Ate 50 campanhas ativas',
+                'Até 50 campanhas ativas',
                 'Todas as plataformas',
-                'Relatorios ilimitados',
-                'Automacoes avancadas',
-                'Suporte prioritario',
+                'Relatórios ilimitados',
+                'Automações avançadas',
+                'Suporte prioritário',
               ].map((feature) => (
                 <div key={feature} className="flex items-center gap-2 text-sm text-[#A0A0B0]">
                   <Check size={14} className="text-[#00FF88]" />
@@ -439,13 +439,13 @@ function BillingSettings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Metodo de Pagamento</CardTitle>
+          <CardTitle>Método de Pagamento</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-lg bg-white/5">
-                <CreditCard size={20} className="text-[#00F5FF]" />
+                <CreditCard size={20} className="text-[#3B82F6]" />
               </div>
               <div>
                 <p className="text-sm font-medium text-white">**** **** **** 4242</p>
@@ -473,21 +473,21 @@ function SecuritySettings() {
               <label className="block text-sm text-[#6B6B7B] mb-2">Senha Atual</label>
               <input
                 type="password"
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#00F5FF]/50 transition-all"
+                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50 transition-all"
               />
             </div>
             <div>
               <label className="block text-sm text-[#6B6B7B] mb-2">Nova Senha</label>
               <input
                 type="password"
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#00F5FF]/50 transition-all"
+                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50 transition-all"
               />
             </div>
             <div>
               <label className="block text-sm text-[#6B6B7B] mb-2">Confirmar Nova Senha</label>
               <input
                 type="password"
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#00F5FF]/50 transition-all"
+                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50 transition-all"
               />
             </div>
             <Button variant="primary">Atualizar Senha</Button>
@@ -497,7 +497,7 @@ function SecuritySettings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Autenticacao de Dois Fatores</CardTitle>
+          <CardTitle>Autenticação de Dois Fatores</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
@@ -512,13 +512,13 @@ function SecuritySettings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Sessoes Ativas</CardTitle>
+          <CardTitle>Sessões Ativas</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {[
-              { device: 'Chrome - Windows', location: 'Sao Paulo, BR', current: true },
-              { device: 'Safari - iPhone', location: 'Sao Paulo, BR', current: false },
+              { device: 'Chrome - Windows', location: 'São Paulo, BR', current: true },
+              { device: 'Safari - iPhone', location: 'São Paulo, BR', current: false },
             ].map((session, i) => (
               <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
                 <div>

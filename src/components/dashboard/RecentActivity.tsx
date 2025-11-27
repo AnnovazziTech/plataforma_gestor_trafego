@@ -77,12 +77,12 @@ const activities: Activity[] = [
 export function RecentActivity() {
   const getActivityIcon = (type: Activity['type']) => {
     const icons = {
-      campaign_started: <Play size={14} className="text-[#00FF88]" />,
-      campaign_paused: <Pause size={14} className="text-[#FFE500]" />,
-      budget_increased: <DollarSign size={14} className="text-[#00F5FF]" />,
-      milestone_reached: <CheckCircle size={14} className="text-[#00FF88]" />,
+      campaign_started: <Play size={14} className="text-[#3B82F6]" />,
+      campaign_paused: <Pause size={14} className="text-[#FACC15]" />,
+      budget_increased: <DollarSign size={14} className="text-[#60A5FA]" />,
+      milestone_reached: <CheckCircle size={14} className="text-[#3B82F6]" />,
       alert: <AlertTriangle size={14} className="text-red-400" />,
-      campaign_created: <TrendingUp size={14} className="text-[#BF00FF]" />,
+      campaign_created: <TrendingUp size={14} className="text-[#FACC15]" />,
       campaign_edited: <Edit size={14} className="text-[#A0A0B0]" />,
     }
     return icons[type]
@@ -90,12 +90,12 @@ export function RecentActivity() {
 
   const getActivityColor = (type: Activity['type']) => {
     const colors = {
-      campaign_started: 'border-[#00FF88]/30 bg-[#00FF88]/5',
-      campaign_paused: 'border-[#FFE500]/30 bg-[#FFE500]/5',
-      budget_increased: 'border-[#00F5FF]/30 bg-[#00F5FF]/5',
-      milestone_reached: 'border-[#00FF88]/30 bg-[#00FF88]/5',
+      campaign_started: 'border-[#3B82F6]/30 bg-[#3B82F6]/5',
+      campaign_paused: 'border-[#FACC15]/30 bg-[#FACC15]/5',
+      budget_increased: 'border-[#60A5FA]/30 bg-[#60A5FA]/5',
+      milestone_reached: 'border-[#3B82F6]/30 bg-[#3B82F6]/5',
       alert: 'border-red-500/30 bg-red-500/5',
-      campaign_created: 'border-[#BF00FF]/30 bg-[#BF00FF]/5',
+      campaign_created: 'border-[#FACC15]/30 bg-[#FACC15]/5',
       campaign_edited: 'border-white/20 bg-white/5',
     }
     return colors[type]
@@ -119,31 +119,31 @@ export function RecentActivity() {
     <Card>
       <CardHeader>
         <CardTitle>Atividade Recente</CardTitle>
-        <button className="text-xs text-[#00F5FF] hover:underline">Ver tudo</button>
+        <button className="text-xs text-[#3B82F6] hover:underline">Ver tudo</button>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div className="space-y-2">
           {activities.map((activity, index) => (
             <motion.div
               key={activity.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors group cursor-pointer"
+              className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group cursor-pointer"
             >
-              <div className={`p-2 rounded-lg border ${getActivityColor(activity.type)}`}>
+              <div className={`p-2.5 rounded-xl border flex-shrink-0 ${getActivityColor(activity.type)}`}>
                 {getActivityIcon(activity.type)}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-sm font-medium text-white">{activity.title}</p>
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <p className="text-sm font-medium text-white truncate flex-1">{activity.title}</p>
                   {activity.platform && (
-                    <PlatformIcon platform={activity.platform} size={14} />
+                    <PlatformIcon platform={activity.platform} size={16} className="flex-shrink-0" />
                   )}
                 </div>
-                <p className="text-xs text-[#6B6B7B] line-clamp-1">{activity.description}</p>
+                <p className="text-xs text-[#6B6B7B] truncate">{activity.description}</p>
               </div>
-              <span className="text-xs text-[#6B6B7B] whitespace-nowrap">
+              <span className="text-xs text-[#6B6B7B] whitespace-nowrap flex-shrink-0 bg-white/5 px-2 py-1 rounded-lg">
                 {formatTimestamp(activity.timestamp)}
               </span>
             </motion.div>
@@ -152,7 +152,7 @@ export function RecentActivity() {
 
         {/* View All Link */}
         <div className="mt-4 pt-4 border-t border-white/10">
-          <button className="w-full py-2 text-sm text-[#00F5FF] hover:text-[#00F5FF]/80 transition-colors">
+          <button className="w-full py-2 text-sm text-[#3B82F6] hover:text-[#3B82F6]/80 transition-colors">
             Ver todas as atividades
           </button>
         </div>

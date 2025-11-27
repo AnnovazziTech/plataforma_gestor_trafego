@@ -1,24 +1,24 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react'
+import { CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react'
 import { useApp } from '@/contexts'
 
 export function ToastContainer() {
   const { toasts } = useApp()
 
   const icons = {
-    success: <CheckCircle className="w-5 h-5 text-[#00FF88]" />,
+    success: <CheckCircle className="w-5 h-5 text-[#3B82F6]" />,
     error: <XCircle className="w-5 h-5 text-red-500" />,
-    warning: <AlertCircle className="w-5 h-5 text-[#FFE500]" />,
-    info: <Info className="w-5 h-5 text-[#00F5FF]" />,
+    warning: <AlertCircle className="w-5 h-5 text-[#FACC15]" />,
+    info: <Info className="w-5 h-5 text-[#60A5FA]" />,
   }
 
   const colors = {
-    success: 'border-[#00FF88]/30 bg-[#00FF88]/10',
+    success: 'border-[#3B82F6]/30 bg-[#3B82F6]/10',
     error: 'border-red-500/30 bg-red-500/10',
-    warning: 'border-[#FFE500]/30 bg-[#FFE500]/10',
-    info: 'border-[#00F5FF]/30 bg-[#00F5FF]/10',
+    warning: 'border-[#FACC15]/30 bg-[#FACC15]/10',
+    info: 'border-[#60A5FA]/30 bg-[#60A5FA]/10',
   }
 
   return (

@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { motion, HTMLMotionProps } from 'framer-motion'
 
 interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref'> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'yellow'
   size?: 'sm' | 'md' | 'lg'
   isLoading?: boolean
 }
@@ -15,15 +15,16 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = 'inline-flex items-center justify-center font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed'
 
     const variants = {
-      primary: 'bg-gradient-to-r from-[#00F5FF] via-[#BF00FF] to-[#FF00E5] text-[#0A0A0F] hover:shadow-[0_0_30px_rgba(0,245,255,0.4)] hover:-translate-y-0.5',
-      secondary: 'border border-[#00F5FF]/30 text-[#00F5FF] hover:bg-[#00F5FF]/10 hover:border-[#00F5FF]',
+      primary: 'bg-gradient-to-r from-[#3B82F6] to-[#1D4ED8] text-white hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] hover:-translate-y-0.5',
+      secondary: 'border border-[#3B82F6]/30 text-[#3B82F6] hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]',
       ghost: 'text-[#A0A0B0] hover:text-white hover:bg-white/5',
-      danger: 'bg-gradient-to-r from-red-500 to-orange-500 text-white hover:shadow-[0_0_30px_rgba(255,68,68,0.4)]',
+      danger: 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:shadow-[0_0_30px_rgba(255,68,68,0.4)]',
+      yellow: 'bg-gradient-to-r from-[#FACC15] to-[#EAB308] text-[#0A0A0F] hover:shadow-[0_0_30px_rgba(250,204,21,0.4)] hover:-translate-y-0.5',
     }
 
     const sizes = {
-      sm: 'h-8 px-3 text-xs rounded-lg gap-1.5',
-      md: 'h-10 px-4 text-sm rounded-xl gap-2',
+      sm: 'h-9 px-4 text-sm rounded-lg gap-1.5',
+      md: 'h-10 px-5 text-sm rounded-xl gap-2',
       lg: 'h-12 px-6 text-base rounded-xl gap-2.5',
     }
 

@@ -20,7 +20,7 @@ export function CampaignPerformance() {
     if (!active || !payload) return null
 
     return (
-      <div className="bg-[#1A1A25] border border-[#00F5FF]/20 rounded-xl p-4 shadow-2xl min-w-48">
+      <div className="bg-[#1A1A25] border border-[#3B82F6]/20 rounded-xl p-4 shadow-2xl min-w-48">
         <p className="text-sm font-medium text-white mb-3 truncate">{label}</p>
         <div className="space-y-2">
           {payload.map((entry: any) => (
@@ -46,9 +46,9 @@ export function CampaignPerformance() {
   }
 
   const getBarColor = (roas: number) => {
-    if (roas >= 4) return '#00FF88'
-    if (roas >= 3) return '#00F5FF'
-    if (roas >= 2) return '#FFE500'
+    if (roas >= 4) return '#3B82F6'
+    if (roas >= 3) return '#60A5FA'
+    if (roas >= 2) return '#FACC15'
     return '#FF6B6B'
   }
 
@@ -58,17 +58,17 @@ export function CampaignPerformance() {
         <CardTitle>Performance das Campanhas</CardTitle>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-[#00F5FF]" />
+            <div className="w-2 h-2 rounded-full bg-[#3B82F6]" />
             <span className="text-xs text-[#6B6B7B]">Investido</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-[#BF00FF]" />
+            <div className="w-2 h-2 rounded-full bg-[#FACC15]" />
             <span className="text-xs text-[#6B6B7B]">Conversões</span>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-72">
+        <div className="h-72 mt-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={campaignComparison}
@@ -82,32 +82,33 @@ export function CampaignPerformance() {
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#A0A0B0', fontSize: 11 }}
-                width={150}
+                tick={{ fill: '#A0A0B0', fontSize: 10 }}
+                width={100}
+                tickFormatter={(value) => value.length > 15 ? value.substring(0, 15) + '...' : value}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0, 245, 255, 0.05)' }} />
-              <Bar dataKey="spent" fill="#00F5FF" radius={[0, 4, 4, 0]} barSize={16} />
-              <Bar dataKey="conversions" fill="#BF00FF" radius={[0, 4, 4, 0]} barSize={16} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(59, 130, 246, 0.05)' }} />
+              <Bar dataKey="spent" fill="#3B82F6" radius={[0, 4, 4, 0]} barSize={16} />
+              <Bar dataKey="conversions" fill="#FACC15" radius={[0, 4, 4, 0]} barSize={16} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* ROAS Indicators */}
-        <div className="mt-4 pt-4 border-t border-white/10">
-          <p className="text-xs text-[#6B6B7B] mb-3">ROAS por Campanha</p>
-          <div className="flex items-center gap-2">
+        <div className="mt-6 pt-5 border-t border-white/10">
+          <p className="text-sm text-[#A0A0B0] mb-4 font-medium">ROAS por Campanha</p>
+          <div className="flex items-center gap-3">
             {campaignComparison.map((campaign, index) => (
               <motion.div
                 key={campaign.name}
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1 }}
-                className="flex-1 p-3 rounded-lg bg-white/5 text-center"
+                className="flex-1 p-4 rounded-xl bg-white/5 text-center"
               >
-                <p className="text-lg font-bold" style={{ color: getBarColor(campaign.roas) }}>
+                <p className="text-xl font-bold mb-1" style={{ color: getBarColor(campaign.roas) }}>
                   {campaign.roas.toFixed(2)}x
                 </p>
-                <p className="text-xs text-[#6B6B7B] truncate mt-1" title={campaign.name}>
+                <p className="text-xs text-[#6B6B7B] truncate" title={campaign.name}>
                   {campaign.name.split(' ')[0]}
                 </p>
               </motion.div>

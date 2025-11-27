@@ -10,10 +10,10 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   ({ className, variant = 'default', ...props }, ref) => {
     const variants = {
-      success: 'bg-[#00FF88]/15 text-[#00FF88] border-[#00FF88]/20',
-      warning: 'bg-[#FFE500]/15 text-[#FFE500] border-[#FFE500]/20',
+      success: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
+      warning: 'bg-[#FACC15]/15 text-[#FACC15] border-[#FACC15]/20',
       error: 'bg-red-500/15 text-red-400 border-red-500/20',
-      info: 'bg-[#00F5FF]/15 text-[#00F5FF] border-[#00F5FF]/20',
+      info: 'bg-[#3B82F6]/15 text-[#3B82F6] border-[#3B82F6]/20',
       default: 'bg-white/10 text-[#A0A0B0] border-white/10',
     }
 
@@ -21,7 +21,7 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
       <span
         ref={ref}
         className={cn(
-          'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border',
+          'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border',
           variants[variant],
           className
         )}

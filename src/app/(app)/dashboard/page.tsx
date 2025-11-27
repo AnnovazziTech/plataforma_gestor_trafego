@@ -24,28 +24,28 @@ export default function DashboardPage() {
     <div className="flex flex-col min-h-screen">
       <Header
         title="Dashboard"
-        subtitle="Visao geral da performance de todas as suas campanhas"
+        subtitle="Visão geral da performance de todas as suas campanhas"
       />
 
       <main className="flex-1 p-4 md:p-6 overflow-x-hidden">
-        {/* Metrics Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+        {/* Metrics Grid - 2 colunas mobile, 3 tablet, 3 desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <MetricCard
             title="Total Investido"
             value={dashboardMetrics.totalSpent}
             previousValue={dashboardMetrics.previousPeriod.totalSpent}
             format="currency"
-            icon={<DollarSign size={16} />}
-            color="cyan"
+            icon={<DollarSign size={20} />}
+            color="blue"
             delay={0}
           />
           <MetricCard
-            title="Impressoes"
+            title="Impressões"
             value={dashboardMetrics.totalImpressions}
             previousValue={dashboardMetrics.previousPeriod.totalImpressions}
             format="compact"
-            icon={<Eye size={16} />}
-            color="purple"
+            icon={<Eye size={20} />}
+            color="yellow"
             delay={0.1}
           />
           <MetricCard
@@ -53,34 +53,34 @@ export default function DashboardPage() {
             value={dashboardMetrics.totalClicks}
             previousValue={dashboardMetrics.previousPeriod.totalClicks}
             format="compact"
-            icon={<MousePointer size={16} />}
-            color="pink"
+            icon={<MousePointer size={20} />}
+            color="blue"
             delay={0.2}
           />
           <MetricCard
-            title="Conversoes"
+            title="Conversões"
             value={dashboardMetrics.totalConversions}
             previousValue={dashboardMetrics.previousPeriod.totalConversions}
             format="number"
-            icon={<ShoppingCart size={16} />}
-            color="green"
+            icon={<ShoppingCart size={20} />}
+            color="yellow"
             delay={0.3}
           />
           <MetricCard
-            title="Receita"
+            title="Receita Total"
             value={dashboardMetrics.totalRevenue}
             previousValue={dashboardMetrics.previousPeriod.totalRevenue}
             format="currency"
-            icon={<TrendingUp size={16} />}
-            color="orange"
+            icon={<TrendingUp size={20} />}
+            color="blue"
             delay={0.4}
           />
           <MetricCard
-            title="ROAS Medio"
+            title="ROAS Médio"
             value={dashboardMetrics.avgRoas}
             format="number"
-            icon={<Target size={16} />}
-            color="blue"
+            icon={<Target size={20} />}
+            color="yellow"
             delay={0.5}
           />
         </div>

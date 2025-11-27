@@ -49,7 +49,7 @@ import {
   MousePointer,
 } from 'lucide-react'
 
-const COLORS = ['#00F5FF', '#BF00FF', '#FF00E5', '#00FF88', '#FFE500', '#FF6B00']
+const COLORS = ['#3B82F6', '#60A5FA', '#FACC15', '#FDE047', '#1D4ED8', '#EAB308']
 
 export default function AnalyticsPage() {
   const [selectedMetric, setSelectedMetric] = useState<'impressions' | 'clicks' | 'conversions'>('impressions')
@@ -73,43 +73,43 @@ export default function AnalyticsPage() {
     <div className="min-h-screen">
       <Header
         title="Analytics"
-        subtitle="Analise detalhada do desempenho das suas campanhas"
+        subtitle="Análise detalhada do desempenho das suas campanhas"
       />
 
       <main className="p-8">
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <MetricCard
-            title="Total de Usuarios Alcancados"
+            title="Usuários Alcançados"
             value={8234567}
             previousValue={7234567}
             format="compact"
             icon={<Users size={20} />}
-            color="cyan"
+            color="blue"
             delay={0}
           />
           <MetricCard
-            title="Taxa de Engajamento"
+            title="Engajamento"
             value={4.73}
             format="percent"
             icon={<Target size={20} />}
-            color="purple"
+            color="yellow"
             delay={0.1}
           />
           <MetricCard
-            title="Custo por Mil (CPM)"
+            title="CPM"
             value={12.34}
             format="currency"
             icon={<Eye size={20} />}
-            color="green"
+            color="blue"
             delay={0.2}
           />
           <MetricCard
-            title="Custo por Clique (CPC)"
+            title="CPC"
             value={0.33}
             format="currency"
             icon={<MousePointer size={20} />}
-            color="orange"
+            color="yellow"
             delay={0.3}
           />
         </div>
@@ -125,11 +125,11 @@ export default function AnalyticsPage() {
                   onClick={() => setSelectedMetric(metric as any)}
                   className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
                     selectedMetric === metric
-                      ? 'bg-[#00F5FF]/20 text-[#00F5FF] border border-[#00F5FF]'
+                      ? 'bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]'
                       : 'text-[#6B6B7B] hover:text-white border border-transparent'
                   }`}
                 >
-                  {metric === 'impressions' ? 'Impressoes' : metric === 'clicks' ? 'Cliques' : 'Conversoes'}
+                  {metric === 'impressions' ? 'Impressões' : metric === 'clicks' ? 'Cliques' : 'Conversões'}
                 </button>
               ))}
             </div>
@@ -140,8 +140,8 @@ export default function AnalyticsPage() {
                 <AreaChart data={timeSeriesData}>
                   <defs>
                     <linearGradient id="colorMetric" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00F5FF" stopOpacity={0.4} />
-                      <stop offset="100%" stopColor="#00F5FF" stopOpacity={0} />
+                      <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -161,7 +161,7 @@ export default function AnalyticsPage() {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#1A1A25',
-                      border: '1px solid rgba(0, 245, 255, 0.2)',
+                      border: '1px solid rgba(59, 130, 246, 0.2)',
                       borderRadius: '12px',
                     }}
                     labelStyle={{ color: '#fff' }}
@@ -169,7 +169,7 @@ export default function AnalyticsPage() {
                   <Area
                     type="monotone"
                     dataKey={selectedMetric}
-                    stroke="#00F5FF"
+                    stroke="#3B82F6"
                     strokeWidth={2}
                     fill="url(#colorMetric)"
                   />
@@ -184,7 +184,7 @@ export default function AnalyticsPage() {
           {/* Age Distribution */}
           <Card>
             <CardHeader>
-              <CardTitle>Distribuicao por Idade</CardTitle>
+              <CardTitle>Distribuição por Idade</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -196,12 +196,12 @@ export default function AnalyticsPage() {
                     <Tooltip
                       contentStyle={{
                         backgroundColor: '#1A1A25',
-                        border: '1px solid rgba(0, 245, 255, 0.2)',
+                        border: '1px solid rgba(59, 130, 246, 0.2)',
                         borderRadius: '12px',
                       }}
-                      formatter={(value: number) => [formatCompactNumber(value), 'Usuarios']}
+                      formatter={(value: number) => [formatCompactNumber(value), 'Usuários']}
                     />
-                    <Bar dataKey="value" fill="#00F5FF" radius={[0, 4, 4, 0]} barSize={20}>
+                    <Bar dataKey="value" fill="#3B82F6" radius={[0, 4, 4, 0]} barSize={20}>
                       {audienceByAge.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
@@ -215,7 +215,7 @@ export default function AnalyticsPage() {
           {/* Gender Distribution */}
           <Card>
             <CardHeader>
-              <CardTitle>Distribuicao por Genero</CardTitle>
+              <CardTitle>Distribuição por Gênero</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-center gap-8">
@@ -238,7 +238,7 @@ export default function AnalyticsPage() {
                       <Tooltip
                         contentStyle={{
                           backgroundColor: '#1A1A25',
-                          border: '1px solid rgba(0, 245, 255, 0.2)',
+                          border: '1px solid rgba(59, 130, 246, 0.2)',
                           borderRadius: '12px',
                         }}
                       />
@@ -276,7 +276,7 @@ export default function AnalyticsPage() {
                     transition={{ delay: index * 0.1 }}
                     className="flex items-center gap-4"
                   >
-                    <div className="p-3 rounded-xl bg-white/5 text-[#00F5FF]">
+                    <div className="p-3 rounded-xl bg-white/5 text-[#3B82F6]">
                       {deviceIcons[device.segment]}
                     </div>
                     <div className="flex-1">
@@ -316,12 +316,12 @@ export default function AnalyticsPage() {
                     transition={{ delay: index * 0.1 }}
                     className="flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
                   >
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-[#00F5FF]/20 to-[#BF00FF]/20 text-xs font-bold text-white">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-[#3B82F6]/20 to-[#60A5FA]/20 text-xs font-bold text-white">
                       {index + 1}
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-white">{location.segment}</p>
-                      <p className="text-xs text-[#6B6B7B]">{formatCompactNumber(location.value)} usuarios</p>
+                      <p className="text-xs text-[#6B6B7B]">{formatCompactNumber(location.value)} usuários</p>
                     </div>
                     <span className="text-sm font-medium" style={{ color: COLORS[index % COLORS.length] }}>
                       {location.percentage.toFixed(1)}%
@@ -337,7 +337,7 @@ export default function AnalyticsPage() {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Clock size={18} className="text-[#00F5FF]" />
+              <Clock size={18} className="text-[#3B82F6]" />
               Performance por Hora do Dia
             </CardTitle>
           </CardHeader>
@@ -351,14 +351,14 @@ export default function AnalyticsPage() {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#1A1A25',
-                      border: '1px solid rgba(0, 245, 255, 0.2)',
+                      border: '1px solid rgba(59, 130, 246, 0.2)',
                       borderRadius: '12px',
                     }}
                   />
                   <Legend />
-                  <Line type="monotone" dataKey="impressions" stroke="#00F5FF" strokeWidth={2} dot={false} name="Impressoes" />
-                  <Line type="monotone" dataKey="clicks" stroke="#BF00FF" strokeWidth={2} dot={false} name="Cliques" />
-                  <Line type="monotone" dataKey="conversions" stroke="#00FF88" strokeWidth={2} dot={false} name="Conversoes" />
+                  <Line type="monotone" dataKey="impressions" stroke="#3B82F6" strokeWidth={2} dot={false} name="Impressões" />
+                  <Line type="monotone" dataKey="clicks" stroke="#60A5FA" strokeWidth={2} dot={false} name="Cliques" />
+                  <Line type="monotone" dataKey="conversions" stroke="#FACC15" strokeWidth={2} dot={false} name="Conversões" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -377,13 +377,13 @@ export default function AnalyticsPage() {
                   <PolarGrid stroke="rgba(255,255,255,0.1)" />
                   <PolarAngleAxis dataKey="platform" tick={{ fill: '#A0A0B0', fontSize: 12 }} />
                   <PolarRadiusAxis tick={{ fill: '#6B6B7B', fontSize: 10 }} />
-                  <Radar name="ROAS" dataKey="roas" stroke="#00FF88" fill="#00FF88" fillOpacity={0.3} />
-                  <Radar name="Campanhas" dataKey="campaigns" stroke="#00F5FF" fill="#00F5FF" fillOpacity={0.3} />
+                  <Radar name="ROAS" dataKey="roas" stroke="#FACC15" fill="#FACC15" fillOpacity={0.3} />
+                  <Radar name="Campanhas" dataKey="campaigns" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.3} />
                   <Legend />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#1A1A25',
-                      border: '1px solid rgba(0, 245, 255, 0.2)',
+                      border: '1px solid rgba(59, 130, 246, 0.2)',
                       borderRadius: '12px',
                     }}
                   />

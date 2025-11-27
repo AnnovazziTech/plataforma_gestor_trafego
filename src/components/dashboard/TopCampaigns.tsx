@@ -32,7 +32,7 @@ export function TopCampaigns() {
     <Card>
       <CardHeader>
         <CardTitle>Campanhas em Destaque</CardTitle>
-        <button className="text-xs text-[#00F5FF] hover:underline">Ver todas</button>
+        <button className="text-xs text-[#3B82F6] hover:underline">Ver todas</button>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -43,21 +43,21 @@ export function TopCampaigns() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               whileHover={{ x: 4 }}
-              className="group p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-[#00F5FF]/20 transition-all cursor-pointer"
+              className="group p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-[#3B82F6]/20 transition-all cursor-pointer"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-white/5">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="p-2 rounded-lg bg-white/5 flex-shrink-0">
                     <PlatformIcon platform={campaign.platform} size={20} />
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-white group-hover:text-[#00F5FF] transition-colors line-clamp-1">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-white group-hover:text-[#3B82F6] transition-colors truncate">
                       {campaign.name}
                     </p>
-                    <p className="text-xs text-[#6B6B7B] capitalize">{campaign.platform} • {campaign.objective}</p>
+                    <p className="text-xs text-[#6B6B7B] capitalize truncate">{campaign.platform} • {campaign.objective}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   {getStatusBadge(campaign.status)}
                   <button className="p-1 rounded hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-all">
                     <MoreVertical size={14} className="text-[#6B6B7B]" />
@@ -65,23 +65,23 @@ export function TopCampaigns() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-4">
-                <div>
+              <div className="grid grid-cols-4 gap-3">
+                <div className="min-w-0 p-2 rounded-lg bg-white/5 text-center">
                   <p className="text-xs text-[#6B6B7B] mb-1">Investido</p>
                   <p className="text-sm font-semibold text-white">{formatCurrency(campaign.spent)}</p>
                 </div>
-                <div>
+                <div className="min-w-0 p-2 rounded-lg bg-white/5 text-center">
                   <p className="text-xs text-[#6B6B7B] mb-1">Conversões</p>
                   <p className="text-sm font-semibold text-white">{formatCompactNumber(campaign.metrics.conversions)}</p>
                 </div>
-                <div>
+                <div className="min-w-0 p-2 rounded-lg bg-white/5 text-center">
                   <p className="text-xs text-[#6B6B7B] mb-1">CTR</p>
                   <p className="text-sm font-semibold text-white">{campaign.metrics.ctr.toFixed(2)}%</p>
                 </div>
-                <div>
+                <div className="min-w-0 p-2 rounded-lg bg-white/5 text-center">
                   <p className="text-xs text-[#6B6B7B] mb-1">ROAS</p>
-                  <p className={`text-sm font-semibold flex items-center gap-1 ${
-                    campaign.metrics.roas >= 3 ? 'text-[#00FF88]' : campaign.metrics.roas >= 2 ? 'text-[#FFE500]' : 'text-red-400'
+                  <p className={`text-sm font-semibold flex items-center justify-center gap-1 ${
+                    campaign.metrics.roas >= 3 ? 'text-[#3B82F6]' : campaign.metrics.roas >= 2 ? 'text-[#FACC15]' : 'text-red-400'
                   }`}>
                     {campaign.metrics.roas >= 3 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                     {campaign.metrics.roas.toFixed(2)}x
@@ -100,7 +100,7 @@ export function TopCampaigns() {
                     initial={{ width: 0 }}
                     animate={{ width: `${(campaign.spent / campaign.budget) * 100}%` }}
                     transition={{ duration: 1, delay: index * 0.1 }}
-                    className="h-full rounded-full bg-gradient-to-r from-[#00F5FF] to-[#BF00FF]"
+                    className="h-full rounded-full bg-gradient-to-r from-[#3B82F6] to-[#FACC15]"
                   />
                 </div>
               </div>

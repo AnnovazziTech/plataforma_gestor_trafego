@@ -25,9 +25,9 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
         transition={{ duration: 0.3 }}
         whileHover={hover ? { y: -2, boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)' } : undefined}
         className={cn(
-          'rounded-2xl p-6 transition-all duration-300',
+          'rounded-2xl p-6 transition-all duration-300 overflow-hidden',
           variants[variant],
-          hover && 'hover:border-[#00F5FF]/20',
+          hover && 'hover:border-[#3B82F6]/20',
           className
         )}
         {...props}
@@ -42,7 +42,7 @@ Card.displayName = 'Card'
 
 const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('flex items-center justify-between mb-4', className)} {...props} />
+    <div ref={ref} className={cn('flex items-center justify-between mb-5', className)} {...props} />
   )
 )
 CardHeader.displayName = 'CardHeader'

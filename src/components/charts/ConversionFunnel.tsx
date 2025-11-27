@@ -14,7 +14,7 @@ export function ConversionFunnel() {
         <CardTitle>Funil de Conversão</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-5">
           {conversionFunnel.map((stage, index) => {
             const widthPercentage = (stage.value / maxValue) * 100
 
@@ -45,9 +45,9 @@ export function ConversionFunnel() {
                     className="h-full rounded-lg relative overflow-hidden"
                     style={{
                       background: `linear-gradient(90deg,
-                        rgba(0, 245, 255, ${0.8 - index * 0.1}) 0%,
-                        rgba(191, 0, 255, ${0.8 - index * 0.1}) 50%,
-                        rgba(255, 0, 229, ${0.8 - index * 0.1}) 100%
+                        rgba(59, 130, 246, ${0.8 - index * 0.1}) 0%,
+                        rgba(96, 165, 250, ${0.8 - index * 0.1}) 50%,
+                        rgba(250, 204, 21, ${0.8 - index * 0.1}) 100%
                       )`,
                     }}
                   >
@@ -70,22 +70,22 @@ export function ConversionFunnel() {
         </div>
 
         {/* Summary */}
-        <div className="mt-6 pt-4 border-t border-white/10">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold gradient-text">
+        <div className="mt-8 pt-5 border-t border-white/10">
+          <div className="grid grid-cols-3 gap-6">
+            <div className="text-center p-4 rounded-xl bg-white/5">
+              <p className="text-2xl font-bold text-[#3B82F6] mb-1">
                 {((conversionFunnel[conversionFunnel.length - 1].value / conversionFunnel[1].value) * 100).toFixed(2)}%
               </p>
               <p className="text-xs text-[#6B6B7B]">Taxa de Conversão</p>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-[#00FF88]">
+            <div className="text-center p-4 rounded-xl bg-white/5">
+              <p className="text-2xl font-bold text-[#60A5FA] mb-1">
                 {formatCompactNumber(conversionFunnel[conversionFunnel.length - 1].value)}
               </p>
               <p className="text-xs text-[#6B6B7B]">Conversões Totais</p>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-[#FFE500]">
+            <div className="text-center p-4 rounded-xl bg-white/5">
+              <p className="text-2xl font-bold text-[#FACC15] mb-1">
                 R$ 17,74
               </p>
               <p className="text-xs text-[#6B6B7B]">Custo por Conversão</p>

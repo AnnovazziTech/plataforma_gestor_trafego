@@ -10,7 +10,7 @@ interface MetricCardProps {
   previousValue?: number
   format?: 'currency' | 'number' | 'percent' | 'compact'
   icon?: React.ReactNode
-  color?: 'cyan' | 'purple' | 'pink' | 'green' | 'orange' | 'blue'
+  color?: 'blue' | 'yellow'
   delay?: number
 }
 
@@ -20,7 +20,7 @@ export function MetricCard({
   previousValue,
   format = 'number',
   icon,
-  color = 'cyan',
+  color = 'blue',
   delay = 0,
 }: MetricCardProps) {
   const formatValue = (val: number) => {
@@ -43,21 +43,18 @@ export function MetricCard({
   const isNegative = percentChange < 0
 
   const colorClasses = {
-    cyan: 'from-[#00F5FF]/20 to-transparent border-[#00F5FF]/20 hover:border-[#00F5FF]/40',
-    purple: 'from-[#BF00FF]/20 to-transparent border-[#BF00FF]/20 hover:border-[#BF00FF]/40',
-    pink: 'from-[#FF00E5]/20 to-transparent border-[#FF00E5]/20 hover:border-[#FF00E5]/40',
-    green: 'from-[#00FF88]/20 to-transparent border-[#00FF88]/20 hover:border-[#00FF88]/40',
-    orange: 'from-[#FF6B00]/20 to-transparent border-[#FF6B00]/20 hover:border-[#FF6B00]/40',
-    blue: 'from-[#0066FF]/20 to-transparent border-[#0066FF]/20 hover:border-[#0066FF]/40',
+    blue: 'border-[#3B82F6]/20 hover:border-[#3B82F6]/50',
+    yellow: 'border-[#FACC15]/20 hover:border-[#FACC15]/50',
   }
 
   const iconColors = {
-    cyan: 'text-[#00F5FF]',
-    purple: 'text-[#BF00FF]',
-    pink: 'text-[#FF00E5]',
-    green: 'text-[#00FF88]',
-    orange: 'text-[#FF6B00]',
-    blue: 'text-[#0066FF]',
+    blue: 'text-[#3B82F6] bg-[#3B82F6]/10',
+    yellow: 'text-[#FACC15] bg-[#FACC15]/10',
+  }
+
+  const glowColors = {
+    blue: 'bg-[#3B82F6]',
+    yellow: 'bg-[#FACC15]',
   }
 
   return (
@@ -65,51 +62,60 @@ export function MetricCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      whileHover={{ y: -2, transition: { duration: 0.2 } }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
       className={cn(
-        'relative p-4 rounded-xl bg-gradient-to-br border backdrop-blur-xl overflow-hidden group',
+        'relative rounded-2xl bg-gradient-to-br from-[#12121A] to-[#0D0D14] border overflow-hidden group',
         colorClasses[color]
       )}
     >
       {/* Background glow effect */}
       <div className={cn(
-        'absolute -top-16 -right-16 w-32 h-32 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity',
-        color === 'cyan' && 'bg-[#00F5FF]',
-        color === 'purple' && 'bg-[#BF00FF]',
-        color === 'pink' && 'bg-[#FF00E5]',
-        color === 'green' && 'bg-[#00FF88]',
-        color === 'orange' && 'bg-[#FF6B00]',
-        color === 'blue' && 'bg-[#0066FF]',
+        'absolute -top-12 -right-12 w-28 h-28 rounded-full blur-3xl opacity-15 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none',
+        glowColors[color],
       )} />
 
-      <div className="relative">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-[#A0A0B0] font-medium truncate">{title}</span>
-          {icon && <span className={cn('p-1.5 rounded-lg bg-white/5', iconColors[color])}>{icon}</span>}
-        </div>
+      {/* Content - layout centralizado */}
+      <div className="relative px-6 py-5 h-full flex flex-col items-center text-center">
+        {/* Icon no topo */}
+        {icon && (
+          <div className={cn(
+            'w-12 h-12 rounded-xl flex items-center justify-center mb-3',
+            iconColors[color]
+          )}>
+            {icon}
+          </div>
+        )}
 
+        {/* Title */}
+        <span className="text-sm text-[#A0A0B0] font-medium mb-2">
+          {title}
+        </span>
+
+        {/* Value - centralizado */}
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: delay + 0.2 }}
-          className="text-xl font-bold text-white mb-1"
+          className="text-[28px] font-bold text-white tracking-tight"
         >
           {formatValue(value)}
         </motion.div>
 
+        {/* Change indicator */}
         {previousValue !== undefined && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-white/5 w-full">
             <span className={cn(
-              'flex items-center gap-0.5 text-xs font-medium',
-              isPositive && 'text-[#00FF88]',
-              isNegative && 'text-red-400',
-              !isPositive && !isNegative && 'text-[#A0A0B0]'
+              'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold',
+              isPositive && 'bg-emerald-500/10 text-emerald-400',
+              isNegative && 'bg-red-500/10 text-red-400',
+              !isPositive && !isNegative && 'bg-white/5 text-[#6B6B7B]'
             )}>
               {isPositive && <TrendingUp size={12} />}
               {isNegative && <TrendingDown size={12} />}
               {!isPositive && !isNegative && <Minus size={12} />}
               {Math.abs(percentChange).toFixed(1)}%
             </span>
+            <span className="text-xs text-[#6B6B7B]">vs anterior</span>
           </div>
         )}
       </div>

@@ -8,8 +8,6 @@ import { campaigns } from '@/data/mock-data'
 import { formatCurrency, formatCompactNumber } from '@/lib/utils'
 import { Campaign, Platform, CampaignStatus } from '@/types'
 import {
-  Search,
-  Filter,
   Plus,
   MoreVertical,
   Play,
@@ -19,7 +17,6 @@ import {
   Copy,
   TrendingUp,
   TrendingDown,
-  Eye,
   MousePointer,
   DollarSign,
   Target,
@@ -66,31 +63,20 @@ export default function CampaignsPage() {
     <div className="min-h-screen">
       <Header
         title="Campanhas"
-        subtitle="Gerencie todas as suas campanhas de trafego pago"
+        subtitle="Gerencie todas as suas campanhas de tráfego pago"
       />
 
-      <main className="p-8">
-        {/* Filters Bar */}
-        <div className="flex items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4 flex-1">
-            {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6B7B]" />
-              <input
-                type="text"
-                placeholder="Buscar campanhas..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full h-10 pl-10 pr-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#00F5FF]/50 transition-all"
-              />
-            </div>
-
-            {/* Platform Filter */}
+      <main className="p-6 md:p-8">
+        {/* Filters Bar - Filtros e Visualização */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          {/* Filtros */}
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Filtro por Plataforma */}
             <div className="relative">
               <select
                 value={selectedPlatform}
                 onChange={(e) => setSelectedPlatform(e.target.value as Platform | 'all')}
-                className="h-10 pl-4 pr-10 rounded-xl bg-white/5 border border-white/10 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-[#00F5FF]/50"
+                className="h-11 pl-4 pr-10 rounded-xl bg-white/5 border border-white/10 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-[#3B82F6]/50 hover:border-[#3B82F6]/30 transition-all"
               >
                 <option value="all">Todas Plataformas</option>
                 {platforms.map((platform) => (
@@ -102,12 +88,12 @@ export default function CampaignsPage() {
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6B7B] pointer-events-none" />
             </div>
 
-            {/* Status Filter */}
+            {/* Filtro por Status */}
             <div className="relative">
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value as CampaignStatus | 'all')}
-                className="h-10 pl-4 pr-10 rounded-xl bg-white/5 border border-white/10 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-[#00F5FF]/50"
+                className="h-11 pl-4 pr-10 rounded-xl bg-white/5 border border-white/10 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-[#3B82F6]/50 hover:border-[#3B82F6]/30 transition-all"
               >
                 <option value="all">Todos Status</option>
                 {statuses.map((status) => (
@@ -120,53 +106,46 @@ export default function CampaignsPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* View Mode Toggle */}
-            <div className="flex items-center bg-white/5 rounded-lg p-1">
+          {/* Modo de Visualização */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center bg-white/5 rounded-xl p-1 border border-white/10">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#00F5FF]/20 text-[#00F5FF]' : 'text-[#6B6B7B] hover:text-white'}`}
+                className={`p-2.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-[#3B82F6]/20 text-[#3B82F6]' : 'text-[#6B6B7B] hover:text-white'}`}
               >
                 <LayoutGrid size={18} />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#00F5FF]/20 text-[#00F5FF]' : 'text-[#6B6B7B] hover:text-white'}`}
+                className={`p-2.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-[#3B82F6]/20 text-[#3B82F6]' : 'text-[#6B6B7B] hover:text-white'}`}
               >
                 <List size={18} />
               </button>
             </div>
-
-            <Button variant="primary" className="gap-2">
-              <Plus size={18} />
-              Nova Campanha
-            </Button>
           </div>
         </div>
 
         {/* Stats Summary */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'Total de Campanhas', value: campaigns.length, icon: Target, color: 'cyan' },
-            { label: 'Campanhas Ativas', value: campaigns.filter(c => c.status === 'active').length, icon: Play, color: 'green' },
-            { label: 'Total Investido', value: formatCurrency(campaigns.reduce((acc, c) => acc + c.spent, 0)), icon: DollarSign, color: 'purple' },
-            { label: 'ROAS Medio', value: `${(campaigns.reduce((acc, c) => acc + c.metrics.roas, 0) / campaigns.length).toFixed(2)}x`, icon: TrendingUp, color: 'orange' },
+            { label: 'Total de Campanhas', value: campaigns.length, icon: Target, color: 'blue' },
+            { label: 'Campanhas Ativas', value: campaigns.filter(c => c.status === 'active').length, icon: Play, color: 'yellow' },
+            { label: 'Total Investido', value: formatCurrency(campaigns.reduce((acc, c) => acc + c.spent, 0)), icon: DollarSign, color: 'blue' },
+            { label: 'ROAS Médio', value: `${(campaigns.reduce((acc, c) => acc + c.metrics.roas, 0) / campaigns.length).toFixed(2)}x`, icon: TrendingUp, color: 'yellow' },
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="p-4 rounded-xl bg-white/5 border border-white/10"
+              className="p-5 rounded-xl bg-gradient-to-br from-[#12121A] to-[#0D0D14] border border-white/10 hover:border-[#3B82F6]/30 transition-all"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-[#6B6B7B] mb-1">{stat.label}</p>
-                  <p className="text-xl font-bold text-white">{stat.value}</p>
+              <div className="flex flex-col items-center text-center">
+                <div className={`p-3 rounded-xl mb-3 ${stat.color === 'blue' ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-[#FACC15]/10 text-[#FACC15]'}`}>
+                  <stat.icon size={22} />
                 </div>
-                <div className={`p-2 rounded-lg ${stat.color === 'cyan' ? 'bg-[#00F5FF]/10 text-[#00F5FF]' : stat.color === 'green' ? 'bg-[#00FF88]/10 text-[#00FF88]' : stat.color === 'purple' ? 'bg-[#BF00FF]/10 text-[#BF00FF]' : 'bg-[#FF6B00]/10 text-[#FF6B00]'}`}>
-                  <stat.icon size={20} />
-                </div>
+                <p className="text-sm text-[#A0A0B0] mb-2">{stat.label}</p>
+                <p className="text-2xl font-bold text-white">{stat.value}</p>
               </div>
             </motion.div>
           ))}
@@ -217,7 +196,7 @@ function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       whileHover={{ y: -4 }}
-      className="group relative p-5 rounded-2xl bg-[#12121A]/80 border border-white/5 hover:border-[#00F5FF]/20 transition-all cursor-pointer"
+      className="group relative p-5 rounded-2xl bg-[#12121A]/80 border border-white/5 hover:border-[#3B82F6]/30 transition-all cursor-pointer"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
@@ -226,7 +205,7 @@ function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }
             <PlatformIcon platform={campaign.platform} size={22} />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white group-hover:text-[#00F5FF] transition-colors line-clamp-1">
+            <h3 className="text-sm font-semibold text-white group-hover:text-[#3B82F6] transition-colors line-clamp-1">
               {campaign.name}
             </h3>
             <p className="text-xs text-[#6B6B7B] capitalize">{campaign.objective}</p>
@@ -274,13 +253,13 @@ function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }
       <div className="grid grid-cols-2 gap-3 mb-4">
         {[
           { label: 'Investido', value: formatCurrency(campaign.spent), icon: DollarSign },
-          { label: 'Conversoes', value: formatCompactNumber(campaign.metrics.conversions), icon: Target },
+          { label: 'Conversões', value: formatCompactNumber(campaign.metrics.conversions), icon: Target },
           { label: 'CTR', value: `${campaign.metrics.ctr.toFixed(2)}%`, icon: MousePointer },
           { label: 'ROAS', value: `${campaign.metrics.roas.toFixed(2)}x`, icon: TrendingUp, highlight: campaign.metrics.roas >= 3 },
         ].map((metric) => (
-          <div key={metric.label} className="p-2.5 rounded-lg bg-white/5">
-            <p className="text-xs text-[#6B6B7B] mb-0.5">{metric.label}</p>
-            <p className={`text-sm font-semibold ${metric.highlight ? 'text-[#00FF88]' : 'text-white'}`}>
+          <div key={metric.label} className="p-3 rounded-lg bg-white/5 text-center">
+            <p className="text-xs text-[#6B6B7B] mb-1">{metric.label}</p>
+            <p className={`text-sm font-semibold ${metric.highlight ? 'text-[#3B82F6]' : 'text-white'}`}>
               {metric.value}
             </p>
           </div>
@@ -298,7 +277,7 @@ function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }
             initial={{ width: 0 }}
             animate={{ width: `${(campaign.spent / campaign.budget) * 100}%` }}
             transition={{ duration: 1, delay: index * 0.05 }}
-            className="h-full rounded-full bg-gradient-to-r from-[#00F5FF] to-[#BF00FF]"
+            className="h-full rounded-full bg-gradient-to-r from-[#3B82F6] to-[#FACC15]"
           />
         </div>
       </div>
@@ -327,12 +306,12 @@ function CampaignTable({ campaigns }: { campaigns: Campaign[] }) {
             <th className="text-left text-xs font-medium text-[#6B6B7B] uppercase tracking-wider p-4">Campanha</th>
             <th className="text-left text-xs font-medium text-[#6B6B7B] uppercase tracking-wider p-4">Status</th>
             <th className="text-right text-xs font-medium text-[#6B6B7B] uppercase tracking-wider p-4">Investido</th>
-            <th className="text-right text-xs font-medium text-[#6B6B7B] uppercase tracking-wider p-4">Impressoes</th>
+            <th className="text-right text-xs font-medium text-[#6B6B7B] uppercase tracking-wider p-4">Impressões</th>
             <th className="text-right text-xs font-medium text-[#6B6B7B] uppercase tracking-wider p-4">Cliques</th>
             <th className="text-right text-xs font-medium text-[#6B6B7B] uppercase tracking-wider p-4">CTR</th>
-            <th className="text-right text-xs font-medium text-[#6B6B7B] uppercase tracking-wider p-4">Conversoes</th>
+            <th className="text-right text-xs font-medium text-[#6B6B7B] uppercase tracking-wider p-4">Conversões</th>
             <th className="text-right text-xs font-medium text-[#6B6B7B] uppercase tracking-wider p-4">ROAS</th>
-            <th className="text-center text-xs font-medium text-[#6B6B7B] uppercase tracking-wider p-4">Acoes</th>
+            <th className="text-center text-xs font-medium text-[#6B6B7B] uppercase tracking-wider p-4">Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -362,7 +341,7 @@ function CampaignTable({ campaigns }: { campaigns: Campaign[] }) {
               <td className="p-4 text-right text-sm text-white">{campaign.metrics.ctr.toFixed(2)}%</td>
               <td className="p-4 text-right text-sm text-white">{formatCompactNumber(campaign.metrics.conversions)}</td>
               <td className="p-4 text-right">
-                <span className={`text-sm font-medium ${campaign.metrics.roas >= 3 ? 'text-[#00FF88]' : campaign.metrics.roas >= 2 ? 'text-[#FFE500]' : 'text-red-400'}`}>
+                <span className={`text-sm font-medium ${campaign.metrics.roas >= 3 ? 'text-[#3B82F6]' : campaign.metrics.roas >= 2 ? 'text-[#FACC15]' : 'text-red-400'}`}>
                   {campaign.metrics.roas.toFixed(2)}x
                 </span>
               </td>

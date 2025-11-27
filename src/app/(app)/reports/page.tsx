@@ -31,7 +31,7 @@ import { Report, Platform } from '@/types'
 
 const reportTypeLabels: Record<string, string> = {
   performance: 'Performance',
-  audience: 'Audiencia',
+  audience: 'Audiência',
   creative: 'Criativos',
   custom: 'Personalizado',
 }
@@ -44,7 +44,7 @@ const reportTypeIcons: Record<string, ReactNode> = {
 }
 
 const frequencyLabels: Record<string, string> = {
-  daily: 'Diario',
+  daily: 'Diário',
   weekly: 'Semanal',
   monthly: 'Mensal',
   custom: 'Personalizado',
@@ -56,39 +56,32 @@ export default function ReportsPage() {
   return (
     <div className="min-h-screen">
       <Header
-        title="Relatorios"
-        subtitle="Crie e gerencie relatorios automatizados"
+        title="Relatórios"
+        subtitle="Crie e gerencie relatórios automatizados"
       />
 
       <main className="p-8">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'Relatorios Ativos', value: reports.filter(r => r.status === 'active').length, icon: FileText, color: 'cyan' },
-            { label: 'Gerados Este Mes', value: 24, icon: Download, color: 'purple' },
-            { label: 'Destinatarios', value: 8, icon: Mail, color: 'green' },
-            { label: 'Proxima Geracao', value: 'Em 2h', icon: Clock, color: 'orange' },
+            { label: 'Relatórios Ativos', value: reports.filter(r => r.status === 'active').length, icon: FileText, color: 'blue' },
+            { label: 'Gerados Este Mês', value: 24, icon: Download, color: 'yellow' },
+            { label: 'Destinatários', value: 8, icon: Mail, color: 'blue' },
+            { label: 'Próxima Geração', value: 'Em 2h', icon: Clock, color: 'yellow' },
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="p-4 rounded-xl bg-white/5 border border-white/10"
+              className="p-5 rounded-xl bg-gradient-to-br from-[#12121A] to-[#0D0D14] border border-white/10 hover:border-[#3B82F6]/30 transition-all"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-[#6B6B7B] mb-1">{stat.label}</p>
-                  <p className="text-2xl font-bold text-white">{stat.value}</p>
+              <div className="flex flex-col items-center text-center">
+                <div className={`p-3 rounded-xl mb-3 ${stat.color === 'blue' ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-[#FACC15]/10 text-[#FACC15]'}`}>
+                  <stat.icon size={22} />
                 </div>
-                <div className={`p-2 rounded-lg ${
-                  stat.color === 'cyan' ? 'bg-[#00F5FF]/10 text-[#00F5FF]' :
-                  stat.color === 'purple' ? 'bg-[#BF00FF]/10 text-[#BF00FF]' :
-                  stat.color === 'green' ? 'bg-[#00FF88]/10 text-[#00FF88]' :
-                  'bg-[#FF6B00]/10 text-[#FF6B00]'
-                }`}>
-                  <stat.icon size={20} />
-                </div>
+                <p className="text-sm text-[#A0A0B0] mb-2">{stat.label}</p>
+                <p className="text-2xl font-bold text-white">{stat.value}</p>
               </div>
             </motion.div>
           ))}
@@ -96,10 +89,10 @@ export default function ReportsPage() {
 
         {/* Action Bar */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-white">Meus Relatorios</h2>
+          <h2 className="text-lg font-semibold text-white">Meus Relatórios</h2>
           <Button variant="primary" className="gap-2" onClick={() => setShowCreateModal(true)}>
             <Plus size={18} />
-            Novo Relatorio
+            Novo Relatório
           </Button>
         </div>
 
@@ -115,27 +108,27 @@ export default function ReportsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: reports.length * 0.1 }}
             onClick={() => setShowCreateModal(true)}
-            className="p-6 rounded-2xl border-2 border-dashed border-white/10 hover:border-[#00F5FF]/30 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all group min-h-[280px]"
+            className="p-6 rounded-2xl border-2 border-dashed border-white/10 hover:border-[#3B82F6]/30 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all group min-h-[280px]"
           >
-            <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#00F5FF]/10 transition-colors">
-              <Plus size={24} className="text-[#6B6B7B] group-hover:text-[#00F5FF] transition-colors" />
+            <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#3B82F6]/10 transition-colors">
+              <Plus size={24} className="text-[#6B6B7B] group-hover:text-[#3B82F6] transition-colors" />
             </div>
             <div className="text-center">
-              <p className="text-sm font-medium text-white mb-1">Criar Novo Relatorio</p>
-              <p className="text-xs text-[#6B6B7B]">Configure relatorios automaticos</p>
+              <p className="text-sm font-medium text-white mb-1">Criar Novo Relatório</p>
+              <p className="text-xs text-[#6B6B7B]">Configure relatórios automáticos</p>
             </div>
           </motion.div>
         </div>
 
         {/* Report Templates */}
         <div className="mt-12">
-          <h2 className="text-lg font-semibold text-white mb-6">Templates Disponiveis</h2>
+          <h2 className="text-lg font-semibold text-white mb-6">Templates Disponíveis</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { name: 'Performance Semanal', description: 'Metricas de performance completas', icon: TrendingUp, color: 'cyan' },
-              { name: 'Analise de Audiencia', description: 'Demografia e comportamento', icon: Users, color: 'purple' },
-              { name: 'ROI por Plataforma', description: 'Comparativo de retorno', icon: BarChart3, color: 'green' },
-              { name: 'Criativos Top', description: 'Melhores anuncios e copies', icon: Eye, color: 'orange' },
+              { name: 'Performance Semanal', description: 'Métricas de performance completas', icon: TrendingUp, color: 'blue' },
+              { name: 'Análise de Audiência', description: 'Demografia e comportamento', icon: Users, color: 'blue' },
+              { name: 'ROI por Plataforma', description: 'Comparativo de retorno', icon: BarChart3, color: 'yellow' },
+              { name: 'Criativos Top', description: 'Melhores anúncios e copies', icon: Eye, color: 'yellow' },
             ].map((template, index) => (
               <motion.div
                 key={template.name}
@@ -143,17 +136,14 @@ export default function ReportsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ y: -4 }}
-                className="p-5 rounded-xl bg-white/5 border border-white/10 hover:border-[#00F5FF]/20 cursor-pointer transition-all group"
+                className="p-5 rounded-xl bg-white/5 border border-white/10 hover:border-[#3B82F6]/30 cursor-pointer transition-all group"
               >
                 <div className={`p-3 rounded-xl mb-4 w-fit ${
-                  template.color === 'cyan' ? 'bg-[#00F5FF]/10 text-[#00F5FF]' :
-                  template.color === 'purple' ? 'bg-[#BF00FF]/10 text-[#BF00FF]' :
-                  template.color === 'green' ? 'bg-[#00FF88]/10 text-[#00FF88]' :
-                  'bg-[#FF6B00]/10 text-[#FF6B00]'
+                  template.color === 'blue' ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-[#FACC15]/10 text-[#FACC15]'
                 }`}>
                   <template.icon size={20} />
                 </div>
-                <h3 className="text-sm font-semibold text-white mb-1 group-hover:text-[#00F5FF] transition-colors">
+                <h3 className="text-sm font-semibold text-white mb-1 group-hover:text-[#3B82F6] transition-colors">
                   {template.name}
                 </h3>
                 <p className="text-xs text-[#6B6B7B]">{template.description}</p>
@@ -180,21 +170,21 @@ function ReportCard({ report, index }: { report: Report; index: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="group p-5 rounded-2xl bg-[#12121A]/80 border border-white/5 hover:border-[#00F5FF]/20 transition-all"
+      className="group p-5 rounded-2xl bg-[#12121A]/80 border border-white/5 hover:border-[#3B82F6]/30 transition-all"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className={`p-2.5 rounded-xl ${
-            report.type === 'performance' ? 'bg-[#00F5FF]/10 text-[#00F5FF]' :
-            report.type === 'audience' ? 'bg-[#BF00FF]/10 text-[#BF00FF]' :
-            report.type === 'creative' ? 'bg-[#00FF88]/10 text-[#00FF88]' :
-            'bg-[#FF6B00]/10 text-[#FF6B00]'
+            report.type === 'performance' ? 'bg-[#3B82F6]/10 text-[#3B82F6]' :
+            report.type === 'audience' ? 'bg-[#60A5FA]/10 text-[#60A5FA]' :
+            report.type === 'creative' ? 'bg-[#FACC15]/10 text-[#FACC15]' :
+            'bg-[#FDE047]/10 text-[#FDE047]'
           }`}>
             {reportTypeIcons[report.type]}
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white group-hover:text-[#00F5FF] transition-colors">
+            <h3 className="text-sm font-semibold text-white group-hover:text-[#3B82F6] transition-colors">
               {report.name}
             </h3>
             <p className="text-xs text-[#6B6B7B]">{reportTypeLabels[report.type]}</p>
@@ -245,7 +235,7 @@ function ReportCard({ report, index }: { report: Report; index: number }) {
       <div className="space-y-3 mb-4">
         <div className="flex items-center gap-2 text-xs text-[#6B6B7B]">
           <Clock size={12} />
-          <span>Frequencia: {frequencyLabels[report.frequency]}</span>
+          <span>Frequência: {frequencyLabels[report.frequency]}</span>
         </div>
         <div className="flex items-center gap-2 text-xs text-[#6B6B7B]">
           <Calendar size={12} />
@@ -255,7 +245,7 @@ function ReportCard({ report, index }: { report: Report; index: number }) {
         </div>
         <div className="flex items-center gap-2 text-xs text-[#6B6B7B]">
           <Mail size={12} />
-          <span>{report.recipients.length} destinatario(s)</span>
+          <span>{report.recipients.length} destinatário(s)</span>
         </div>
       </div>
 
@@ -272,7 +262,7 @@ function ReportCard({ report, index }: { report: Report; index: number }) {
       {report.lastGenerated && (
         <div className="pt-4 border-t border-white/5">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-[#6B6B7B]">Ultima geracao</span>
+            <span className="text-xs text-[#6B6B7B]">Última geração</span>
             <span className="text-xs text-white">
               {new Date(report.lastGenerated).toLocaleString('pt-BR')}
             </span>
@@ -290,7 +280,7 @@ function ReportCard({ report, index }: { report: Report; index: number }) {
           onClick={handleCopy}
           className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-[#6B6B7B] hover:text-white transition-all"
         >
-          {copied ? <Check size={14} className="text-[#00FF88]" /> : <Copy size={14} />}
+          {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
         </button>
       </div>
     </motion.div>

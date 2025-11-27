@@ -34,9 +34,9 @@ const automationTypeLabels: Record<string, string> = {
 }
 
 const automationTypeColors: Record<string, string> = {
-  rule: 'bg-[#00F5FF]/10 text-[#00F5FF]',
-  schedule: 'bg-[#BF00FF]/10 text-[#BF00FF]',
-  trigger: 'bg-[#FF6B00]/10 text-[#FF6B00]',
+  rule: 'bg-[#3B82F6]/10 text-[#3B82F6]',
+  schedule: 'bg-[#60A5FA]/10 text-[#60A5FA]',
+  trigger: 'bg-[#FACC15]/10 text-[#FACC15]',
 }
 
 const operatorLabels: Record<string, string> = {
@@ -72,39 +72,32 @@ export default function AutomationPage() {
   return (
     <div className="min-h-screen">
       <Header
-        title="Automacao"
-        subtitle="Configure regras e gatilhos automaticos para suas campanhas"
+        title="Automação"
+        subtitle="Configure regras e gatilhos automáticos para suas campanhas"
       />
 
       <main className="p-8">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'Automacoes Ativas', value: activeAutomations, icon: Zap, color: 'cyan' },
-            { label: 'Gatilhos Executados', value: totalTriggers, icon: Activity, color: 'purple' },
-            { label: 'Campanhas Otimizadas', value: 18, icon: Target, color: 'green' },
-            { label: 'Economia Estimada', value: 'R$ 12.450', icon: DollarSign, color: 'orange' },
+            { label: 'Automações Ativas', value: activeAutomations, icon: Zap, color: 'blue' },
+            { label: 'Gatilhos Executados', value: totalTriggers, icon: Activity, color: 'yellow' },
+            { label: 'Campanhas Otimizadas', value: 18, icon: Target, color: 'blue' },
+            { label: 'Economia Estimada', value: 'R$ 12.450', icon: DollarSign, color: 'yellow' },
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="p-4 rounded-xl bg-white/5 border border-white/10"
+              className="p-5 rounded-xl bg-gradient-to-br from-[#12121A] to-[#0D0D14] border border-white/10 hover:border-[#3B82F6]/30 transition-all"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-[#6B6B7B] mb-1">{stat.label}</p>
-                  <p className="text-2xl font-bold text-white">{stat.value}</p>
+              <div className="flex flex-col items-center text-center">
+                <div className={`p-3 rounded-xl mb-3 ${stat.color === 'blue' ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-[#FACC15]/10 text-[#FACC15]'}`}>
+                  <stat.icon size={22} />
                 </div>
-                <div className={`p-2 rounded-lg ${
-                  stat.color === 'cyan' ? 'bg-[#00F5FF]/10 text-[#00F5FF]' :
-                  stat.color === 'purple' ? 'bg-[#BF00FF]/10 text-[#BF00FF]' :
-                  stat.color === 'green' ? 'bg-[#00FF88]/10 text-[#00FF88]' :
-                  'bg-[#FF6B00]/10 text-[#FF6B00]'
-                }`}>
-                  <stat.icon size={20} />
-                </div>
+                <p className="text-sm text-[#A0A0B0] mb-2">{stat.label}</p>
+                <p className="text-2xl font-bold text-white">{stat.value}</p>
               </div>
             </motion.div>
           ))}
@@ -112,10 +105,10 @@ export default function AutomationPage() {
 
         {/* Action Bar */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-white">Minhas Automacoes</h2>
+          <h2 className="text-lg font-semibold text-white">Minhas Automações</h2>
           <Button variant="primary" className="gap-2" onClick={() => setShowCreateModal(true)}>
             <Plus size={18} />
-            Nova Automacao
+            Nova Automação
           </Button>
         </div>
 
@@ -133,7 +126,7 @@ export default function AutomationPage() {
             {[
               {
                 title: 'Pausar CPA Alto',
-                description: 'Pausa automaticamente campanhas com custo por aquisicao acima do limite',
+                description: 'Pausa automaticamente campanhas com custo por aquisição acima do limite',
                 icon: AlertTriangle,
                 color: 'red',
                 conditions: 'CPA > R$50 por 3 dias',
@@ -143,40 +136,40 @@ export default function AutomationPage() {
                 title: 'Escalar ROAS Alto',
                 description: 'Aumenta o budget de campanhas com alto retorno sobre investimento',
                 icon: TrendingUp,
-                color: 'green',
+                color: 'blue',
                 conditions: 'ROAS >= 4x por 7 dias',
                 action: 'Aumentar budget em 20%',
               },
               {
                 title: 'Alerta CTR Baixo',
-                description: 'Envia notificacao quando a taxa de cliques cai abaixo do esperado',
+                description: 'Envia notificação quando a taxa de cliques cai abaixo do esperado',
                 icon: Bell,
-                color: 'orange',
-                conditions: 'CTR < 1% com 10K+ impressoes',
-                action: 'Enviar notificacao',
+                color: 'yellow',
+                conditions: 'CTR < 1% com 10K+ impressões',
+                action: 'Enviar notificação',
               },
               {
                 title: 'Redistribuir Budget',
                 description: 'Move budget de campanhas ruins para as melhores automaticamente',
                 icon: DollarSign,
-                color: 'cyan',
+                color: 'blue',
                 conditions: 'Performance relativa',
                 action: 'Redistribuir budget',
               },
               {
-                title: 'Pausar Frequencia Alta',
-                description: 'Pausa anuncios quando a frequencia fica muito alta',
+                title: 'Pausar Frequência Alta',
+                description: 'Pausa anúncios quando a frequência fica muito alta',
                 icon: Activity,
-                color: 'purple',
-                conditions: 'Frequencia > 5x',
-                action: 'Pausar anuncio',
+                color: 'yellow',
+                conditions: 'Frequência > 5x',
+                action: 'Pausar anúncio',
               },
               {
                 title: 'Otimizar Lances',
                 description: 'Ajusta lances automaticamente baseado em performance',
                 icon: Settings,
                 color: 'blue',
-                conditions: 'Conversoes por hora',
+                conditions: 'Conversões por hora',
                 action: 'Ajustar lance CPA',
               },
             ].map((template, index) => (
@@ -186,30 +179,27 @@ export default function AutomationPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ y: -4 }}
-                className="p-5 rounded-xl bg-white/5 border border-white/10 hover:border-[#00F5FF]/20 cursor-pointer transition-all group"
+                className="p-5 rounded-xl bg-white/5 border border-white/10 hover:border-[#3B82F6]/30 cursor-pointer transition-all group"
               >
                 <div className={`p-3 rounded-xl mb-4 w-fit ${
                   template.color === 'red' ? 'bg-red-500/10 text-red-400' :
-                  template.color === 'green' ? 'bg-[#00FF88]/10 text-[#00FF88]' :
-                  template.color === 'orange' ? 'bg-[#FF6B00]/10 text-[#FF6B00]' :
-                  template.color === 'cyan' ? 'bg-[#00F5FF]/10 text-[#00F5FF]' :
-                  template.color === 'purple' ? 'bg-[#BF00FF]/10 text-[#BF00FF]' :
-                  'bg-[#0066FF]/10 text-[#0066FF]'
+                  template.color === 'blue' ? 'bg-[#3B82F6]/10 text-[#3B82F6]' :
+                  'bg-[#FACC15]/10 text-[#FACC15]'
                 }`}>
                   <template.icon size={20} />
                 </div>
-                <h3 className="text-sm font-semibold text-white mb-2 group-hover:text-[#00F5FF] transition-colors">
+                <h3 className="text-sm font-semibold text-white mb-2 group-hover:text-[#3B82F6] transition-colors">
                   {template.title}
                 </h3>
                 <p className="text-xs text-[#6B6B7B] mb-4">{template.description}</p>
                 <div className="space-y-2 pt-4 border-t border-white/5">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-[#6B6B7B]">Se:</span>
+                    <span className="text-xs text-[#6B6B7B]">Condição:</span>
                     <span className="text-xs text-[#A0A0B0]">{template.conditions}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-[#6B6B7B]">Entao:</span>
-                    <span className="text-xs text-[#00F5FF]">{template.action}</span>
+                    <span className="text-xs text-[#6B6B7B]">Então:</span>
+                    <span className="text-xs text-[#3B82F6]">{template.action}</span>
                   </div>
                 </div>
               </motion.div>
@@ -230,7 +220,7 @@ function AutomationCard({ automation, index }: { automation: Automation; index: 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="group rounded-2xl bg-[#12121A]/80 border border-white/5 hover:border-[#00F5FF]/20 transition-all overflow-hidden"
+      className="group rounded-2xl bg-[#12121A]/80 border border-white/5 hover:border-[#3B82F6]/30 transition-all overflow-hidden"
     >
       {/* Main Content */}
       <div
@@ -244,7 +234,7 @@ function AutomationCard({ automation, index }: { automation: Automation; index: 
             </div>
             <div>
               <div className="flex items-center gap-3 mb-1">
-                <h3 className="text-sm font-semibold text-white group-hover:text-[#00F5FF] transition-colors">
+                <h3 className="text-sm font-semibold text-white group-hover:text-[#3B82F6] transition-colors">
                   {automation.name}
                 </h3>
                 <Badge variant={automation.status === 'active' ? 'success' : 'warning'}>
@@ -257,12 +247,12 @@ function AutomationCard({ automation, index }: { automation: Automation; index: 
               <div className="flex items-center gap-4 text-xs text-[#6B6B7B]">
                 <span className="flex items-center gap-1">
                   <Activity size={12} />
-                  {automation.triggerCount} execucoes
+                  {automation.triggerCount} execuções
                 </span>
                 {automation.lastTriggered && (
                   <span className="flex items-center gap-1">
                     <Clock size={12} />
-                    Ultimo: {new Date(automation.lastTriggered).toLocaleString('pt-BR')}
+                    Último: {new Date(automation.lastTriggered).toLocaleString('pt-BR')}
                   </span>
                 )}
               </div>
@@ -315,11 +305,11 @@ function AutomationCard({ automation, index }: { automation: Automation; index: 
             <div className="p-5 space-y-4">
               {/* Conditions */}
               <div>
-                <h4 className="text-xs font-medium text-[#6B6B7B] uppercase tracking-wider mb-3">Condicoes</h4>
+                <h4 className="text-xs font-medium text-[#6B6B7B] uppercase tracking-wider mb-3">Condições</h4>
                 <div className="space-y-2">
                   {automation.conditions.map((condition, i) => (
                     <div key={i} className="flex items-center gap-2 p-3 rounded-lg bg-white/5">
-                      <Target size={14} className="text-[#00F5FF]" />
+                      <Target size={14} className="text-[#3B82F6]" />
                       <span className="text-sm text-white">
                         {condition.metric} {operatorLabels[condition.operator]} {condition.value}
                       </span>
@@ -333,7 +323,7 @@ function AutomationCard({ automation, index }: { automation: Automation; index: 
 
               {/* Actions */}
               <div>
-                <h4 className="text-xs font-medium text-[#6B6B7B] uppercase tracking-wider mb-3">Acoes</h4>
+                <h4 className="text-xs font-medium text-[#6B6B7B] uppercase tracking-wider mb-3">Ações</h4>
                 <div className="space-y-2">
                   {automation.actions.map((action, i) => (
                     <div key={i} className="flex items-center gap-2 p-3 rounded-lg bg-[#00FF88]/5 border border-[#00FF88]/20">
@@ -346,7 +336,7 @@ function AutomationCard({ automation, index }: { automation: Automation; index: 
                       </span>
                       <ArrowRight size={14} className="text-[#6B6B7B]" />
                       <span className="text-xs text-[#6B6B7B]">
-                        {action.target === 'campaign' ? 'Campanha' : action.target === 'adset' ? 'Conjunto' : 'Anuncio'}
+                        {action.target === 'campaign' ? 'Campanha' : action.target === 'adset' ? 'Conjunto' : 'Anúncio'}
                       </span>
                     </div>
                   ))}
