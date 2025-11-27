@@ -80,41 +80,42 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-40 bg-[#0A0A0F]/95 backdrop-blur-xl border-b border-white/10">
-      <div className="flex items-center justify-between h-20 px-6 md:px-8">
+      <div className="flex items-center justify-between h-[72px] px-6 lg:px-8 gap-6">
         {/* Título e Subtítulo */}
-        <div className="min-w-0 flex-shrink-0">
-          <h1 className="text-xl md:text-2xl font-bold text-white">
+        <div className="min-w-0 flex-shrink-0 mr-auto">
+          <h1 className="text-lg md:text-xl font-bold text-white truncate">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-sm text-[#6B6B7B] mt-1">
+            <p className="text-xs text-[#6B6B7B] mt-0.5 truncate max-w-[200px] md:max-w-[300px]">
               {subtitle}
             </p>
           )}
         </div>
 
-        <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
-          {/* Campo de Busca Global */}
-          <form onSubmit={handleSearch} className="relative hidden lg:flex items-center">
-            <Search className="absolute left-4 w-4 h-4 text-[#6B6B7B] pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Buscar campanhas, relatórios..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-64 xl:w-80 h-11 pl-11 pr-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50 focus:bg-white/10 transition-all"
-            />
-          </form>
+        {/* Campo de Busca Global */}
+        <form onSubmit={handleSearch} className="relative hidden lg:flex items-center flex-shrink-0">
+          <Search className="absolute left-3.5 w-4 h-4 text-[#6B6B7B] pointer-events-none z-10" />
+          <input
+            type="text"
+            placeholder="Buscar campanhas..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-52 xl:w-64 h-10 pl-10 pr-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50 focus:bg-white/10 transition-all"
+          />
+        </form>
+
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
 
           {/* Seletor de Período */}
           <div className="relative hidden md:block">
             <button
               onClick={() => setShowDatePicker(!showDatePicker)}
-              className="flex items-center gap-2 h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white hover:bg-white/10 hover:border-[#3B82F6]/30 transition-all"
+              className="flex items-center gap-2 h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white hover:bg-white/10 hover:border-[#3B82F6]/30 transition-all"
             >
               <Calendar className="w-4 h-4 text-[#3B82F6]" />
-              <span className="hidden xl:inline">{dateRange}</span>
-              <ChevronDown className={cn('w-4 h-4 text-[#6B6B7B] transition-transform', showDatePicker && 'rotate-180')} />
+              <span className="hidden xl:inline text-xs">{dateRange}</span>
+              <ChevronDown className={cn('w-3.5 h-3.5 text-[#6B6B7B] transition-transform', showDatePicker && 'rotate-180')} />
             </button>
 
             <AnimatePresence>
@@ -152,7 +153,7 @@ export function Header({
           {/* Botão Atualizar */}
           <button
             onClick={handleRefresh}
-            className="w-11 h-11 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/10 hover:border-[#3B82F6]/30 transition-all"
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/10 hover:border-[#3B82F6]/30 transition-all"
             title="Atualizar dados"
           >
             <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} />
@@ -162,7 +163,7 @@ export function Header({
           <div className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative w-11 h-11 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/10 hover:border-[#3B82F6]/30 transition-all"
+              className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/10 hover:border-[#3B82F6]/30 transition-all"
               title="Notificações"
             >
               <Bell className="w-4 h-4" />
@@ -246,9 +247,9 @@ export function Header({
 
           {/* Botão Nova Campanha */}
           {showCreateButton && (
-            <Button variant="primary" className="gap-2 hidden sm:flex h-11" onClick={handleCreateClick}>
+            <Button variant="primary" className="gap-2 hidden sm:flex h-10 px-4" onClick={handleCreateClick}>
               <Plus className="w-4 h-4" />
-              <span className="hidden md:inline">{createButtonText}</span>
+              <span className="hidden lg:inline text-sm">{createButtonText}</span>
             </Button>
           )}
         </div>

@@ -1,6 +1,7 @@
 export { Button } from './Button'
-export { Card, CardHeader, CardTitle, CardContent } from './Card'
+export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './Card'
 export { Badge } from './Badge'
 export { PlatformIcon } from './PlatformIcon'
 export { MetricCard } from './MetricCard'
+export { StatCard } from './StatCard'
 export { ToastContainer } from './Toast'

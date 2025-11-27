@@ -99,7 +99,7 @@ function AccountSettings() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-6 mb-8">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#00F5FF] to-[#BF00FF] flex items-center justify-center text-2xl font-bold text-white">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-[#3B82F6]/20">
               {currentUser.name.split(' ').map(n => n[0]).join('')}
             </div>
             <div>
@@ -339,9 +339,9 @@ function NotificationsSettings() {
 
 function AppearanceSettings() {
   const [theme, setTheme] = useState('dark')
-  const [accentColor, setAccentColor] = useState('#00F5FF')
+  const [accentColor, setAccentColor] = useState('#3B82F6')
 
-  const colors = ['#00F5FF', '#BF00FF', '#FF00E5', '#00FF88', '#FFE500', '#FF6B00']
+  const colors = ['#3B82F6', '#60A5FA', '#FACC15', '#FDE047', '#1D4ED8', '#EAB308']
 
   return (
     <div className="space-y-6">
@@ -424,7 +424,7 @@ function BillingSettings() {
                 'Suporte prioritário',
               ].map((feature) => (
                 <div key={feature} className="flex items-center gap-2 text-sm text-[#A0A0B0]">
-                  <Check size={14} className="text-[#00FF88]" />
+                  <Check size={14} className="text-emerald-400" />
                   {feature}
                 </div>
               ))}

@@ -3,7 +3,7 @@
 import { useState, ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
-import { Card, CardHeader, CardTitle, CardContent, Button, Badge } from '@/components/ui'
+import { Card, CardHeader, CardTitle, CardContent, Button, Badge, StatCard } from '@/components/ui'
 import { automations } from '@/data/mock-data'
 import {
   Zap,
@@ -79,28 +79,34 @@ export default function AutomationPage() {
       <main className="p-8">
         {/* Quick Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {[
-            { label: 'Automações Ativas', value: activeAutomations, icon: Zap, color: 'blue' },
-            { label: 'Gatilhos Executados', value: totalTriggers, icon: Activity, color: 'yellow' },
-            { label: 'Campanhas Otimizadas', value: 18, icon: Target, color: 'blue' },
-            { label: 'Economia Estimada', value: 'R$ 12.450', icon: DollarSign, color: 'yellow' },
-          ].map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="p-5 rounded-xl bg-gradient-to-br from-[#12121A] to-[#0D0D14] border border-white/10 hover:border-[#3B82F6]/30 transition-all"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className={`p-3 rounded-xl mb-3 ${stat.color === 'blue' ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-[#FACC15]/10 text-[#FACC15]'}`}>
-                  <stat.icon size={22} />
-                </div>
-                <p className="text-sm text-[#A0A0B0] mb-2">{stat.label}</p>
-                <p className="text-2xl font-bold text-white">{stat.value}</p>
-              </div>
-            </motion.div>
-          ))}
+          <StatCard
+            label="Automações Ativas"
+            value={activeAutomations}
+            icon={Zap}
+            color="blue"
+            delay={0}
+          />
+          <StatCard
+            label="Gatilhos Executados"
+            value={totalTriggers}
+            icon={Activity}
+            color="yellow"
+            delay={0.1}
+          />
+          <StatCard
+            label="Campanhas Otimizadas"
+            value={18}
+            icon={Target}
+            color="blue"
+            delay={0.2}
+          />
+          <StatCard
+            label="Economia Estimada"
+            value="R$ 12.450"
+            icon={DollarSign}
+            color="yellow"
+            delay={0.3}
+          />
         </div>
 
         {/* Action Bar */}
@@ -326,8 +332,8 @@ function AutomationCard({ automation, index }: { automation: Automation; index: 
                 <h4 className="text-xs font-medium text-[#6B6B7B] uppercase tracking-wider mb-3">Ações</h4>
                 <div className="space-y-2">
                   {automation.actions.map((action, i) => (
-                    <div key={i} className="flex items-center gap-2 p-3 rounded-lg bg-[#00FF88]/5 border border-[#00FF88]/20">
-                      <div className="p-1.5 rounded bg-[#00FF88]/10 text-[#00FF88]">
+                    <div key={i} className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+                      <div className="p-1.5 rounded bg-emerald-500/10 text-emerald-400">
                         {actionIcons[action.type]}
                       </div>
                       <span className="text-sm text-white">
