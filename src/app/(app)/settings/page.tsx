@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
 import { Button, Badge, PlatformIcon } from '@/components/ui'
@@ -30,6 +30,7 @@ import {
   Settings,
   Palette,
   RefreshCw,
+  Camera,
 } from 'lucide-react'
 import { Platform } from '@/types'
 
@@ -38,6 +39,8 @@ type TabType = 'profile' | 'notifications' | 'connections' | 'security' | 'billi
 export default function SettingsPage() {
   const { showToast, connectedAccounts, connectAccount, disconnectAccount } = useApp()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const tabs = [
     { id: 'profile', label: 'Perfil', icon: User },
@@ -68,20 +71,33 @@ export default function SettingsPage() {
             }}>
               {/* User Info */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', paddingBottom: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                <div style={{
-                  width: '56px',
-                  height: '56px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(to bottom right, #3B82F6, #1D4ED8)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px',
-                  fontWeight: 600,
-                  color: '#FFFFFF',
-                }}>
-                  {currentUser.name.split(' ').map(n => n[0]).join('')}
-                </div>
+                {profilePhoto ? (
+                  <img
+                    src={profilePhoto}
+                    alt="Profile"
+                    style={{
+                      width: '56px',
+                      height: '56px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(to bottom right, #3B82F6, #1D4ED8)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '20px',
+                    fontWeight: 600,
+                    color: '#FFFFFF',
+                  }}>
+                    {currentUser.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                )}
                 <div>
                   <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', marginBottom: '2px' }}>{currentUser.name}</h3>
                   <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>{currentUser.email}</p>
@@ -121,6 +137,7 @@ export default function SettingsPage() {
               {/* Logout */}
               <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
                 <button
+                  onClick={() => setShowLogoutModal(true)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -147,7 +164,12 @@ export default function SettingsPage() {
           <div style={{ flex: 1, minWidth: 0 }}>
             <AnimatePresence mode="wait">
               {activeTab === 'profile' && (
-                <ProfileSection key="profile" showToast={showToast} />
+                <ProfileSection
+                  key="profile"
+                  showToast={showToast}
+                  profilePhoto={profilePhoto}
+                  setProfilePhoto={setProfilePhoto}
+                />
               )}
               {activeTab === 'connections' && (
                 <ConnectionsSection
@@ -174,11 +196,113 @@ export default function SettingsPage() {
           </div>
         </div>
       </main>
+
+      {/* Logout Confirmation Modal */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowLogoutModal(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '400px',
+                backgroundColor: '#12121A',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '16px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                padding: '24px',
+              }}
+            >
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <div
+                  style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                  }}
+                >
+                  <LogOut style={{ width: '24px', height: '24px', color: '#EF4444' }} />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', marginBottom: '8px' }}>
+                  Sair da Conta
+                </h3>
+                <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>
+                  Tem certeza que deseja sair? Você precisará fazer login novamente.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowLogoutModal(false)}
+                  style={{ flex: 1 }}
+                >
+                  Cancelar
+                </Button>
+                <button
+                  onClick={() => {
+                    setShowLogoutModal(false)
+                    showToast('Você foi desconectado!', 'success')
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '12px 24px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    backgroundColor: '#EF4444',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Sair
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
 
-function ProfileSection({ showToast }: { showToast: (msg: string, type: any) => void }) {
+function ProfileSection({
+  showToast,
+  profilePhoto,
+  setProfilePhoto,
+}: {
+  showToast: (msg: string, type: any) => void
+  profilePhoto: string | null
+  setProfilePhoto: (photo: string | null) => void
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState({
     name: currentUser.name,
     email: currentUser.email,
@@ -189,6 +313,37 @@ function ProfileSection({ showToast }: { showToast: (msg: string, type: any) => 
 
   const handleSave = () => {
     showToast('Perfil atualizado com sucesso!', 'success')
+  }
+
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      // Verificar tamanho (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Arquivo muito grande. Máximo 5MB.', 'error')
+        return
+      }
+      // Verificar tipo
+      if (!file.type.startsWith('image/')) {
+        showToast('Arquivo inválido. Use JPG, PNG ou GIF.', 'error')
+        return
+      }
+      // Criar URL para preview
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setProfilePhoto(e.target?.result as string)
+        showToast('Foto atualizada com sucesso!', 'success')
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleRemovePhoto = () => {
+    setProfilePhoto(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    showToast('Foto removida!', 'info')
   }
 
   return (
@@ -220,28 +375,94 @@ function ProfileSection({ showToast }: { showToast: (msg: string, type: any) => 
 
       {/* Avatar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '32px', paddingBottom: '32px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-        <div style={{
-          width: '96px',
-          height: '96px',
-          borderRadius: '50%',
-          background: 'linear-gradient(to bottom right, #3B82F6, #1D4ED8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '32px',
-          fontWeight: 600,
-          color: '#FFFFFF',
-        }}>
-          {currentUser.name.split(' ').map(n => n[0]).join('')}
+        <div style={{ position: 'relative' }}>
+          {profilePhoto ? (
+            <img
+              src={profilePhoto}
+              alt="Profile"
+              style={{
+                width: '96px',
+                height: '96px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '3px solid rgba(59, 130, 246, 0.3)',
+              }}
+            />
+          ) : (
+            <div style={{
+              width: '96px',
+              height: '96px',
+              borderRadius: '50%',
+              background: 'linear-gradient(to bottom right, #3B82F6, #1D4ED8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '32px',
+              fontWeight: 600,
+              color: '#FFFFFF',
+            }}>
+              {currentUser.name.split(' ').map(n => n[0]).join('')}
+            </div>
+          )}
+          {/* Camera overlay */}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              backgroundColor: '#3B82F6',
+              border: '3px solid #12121A',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <Camera size={14} style={{ color: '#FFFFFF' }} />
+          </button>
         </div>
         <div>
-          <Button variant="secondary" size="sm">
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Upload size={14} />
-              Alterar Foto
-            </span>
-          </Button>
-          <p style={{ fontSize: '12px', color: '#6B6B7B', marginTop: '8px' }}>JPG, PNG ou GIF. Máximo 5MB.</p>
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoUpload}
+            style={{ display: 'none' }}
+          />
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+            <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Upload size={14} />
+                Alterar Foto
+              </span>
+            </Button>
+            {profilePhoto && (
+              <button
+                onClick={handleRemovePhoto}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  color: '#EF4444',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <Trash2 size={12} />
+                Remover
+              </button>
+            )}
+          </div>
+          <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>JPG, PNG ou GIF. Máximo 5MB.</p>
         </div>
       </div>
 
@@ -390,6 +611,33 @@ function ConnectionsSection({
   connectAccount: (platform: AccountPlatform) => void
   disconnectAccount: (id: string) => void
 }) {
+  const [syncing, setSyncing] = useState<string | null>(null)
+
+  const availablePlatforms = [
+    { id: 'facebook_ads', name: 'Facebook Ads', description: 'Meta Business Suite' },
+    { id: 'google_ads', name: 'Google Ads', description: 'Google Ads Manager' },
+    { id: 'linkedin_ads', name: 'LinkedIn Ads', description: 'LinkedIn Campaign Manager' },
+    { id: 'tiktok_ads', name: 'TikTok Ads', description: 'TikTok for Business' },
+    { id: 'whatsapp', name: 'WhatsApp Business', description: 'WhatsApp Business API' },
+  ]
+
+  const handleSync = (id: string) => {
+    setSyncing(id)
+    setTimeout(() => {
+      setSyncing(null)
+      showToast('Conta sincronizada com sucesso!', 'success')
+    }, 1500)
+  }
+
+  // Verificar quais plataformas já estão conectadas
+  const connectedPlatformIds = connectedAccounts
+    .filter(a => a.connected)
+    .map(a => a.platform)
+
+  const unconnectedPlatforms = availablePlatforms.filter(
+    p => !connectedPlatformIds.includes(p.id)
+  )
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -417,66 +665,154 @@ function ConnectionsSection({
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {connectedAccounts.map((account, index) => (
-          <motion.div
-            key={account.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '20px',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: `1px solid ${account.connected ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{
-                padding: '10px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              }}>
-                <PlatformIcon platform={account.platform as Platform} size={24} />
-              </div>
-              <div>
-                <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '2px' }}>{account.name}</h4>
-                <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>
-                  {account.platform.charAt(0).toUpperCase() + account.platform.slice(1)} Ads
-                </p>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Badge variant={account.connected ? 'success' : 'default'}>
-                {account.connected ? 'Conectado' : 'Desconectado'}
-              </Badge>
-              {account.connected ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <button style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
-                    <RefreshCw size={14} />
-                  </button>
-                  <button
-                    onClick={() => disconnectAccount(account.id)}
-                    style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
+      {/* Connected Accounts */}
+      {connectedAccounts.filter(a => a.connected).length > 0 && (
+        <div style={{ marginBottom: '32px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px' }}>
+            Contas Conectadas
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {connectedAccounts.filter(a => a.connected).map((account, index) => (
+              <motion.div
+                key={account.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '20px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{
+                    padding: '10px',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  }}>
+                    <PlatformIcon platform={account.platform as Platform} size={24} />
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '2px' }}>{account.name}</h4>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>
+                      {account.email || `Conectado em ${account.connectedAt}`}
+                    </p>
+                  </div>
                 </div>
-              ) : (
-                <Button variant="primary" size="sm" onClick={() => connectAccount(account.platform as AccountPlatform)}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Plus size={14} />
-                    Conectar
-                  </span>
-                </Button>
-              )}
-            </div>
-          </motion.div>
-        ))}
-      </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <Badge variant="success">Conectado</Badge>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      onClick={() => handleSync(account.id)}
+                      style={{
+                        padding: '8px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: 'none',
+                        color: '#6B6B7B',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <RefreshCw
+                        size={14}
+                        style={{
+                          animation: syncing === account.id ? 'spin 1s linear infinite' : 'none',
+                        }}
+                      />
+                    </button>
+                    <button
+                      onClick={() => disconnectAccount(account.id)}
+                      style={{
+                        padding: '8px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: 'none',
+                        color: '#EF4444',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Available Platforms to Connect */}
+      {unconnectedPlatforms.length > 0 && (
+        <div>
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px' }}>
+            Adicionar Nova Conexão
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            {unconnectedPlatforms.map((platform) => (
+              <motion.button
+                key={platform.id}
+                onClick={() => connectAccount(platform.id as AccountPlatform)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  padding: '20px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <div style={{
+                  padding: '10px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                }}>
+                  <PlatformIcon platform={platform.id as Platform} size={24} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '2px' }}>
+                    {platform.name}
+                  </h4>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>
+                    {platform.description}
+                  </p>
+                </div>
+                <Plus size={18} style={{ color: '#3B82F6' }} />
+              </motion.button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* All connected message */}
+      {unconnectedPlatforms.length === 0 && (
+        <div style={{
+          padding: '24px',
+          borderRadius: '12px',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          border: '1px solid rgba(16, 185, 129, 0.3)',
+          textAlign: 'center',
+        }}>
+          <Check size={24} style={{ color: '#10B981', marginBottom: '8px' }} />
+          <p style={{ fontSize: '14px', color: '#10B981', margin: 0 }}>
+            Todas as plataformas estão conectadas!
+          </p>
+        </div>
+      )}
     </motion.div>
   )
 }

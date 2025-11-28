@@ -229,6 +229,308 @@ export default function AutomationPage() {
           </div>
         </div>
       </main>
+
+      {/* Create Automation Modal */}
+      <AnimatePresence>
+        {showCreateModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowCreateModal(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '600px',
+                maxHeight: 'calc(100vh - 40px)',
+                overflow: 'auto',
+                backgroundColor: '#12121A',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '16px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              }}
+            >
+              {/* Modal Header */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '20px',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(to bottom right, #3B82F6, #1D4ED8)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Zap style={{ width: '20px', height: '20px', color: '#FFFFFF' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>Nova Automação</h2>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Configure regras automáticas</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '8px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#6B6B7B',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Plus style={{ width: '20px', height: '20px', transform: 'rotate(45deg)' }} />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* Name */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Nome da Automação
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ex: Pausar CPA Alto"
+                    style={{
+                      width: '100%',
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                {/* Type */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Tipo de Automação
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                    {[
+                      { id: 'rule', label: 'Regra', icon: Target },
+                      { id: 'schedule', label: 'Agendamento', icon: Clock },
+                      { id: 'trigger', label: 'Gatilho', icon: Zap },
+                    ].map((type) => (
+                      <button
+                        key={type.id}
+                        type="button"
+                        style={{
+                          padding: '12px',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          color: '#FFFFFF',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                      >
+                        <type.icon size={20} style={{ color: '#3B82F6' }} />
+                        <span style={{ fontSize: '12px' }}>{type.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Condition */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Condição
+                  </label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <select
+                      style={{
+                        flex: 1,
+                        height: '48px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                      }}
+                    >
+                      <option value="cpa">CPA</option>
+                      <option value="roas">ROAS</option>
+                      <option value="ctr">CTR</option>
+                      <option value="cpc">CPC</option>
+                      <option value="impressions">Impressões</option>
+                      <option value="conversions">Conversões</option>
+                    </select>
+                    <select
+                      style={{
+                        width: '120px',
+                        height: '48px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                      }}
+                    >
+                      <option value="gt">Maior que</option>
+                      <option value="lt">Menor que</option>
+                      <option value="eq">Igual a</option>
+                      <option value="gte">Maior ou igual</option>
+                      <option value="lte">Menor ou igual</option>
+                    </select>
+                    <input
+                      type="number"
+                      placeholder="Valor"
+                      style={{
+                        width: '100px',
+                        height: '48px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Timeframe */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Período de Análise
+                  </label>
+                  <select
+                    style={{
+                      width: '100%',
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  >
+                    <option value="hour">Última hora</option>
+                    <option value="day">Último dia</option>
+                    <option value="week">Última semana</option>
+                  </select>
+                </div>
+
+                {/* Action */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Ação
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                    {[
+                      { id: 'pause', label: 'Pausar', icon: Pause },
+                      { id: 'activate', label: 'Ativar', icon: Play },
+                      { id: 'adjust_budget', label: 'Ajustar Budget', icon: DollarSign },
+                      { id: 'notify', label: 'Notificar', icon: Bell },
+                    ].map((action) => (
+                      <button
+                        key={action.id}
+                        type="button"
+                        style={{
+                          padding: '12px',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          color: '#FFFFFF',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                      >
+                        <action.icon size={16} style={{ color: '#10B981' }} />
+                        <span style={{ fontSize: '14px' }}>{action.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Target */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Aplicar em
+                  </label>
+                  <select
+                    style={{
+                      width: '100%',
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  >
+                    <option value="campaign">Campanha</option>
+                    <option value="adset">Conjunto de Anúncios</option>
+                    <option value="ad">Anúncio</option>
+                  </select>
+                </div>
+
+                {/* Buttons */}
+                <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>
+                  <Button type="button" variant="ghost" onClick={() => setShowCreateModal(false)} style={{ flex: 1 }}>
+                    Cancelar
+                  </Button>
+                  <Button type="button" variant="primary" onClick={() => setShowCreateModal(false)} style={{ flex: 1 }}>
+                    Criar Automação
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
