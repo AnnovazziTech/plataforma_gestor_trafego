@@ -7,6 +7,7 @@ import { Card, CardContent, Button, Badge, PlatformIcon, StatCard } from '@/comp
 import { campaigns } from '@/data/mock-data'
 import { formatCurrency, formatCompactNumber } from '@/lib/utils'
 import { Campaign, Platform, CampaignStatus } from '@/types'
+import { useApp } from '@/contexts'
 import {
   Plus,
   MoreVertical,
@@ -24,6 +25,9 @@ import {
   LayoutGrid,
   List,
   ChevronDown,
+  Sparkles,
+  Bot,
+  X,
 } from 'lucide-react'
 
 const statusLabels: Record<CampaignStatus, string> = {
@@ -43,11 +47,14 @@ const statusColors: Record<CampaignStatus, 'success' | 'warning' | 'error' | 'in
 }
 
 export default function CampaignsPage() {
+  const { connectedAccounts, selectedAccount, setSelectedAccount } = useApp()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | 'all'>('all')
   const [selectedStatus, setSelectedStatus] = useState<CampaignStatus | 'all'>('all')
   const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null)
+  const [aiAnalysis, setAiAnalysis] = useState<{ campaignId: string; analysis: string } | null>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState<string | null>(null)
 
   const filteredCampaigns = campaigns.filter((campaign) => {
     const matchesSearch = campaign.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -58,6 +65,24 @@ export default function CampaignsPage() {
 
   const platforms: Platform[] = ['meta', 'google', 'tiktok', 'linkedin', 'twitter']
   const statuses: CampaignStatus[] = ['active', 'paused', 'ended', 'draft', 'error']
+
+  const handleAiAnalysis = (campaignId: string, campaignName: string) => {
+    setIsAnalyzing(campaignId)
+    // Simular análise da IA
+    setTimeout(() => {
+      const analyses = [
+        `A campanha "${campaignName}" apresenta um CTR acima da média do mercado. Recomenda-se aumentar o orçamento em 20% para escalar os resultados. O público-alvo está bem segmentado, mas considere testar novos criativos para evitar fadiga de anúncio.`,
+        `Esta campanha tem um ROAS excelente de 3.5x. Os horários de maior conversão são entre 19h-22h. Sugestão: concentrar 60% do orçamento neste período para maximizar ROI.`,
+        `A campanha "${campaignName}" está com CPC elevado comparado ao benchmark. Recomendações: 1) Revisar segmentação de público, 2) Testar novos títulos de anúncio, 3) Considerar formato de vídeo curto.`,
+        `Performance sólida com tendência de crescimento. O custo por conversão diminuiu 15% na última semana. Mantenha a estratégia atual e monitore a frequência para evitar saturação.`
+      ]
+      setAiAnalysis({
+        campaignId,
+        analysis: analyses[Math.floor(Math.random() * analyses.length)]
+      })
+      setIsAnalyzing(null)
+    }, 2000)
+  }
 
   return (
     <div className="min-h-screen">
@@ -71,6 +96,23 @@ export default function CampaignsPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           {/* Filtros */}
           <div className="flex items-center gap-3 flex-wrap">
+            {/* Filtro por Conta */}
+            <div className="relative">
+              <select
+                value={selectedAccount}
+                onChange={(e) => setSelectedAccount(e.target.value)}
+                className="h-11 pl-4 pr-10 rounded-xl bg-white/5 border border-white/10 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-[#3B82F6]/50 hover:border-[#3B82F6]/30 transition-all"
+              >
+                <option value="all">Todas as Contas</option>
+                {connectedAccounts.filter(a => a.connected).map((account) => (
+                  <option key={account.id} value={account.id} className="bg-[#12121A]">
+                    {account.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6B7B] pointer-events-none" />
+            </div>
+
             {/* Filtro por Plataforma */}
             <div className="relative">
               <select
@@ -158,42 +200,120 @@ export default function CampaignsPage() {
         </div>
 
         {/* Campaigns Grid/List */}
-        <AnimatePresence mode="wait">
-          {viewMode === 'grid' ? (
-            <motion.div
-              key="grid"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-            >
-              {filteredCampaigns.map((campaign, index) => (
-                <CampaignCard key={campaign.id} campaign={campaign} index={index} />
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="list"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <CampaignTable campaigns={filteredCampaigns} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Lista de Campanhas - Ocupa 2 colunas */}
+          <div className="lg:col-span-2">
+            <AnimatePresence mode="wait">
+              {viewMode === 'grid' ? (
+                <motion.div
+                  key="grid"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10"
+                >
+                  {filteredCampaigns.map((campaign, index) => (
+                    <CampaignCard
+                      key={campaign.id}
+                      campaign={campaign}
+                      index={index}
+                      onAiAnalysis={handleAiAnalysis}
+                      isAnalyzing={isAnalyzing === campaign.id}
+                    />
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="list"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="max-h-[600px] overflow-y-auto"
+                >
+                  <CampaignTable campaigns={filteredCampaigns} onAiAnalysis={handleAiAnalysis} isAnalyzing={isAnalyzing} />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-        {filteredCampaigns.length === 0 && (
-          <div className="text-center py-20">
-            <p className="text-[#6B6B7B]">Nenhuma campanha encontrada</p>
+            {filteredCampaigns.length === 0 && (
+              <div className="text-center py-20">
+                <p className="text-[#6B6B7B]">Nenhuma campanha encontrada</p>
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Quadro de Análise da IA */}
+          <div className="lg:col-span-1">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="sticky top-24 p-5 rounded-2xl bg-gradient-to-br from-[#12121A] to-[#0D0D14] border border-white/10"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#3B82F6]/20 to-[#8B5CF6]/20">
+                  <Bot className="w-5 h-5 text-[#3B82F6]" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white">Análise da IA</h3>
+                  <p className="text-xs text-[#6B6B7B]">Insights inteligentes sobre suas campanhas</p>
+                </div>
+              </div>
+
+              {aiAnalysis ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
+                  <div className="p-4 rounded-xl bg-white/5 border border-[#3B82F6]/20">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-medium text-[#3B82F6] flex items-center gap-1.5">
+                        <Sparkles size={12} />
+                        Análise Gerada
+                      </span>
+                      <button
+                        onClick={() => setAiAnalysis(null)}
+                        className="p-1 rounded hover:bg-white/10 text-[#6B6B7B] hover:text-white transition-all"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                    <p className="text-sm text-[#A0A0B0] leading-relaxed">
+                      {aiAnalysis.analysis}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+                      <p className="text-xs text-emerald-400 mb-1">Recomendação</p>
+                      <p className="text-sm font-semibold text-white">Escalar</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-[#FACC15]/10 border border-[#FACC15]/20 text-center">
+                      <p className="text-xs text-[#FACC15] mb-1">Prioridade</p>
+                      <p className="text-sm font-semibold text-white">Alta</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
+                    <Sparkles className="w-8 h-8 text-[#6B6B7B]" />
+                  </div>
+                  <p className="text-sm text-[#6B6B7B] mb-2">Nenhuma análise selecionada</p>
+                  <p className="text-xs text-[#4B4B5B]">
+                    Clique no ícone <span className="text-[#FACC15]">✨</span> em uma campanha para solicitar análise da IA
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </div>
       </main>
     </div>
   )
 }
 
-function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }) {
+function CampaignCard({ campaign, index, onAiAnalysis, isAnalyzing }: { campaign: Campaign; index: number; onAiAnalysis: (id: string, name: string) => void; isAnalyzing: boolean }) {
   const [showMenu, setShowMenu] = useState(false)
 
   return (
@@ -211,9 +331,18 @@ function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }
             <PlatformIcon platform={campaign.platform} size={22} />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white group-hover:text-[#3B82F6] transition-colors line-clamp-1">
-              {campaign.name}
-            </h3>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onAiAnalysis(campaign.id, campaign.name)}
+                className={`text-lg hover:scale-125 transition-transform ${isAnalyzing ? 'animate-pulse' : ''}`}
+                title="Solicitar análise da IA"
+              >
+                ✨
+              </button>
+              <h3 className="text-sm font-semibold text-white group-hover:text-[#3B82F6] transition-colors line-clamp-1">
+                {campaign.name}
+              </h3>
+            </div>
             <p className="text-xs text-[#6B6B7B] capitalize">{campaign.objective}</p>
           </div>
         </div>
@@ -303,7 +432,7 @@ function CampaignCard({ campaign, index }: { campaign: Campaign; index: number }
   )
 }
 
-function CampaignTable({ campaigns }: { campaigns: Campaign[] }) {
+function CampaignTable({ campaigns, onAiAnalysis, isAnalyzing }: { campaigns: Campaign[]; onAiAnalysis: (id: string, name: string) => void; isAnalyzing: string | null }) {
   return (
     <div className="rounded-2xl bg-gradient-to-br from-[#12121A] to-[#0D0D14] border border-white/10 overflow-hidden shadow-xl shadow-black/20">
       {/* Table Header */}
@@ -350,7 +479,16 @@ function CampaignTable({ campaigns }: { campaigns: Campaign[] }) {
                       <PlatformIcon platform={campaign.platform} size={20} />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white group-hover:text-[#3B82F6] transition-colors">{campaign.name}</p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => onAiAnalysis(campaign.id, campaign.name)}
+                          className={`text-base hover:scale-125 transition-transform ${isAnalyzing === campaign.id ? 'animate-pulse' : ''}`}
+                          title="Solicitar análise da IA"
+                        >
+                          ✨
+                        </button>
+                        <p className="text-sm font-medium text-white group-hover:text-[#3B82F6] transition-colors">{campaign.name}</p>
+                      </div>
                       <p className="text-xs text-[#6B6B7B] capitalize">{campaign.objective}</p>
                     </div>
                   </div>

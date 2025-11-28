@@ -4,6 +4,15 @@ import { createContext, useContext, useState, ReactNode, useCallback } from 'rea
 import { Campaign, Report, Automation, Notification } from '@/types'
 import { campaigns as initialCampaigns, reports as initialReports, automations as initialAutomations, notifications as initialNotifications } from '@/data/mock-data'
 
+interface ConnectedAccount {
+  id: string
+  platform: 'facebook_ads' | 'google_ads' | 'linkedin_ads' | 'tiktok_ads' | 'whatsapp'
+  name: string
+  email?: string
+  connected: boolean
+  connectedAt?: string
+}
+
 interface AppContextType {
   // Campaigns
   campaigns: Campaign[]
@@ -30,9 +39,18 @@ interface AppContextType {
   markAllNotificationsAsRead: () => void
   clearNotification: (id: string) => void
 
+  // Connected Accounts
+  connectedAccounts: ConnectedAccount[]
+  connectAccount: (platform: ConnectedAccount['platform']) => void
+  disconnectAccount: (id: string) => void
+
   // Date range
   dateRange: string
   setDateRange: (range: string) => void
+
+  // Selected account filter
+  selectedAccount: string
+  setSelectedAccount: (accountId: string) => void
 
   // Modals
   isCreateCampaignModalOpen: boolean
@@ -41,6 +59,8 @@ interface AppContextType {
   setIsCreateReportModalOpen: (open: boolean) => void
   isCreateAutomationModalOpen: boolean
   setIsCreateAutomationModalOpen: (open: boolean) => void
+  isConnectAccountsModalOpen: boolean
+  setIsConnectAccountsModalOpen: (open: boolean) => void
 
   // Toast notifications
   showToast: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void
@@ -55,19 +75,27 @@ interface Toast {
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
 
+const initialConnectedAccounts: ConnectedAccount[] = [
+  { id: '1', platform: 'facebook_ads', name: 'Meta Ads - Empresa Principal', email: 'empresa@email.com', connected: true, connectedAt: '2024-01-15' },
+  { id: '2', platform: 'google_ads', name: 'Google Ads - Conta Master', email: 'ads@empresa.com', connected: true, connectedAt: '2024-01-20' },
+]
+
 export function AppProvider({ children }: { children: ReactNode }) {
   // State
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns)
   const [reports, setReports] = useState<Report[]>(initialReports)
   const [automations, setAutomations] = useState<Automation[]>(initialAutomations)
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications)
+  const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>(initialConnectedAccounts)
   const [dateRange, setDateRange] = useState('Ultimos 30 dias')
+  const [selectedAccount, setSelectedAccount] = useState<string>('all')
   const [toasts, setToasts] = useState<Toast[]>([])
 
   // Modal states
   const [isCreateCampaignModalOpen, setIsCreateCampaignModalOpen] = useState(false)
   const [isCreateReportModalOpen, setIsCreateReportModalOpen] = useState(false)
   const [isCreateAutomationModalOpen, setIsCreateAutomationModalOpen] = useState(false)
+  const [isConnectAccountsModalOpen, setIsConnectAccountsModalOpen] = useState(false)
 
   // Toast function
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning') => {
@@ -157,6 +185,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setNotifications(prev => prev.filter(n => n.id !== id))
   }, [])
 
+  // Connected Accounts functions
+  const connectAccount = useCallback((platform: ConnectedAccount['platform']) => {
+    const platformNames: Record<ConnectedAccount['platform'], string> = {
+      facebook_ads: 'Facebook Ads',
+      google_ads: 'Google Ads',
+      linkedin_ads: 'LinkedIn Ads',
+      tiktok_ads: 'TikTok Ads',
+      whatsapp: 'WhatsApp Business'
+    }
+    const newAccount: ConnectedAccount = {
+      id: Math.random().toString(36).substring(7),
+      platform,
+      name: `${platformNames[platform]} - Nova Conta`,
+      connected: true,
+      connectedAt: new Date().toISOString().split('T')[0]
+    }
+    setConnectedAccounts(prev => [...prev, newAccount])
+    showToast(`${platformNames[platform]} conectado com sucesso!`, 'success')
+  }, [showToast])
+
+  const disconnectAccount = useCallback((id: string) => {
+    setConnectedAccounts(prev => prev.filter(a => a.id !== id))
+    showToast('Conta desconectada com sucesso!', 'info')
+  }, [showToast])
+
   return (
     <AppContext.Provider value={{
       campaigns,
@@ -176,14 +229,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       markNotificationAsRead,
       markAllNotificationsAsRead,
       clearNotification,
+      connectedAccounts,
+      connectAccount,
+      disconnectAccount,
       dateRange,
       setDateRange,
+      selectedAccount,
+      setSelectedAccount,
       isCreateCampaignModalOpen,
       setIsCreateCampaignModalOpen,
       isCreateReportModalOpen,
       setIsCreateReportModalOpen,
       isCreateAutomationModalOpen,
       setIsCreateAutomationModalOpen,
+      isConnectAccountsModalOpen,
+      setIsConnectAccountsModalOpen,
       showToast,
       toasts,
     }}>

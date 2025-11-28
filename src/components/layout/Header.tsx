@@ -8,7 +8,8 @@ import {
   Calendar,
   ChevronDown,
   RefreshCw,
-  Plus
+  Plus,
+  Link2
 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { useApp } from '@/contexts'
@@ -20,6 +21,7 @@ interface HeaderProps {
   showCreateButton?: boolean
   onCreateClick?: () => void
   createButtonText?: string
+  buttonType?: 'campaign' | 'connect'
 }
 
 export function Header({
@@ -27,7 +29,8 @@ export function Header({
   subtitle,
   showCreateButton = true,
   onCreateClick,
-  createButtonText = 'Nova Campanha'
+  createButtonText = 'Nova Campanha',
+  buttonType = 'campaign'
 }: HeaderProps) {
   const {
     notifications,
@@ -36,6 +39,7 @@ export function Header({
     dateRange,
     setDateRange,
     setIsCreateCampaignModalOpen,
+    setIsConnectAccountsModalOpen,
     showToast
   } = useApp()
 
@@ -73,6 +77,8 @@ export function Header({
   const handleCreateClick = () => {
     if (onCreateClick) {
       onCreateClick()
+    } else if (buttonType === 'connect') {
+      setIsConnectAccountsModalOpen(true)
     } else {
       setIsCreateCampaignModalOpen(true)
     }
@@ -245,10 +251,10 @@ export function Header({
             </AnimatePresence>
           </div>
 
-          {/* Botão Nova Campanha */}
+          {/* Botão Principal */}
           {showCreateButton && (
             <Button variant="primary" className="gap-2 hidden sm:flex h-10 px-4" onClick={handleCreateClick}>
-              <Plus className="w-4 h-4" />
+              {buttonType === 'connect' ? <Link2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
               <span className="hidden lg:inline text-sm">{createButtonText}</span>
             </Button>
           )}

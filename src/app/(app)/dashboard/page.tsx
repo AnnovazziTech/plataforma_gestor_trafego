@@ -25,6 +25,8 @@ export default function DashboardPage() {
       <Header
         title="Dashboard"
         subtitle="Visão geral da performance de todas as suas campanhas"
+        buttonType="connect"
+        createButtonText="Conectar Contas"
       />
 
       <main className="flex-1 p-4 md:p-6 overflow-x-hidden">

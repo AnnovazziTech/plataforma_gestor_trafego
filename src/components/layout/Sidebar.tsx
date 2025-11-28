@@ -17,6 +17,10 @@ import {
   Crown,
   Sparkles,
   X,
+  Briefcase,
+  Share2,
+  MessageCircle,
+  Palette,
 } from 'lucide-react'
 import { PlatformIcon } from '@/components/ui'
 import { useState } from 'react'
@@ -26,7 +30,11 @@ const menuItems = [
   { icon: Megaphone, label: 'Campanhas', href: '/campaigns', badge: '12' },
   { icon: BarChart3, label: 'Analytics', href: '/analytics', badge: null },
   { icon: FileText, label: 'Relatórios', href: '/reports', badge: null },
-  { icon: Zap, label: 'Automação', href: '/automation', badge: 'Novo' },
+  { icon: Briefcase, label: 'Administração', href: '/admin', badge: null },
+  { icon: Share2, label: 'Redes Sociais', href: '/social', badge: 'Novo' },
+  { icon: MessageCircle, label: 'TimTim', href: '/timtim', badge: null },
+  { icon: Palette, label: 'Criativos', href: '/criativos', badge: null },
+  { icon: Zap, label: 'Automação', href: '/automation', badge: null },
   { icon: Settings, label: 'Configurações', href: '/settings', badge: null },
 ]
 
@@ -82,7 +90,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 <h1 className="text-lg font-bold bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
                   TrafficPro
                 </h1>
-                <p className="text-[11px] text-[#6B6B7B] font-medium">Gestão de Tráfego</p>
+                <p className="text-[11px] text-[#6B6B7B] font-medium">Plataforma de Marketing</p>
               </div>
             </motion.div>
           ) : (

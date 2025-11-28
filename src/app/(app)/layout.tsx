@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Sidebar, SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '@/components/layout'
 import { ToastContainer } from '@/components/ui'
-import { CreateCampaignModal } from '@/components/modals'
+import { CreateCampaignModal, ConnectAccountsModal } from '@/components/modals'
 import { AppProvider } from '@/contexts'
 
 export default function AppLayout({
@@ -27,6 +27,7 @@ export default function AppLayout({
           {children}
         </main>
         <CreateCampaignModal />
+        <ConnectAccountsModal />
         <ToastContainer />
       </div>
     </AppProvider>
