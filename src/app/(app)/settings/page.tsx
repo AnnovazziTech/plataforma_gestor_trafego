@@ -1,88 +1,176 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
-import { Card, CardHeader, CardTitle, CardContent, Button, Badge, PlatformIcon } from '@/components/ui'
+import { Button, Badge, PlatformIcon } from '@/components/ui'
+import { useApp } from '@/contexts'
 import { currentUser } from '@/data/mock-data'
 import {
   User,
-  Mail,
-  Lock,
   Bell,
-  Palette,
-  Globe,
   Shield,
   CreditCard,
-  Link2,
-  LogOut,
+  Link,
+  Eye,
+  EyeOff,
   Check,
   X,
+  Upload,
+  Moon,
+  Sun,
+  Globe,
+  Mail,
+  Save,
   ChevronRight,
-  RefreshCw,
+  Smartphone,
   Trash2,
   Plus,
+  LogOut,
+  Settings,
+  Palette,
+  RefreshCw,
 } from 'lucide-react'
-import { Platform, ConnectedAccount } from '@/types'
+import { Platform } from '@/types'
+
+type TabType = 'profile' | 'notifications' | 'connections' | 'security' | 'billing' | 'preferences'
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('account')
+  const { showToast, connectedAccounts, connectAccount, disconnectAccount } = useApp()
+  const [activeTab, setActiveTab] = useState<TabType>('profile')
 
   const tabs = [
-    { id: 'account', label: 'Conta', icon: User },
-    { id: 'integrations', label: 'Integrações', icon: Link2 },
+    { id: 'profile', label: 'Perfil', icon: User },
+    { id: 'connections', label: 'Conexões', icon: Link },
     { id: 'notifications', label: 'Notificações', icon: Bell },
-    { id: 'appearance', label: 'Aparência', icon: Palette },
-    { id: 'billing', label: 'Faturamento', icon: CreditCard },
     { id: 'security', label: 'Segurança', icon: Shield },
+    { id: 'billing', label: 'Assinatura', icon: CreditCard },
+    { id: 'preferences', label: 'Preferências', icon: Palette },
   ]
 
   return (
-    <div className="min-h-screen">
+    <div style={{ minHeight: '100vh' }}>
       <Header
         title="Configurações"
-        subtitle="Gerencie suas preferências e conta"
+        subtitle="Gerencie suas preferências e configurações"
+        showCreateButton={false}
       />
 
-      <main className="p-8">
-        <div className="flex gap-8">
-          {/* Sidebar Navigation */}
-          <div className="w-64 shrink-0">
-            <nav className="space-y-1">
-              {tabs.map((tab) => (
-                <motion.button
-                  key={tab.id}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                    activeTab === tab.id
-                      ? 'bg-gradient-to-r from-[#3B82F6]/15 to-transparent text-[#3B82F6] border-l-2 border-[#3B82F6]'
-                      : 'text-[#A0A0B0] hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <tab.icon size={18} />
-                  <span className="text-sm font-medium">{tab.label}</span>
-                </motion.button>
-              ))}
-            </nav>
+      <main style={{ padding: '24px 32px', paddingBottom: '80px' }}>
+        <div style={{ display: 'flex', gap: '32px' }}>
+          {/* Sidebar */}
+          <div style={{ width: '280px', flexShrink: 0 }}>
+            <div style={{
+              padding: '24px',
+              borderRadius: '16px',
+              backgroundColor: 'rgba(18, 18, 26, 0.8)',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+            }}>
+              {/* User Info */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', paddingBottom: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(to bottom right, #3B82F6, #1D4ED8)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '20px',
+                  fontWeight: 600,
+                  color: '#FFFFFF',
+                }}>
+                  {currentUser.name.split(' ').map(n => n[0]).join('')}
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', marginBottom: '2px' }}>{currentUser.name}</h3>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>{currentUser.email}</p>
+                </div>
+              </div>
 
-            {/* Logout */}
-            <div className="mt-8 pt-8 border-t border-white/10">
-              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors">
-                <LogOut size={18} />
-                <span className="text-sm font-medium">Sair da Conta</span>
-              </button>
+              {/* Tabs */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as TabType)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      border: 'none',
+                      backgroundColor: activeTab === tab.id ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                      color: activeTab === tab.id ? '#3B82F6' : '#A0A0B0',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      width: '100%',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <tab.icon size={18} />
+                    {tab.label}
+                    <ChevronRight size={14} style={{ marginLeft: 'auto', opacity: activeTab === tab.id ? 1 : 0 }} />
+                  </button>
+                ))}
+              </div>
+
+              {/* Logout */}
+              <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <button
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    color: '#EF4444',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    width: '100%',
+                  }}
+                >
+                  <LogOut size={18} />
+                  Sair da Conta
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Content */}
-          <div className="flex-1">
-            {activeTab === 'account' && <AccountSettings />}
-            {activeTab === 'integrations' && <IntegrationsSettings />}
-            {activeTab === 'notifications' && <NotificationsSettings />}
-            {activeTab === 'appearance' && <AppearanceSettings />}
-            {activeTab === 'billing' && <BillingSettings />}
-            {activeTab === 'security' && <SecuritySettings />}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <AnimatePresence mode="wait">
+              {activeTab === 'profile' && (
+                <ProfileSection key="profile" showToast={showToast} />
+              )}
+              {activeTab === 'connections' && (
+                <ConnectionsSection
+                  key="connections"
+                  showToast={showToast}
+                  connectedAccounts={connectedAccounts}
+                  connectAccount={connectAccount}
+                  disconnectAccount={disconnectAccount}
+                />
+              )}
+              {activeTab === 'notifications' && (
+                <NotificationsSection key="notifications" showToast={showToast} />
+              )}
+              {activeTab === 'security' && (
+                <SecuritySection key="security" showToast={showToast} />
+              )}
+              {activeTab === 'billing' && (
+                <BillingSection key="billing" showToast={showToast} />
+              )}
+              {activeTab === 'preferences' && (
+                <PreferencesSection key="preferences" showToast={showToast} />
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </main>
@@ -90,454 +178,826 @@ export default function SettingsPage() {
   )
 }
 
-function AccountSettings() {
+function ProfileSection({ showToast }: { showToast: (msg: string, type: any) => void }) {
+  const [formData, setFormData] = useState({
+    name: currentUser.name,
+    email: currentUser.email,
+    phone: '+55 11 99999-9999',
+    company: 'Agência Digital',
+    website: 'https://agencia.com.br',
+  })
+
+  const handleSave = () => {
+    showToast('Perfil atualizado com sucesso!', 'success')
+  }
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Informações da Conta</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-6 mb-8">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-[#3B82F6]/20">
-              {currentUser.name.split(' ').map(n => n[0]).join('')}
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">{currentUser.name}</h3>
-              <p className="text-sm text-[#6B6B7B]">{currentUser.email}</p>
-              <Badge variant="info" className="mt-2">
-                {currentUser.role === 'admin' ? 'Administrador' : currentUser.role === 'manager' ? 'Gerente' : 'Visualizador'}
-              </Badge>
-            </div>
-            <Button variant="secondary" className="ml-auto">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      style={{
+        padding: '32px',
+        borderRadius: '16px',
+        backgroundColor: 'rgba(18, 18, 26, 0.8)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+        <div style={{
+          padding: '10px',
+          borderRadius: '12px',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          color: '#3B82F6',
+        }}>
+          <User size={20} />
+        </div>
+        <div>
+          <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Perfil</h2>
+          <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Atualize suas informações pessoais</p>
+        </div>
+      </div>
+
+      {/* Avatar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '32px', paddingBottom: '32px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+        <div style={{
+          width: '96px',
+          height: '96px',
+          borderRadius: '50%',
+          background: 'linear-gradient(to bottom right, #3B82F6, #1D4ED8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '32px',
+          fontWeight: 600,
+          color: '#FFFFFF',
+        }}>
+          {currentUser.name.split(' ').map(n => n[0]).join('')}
+        </div>
+        <div>
+          <Button variant="secondary" size="sm">
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Upload size={14} />
               Alterar Foto
-            </Button>
-          </div>
+            </span>
+          </Button>
+          <p style={{ fontSize: '12px', color: '#6B6B7B', marginTop: '8px' }}>JPG, PNG ou GIF. Máximo 5MB.</p>
+        </div>
+      </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-[#6B6B7B] mb-2">Nome</label>
-              <input
-                type="text"
-                defaultValue={currentUser.name}
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50 transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-[#6B6B7B] mb-2">Email</label>
-              <input
-                type="email"
-                defaultValue={currentUser.email}
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50 transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-[#6B6B7B] mb-2">Telefone</label>
-              <input
-                type="tel"
-                placeholder="+55 (11) 99999-9999"
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50 transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-[#6B6B7B] mb-2">Empresa</label>
-              <input
-                type="text"
-                placeholder="Nome da empresa"
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50 transition-all"
-              />
-            </div>
+      {/* Form */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>
+              Nome Completo
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              style={{
+                width: '100%',
+                height: '44px',
+                padding: '0 16px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                fontSize: '14px',
+                color: '#FFFFFF',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
           </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>
+              E-mail
+            </label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              style={{
+                width: '100%',
+                height: '44px',
+                padding: '0 16px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                fontSize: '14px',
+                color: '#FFFFFF',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+        </div>
 
-          <div className="flex justify-end mt-6">
-            <Button variant="primary">Salvar Alterações</Button>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>
+              Telefone
+            </label>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+              style={{
+                width: '100%',
+                height: '44px',
+                padding: '0 16px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                fontSize: '14px',
+                color: '#FFFFFF',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>
+              Empresa
+            </label>
+            <input
+              type="text"
+              value={formData.company}
+              onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+              style={{
+                width: '100%',
+                height: '44px',
+                padding: '0 16px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                fontSize: '14px',
+                color: '#FFFFFF',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>
+            Website
+          </label>
+          <input
+            type="url"
+            value={formData.website}
+            onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+            style={{
+              width: '100%',
+              height: '44px',
+              padding: '0 16px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              fontSize: '14px',
+              color: '#FFFFFF',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '16px' }}>
+          <Button variant="primary" onClick={handleSave}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Save size={16} />
+              Salvar Alterações
+            </span>
+          </Button>
+        </div>
+      </div>
+    </motion.div>
   )
 }
 
-function IntegrationsSettings() {
-  const allPlatforms: { platform: Platform; name: string; description: string }[] = [
-    { platform: 'meta', name: 'Meta Ads', description: 'Facebook e Instagram Ads' },
-    { platform: 'google', name: 'Google Ads', description: 'Search, Display, YouTube' },
-    { platform: 'tiktok', name: 'TikTok Ads', description: 'TikTok For Business' },
-    { platform: 'linkedin', name: 'LinkedIn Ads', description: 'LinkedIn Campaign Manager' },
-    { platform: 'twitter', name: 'X Ads', description: 'Twitter Advertising' },
-    { platform: 'pinterest', name: 'Pinterest Ads', description: 'Pinterest Business' },
+type AccountPlatform = 'facebook_ads' | 'google_ads' | 'linkedin_ads' | 'tiktok_ads' | 'whatsapp'
+
+function ConnectionsSection({
+  showToast,
+  connectedAccounts,
+  connectAccount,
+  disconnectAccount
+}: {
+  showToast: (msg: string, type: any) => void
+  connectedAccounts: any[]
+  connectAccount: (platform: AccountPlatform) => void
+  disconnectAccount: (id: string) => void
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      style={{
+        padding: '32px',
+        borderRadius: '16px',
+        backgroundColor: 'rgba(18, 18, 26, 0.8)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+        <div style={{
+          padding: '10px',
+          borderRadius: '12px',
+          backgroundColor: 'rgba(250, 204, 21, 0.1)',
+          color: '#FACC15',
+        }}>
+          <Link size={20} />
+        </div>
+        <div>
+          <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Conexões</h2>
+          <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Conecte suas contas de anúncios</p>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {connectedAccounts.map((account, index) => (
+          <motion.div
+            key={account.id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '20px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: `1px solid ${account.connected ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{
+                padding: '10px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              }}>
+                <PlatformIcon platform={account.platform as Platform} size={24} />
+              </div>
+              <div>
+                <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '2px' }}>{account.name}</h4>
+                <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>
+                  {account.platform.charAt(0).toUpperCase() + account.platform.slice(1)} Ads
+                </p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Badge variant={account.connected ? 'success' : 'default'}>
+                {account.connected ? 'Conectado' : 'Desconectado'}
+              </Badge>
+              {account.connected ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
+                    <RefreshCw size={14} />
+                  </button>
+                  <button
+                    onClick={() => disconnectAccount(account.id)}
+                    style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ) : (
+                <Button variant="primary" size="sm" onClick={() => connectAccount(account.platform as AccountPlatform)}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Plus size={14} />
+                    Conectar
+                  </span>
+                </Button>
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
+
+function NotificationsSection({ showToast }: { showToast: (msg: string, type: any) => void }) {
+  const [settings, setSettings] = useState({
+    emailAlerts: true,
+    pushNotifications: true,
+    weeklyReports: true,
+    budgetAlerts: true,
+    performanceAlerts: false,
+  })
+
+  const toggleSetting = (key: keyof typeof settings) => {
+    setSettings(prev => ({ ...prev, [key]: !prev[key] }))
+    showToast('Preferência atualizada!', 'success')
+  }
+
+  const options = [
+    { key: 'emailAlerts', label: 'Alertas por E-mail', description: 'Receba alertas importantes por e-mail', icon: Mail },
+    { key: 'pushNotifications', label: 'Notificações Push', description: 'Notificações no navegador em tempo real', icon: Bell },
+    { key: 'weeklyReports', label: 'Relatórios Semanais', description: 'Resumo semanal de performance', icon: Mail },
+    { key: 'budgetAlerts', label: 'Alertas de Budget', description: 'Quando o budget atinge 80%', icon: CreditCard },
+    { key: 'performanceAlerts', label: 'Alertas de Performance', description: 'Quando métricas caem abaixo do esperado', icon: Bell },
   ]
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Plataformas Conectadas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {currentUser.accounts.map((account) => (
-              <div
-                key={account.id}
-                className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-white/5">
-                    <PlatformIcon platform={account.platform} size={24} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-white">{account.name}</h4>
-                    <p className="text-xs text-[#6B6B7B]">ID: {account.accountId}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <Badge variant={account.status === 'connected' ? 'success' : 'error'}>
-                      {account.status === 'connected' ? 'Conectado' : 'Erro'}
-                    </Badge>
-                    {account.lastSync && (
-                      <p className="text-xs text-[#6B6B7B] mt-1">
-                        Sync: {new Date(account.lastSync).toLocaleString('pt-BR')}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button className="p-2 rounded-lg hover:bg-white/10 text-[#6B6B7B] hover:text-white transition-all">
-                      <RefreshCw size={16} />
-                    </button>
-                    <button className="p-2 rounded-lg hover:bg-white/10 text-[#6B6B7B] hover:text-red-400 transition-all">
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      style={{
+        padding: '32px',
+        borderRadius: '16px',
+        backgroundColor: 'rgba(18, 18, 26, 0.8)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+        <div style={{
+          padding: '10px',
+          borderRadius: '12px',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          color: '#3B82F6',
+        }}>
+          <Bell size={20} />
+        </div>
+        <div>
+          <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Notificações</h2>
+          <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Configure suas preferências de notificação</p>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Adicionar Nova Plataforma</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            {allPlatforms
-              .filter(p => !currentUser.accounts.find(a => a.platform === p.platform))
-              .map((platform) => (
-                <motion.button
-                  key={platform.platform}
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:border-[#3B82F6]/30 transition-all group"
-                >
-                  <div className="p-3 rounded-xl bg-white/5 group-hover:bg-[#3B82F6]/10 transition-colors">
-                    <PlatformIcon platform={platform.platform} size={24} />
-                  </div>
-                  <div className="text-left">
-                    <h4 className="text-sm font-medium text-white">{platform.name}</h4>
-                    <p className="text-xs text-[#6B6B7B]">{platform.description}</p>
-                  </div>
-                  <Plus size={18} className="ml-auto text-[#6B6B7B] group-hover:text-[#3B82F6] transition-colors" />
-                </motion.button>
-              ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-function NotificationsSettings() {
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: true,
-    slack: false,
-    alerts: true,
-    reports: true,
-    updates: false,
-  })
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Canais de Notificação</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[
-              { key: 'email', label: 'Email', description: 'Receber notificações por email' },
-              { key: 'push', label: 'Push', description: 'Notificações no navegador' },
-              { key: 'slack', label: 'Slack', description: 'Integrar com canal do Slack' },
-            ].map((channel) => (
-              <div
-                key={channel.key}
-                className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10"
-              >
-                <div>
-                  <h4 className="text-sm font-medium text-white">{channel.label}</h4>
-                  <p className="text-xs text-[#6B6B7B]">{channel.description}</p>
-                </div>
-                <button
-                  onClick={() => setNotifications(prev => ({ ...prev, [channel.key]: !prev[channel.key as keyof typeof prev] }))}
-                  className={`w-12 h-6 rounded-full transition-all ${
-                    notifications[channel.key as keyof typeof notifications]
-                      ? 'bg-[#3B82F6]'
-                      : 'bg-white/20'
-                  }`}
-                >
-                  <div className={`w-5 h-5 rounded-full bg-white shadow-lg transition-transform ${
-                    notifications[channel.key as keyof typeof notifications] ? 'translate-x-6' : 'translate-x-0.5'
-                  }`} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Tipos de Notificação</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[
-              { key: 'alerts', label: 'Alertas de Performance', description: 'CPA alto, CTR baixo, etc' },
-              { key: 'reports', label: 'Relatórios', description: 'Quando relatórios são gerados' },
-              { key: 'updates', label: 'Atualizações do Sistema', description: 'Novidades e melhorias' },
-            ].map((type) => (
-              <div
-                key={type.key}
-                className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10"
-              >
-                <div>
-                  <h4 className="text-sm font-medium text-white">{type.label}</h4>
-                  <p className="text-xs text-[#6B6B7B]">{type.description}</p>
-                </div>
-                <button
-                  onClick={() => setNotifications(prev => ({ ...prev, [type.key]: !prev[type.key as keyof typeof prev] }))}
-                  className={`w-12 h-6 rounded-full transition-all ${
-                    notifications[type.key as keyof typeof notifications]
-                      ? 'bg-[#3B82F6]'
-                      : 'bg-white/20'
-                  }`}
-                >
-                  <div className={`w-5 h-5 rounded-full bg-white shadow-lg transition-transform ${
-                    notifications[type.key as keyof typeof notifications] ? 'translate-x-6' : 'translate-x-0.5'
-                  }`} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-function AppearanceSettings() {
-  const [theme, setTheme] = useState('dark')
-  const [accentColor, setAccentColor] = useState('#3B82F6')
-
-  const colors = ['#3B82F6', '#60A5FA', '#FACC15', '#FDE047', '#1D4ED8', '#EAB308']
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Tema</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { id: 'dark', label: 'Escuro', bg: 'bg-[#0A0A0F]' },
-              { id: 'light', label: 'Claro', bg: 'bg-white' },
-              { id: 'system', label: 'Sistema', bg: 'bg-gradient-to-r from-[#0A0A0F] to-white' },
-            ].map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTheme(t.id)}
-                className={`p-4 rounded-xl border transition-all ${
-                  theme === t.id
-                    ? 'border-[#3B82F6] bg-[#3B82F6]/10'
-                    : 'border-white/10 hover:border-white/20'
-                }`}
-              >
-                <div className={`w-full h-20 rounded-lg ${t.bg} mb-3`} />
-                <p className="text-sm text-white">{t.label}</p>
-              </button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Cor de Destaque</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            {colors.map((color) => (
-              <button
-                key={color}
-                onClick={() => setAccentColor(color)}
-                className={`w-10 h-10 rounded-full transition-all ${
-                  accentColor === color ? 'ring-2 ring-white ring-offset-2 ring-offset-[#0A0A0F]' : ''
-                }`}
-                style={{ backgroundColor: color }}
-              />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-function BillingSettings() {
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Plano Atual</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="p-6 rounded-xl bg-gradient-to-br from-[#3B82F6]/20 to-[#FACC15]/20 border border-[#3B82F6]/30">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-xl font-bold text-white">Plano Pro</h3>
-                <p className="text-sm text-[#A0A0B0]">Faturamento mensal</p>
-              </div>
-              <div className="text-right">
-                <p className="text-3xl font-bold text-white">R$ 297</p>
-                <p className="text-sm text-[#6B6B7B]">/mês</p>
-              </div>
-            </div>
-            <div className="space-y-2">
-              {[
-                'Até 50 campanhas ativas',
-                'Todas as plataformas',
-                'Relatórios ilimitados',
-                'Automações avançadas',
-                'Suporte prioritário',
-              ].map((feature) => (
-                <div key={feature} className="flex items-center gap-2 text-sm text-[#A0A0B0]">
-                  <Check size={14} className="text-emerald-400" />
-                  {feature}
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-3 mt-6">
-              <Button variant="secondary">Alterar Plano</Button>
-              <Button variant="ghost">Cancelar Assinatura</Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Método de Pagamento</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-white/5">
-                <CreditCard size={20} className="text-[#3B82F6]" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {options.map((option) => (
+          <div
+            key={option.key}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '20px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{
+                padding: '10px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                color: '#6B6B7B',
+              }}>
+                <option.icon size={18} />
               </div>
               <div>
-                <p className="text-sm font-medium text-white">**** **** **** 4242</p>
-                <p className="text-xs text-[#6B6B7B]">Expira em 12/2025</p>
+                <h4 style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '2px' }}>{option.label}</h4>
+                <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>{option.description}</p>
               </div>
             </div>
-            <Button variant="secondary" size="sm">Alterar</Button>
+            <button
+              onClick={() => toggleSetting(option.key as keyof typeof settings)}
+              style={{
+                width: '48px',
+                height: '28px',
+                borderRadius: '9999px',
+                border: 'none',
+                backgroundColor: settings[option.key as keyof typeof settings] ? '#3B82F6' : 'rgba(255, 255, 255, 0.1)',
+                position: 'relative',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+              }}
+            >
+              <div style={{
+                width: '20px',
+                height: '20px',
+                borderRadius: '50%',
+                backgroundColor: '#FFFFFF',
+                position: 'absolute',
+                top: '4px',
+                left: settings[option.key as keyof typeof settings] ? '24px' : '4px',
+                transition: 'left 0.2s',
+              }} />
+            </button>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        ))}
+      </div>
+    </motion.div>
   )
 }
 
-function SecuritySettings() {
+function SecuritySection({ showToast }: { showToast: (msg: string, type: any) => void }) {
+  const [showPassword, setShowPassword] = useState(false)
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Alterar Senha</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4 max-w-md">
-            <div>
-              <label className="block text-sm text-[#6B6B7B] mb-2">Senha Atual</label>
-              <input
-                type="password"
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50 transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-[#6B6B7B] mb-2">Nova Senha</label>
-              <input
-                type="password"
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50 transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-[#6B6B7B] mb-2">Confirmar Nova Senha</label>
-              <input
-                type="password"
-                className="w-full h-10 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50 transition-all"
-              />
-            </div>
-            <Button variant="primary">Atualizar Senha</Button>
-          </div>
-        </CardContent>
-      </Card>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      style={{
+        padding: '32px',
+        borderRadius: '16px',
+        backgroundColor: 'rgba(18, 18, 26, 0.8)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+        <div style={{
+          padding: '10px',
+          borderRadius: '12px',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          color: '#10B981',
+        }}>
+          <Shield size={20} />
+        </div>
+        <div>
+          <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Segurança</h2>
+          <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Proteja sua conta</p>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Autenticação de Dois Fatores</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {/* Change Password */}
+        <div style={{ paddingBottom: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px' }}>Alterar Senha</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
-              <h4 className="text-sm font-medium text-white">2FA via Aplicativo</h4>
-              <p className="text-xs text-[#6B6B7B]">Use Google Authenticator ou similar</p>
+              <label style={{ display: 'block', fontSize: '12px', color: '#6B6B7B', marginBottom: '8px' }}>Senha Atual</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  style={{
+                    width: '100%',
+                    height: '44px',
+                    padding: '0 48px 0 16px',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    fontSize: '14px',
+                    color: '#FFFFFF',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                <button
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    color: '#6B6B7B',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
-            <Button variant="secondary" size="sm">Configurar</Button>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: '#6B6B7B', marginBottom: '8px' }}>Nova Senha</label>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  style={{
+                    width: '100%',
+                    height: '44px',
+                    padding: '0 16px',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    fontSize: '14px',
+                    color: '#FFFFFF',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: '#6B6B7B', marginBottom: '8px' }}>Confirmar Nova Senha</label>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  style={{
+                    width: '100%',
+                    height: '44px',
+                    padding: '0 16px',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    fontSize: '14px',
+                    color: '#FFFFFF',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button variant="primary" size="sm" onClick={() => showToast('Senha alterada com sucesso!', 'success')}>
+                Alterar Senha
+              </Button>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Sessões Ativas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
+        {/* 2FA */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ padding: '10px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', color: '#6B6B7B' }}>
+              <Smartphone size={18} />
+            </div>
+            <div>
+              <h4 style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '2px' }}>Autenticação em Duas Etapas</h4>
+              <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Adicione uma camada extra de segurança</p>
+            </div>
+          </div>
+          <Button variant="secondary" size="sm" onClick={() => showToast('2FA configurado!', 'success')}>
+            Ativar
+          </Button>
+        </div>
+
+        {/* Sessions */}
+        <div>
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px' }}>Sessões Ativas</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {[
               { device: 'Chrome - Windows', location: 'São Paulo, BR', current: true },
               { device: 'Safari - iPhone', location: 'São Paulo, BR', current: false },
             ].map((session, i) => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
                 <div>
-                  <p className="text-sm font-medium text-white">{session.device}</p>
-                  <p className="text-xs text-[#6B6B7B]">{session.location}</p>
+                  <p style={{ fontSize: '14px', color: '#FFFFFF', marginBottom: '2px' }}>{session.device}</p>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>{session.location}</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  {session.current && <Badge variant="success">Atual</Badge>}
-                  {!session.current && (
-                    <Button variant="ghost" size="sm" className="text-red-400">
-                      Encerrar
-                    </Button>
-                  )}
-                </div>
+                {session.current ? (
+                  <Badge variant="success">Atual</Badge>
+                ) : (
+                  <button style={{ padding: '6px', borderRadius: '8px', background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}>
+                    <Trash2 size={14} />
+                  </button>
+                )}
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+function BillingSection({ showToast }: { showToast: (msg: string, type: any) => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      style={{
+        padding: '32px',
+        borderRadius: '16px',
+        backgroundColor: 'rgba(18, 18, 26, 0.8)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+        <div style={{
+          padding: '10px',
+          borderRadius: '12px',
+          backgroundColor: 'rgba(250, 204, 21, 0.1)',
+          color: '#FACC15',
+        }}>
+          <CreditCard size={20} />
+        </div>
+        <div>
+          <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Assinatura</h2>
+          <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Gerencie seu plano e pagamentos</p>
+        </div>
+      </div>
+
+      {/* Current Plan */}
+      <div style={{
+        padding: '24px',
+        borderRadius: '12px',
+        background: 'linear-gradient(to right, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2))',
+        border: '1px solid rgba(59, 130, 246, 0.3)',
+        marginBottom: '24px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <Badge variant="info">Plano Pro</Badge>
+            <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: '12px 0 4px' }}>R$ 197/mês</h3>
+            <p style={{ fontSize: '14px', color: '#A0A0B0', margin: 0 }}>Renovação em 15/03/2024</p>
+          </div>
+          <Button variant="secondary">
+            Fazer Upgrade
+          </Button>
+        </div>
+      </div>
+
+      {/* Features */}
+      <div style={{ marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px' }}>Recursos do Plano</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+          {[
+            'Contas de anúncios ilimitadas',
+            'Relatórios automatizados',
+            'Automações avançadas',
+            'Suporte prioritário',
+            'API Access',
+            'White Label',
+          ].map((feature) => (
+            <div key={feature} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Check size={14} style={{ color: '#10B981' }} />
+              <span style={{ fontSize: '14px', color: '#A0A0B0' }}>{feature}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Payment Method */}
+      <div style={{ paddingTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px' }}>Método de Pagamento</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
+              <CreditCard size={20} style={{ color: '#FFFFFF' }} />
+            </div>
+            <div>
+              <p style={{ fontSize: '14px', color: '#FFFFFF', marginBottom: '2px' }}>•••• •••• •••• 4242</p>
+              <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Expira 12/26</p>
+            </div>
+          </div>
+          <Button variant="ghost" size="sm">Alterar</Button>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+function PreferencesSection({ showToast }: { showToast: (msg: string, type: any) => void }) {
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [language, setLanguage] = useState('pt-BR')
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      style={{
+        padding: '32px',
+        borderRadius: '16px',
+        backgroundColor: 'rgba(18, 18, 26, 0.8)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+        <div style={{
+          padding: '10px',
+          borderRadius: '12px',
+          backgroundColor: 'rgba(139, 92, 246, 0.1)',
+          color: '#8B5CF6',
+        }}>
+          <Palette size={20} />
+        </div>
+        <div>
+          <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Preferências</h2>
+          <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Personalize sua experiência</p>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* Theme */}
+        <div>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>
+            Tema
+          </label>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            <button
+              onClick={() => { setTheme('dark'); showToast('Tema alterado!', 'success'); }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '16px',
+                borderRadius: '12px',
+                border: theme === 'dark' ? '2px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: theme === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                cursor: 'pointer',
+              }}
+            >
+              <Moon size={20} style={{ color: theme === 'dark' ? '#3B82F6' : '#6B6B7B' }} />
+              <span style={{ fontSize: '14px', color: '#FFFFFF' }}>Escuro</span>
+            </button>
+            <button
+              onClick={() => { setTheme('light'); showToast('Tema alterado!', 'success'); }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '16px',
+                borderRadius: '12px',
+                border: theme === 'light' ? '2px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: theme === 'light' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                cursor: 'pointer',
+              }}
+            >
+              <Sun size={20} style={{ color: theme === 'light' ? '#3B82F6' : '#6B6B7B' }} />
+              <span style={{ fontSize: '14px', color: '#FFFFFF' }}>Claro</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Language */}
+        <div>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>
+            Idioma
+          </label>
+          <div style={{ position: 'relative' }}>
+            <Globe style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#6B6B7B' }} />
+            <select
+              value={language}
+              onChange={(e) => { setLanguage(e.target.value); showToast('Idioma alterado!', 'success'); }}
+              style={{
+                width: '100%',
+                height: '44px',
+                paddingLeft: '48px',
+                paddingRight: '16px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                fontSize: '14px',
+                color: '#FFFFFF',
+                outline: 'none',
+                appearance: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <option value="pt-BR" style={{ backgroundColor: '#12121A' }}>Português (Brasil)</option>
+              <option value="en-US" style={{ backgroundColor: '#12121A' }}>English (US)</option>
+              <option value="es-ES" style={{ backgroundColor: '#12121A' }}>Español</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Timezone */}
+        <div>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>
+            Fuso Horário
+          </label>
+          <select
+            style={{
+              width: '100%',
+              height: '44px',
+              padding: '0 16px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              fontSize: '14px',
+              color: '#FFFFFF',
+              outline: 'none',
+              appearance: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="America/Sao_Paulo" style={{ backgroundColor: '#12121A' }}>América/São Paulo (GMT-3)</option>
+            <option value="America/New_York" style={{ backgroundColor: '#12121A' }}>América/Nova York (GMT-5)</option>
+            <option value="Europe/London" style={{ backgroundColor: '#12121A' }}>Europa/Londres (GMT)</option>
+          </select>
+        </div>
+
+        {/* Currency */}
+        <div>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>
+            Moeda Padrão
+          </label>
+          <select
+            style={{
+              width: '100%',
+              height: '44px',
+              padding: '0 16px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              fontSize: '14px',
+              color: '#FFFFFF',
+              outline: 'none',
+              appearance: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="BRL" style={{ backgroundColor: '#12121A' }}>Real Brasileiro (R$)</option>
+            <option value="USD" style={{ backgroundColor: '#12121A' }}>Dólar Americano ($)</option>
+            <option value="EUR" style={{ backgroundColor: '#12121A' }}>Euro (€)</option>
+          </select>
+        </div>
+      </div>
+    </motion.div>
   )
 }

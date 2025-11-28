@@ -81,25 +81,39 @@ export const platformMetrics: PlatformMetrics[] = [
   },
 ]
 
-// Time Series Data (last 30 days)
-export const timeSeriesData: TimeSeriesData[] = Array.from({ length: 30 }, (_, i) => {
-  const date = new Date()
-  date.setDate(date.getDate() - (29 - i))
-  const baseImpressions = 350000 + Math.random() * 150000
-  const baseClicks = baseImpressions * (0.03 + Math.random() * 0.02)
-  const baseConversions = baseClicks * (0.015 + Math.random() * 0.01)
-  const baseSpent = 4500 + Math.random() * 2000
-  const baseRevenue = baseSpent * (2.5 + Math.random() * 1.5)
-
-  return {
-    date: date.toISOString().split('T')[0],
-    impressions: Math.round(baseImpressions),
-    clicks: Math.round(baseClicks),
-    conversions: Math.round(baseConversions),
-    spent: Math.round(baseSpent * 100) / 100,
-    revenue: Math.round(baseRevenue * 100) / 100,
-  }
-})
+// Time Series Data (last 30 days) - valores fixos para evitar hydration mismatch
+export const timeSeriesData: TimeSeriesData[] = [
+  { date: '2024-10-22', impressions: 385000, clicks: 15400, conversions: 308, spent: 4800, revenue: 14400 },
+  { date: '2024-10-23', impressions: 412000, clicks: 16480, conversions: 330, spent: 5100, revenue: 15300 },
+  { date: '2024-10-24', impressions: 398000, clicks: 15920, conversions: 318, spent: 4950, revenue: 14850 },
+  { date: '2024-10-25', impressions: 425000, clicks: 17000, conversions: 340, spent: 5200, revenue: 16640 },
+  { date: '2024-10-26', impressions: 378000, clicks: 15120, conversions: 302, spent: 4700, revenue: 13160 },
+  { date: '2024-10-27', impressions: 356000, clicks: 14240, conversions: 285, spent: 4500, revenue: 12600 },
+  { date: '2024-10-28', impressions: 445000, clicks: 17800, conversions: 356, spent: 5400, revenue: 17280 },
+  { date: '2024-10-29', impressions: 467000, clicks: 18680, conversions: 374, spent: 5600, revenue: 18480 },
+  { date: '2024-10-30', impressions: 432000, clicks: 17280, conversions: 346, spent: 5300, revenue: 16960 },
+  { date: '2024-10-31', impressions: 489000, clicks: 19560, conversions: 391, spent: 5800, revenue: 19720 },
+  { date: '2024-11-01', impressions: 478000, clicks: 19120, conversions: 382, spent: 5700, revenue: 18810 },
+  { date: '2024-11-02', impressions: 412000, clicks: 16480, conversions: 330, spent: 5100, revenue: 16320 },
+  { date: '2024-11-03', impressions: 398000, clicks: 15920, conversions: 318, spent: 4950, revenue: 15345 },
+  { date: '2024-11-04', impressions: 456000, clicks: 18240, conversions: 365, spent: 5500, revenue: 18150 },
+  { date: '2024-11-05', impressions: 489000, clicks: 19560, conversions: 391, spent: 5800, revenue: 19720 },
+  { date: '2024-11-06', impressions: 512000, clicks: 20480, conversions: 410, spent: 6000, revenue: 20400 },
+  { date: '2024-11-07', impressions: 498000, clicks: 19920, conversions: 398, spent: 5900, revenue: 19470 },
+  { date: '2024-11-08', impressions: 523000, clicks: 20920, conversions: 418, spent: 6100, revenue: 20740 },
+  { date: '2024-11-09', impressions: 467000, clicks: 18680, conversions: 374, spent: 5600, revenue: 17920 },
+  { date: '2024-11-10', impressions: 445000, clicks: 17800, conversions: 356, spent: 5400, revenue: 16740 },
+  { date: '2024-11-11', impressions: 534000, clicks: 21360, conversions: 427, spent: 6200, revenue: 21080 },
+  { date: '2024-11-12', impressions: 556000, clicks: 22240, conversions: 445, spent: 6400, revenue: 22400 },
+  { date: '2024-11-13', impressions: 523000, clicks: 20920, conversions: 418, spent: 6100, revenue: 20740 },
+  { date: '2024-11-14', impressions: 578000, clicks: 23120, conversions: 462, spent: 6600, revenue: 23760 },
+  { date: '2024-11-15', impressions: 545000, clicks: 21800, conversions: 436, spent: 6300, revenue: 21420 },
+  { date: '2024-11-16', impressions: 489000, clicks: 19560, conversions: 391, spent: 5800, revenue: 18560 },
+  { date: '2024-11-17', impressions: 467000, clicks: 18680, conversions: 374, spent: 5600, revenue: 17360 },
+  { date: '2024-11-18', impressions: 589000, clicks: 23560, conversions: 471, spent: 6700, revenue: 24120 },
+  { date: '2024-11-19', impressions: 612000, clicks: 24480, conversions: 490, spent: 6900, revenue: 25530 },
+  { date: '2024-11-20', impressions: 598000, clicks: 23920, conversions: 478, spent: 6800, revenue: 24480 },
+]
 
 // Campaigns
 export const campaigns: Campaign[] = [
@@ -538,14 +552,33 @@ export const notifications: Notification[] = [
   },
 ]
 
-// Hourly performance data for detailed charts
-export const hourlyPerformance = Array.from({ length: 24 }, (_, i) => ({
-  hour: `${i.toString().padStart(2, '0')}:00`,
-  impressions: Math.round(15000 + Math.random() * 25000 * (i >= 8 && i <= 22 ? 1.5 : 0.5)),
-  clicks: Math.round(500 + Math.random() * 800 * (i >= 9 && i <= 21 ? 1.5 : 0.5)),
-  conversions: Math.round(10 + Math.random() * 30 * (i >= 10 && i <= 20 ? 1.5 : 0.5)),
-  spent: Math.round((200 + Math.random() * 300) * 100) / 100,
-}))
+// Hourly performance data for detailed charts - valores fixos para evitar hydration mismatch
+export const hourlyPerformance = [
+  { hour: '00:00', impressions: 18500, clicks: 620, conversions: 15, spent: 280 },
+  { hour: '01:00', impressions: 16200, clicks: 540, conversions: 12, spent: 245 },
+  { hour: '02:00', impressions: 14800, clicks: 490, conversions: 10, spent: 220 },
+  { hour: '03:00', impressions: 13500, clicks: 450, conversions: 9, spent: 205 },
+  { hour: '04:00', impressions: 14200, clicks: 470, conversions: 10, spent: 215 },
+  { hour: '05:00', impressions: 16800, clicks: 560, conversions: 12, spent: 255 },
+  { hour: '06:00', impressions: 22500, clicks: 750, conversions: 18, spent: 320 },
+  { hour: '07:00', impressions: 28900, clicks: 960, conversions: 24, spent: 385 },
+  { hour: '08:00', impressions: 35400, clicks: 1180, conversions: 32, spent: 445 },
+  { hour: '09:00', impressions: 42300, clicks: 1410, conversions: 42, spent: 498 },
+  { hour: '10:00', impressions: 48700, clicks: 1620, conversions: 52, spent: 545 },
+  { hour: '11:00', impressions: 52100, clicks: 1735, conversions: 58, spent: 578 },
+  { hour: '12:00', impressions: 49800, clicks: 1660, conversions: 54, spent: 555 },
+  { hour: '13:00', impressions: 51200, clicks: 1705, conversions: 56, spent: 568 },
+  { hour: '14:00', impressions: 53400, clicks: 1780, conversions: 60, spent: 592 },
+  { hour: '15:00', impressions: 52800, clicks: 1760, conversions: 58, spent: 585 },
+  { hour: '16:00', impressions: 50500, clicks: 1685, conversions: 55, spent: 562 },
+  { hour: '17:00', impressions: 48200, clicks: 1605, conversions: 52, spent: 538 },
+  { hour: '18:00', impressions: 45600, clicks: 1520, conversions: 48, spent: 512 },
+  { hour: '19:00', impressions: 42800, clicks: 1425, conversions: 44, spent: 485 },
+  { hour: '20:00', impressions: 38500, clicks: 1285, conversions: 38, spent: 445 },
+  { hour: '21:00', impressions: 32400, clicks: 1080, conversions: 30, spent: 395 },
+  { hour: '22:00', impressions: 26800, clicks: 895, conversions: 24, spent: 345 },
+  { hour: '23:00', impressions: 21500, clicks: 715, conversions: 18, spent: 298 },
+]
 
 // Top performing ads
 export const topAds = [

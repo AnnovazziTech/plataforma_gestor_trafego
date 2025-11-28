@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { cn } from '@/lib/utils'
 import {
   LayoutDashboard,
   Megaphone,
@@ -29,13 +28,13 @@ const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', badge: null },
   { icon: Megaphone, label: 'Campanhas', href: '/campaigns', badge: '12' },
   { icon: BarChart3, label: 'Analytics', href: '/analytics', badge: null },
-  { icon: FileText, label: 'Relatórios', href: '/reports', badge: null },
-  { icon: Briefcase, label: 'Administração', href: '/admin', badge: null },
+  { icon: FileText, label: 'Relatorios', href: '/reports', badge: null },
+  { icon: Briefcase, label: 'Administracao', href: '/admin', badge: null },
   { icon: Share2, label: 'Redes Sociais', href: '/social', badge: 'Novo' },
-  { icon: MessageCircle, label: 'TimTim', href: '/timtim', badge: null },
+  { icon: MessageCircle, label: 'Mensagens', href: '/mensagens', badge: null },
   { icon: Palette, label: 'Criativos', href: '/criativos', badge: null },
-  { icon: Zap, label: 'Automação', href: '/automation', badge: null },
-  { icon: Settings, label: 'Configurações', href: '/settings', badge: null },
+  { icon: Zap, label: 'Automacao', href: '/automation', badge: null },
+  { icon: Settings, label: 'Configuracoes', href: '/settings', badge: null },
 ]
 
 const platforms = [
@@ -57,20 +56,32 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
   return (
     <aside
-      className={cn(
-        'fixed left-0 top-0 h-screen z-50',
-        'bg-gradient-to-b from-[#0D0D14] via-[#0A0A0F] to-[#080810]',
-        'border-r border-white/[0.06]',
-        'transition-all duration-300 ease-out',
-        'flex flex-col',
-        isCollapsed ? 'w-[72px]' : 'w-[260px]'
-      )}
+      style={{
+        position: 'fixed',
+        left: 0,
+        top: 0,
+        height: '100vh',
+        zIndex: 50,
+        background: 'linear-gradient(to bottom, #0D0D14, #0A0A0F, #080810)',
+        borderRight: '1px solid rgba(255, 255, 255, 0.06)',
+        transition: 'width 0.3s ease',
+        display: 'flex',
+        flexDirection: 'column',
+        width: isCollapsed ? '72px' : '260px',
+      }}
     >
-      {/* Efeito de brilho sutil no topo */}
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#3B82F6]/[0.03] to-transparent pointer-events-none" />
-
-      {/* ===== HEADER - Logo (altura fixa) ===== */}
-      <div className="flex-shrink-0 h-[72px] flex items-center px-4 border-b border-white/[0.06] relative">
+      {/* Header - Logo */}
+      <div
+        style={{
+          flexShrink: 0,
+          height: '72px',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 16px',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+          position: 'relative',
+        }}
+      >
         <AnimatePresence mode="wait">
           {!isCollapsed ? (
             <motion.div
@@ -78,19 +89,57 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
-              className="flex items-center gap-3 w-full"
+              style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}
             >
-              <div className="relative flex-shrink-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] flex items-center justify-center shadow-lg shadow-[#3B82F6]/20">
-                  <Zap className="w-5 h-5 text-white" />
+              <div style={{ position: 'relative', flexShrink: 0 }}>
+                <div
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(to bottom right, #3B82F6, #2563EB, #1D4ED8)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
+                  }}
+                >
+                  <Zap style={{ width: '20px', height: '20px', color: '#FFFFFF' }} />
                 </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#22C55E] rounded-full border-2 border-[#0A0A0F]" />
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-4px',
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: '#22C55E',
+                    borderRadius: '50%',
+                    border: '2px solid #0A0A0F',
+                  }}
+                />
               </div>
-              <div className="flex-1 min-w-0">
-                <h1 className="text-lg font-bold bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h1
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    color: '#FFFFFF',
+                    margin: 0,
+                  }}
+                >
                   TrafficPro
                 </h1>
-                <p className="text-[11px] text-[#6B6B7B] font-medium">Plataforma de Marketing</p>
+                <p
+                  style={{
+                    fontSize: '11px',
+                    color: '#6B6B7B',
+                    fontWeight: 500,
+                    margin: 0,
+                  }}
+                >
+                  Plataforma de Marketing
+                </p>
               </div>
             </motion.div>
           ) : (
@@ -99,13 +148,35 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.2 }}
-              className="flex items-center justify-center w-full"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}
             >
-              <div className="relative">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] flex items-center justify-center shadow-lg shadow-[#3B82F6]/20">
-                  <Zap className="w-5 h-5 text-white" />
+              <div style={{ position: 'relative' }}>
+                <div
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(to bottom right, #3B82F6, #2563EB, #1D4ED8)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
+                  }}
+                >
+                  <Zap style={{ width: '20px', height: '20px', color: '#FFFFFF' }} />
                 </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#22C55E] rounded-full border-2 border-[#0A0A0F]" />
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-4px',
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: '#22C55E',
+                    borderRadius: '50%',
+                    border: '2px solid #0A0A0F',
+                  }}
+                />
               </div>
             </motion.div>
           )}
@@ -114,166 +185,294 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         {/* Toggle button */}
         <button
           onClick={onToggle}
-          className={cn(
-            'absolute -right-3 top-1/2 -translate-y-1/2',
-            'w-6 h-6 rounded-full',
-            'bg-[#1A1A25] border border-white/10',
-            'flex items-center justify-center',
-            'text-[#6B6B7B] hover:text-white',
-            'hover:bg-[#3B82F6] hover:border-[#3B82F6]',
-            'transition-all duration-200',
-            'shadow-lg shadow-black/20',
-            'z-10'
-          )}
+          style={{
+            position: 'absolute',
+            right: '-12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: '24px',
+            height: '24px',
+            borderRadius: '50%',
+            backgroundColor: '#1A1A25',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#6B6B7B',
+            cursor: 'pointer',
+            zIndex: 10,
+          }}
         >
           {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
         </button>
       </div>
 
-      {/* ===== NAVIGATION - Menu Principal (flex-1 com overflow) ===== */}
-      <nav className="flex-1 min-h-0 py-4 px-3 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+      {/* Navigation */}
+      <nav
+        style={{
+          flex: 1,
+          minHeight: 0,
+          padding: '16px 12px',
+          overflowY: 'auto',
+        }}
+      >
         {!isCollapsed && (
-          <span className="text-[10px] font-semibold text-[#4B4B5B] uppercase tracking-widest px-3 mb-2 block">
+          <span
+            style={{
+              fontSize: '10px',
+              fontWeight: 600,
+              color: '#4B4B5B',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              padding: '0 12px',
+              marginBottom: '8px',
+              display: 'block',
+            }}
+          >
             Menu Principal
           </span>
         )}
 
-        {menuItems.map((item, index) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-          return (
-            <Link key={item.href} href={item.href}>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className={cn(
-                  'group relative flex items-center rounded-xl transition-all duration-200',
-                  isCollapsed ? 'justify-center p-3' : 'gap-3 px-3 py-2.5',
-                  isActive
-                    ? 'bg-gradient-to-r from-[#3B82F6]/20 to-[#3B82F6]/5 text-white'
-                    : 'text-[#8B8B9B] hover:text-white hover:bg-white/[0.04]'
-                )}
-                title={isCollapsed ? item.label : undefined}
-              >
-                {/* Indicador ativo */}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-[#3B82F6] to-[#60A5FA] rounded-r-full"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {menuItems.map((item, index) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+            return (
+              <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    borderRadius: '12px',
+                    padding: isCollapsed ? '12px' : '10px 12px',
+                    justifyContent: isCollapsed ? 'center' : 'flex-start',
+                    gap: isCollapsed ? 0 : '12px',
+                    backgroundColor: isActive ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                    color: isActive ? '#FFFFFF' : '#8B8B9B',
+                    cursor: 'pointer',
+                  }}
+                  title={isCollapsed ? item.label : undefined}
+                >
+                  {/* Active indicator */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeIndicator"
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: '4px',
+                        height: '32px',
+                        background: 'linear-gradient(to bottom, #3B82F6, #60A5FA)',
+                        borderRadius: '0 4px 4px 0',
+                      }}
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
 
-                <div className={cn(
-                  'relative flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200',
-                  isActive
-                    ? 'bg-[#3B82F6]/20'
-                    : 'bg-transparent group-hover:bg-white/5'
-                )}>
-                  <item.icon
-                    size={20}
-                    className={cn(
-                      'transition-colors duration-200',
-                      isActive ? 'text-[#3B82F6]' : 'text-[#6B6B7B] group-hover:text-white'
-                    )}
-                  />
-                </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '8px',
+                      backgroundColor: isActive ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                    }}
+                  >
+                    <item.icon
+                      size={20}
+                      style={{
+                        color: isActive ? '#3B82F6' : '#6B6B7B',
+                      }}
+                    />
+                  </div>
 
-                {!isCollapsed && (
-                  <>
-                    <span className={cn(
-                      'text-sm font-medium flex-1',
-                      isActive && 'text-white'
-                    )}>
-                      {item.label}
-                    </span>
-
-                    {item.badge && (
-                      <span className={cn(
-                        'px-2 py-0.5 text-[10px] font-semibold rounded-full',
-                        item.badge === 'Novo'
-                          ? 'bg-[#FACC15]/20 text-[#FACC15]'
-                          : 'bg-[#3B82F6]/20 text-[#3B82F6]'
-                      )}>
-                        {item.badge}
+                  {!isCollapsed && (
+                    <>
+                      <span
+                        style={{
+                          fontSize: '14px',
+                          fontWeight: 500,
+                          flex: 1,
+                          color: isActive ? '#FFFFFF' : '#8B8B9B',
+                        }}
+                      >
+                        {item.label}
                       </span>
-                    )}
-                  </>
-                )}
-              </motion.div>
-            </Link>
-          )
-        })}
+
+                      {item.badge && (
+                        <span
+                          style={{
+                            padding: '2px 8px',
+                            fontSize: '10px',
+                            fontWeight: 600,
+                            borderRadius: '9999px',
+                            backgroundColor: item.badge === 'Novo' ? 'rgba(250, 204, 21, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                            color: item.badge === 'Novo' ? '#FACC15' : '#3B82F6',
+                          }}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </motion.div>
+              </Link>
+            )
+          })}
+        </div>
       </nav>
 
-      {/* ===== FOOTER - Elementos fixos na parte inferior ===== */}
-      <div className="flex-shrink-0">
+      {/* Footer */}
+      <div style={{ flexShrink: 0 }}>
         {/* Connected Platforms */}
-        <div className={cn(
-          'border-t border-white/[0.06]',
-          isCollapsed ? 'px-3 py-3' : 'px-4 py-3'
-        )}>
+        <div
+          style={{
+            borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+            padding: isCollapsed ? '12px' : '12px 16px',
+          }}
+        >
           {!isCollapsed && (
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-semibold text-[#4B4B5B] uppercase tracking-widest">
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '8px',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  color: '#4B4B5B',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                }}
+              >
                 Plataformas
               </span>
-              <span className="text-[10px] text-[#3B82F6] font-medium">3/5</span>
+              <span style={{ fontSize: '10px', color: '#3B82F6', fontWeight: 500 }}>3/5</span>
             </div>
           )}
-          <div className={cn(
-            'flex items-center gap-1.5',
-            isCollapsed ? 'flex-col' : 'flex-wrap'
-          )}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              flexDirection: isCollapsed ? 'column' : 'row',
+              flexWrap: isCollapsed ? 'nowrap' : 'wrap',
+            }}
+          >
             {platforms.map((platform) => (
               <motion.div
                 key={platform.id}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={cn(
-                  'relative p-2 rounded-lg transition-all duration-200 cursor-pointer',
-                  platform.connected
-                    ? 'bg-white/[0.06] hover:bg-white/[0.1]'
-                    : 'bg-white/[0.02] hover:bg-white/[0.04] opacity-50'
-                )}
+                style={{
+                  position: 'relative',
+                  padding: '8px',
+                  borderRadius: '8px',
+                  backgroundColor: platform.connected ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.02)',
+                  opacity: platform.connected ? 1 : 0.5,
+                  cursor: 'pointer',
+                }}
                 title={`${platform.id}${platform.connected ? ' (Conectado)' : ' (Desconectado)'}`}
               >
                 <PlatformIcon platform={platform.id} size={16} />
                 {platform.connected && (
-                  <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-[#22C55E] rounded-full" />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '-2px',
+                      right: '-2px',
+                      width: '6px',
+                      height: '6px',
+                      backgroundColor: '#22C55E',
+                      borderRadius: '50%',
+                    }}
+                  />
                 )}
               </motion.div>
             ))}
           </div>
         </div>
 
-        {/* Upgrade Banner - apenas quando expandido e visível */}
+        {/* Upgrade Banner */}
         <AnimatePresence>
           {!isCollapsed && showUpgradeBanner && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="px-3 pb-2 overflow-hidden"
+              style={{ padding: '0 12px 8px 12px', overflow: 'hidden' }}
             >
-              <div className="relative p-3 rounded-xl bg-gradient-to-br from-[#3B82F6]/15 via-[#1D4ED8]/10 to-[#7C3AED]/15 border border-[#3B82F6]/20">
-                {/* Botão fechar */}
+              <div
+                style={{
+                  position: 'relative',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(to bottom right, rgba(59, 130, 246, 0.15), rgba(29, 78, 216, 0.1), rgba(124, 58, 237, 0.15))',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                }}
+              >
+                {/* Close button */}
                 <button
                   onClick={() => setShowUpgradeBanner(false)}
-                  className="absolute top-2 right-2 p-1 rounded-md text-white/40 hover:text-white/80 hover:bg-white/10 transition-all"
+                  style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    padding: '4px',
+                    borderRadius: '6px',
+                    color: 'rgba(255, 255, 255, 0.4)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
                 >
                   <X size={12} />
                 </button>
 
-                <div className="flex items-center gap-2 mb-1.5">
-                  <Crown className="w-4 h-4 text-[#FACC15]" />
-                  <span className="text-xs font-semibold text-[#FACC15]">PRO</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <Crown style={{ width: '16px', height: '16px', color: '#FACC15' }} />
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: '#FACC15' }}>PRO</span>
                 </div>
-                <p className="text-[11px] text-white/70 mb-2 pr-4">
-                  Recursos avançados de automação
+                <p
+                  style={{
+                    fontSize: '11px',
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    marginBottom: '8px',
+                    paddingRight: '16px',
+                    margin: 0,
+                  }}
+                >
+                  Recursos avancados de automacao
                 </p>
-                <button className="w-full py-1.5 px-3 text-[11px] font-semibold text-white bg-gradient-to-r from-[#3B82F6] to-[#2563EB] rounded-lg hover:from-[#2563EB] hover:to-[#1D4ED8] transition-all duration-200 flex items-center justify-center gap-1.5">
-                  <Sparkles className="w-3 h-3" />
+                <button
+                  style={{
+                    width: '100%',
+                    padding: '6px 12px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: '#FFFFFF',
+                    background: 'linear-gradient(to right, #3B82F6, #2563EB)',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <Sparkles style={{ width: '12px', height: '12px' }} />
                   Fazer Upgrade
                 </button>
               </div>
@@ -282,31 +481,93 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         </AnimatePresence>
 
         {/* User Section */}
-        <div className={cn(
-          'border-t border-white/[0.06]',
-          isCollapsed ? 'p-2' : 'p-3'
-        )}>
-          <div className={cn(
-            'group flex items-center rounded-xl transition-all duration-200',
-            'hover:bg-white/[0.04] cursor-pointer',
-            isCollapsed ? 'justify-center p-2' : 'gap-3 p-2'
-          )}>
-            <div className="relative flex-shrink-0">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#3B82F6] via-[#8B5CF6] to-[#EC4899] flex items-center justify-center text-xs font-bold text-white shadow-lg">
+        <div
+          style={{
+            borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+            padding: isCollapsed ? '8px' : '12px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              borderRadius: '12px',
+              padding: '8px',
+              justifyContent: isCollapsed ? 'center' : 'flex-start',
+              gap: isCollapsed ? 0 : '12px',
+              cursor: 'pointer',
+            }}
+          >
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              <div
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(to bottom right, #3B82F6, #8B5CF6, #EC4899)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  color: '#FFFFFF',
+                }}
+              >
                 JS
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#22C55E] rounded-full border-2 border-[#0A0A0F]" />
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '-2px',
+                  right: '-2px',
+                  width: '10px',
+                  height: '10px',
+                  backgroundColor: '#22C55E',
+                  borderRadius: '50%',
+                  border: '2px solid #0A0A0F',
+                }}
+              />
             </div>
             {!isCollapsed && (
               <>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">João Silva</p>
-                  <p className="text-[10px] text-[#6B6B7B] flex items-center gap-1">
-                    <Crown className="w-3 h-3 text-[#FACC15]" />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      color: '#FFFFFF',
+                      margin: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Joao Silva
+                  </p>
+                  <p
+                    style={{
+                      fontSize: '10px',
+                      color: '#6B6B7B',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      margin: 0,
+                    }}
+                  >
+                    <Crown style={{ width: '12px', height: '12px', color: '#FACC15' }} />
                     Administrador
                   </p>
                 </div>
-                <button className="p-1.5 rounded-lg text-[#6B6B7B] hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100">
+                <button
+                  style={{
+                    padding: '6px',
+                    borderRadius: '8px',
+                    color: '#6B6B7B',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
                   <LogOut size={14} />
                 </button>
               </>

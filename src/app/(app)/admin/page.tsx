@@ -3,13 +3,11 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
-import { Card, CardHeader, CardTitle, CardContent, Button, Badge, StatCard } from '@/components/ui'
+import { Button, Badge, StatCard } from '@/components/ui'
 import { useApp } from '@/contexts'
 import {
   Users,
-  DollarSign,
   TrendingUp,
-  TrendingDown,
   Calendar,
   Clock,
   Plus,
@@ -27,7 +25,6 @@ import {
   Wallet,
   PiggyBank,
   Receipt,
-  ChevronDown,
 } from 'lucide-react'
 import {
   AreaChart,
@@ -107,9 +104,11 @@ const productivityData = [
   { day: 'Dom', hours: 2.0 },
 ]
 
+type TabType = 'clients' | 'finances' | 'agenda' | 'productivity' | 'budget'
+
 export default function AdminPage() {
   const { showToast, connectedAccounts } = useApp()
-  const [activeTab, setActiveTab] = useState<'clients' | 'finances' | 'agenda' | 'productivity' | 'budget'>('clients')
+  const [activeTab, setActiveTab] = useState<TabType>('clients')
   const [clients, setClients] = useState<Client[]>(mockClients)
   const [expenses, setExpenses] = useState<Expense[]>(mockExpenses)
   const [tasks, setTasks] = useState<Task[]>([
@@ -125,6 +124,17 @@ export default function AdminPage() {
   const [showExpenseModal, setShowExpenseModal] = useState(false)
   const [showAppointmentModal, setShowAppointmentModal] = useState(false)
   const [onlineTime, setOnlineTime] = useState(0)
+
+  // New client form state
+  const [newClient, setNewClient] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    contractStart: '',
+    contractEnd: '',
+    contractValue: '',
+    notes: '',
+  })
 
   // Simular tempo online
   useEffect(() => {
@@ -153,17 +163,45 @@ export default function AdminPage() {
     { id: 'budget', label: 'Orçamentos', icon: Target },
   ]
 
+  const handleAddClient = () => {
+    if (!newClient.name.trim()) {
+      showToast('Por favor, informe o nome do cliente', 'error')
+      return
+    }
+    if (!newClient.email.trim()) {
+      showToast('Por favor, informe o email do cliente', 'error')
+      return
+    }
+
+    const client: Client = {
+      id: Date.now().toString(),
+      name: newClient.name,
+      email: newClient.email,
+      phone: newClient.phone,
+      contractStart: newClient.contractStart || new Date().toISOString().split('T')[0],
+      contractEnd: newClient.contractEnd || '',
+      contractValue: parseFloat(newClient.contractValue) || 0,
+      notes: newClient.notes,
+      status: 'pending',
+    }
+
+    setClients(prev => [...prev, client])
+    setShowClientModal(false)
+    setNewClient({ name: '', email: '', phone: '', contractStart: '', contractEnd: '', contractValue: '', notes: '' })
+    showToast('Cliente adicionado com sucesso!', 'success')
+  }
+
   return (
-    <div className="min-h-screen">
+    <div style={{ minHeight: '100vh' }}>
       <Header
         title="Administração"
         subtitle="Gerencie seus clientes, finanças e produtividade"
         showCreateButton={false}
       />
 
-      <main className="p-6 md:p-8">
+      <main style={{ padding: '24px 32px', paddingBottom: '80px' }}>
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
           <StatCard
             label="Clientes Ativos"
             value={clients.filter(c => c.status === 'active').length}
@@ -195,16 +233,26 @@ export default function AdminPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]/30'
-                  : 'bg-white/5 text-[#A0A0B0] border border-white/10 hover:border-white/20'
-              }`}
+              onClick={() => setActiveTab(tab.id as TabType)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 16px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: 500,
+                whiteSpace: 'nowrap',
+                border: activeTab === tab.id ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: activeTab === tab.id ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                color: activeTab === tab.id ? '#3B82F6' : '#A0A0B0',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
             >
               <tab.icon size={16} />
               {tab.label}
@@ -221,73 +269,98 @@ export default function AdminPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-white">Meus Clientes</h2>
-                <Button variant="primary" className="gap-2" onClick={() => setShowClientModal(true)}>
-                  <Plus size={16} />
-                  Novo Cliente
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Meus Clientes</h2>
+                <Button variant="primary" onClick={() => setShowClientModal(true)}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Plus size={16} />
+                    Novo Cliente
+                  </span>
                 </Button>
               </div>
 
-              <div className="grid gap-4">
-                {clients.map((client) => (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {clients.map((client, index) => (
                   <motion.div
                     key={client.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="p-5 rounded-2xl bg-[#12121A]/80 border border-white/5 hover:border-[#3B82F6]/30 transition-all"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    style={{
+                      padding: '20px',
+                      borderRadius: '16px',
+                      backgroundColor: 'rgba(18, 18, 26, 0.8)',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                    }}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#8B5CF6] flex items-center justify-center text-white font-bold">
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div style={{
+                          width: '48px',
+                          height: '48px',
+                          borderRadius: '12px',
+                          background: 'linear-gradient(to bottom right, #3B82F6, #8B5CF6)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#FFFFFF',
+                          fontSize: '18px',
+                          fontWeight: 700,
+                        }}>
                           {client.name.charAt(0)}
                         </div>
                         <div>
-                          <h3 className="font-semibold text-white">{client.name}</h3>
-                          <div className="flex items-center gap-4 mt-1 text-xs text-[#6B6B7B]">
-                            <span className="flex items-center gap-1">
+                          <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', margin: 0, marginBottom: '4px' }}>{client.name}</h3>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#6B6B7B' }}>
                               <Mail size={12} />
                               {client.email}
                             </span>
-                            <span className="flex items-center gap-1">
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#6B6B7B' }}>
                               <Phone size={12} />
                               {client.phone}
                             </span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <Badge variant={client.status === 'active' ? 'success' : client.status === 'pending' ? 'warning' : 'default'}>
                           {client.status === 'active' ? 'Ativo' : client.status === 'pending' ? 'Pendente' : 'Inativo'}
                         </Badge>
-                        <div className="flex items-center gap-1">
-                          <button className="p-2 rounded-lg hover:bg-white/10 text-[#6B6B7B] hover:text-white transition-all">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <button style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
                             <Edit size={14} />
                           </button>
-                          <button className="p-2 rounded-lg hover:bg-red-500/20 text-[#6B6B7B] hover:text-red-400 transition-all">
+                          <button
+                            onClick={() => {
+                              setClients(prev => prev.filter(c => c.id !== client.id))
+                              showToast('Cliente removido', 'info')
+                            }}
+                            style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                          >
                             <Trash2 size={14} />
                           </button>
                         </div>
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-white/5">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <div>
-                        <p className="text-xs text-[#6B6B7B] mb-1">Início do Contrato</p>
-                        <p className="text-sm text-white">{new Date(client.contractStart).toLocaleDateString('pt-BR')}</p>
+                        <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px', margin: 0 }}>Início do Contrato</p>
+                        <p style={{ fontSize: '14px', color: '#FFFFFF', margin: 0 }}>{new Date(client.contractStart).toLocaleDateString('pt-BR')}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-[#6B6B7B] mb-1">Fim do Contrato</p>
-                        <p className="text-sm text-white">{new Date(client.contractEnd).toLocaleDateString('pt-BR')}</p>
+                        <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px', margin: 0 }}>Fim do Contrato</p>
+                        <p style={{ fontSize: '14px', color: '#FFFFFF', margin: 0 }}>{client.contractEnd ? new Date(client.contractEnd).toLocaleDateString('pt-BR') : '-'}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-[#6B6B7B] mb-1">Valor Mensal</p>
-                        <p className="text-sm font-semibold text-[#3B82F6]">R$ {client.contractValue.toLocaleString('pt-BR')}</p>
+                        <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px', margin: 0 }}>Valor Mensal</p>
+                        <p style={{ fontSize: '14px', fontWeight: 600, color: '#3B82F6', margin: 0 }}>R$ {client.contractValue.toLocaleString('pt-BR')}</p>
                       </div>
                     </div>
                     {client.notes && (
-                      <div className="mt-3 p-3 rounded-lg bg-white/5">
-                        <p className="text-xs text-[#6B6B7B]">
-                          <FileText size={12} className="inline mr-1" />
+                      <div style={{ marginTop: '12px', padding: '12px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+                        <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <FileText size={12} />
                           {client.notes}
                         </p>
                       </div>
@@ -306,9 +379,15 @@ export default function AdminPage() {
               exit={{ opacity: 0, y: -20 }}
             >
               {/* Gráfico Receita x Despesas */}
-              <div className="p-5 rounded-2xl bg-[#12121A]/80 border border-white/5 mb-6">
-                <h3 className="text-sm font-semibold text-white mb-4">Receita x Despesas</h3>
-                <div className="h-64">
+              <div style={{
+                padding: '20px',
+                borderRadius: '16px',
+                backgroundColor: 'rgba(18, 18, 26, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                marginBottom: '24px',
+              }}>
+                <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0, marginBottom: '16px' }}>Receita x Despesas</h3>
+                <div style={{ height: '256px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={revenueData}>
                       <defs>
@@ -336,32 +415,45 @@ export default function AdminPage() {
               </div>
 
               {/* Despesas */}
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-white">Minhas Despesas</h2>
-                <Button variant="primary" className="gap-2" onClick={() => setShowExpenseModal(true)}>
-                  <Plus size={16} />
-                  Nova Despesa
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Minhas Despesas</h2>
+                <Button variant="primary" onClick={() => setShowExpenseModal(true)}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Plus size={16} />
+                    Nova Despesa
+                  </span>
                 </Button>
               </div>
 
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {expenses.map((expense) => (
                   <div
                     key={expense.id}
-                    className="flex items-center justify-between p-4 rounded-xl bg-[#12121A]/80 border border-white/5"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(18, 18, 26, 0.8)',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                    }}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-[#FACC15]/10">
-                        <Receipt size={16} className="text-[#FACC15]" />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(250, 204, 21, 0.1)' }}>
+                        <Receipt size={16} style={{ color: '#FACC15' }} />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white">{expense.description}</p>
-                        <p className="text-xs text-[#6B6B7B]">{expense.category} • {new Date(expense.date).toLocaleDateString('pt-BR')}</p>
+                        <p style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', margin: 0 }}>{expense.description}</p>
+                        <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>{expense.category} • {new Date(expense.date).toLocaleDateString('pt-BR')}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-semibold text-red-400">- R$ {expense.amount.toLocaleString('pt-BR')}</span>
-                      <button className="p-2 rounded-lg hover:bg-red-500/20 text-[#6B6B7B] hover:text-red-400 transition-all">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '14px', fontWeight: 600, color: '#EF4444' }}>- R$ {expense.amount.toLocaleString('pt-BR')}</span>
+                      <button
+                        onClick={() => setExpenses(prev => prev.filter(e => e.id !== expense.id))}
+                        style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                      >
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -377,12 +469,17 @@ export default function AdminPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px' }}
             >
               {/* Tarefas do Dia */}
-              <div className="p-5 rounded-2xl bg-[#12121A]/80 border border-white/5">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-white">Tarefas do Dia</h3>
+              <div style={{
+                padding: '20px',
+                borderRadius: '16px',
+                backgroundColor: 'rgba(18, 18, 26, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Tarefas do Dia</h3>
                   <button
                     onClick={() => {
                       const title = prompt('Digite a tarefa:')
@@ -391,27 +488,47 @@ export default function AdminPage() {
                         showToast('Tarefa adicionada!', 'success')
                       }
                     }}
-                    className="p-2 rounded-lg bg-[#3B82F6]/10 text-[#3B82F6] hover:bg-[#3B82F6]/20 transition-all"
+                    style={{
+                      padding: '8px',
+                      borderRadius: '8px',
+                      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                      border: 'none',
+                      color: '#3B82F6',
+                      cursor: 'pointer',
+                    }}
                   >
                     <Plus size={16} />
                   </button>
                 </div>
 
-                <div className="space-y-2">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {tasks.map((task) => (
                     <div
                       key={task.id}
-                      className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all cursor-pointer"
                       onClick={() => {
                         setTasks(prev => prev.map(t => t.id === task.id ? { ...t, completed: !t.completed } : t))
                       }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        cursor: 'pointer',
+                      }}
                     >
                       {task.completed ? (
-                        <CheckCircle size={18} className="text-emerald-400" />
+                        <CheckCircle size={18} style={{ color: '#10B981' }} />
                       ) : (
-                        <Circle size={18} className="text-[#6B6B7B]" />
+                        <Circle size={18} style={{ color: '#6B6B7B' }} />
                       )}
-                      <span className={`text-sm flex-1 ${task.completed ? 'line-through text-[#6B6B7B]' : 'text-white'}`}>
+                      <span style={{
+                        fontSize: '14px',
+                        flex: 1,
+                        color: task.completed ? '#6B6B7B' : '#FFFFFF',
+                        textDecoration: task.completed ? 'line-through' : 'none',
+                      }}>
                         {task.title}
                       </span>
                       <button
@@ -419,7 +536,7 @@ export default function AdminPage() {
                           e.stopPropagation()
                           setTasks(prev => prev.filter(t => t.id !== task.id))
                         }}
-                        className="p-1 rounded hover:bg-red-500/20 text-[#6B6B7B] hover:text-red-400 transition-all"
+                        style={{ padding: '4px', borderRadius: '4px', backgroundColor: 'transparent', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
                       >
                         <Trash2 size={12} />
                       </button>
@@ -429,38 +546,50 @@ export default function AdminPage() {
               </div>
 
               {/* Compromissos */}
-              <div className="p-5 rounded-2xl bg-[#12121A]/80 border border-white/5">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-white">Compromissos</h3>
-                  <Button variant="secondary" size="sm" className="gap-1" onClick={() => setShowAppointmentModal(true)}>
-                    <Plus size={14} />
-                    Agendar
+              <div style={{
+                padding: '20px',
+                borderRadius: '16px',
+                backgroundColor: 'rgba(18, 18, 26, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Compromissos</h3>
+                  <Button variant="secondary" size="sm" onClick={() => setShowAppointmentModal(true)}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Plus size={14} />
+                      Agendar
+                    </span>
                   </Button>
                 </div>
 
-                <div className="space-y-3">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {appointments.map((apt) => (
                     <div
                       key={apt.id}
-                      className="p-4 rounded-xl bg-white/5 border border-white/10"
+                      style={{
+                        padding: '16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                      }}
                     >
-                      <div className="flex items-start justify-between">
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                         <div>
-                          <h4 className="text-sm font-medium text-white">{apt.title}</h4>
-                          <div className="flex items-center gap-3 mt-2 text-xs text-[#6B6B7B]">
-                            <span className="flex items-center gap-1">
+                          <h4 style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', margin: 0, marginBottom: '8px' }}>{apt.title}</h4>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: '#6B6B7B' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Calendar size={12} />
                               {new Date(apt.date).toLocaleDateString('pt-BR')}
                             </span>
-                            <span className="flex items-center gap-1">
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Clock size={12} />
                               {apt.time}
                             </span>
                           </div>
                         </div>
                         {apt.reminder && (
-                          <div className="p-1.5 rounded-lg bg-[#FACC15]/10">
-                            <Bell size={14} className="text-[#FACC15]" />
+                          <div style={{ padding: '6px', borderRadius: '8px', backgroundColor: 'rgba(250, 204, 21, 0.1)' }}>
+                            <Bell size={14} style={{ color: '#FACC15' }} />
                           </div>
                         )}
                       </div>
@@ -479,27 +608,38 @@ export default function AdminPage() {
               exit={{ opacity: 0, y: -20 }}
             >
               {/* Timer Online */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-[#3B82F6]/20 to-[#8B5CF6]/20 border border-[#3B82F6]/30 mb-6">
-                <div className="flex items-center justify-between">
+              <div style={{
+                padding: '24px',
+                borderRadius: '16px',
+                background: 'linear-gradient(to bottom right, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2))',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                marginBottom: '24px',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
-                    <p className="text-sm text-[#A0A0B0] mb-1">Tempo online hoje</p>
-                    <p className="text-4xl font-bold text-white font-mono">{formatTime(onlineTime)}</p>
+                    <p style={{ fontSize: '14px', color: '#A0A0B0', margin: 0, marginBottom: '4px' }}>Tempo online hoje</p>
+                    <p style={{ fontSize: '36px', fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace', margin: 0 }}>{formatTime(onlineTime)}</p>
                   </div>
-                  <div className="p-4 rounded-2xl bg-white/10">
-                    <Timer size={32} className="text-[#3B82F6]" />
+                  <div style={{ padding: '16px', borderRadius: '16px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
+                    <Timer size={32} style={{ color: '#3B82F6' }} />
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t border-white/10">
-                  <p className="text-xs text-[#6B6B7B]">
+                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>
                     Continue assim! Você está {onlineTime > 28800 ? 'acima' : 'abaixo'} da sua meta diária de 8 horas.
                   </p>
                 </div>
               </div>
 
               {/* Gráfico de Produtividade */}
-              <div className="p-5 rounded-2xl bg-[#12121A]/80 border border-white/5">
-                <h3 className="text-sm font-semibold text-white mb-4">Horas Trabalhadas por Dia</h3>
-                <div className="h-64">
+              <div style={{
+                padding: '20px',
+                borderRadius: '16px',
+                backgroundColor: 'rgba(18, 18, 26, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+              }}>
+                <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0, marginBottom: '16px' }}>Horas Trabalhadas por Dia</h3>
+                <div style={{ height: '256px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={productivityData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -514,18 +654,18 @@ export default function AdminPage() {
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-white/5">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-white">46h</p>
-                    <p className="text-xs text-[#6B6B7B]">Esta semana</p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>46h</p>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Esta semana</p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-[#3B82F6]">8.2h</p>
-                    <p className="text-xs text-[#6B6B7B]">Média diária</p>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#3B82F6', margin: 0 }}>8.2h</p>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Média diária</p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-emerald-400">+12%</p>
-                    <p className="text-xs text-[#6B6B7B]">vs semana anterior</p>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#10B981', margin: 0 }}>+12%</p>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>vs semana anterior</p>
                   </div>
                 </div>
               </div>
@@ -539,11 +679,11 @@ export default function AdminPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-white">Controle de Orçamento dos Clientes</h2>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Controle de Orçamento dos Clientes</h2>
               </div>
 
-              <div className="space-y-4">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {connectedAccounts.filter(a => a.connected).map((account, idx) => {
                   const dailyBudget = 150 + idx * 50
                   const totalSpent = dailyBudget * 15
@@ -553,51 +693,60 @@ export default function AdminPage() {
                   return (
                     <div
                       key={account.id}
-                      className="p-5 rounded-2xl bg-[#12121A]/80 border border-white/5"
+                      style={{
+                        padding: '20px',
+                        borderRadius: '16px',
+                        backgroundColor: 'rgba(18, 18, 26, 0.8)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                      }}
                     >
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-[#3B82F6]/10">
-                            <Target size={18} className="text-[#3B82F6]" />
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
+                            <Target size={18} style={{ color: '#3B82F6' }} />
                           </div>
                           <div>
-                            <h3 className="font-medium text-white">{account.name}</h3>
-                            <p className="text-xs text-[#6B6B7B]">Conectado em {account.connectedAt}</p>
+                            <h3 style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', margin: 0 }}>{account.name}</h3>
+                            <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Conectado em {account.connectedAt}</p>
                           </div>
                         </div>
                         <Badge variant="success">Ativo</Badge>
                       </div>
 
-                      <div className="grid grid-cols-4 gap-4 mb-4">
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '16px' }}>
                         <div>
-                          <p className="text-xs text-[#6B6B7B] mb-1">Orçamento Diário</p>
-                          <p className="text-lg font-semibold text-white">R$ {dailyBudget}</p>
+                          <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '4px' }}>Orçamento Diário</p>
+                          <p style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>R$ {dailyBudget}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-[#6B6B7B] mb-1">Gasto Total</p>
-                          <p className="text-lg font-semibold text-[#FACC15]">R$ {totalSpent.toLocaleString('pt-BR')}</p>
+                          <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '4px' }}>Gasto Total</p>
+                          <p style={{ fontSize: '18px', fontWeight: 600, color: '#FACC15', margin: 0 }}>R$ {totalSpent.toLocaleString('pt-BR')}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-[#6B6B7B] mb-1">Orçamento Total</p>
-                          <p className="text-lg font-semibold text-white">R$ {totalBudget.toLocaleString('pt-BR')}</p>
+                          <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '4px' }}>Orçamento Total</p>
+                          <p style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>R$ {totalBudget.toLocaleString('pt-BR')}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-[#6B6B7B] mb-1">Dias Restantes</p>
-                          <p className="text-lg font-semibold text-[#3B82F6]">15 dias</p>
+                          <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '4px' }}>Dias Restantes</p>
+                          <p style={{ fontSize: '18px', fontWeight: 600, color: '#3B82F6', margin: 0 }}>15 dias</p>
                         </div>
                       </div>
 
                       <div>
-                        <div className="flex items-center justify-between text-xs mb-2">
-                          <span className="text-[#6B6B7B]">Progresso do Orçamento</span>
-                          <span className="text-white">{progress.toFixed(0)}%</span>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', marginBottom: '8px' }}>
+                          <span style={{ color: '#6B6B7B' }}>Progresso do Orçamento</span>
+                          <span style={{ color: '#FFFFFF' }}>{progress.toFixed(0)}%</span>
                         </div>
-                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div style={{ height: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '9999px', overflow: 'hidden' }}>
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${progress}%` }}
                             transition={{ duration: 1 }}
-                            className={`h-full rounded-full ${progress > 80 ? 'bg-red-500' : progress > 50 ? 'bg-[#FACC15]' : 'bg-[#3B82F6]'}`}
+                            style={{
+                              height: '100%',
+                              borderRadius: '9999px',
+                              backgroundColor: progress > 80 ? '#EF4444' : progress > 50 ? '#FACC15' : '#3B82F6',
+                            }}
                           />
                         </div>
                       </div>
@@ -606,12 +755,21 @@ export default function AdminPage() {
                 })}
 
                 {connectedAccounts.filter(a => a.connected).length === 0 && (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
-                      <Target className="w-8 h-8 text-[#6B6B7B]" />
+                  <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                    <div style={{
+                      width: '64px',
+                      height: '64px',
+                      margin: '0 auto 16px',
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <Target size={32} style={{ color: '#6B6B7B' }} />
                     </div>
-                    <p className="text-sm text-[#6B6B7B] mb-2">Nenhuma conta conectada</p>
-                    <p className="text-xs text-[#4B4B5B]">Conecte suas contas de anúncios para ver o controle de orçamento</p>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px' }}>Nenhuma conta conectada</p>
+                    <p style={{ fontSize: '12px', color: '#4B4B5B' }}>Conecte suas contas de anúncios para ver o controle de orçamento</p>
                   </div>
                 )}
               </div>
@@ -620,7 +778,267 @@ export default function AdminPage() {
         </AnimatePresence>
       </main>
 
-      {/* Modals would go here - simplified for brevity */}
+      {/* Modal Novo Cliente */}
+      <AnimatePresence>
+        {showClientModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowClientModal(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '512px',
+                maxHeight: 'calc(100vh - 40px)',
+                overflow: 'auto',
+                backgroundColor: '#12121A',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '16px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              }}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '20px',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(to bottom right, #3B82F6, #1D4ED8)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <Users style={{ width: '20px', height: '20px', color: '#FFFFFF' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>Novo Cliente</h2>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Adicione um novo cliente</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowClientModal(false)}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '8px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#6B6B7B',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <X style={{ width: '20px', height: '20px' }} />
+                </button>
+              </div>
+
+              <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Nome do Cliente *
+                  </label>
+                  <input
+                    type="text"
+                    value={newClient.name}
+                    onChange={(e) => setNewClient(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Ex: Empresa ABC"
+                    style={{
+                      width: '100%',
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={newClient.email}
+                    onChange={(e) => setNewClient(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="email@empresa.com"
+                    style={{
+                      width: '100%',
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Telefone
+                  </label>
+                  <input
+                    type="tel"
+                    value={newClient.phone}
+                    onChange={(e) => setNewClient(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="(11) 99999-9999"
+                    style={{
+                      width: '100%',
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                      Início do Contrato
+                    </label>
+                    <input
+                      type="date"
+                      value={newClient.contractStart}
+                      onChange={(e) => setNewClient(prev => ({ ...prev, contractStart: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        height: '48px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                      Fim do Contrato
+                    </label>
+                    <input
+                      type="date"
+                      value={newClient.contractEnd}
+                      onChange={(e) => setNewClient(prev => ({ ...prev, contractEnd: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        height: '48px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Valor Mensal (R$)
+                  </label>
+                  <input
+                    type="number"
+                    value={newClient.contractValue}
+                    onChange={(e) => setNewClient(prev => ({ ...prev, contractValue: e.target.value }))}
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                    style={{
+                      width: '100%',
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Observações
+                  </label>
+                  <textarea
+                    value={newClient.notes}
+                    onChange={(e) => setNewClient(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Anotações sobre o cliente..."
+                    rows={3}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      resize: 'none',
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>
+                  <Button type="button" variant="ghost" onClick={() => setShowClientModal(false)} style={{ flex: 1 }}>
+                    Cancelar
+                  </Button>
+                  <Button type="button" variant="primary" onClick={handleAddClient} style={{ flex: 1 }}>
+                    Adicionar Cliente
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

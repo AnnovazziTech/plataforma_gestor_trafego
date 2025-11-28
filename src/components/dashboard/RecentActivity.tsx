@@ -10,7 +10,6 @@ import {
   AlertTriangle,
   CheckCircle,
   Edit,
-  Trash,
 } from 'lucide-react'
 import { Platform } from '@/types'
 
@@ -27,8 +26,8 @@ const activities: Activity[] = [
   {
     id: '1',
     type: 'milestone_reached',
-    title: 'Meta de conversões atingida',
-    description: 'Campanha "Remarketing" alcançou 1000 conversões',
+    title: 'Meta de conversoes atingida',
+    description: 'Campanha "Remarketing" alcancou 1000 conversoes',
     platform: 'meta',
     timestamp: '2024-11-20T16:00:00Z',
   },
@@ -52,7 +51,7 @@ const activities: Activity[] = [
     id: '4',
     type: 'campaign_started',
     title: 'Campanha iniciada',
-    description: 'TikTok - Gen Z Campaign está ativa',
+    description: 'TikTok - Gen Z Campaign esta ativa',
     platform: 'tiktok',
     timestamp: '2024-11-20T10:00:00Z',
   },
@@ -76,27 +75,28 @@ const activities: Activity[] = [
 
 export function RecentActivity() {
   const getActivityIcon = (type: Activity['type']) => {
+    const iconStyle = { width: '14px', height: '14px' }
     const icons = {
-      campaign_started: <Play size={14} className="text-[#3B82F6]" />,
-      campaign_paused: <Pause size={14} className="text-[#FACC15]" />,
-      budget_increased: <DollarSign size={14} className="text-[#60A5FA]" />,
-      milestone_reached: <CheckCircle size={14} className="text-[#3B82F6]" />,
-      alert: <AlertTriangle size={14} className="text-red-400" />,
-      campaign_created: <TrendingUp size={14} className="text-[#FACC15]" />,
-      campaign_edited: <Edit size={14} className="text-[#A0A0B0]" />,
+      campaign_started: <Play style={{ ...iconStyle, color: '#3B82F6' }} />,
+      campaign_paused: <Pause style={{ ...iconStyle, color: '#FACC15' }} />,
+      budget_increased: <DollarSign style={{ ...iconStyle, color: '#60A5FA' }} />,
+      milestone_reached: <CheckCircle style={{ ...iconStyle, color: '#3B82F6' }} />,
+      alert: <AlertTriangle style={{ ...iconStyle, color: '#EF4444' }} />,
+      campaign_created: <TrendingUp style={{ ...iconStyle, color: '#FACC15' }} />,
+      campaign_edited: <Edit style={{ ...iconStyle, color: '#A0A0B0' }} />,
     }
     return icons[type]
   }
 
   const getActivityColor = (type: Activity['type']) => {
     const colors = {
-      campaign_started: 'border-[#3B82F6]/30 bg-[#3B82F6]/5',
-      campaign_paused: 'border-[#FACC15]/30 bg-[#FACC15]/5',
-      budget_increased: 'border-[#60A5FA]/30 bg-[#60A5FA]/5',
-      milestone_reached: 'border-[#3B82F6]/30 bg-[#3B82F6]/5',
-      alert: 'border-red-500/30 bg-red-500/5',
-      campaign_created: 'border-[#FACC15]/30 bg-[#FACC15]/5',
-      campaign_edited: 'border-white/20 bg-white/5',
+      campaign_started: { border: 'rgba(59, 130, 246, 0.3)', bg: 'rgba(59, 130, 246, 0.05)' },
+      campaign_paused: { border: 'rgba(250, 204, 21, 0.3)', bg: 'rgba(250, 204, 21, 0.05)' },
+      budget_increased: { border: 'rgba(96, 165, 250, 0.3)', bg: 'rgba(96, 165, 250, 0.05)' },
+      milestone_reached: { border: 'rgba(59, 130, 246, 0.3)', bg: 'rgba(59, 130, 246, 0.05)' },
+      alert: { border: 'rgba(239, 68, 68, 0.3)', bg: 'rgba(239, 68, 68, 0.05)' },
+      campaign_created: { border: 'rgba(250, 204, 21, 0.3)', bg: 'rgba(250, 204, 21, 0.05)' },
+      campaign_edited: { border: 'rgba(255, 255, 255, 0.2)', bg: 'rgba(255, 255, 255, 0.05)' },
     }
     return colors[type]
   }
@@ -109,9 +109,9 @@ export function RecentActivity() {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 60) return `${diffMins}m atrás`
-    if (diffHours < 24) return `${diffHours}h atrás`
-    if (diffDays < 7) return `${diffDays}d atrás`
+    if (diffMins < 60) return `${diffMins}m atras`
+    if (diffHours < 24) return `${diffHours}h atras`
+    if (diffDays < 7) return `${diffDays}d atras`
     return date.toLocaleDateString('pt-BR')
   }
 
@@ -119,40 +119,84 @@ export function RecentActivity() {
     <Card>
       <CardHeader>
         <CardTitle>Atividade Recente</CardTitle>
-        <button className="text-xs text-[#3B82F6] hover:underline">Ver tudo</button>
+        <button style={{ fontSize: '12px', color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer' }}>
+          Ver tudo
+        </button>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          {activities.map((activity, index) => (
-            <motion.div
-              key={activity.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group cursor-pointer"
-            >
-              <div className={`p-2.5 rounded-xl border flex-shrink-0 ${getActivityColor(activity.type)}`}>
-                {getActivityIcon(activity.type)}
-              </div>
-              <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <p className="text-sm font-medium text-white truncate flex-1">{activity.title}</p>
-                  {activity.platform && (
-                    <PlatformIcon platform={activity.platform} size={16} className="flex-shrink-0" />
-                  )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {activities.map((activity, index) => {
+            const colors = getActivityColor(activity.type)
+            return (
+              <motion.div
+                key={activity.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '16px',
+                  padding: '16px',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                }}
+              >
+                <div
+                  style={{
+                    padding: '10px',
+                    borderRadius: '12px',
+                    border: `1px solid ${colors.border}`,
+                    backgroundColor: colors.bg,
+                    flexShrink: 0,
+                  }}
+                >
+                  {getActivityIcon(activity.type)}
                 </div>
-                <p className="text-xs text-[#6B6B7B] truncate">{activity.description}</p>
-              </div>
-              <span className="text-xs text-[#6B6B7B] whitespace-nowrap flex-shrink-0 bg-white/5 px-2 py-1 rounded-lg">
-                {formatTimestamp(activity.timestamp)}
-              </span>
-            </motion.div>
-          ))}
+                <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <p style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                      {activity.title}
+                    </p>
+                    {activity.platform && (
+                      <PlatformIcon platform={activity.platform} size={16} />
+                    )}
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {activity.description}
+                  </p>
+                </div>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    color: '#6B6B7B',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    padding: '4px 8px',
+                    borderRadius: '8px',
+                  }}
+                >
+                  {formatTimestamp(activity.timestamp)}
+                </span>
+              </motion.div>
+            )
+          })}
         </div>
 
         {/* View All Link */}
-        <div className="mt-4 pt-4 border-t border-white/10">
-          <button className="w-full py-2 text-sm text-[#3B82F6] hover:text-[#3B82F6]/80 transition-colors">
+        <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <button
+            style={{
+              width: '100%',
+              padding: '8px',
+              fontSize: '14px',
+              color: '#3B82F6',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
             Ver todas as atividades
           </button>
         </div>

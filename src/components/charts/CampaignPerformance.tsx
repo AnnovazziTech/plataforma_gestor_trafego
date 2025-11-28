@@ -10,7 +10,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
 } from 'recharts'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 import { campaignComparison } from '@/data/mock-data'
@@ -34,28 +33,64 @@ export function CampaignPerformance() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-gradient-to-br from-[#1A1A25] to-[#12121A] border border-white/20 rounded-xl p-4 shadow-2xl min-w-[200px]"
+        style={{
+          background: 'linear-gradient(to bottom right, #1A1A25, #12121A)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '12px',
+          padding: '16px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          minWidth: '200px',
+        }}
       >
-        <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/10">
-          <BarChart3 size={14} className="text-[#3B82F6]" />
-          <p className="text-sm font-semibold text-white truncate">{label}</p>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '12px',
+            paddingBottom: '8px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          <BarChart3 size={14} style={{ color: '#3B82F6' }} />
+          <p
+            style={{
+              fontSize: '14px',
+              fontWeight: 600,
+              color: '#FFFFFF',
+              margin: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {label}
+          </p>
         </div>
-        <div className="space-y-2.5">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {payload.map((entry: any) => {
             const Icon = entry.dataKey === 'spent' ? DollarSign : Target
             return (
-              <div key={entry.dataKey} className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="p-1 rounded" style={{ backgroundColor: `${entry.color}20` }}>
+              <div
+                key={entry.dataKey}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '16px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ padding: '4px', borderRadius: '4px', backgroundColor: `${entry.color}20` }}>
                     <Icon size={12} style={{ color: entry.color }} />
                   </div>
-                  <span className="text-xs text-[#A0A0B0]">
+                  <span style={{ fontSize: '12px', color: '#A0A0B0' }}>
                     {entry.dataKey === 'spent' ? 'Investido' :
-                     entry.dataKey === 'conversions' ? 'Conversões' :
+                     entry.dataKey === 'conversions' ? 'Conversoes' :
                      entry.dataKey === 'roas' ? 'ROAS' : entry.dataKey}
                   </span>
                 </div>
-                <span className="text-sm font-semibold text-white">
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF' }}>
                   {entry.dataKey === 'spent' ? formatCurrency(entry.value) :
                    entry.dataKey === 'roas' ? `${entry.value.toFixed(2)}x` :
                    formatCompactNumber(entry.value)}
@@ -64,14 +99,29 @@ export function CampaignPerformance() {
             )
           })}
           {campaign && (
-            <div className="flex items-center justify-between gap-4 pt-2 border-t border-white/10">
-              <div className="flex items-center gap-2">
-                <div className="p-1 rounded bg-emerald-500/20">
-                  <TrendingUp size={12} className="text-emerald-400" />
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '16px',
+                paddingTop: '8px',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ padding: '4px', borderRadius: '4px', backgroundColor: 'rgba(16, 185, 129, 0.2)' }}>
+                  <TrendingUp size={12} style={{ color: '#34D399' }} />
                 </div>
-                <span className="text-xs text-[#A0A0B0]">ROAS</span>
+                <span style={{ fontSize: '12px', color: '#A0A0B0' }}>ROAS</span>
               </div>
-              <span className={`text-sm font-bold ${getBarColor(campaign.roas).replace('bg-', 'text-').replace('/20', '')}`}>
+              <span
+                style={{
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  color: campaign.roas >= 4 ? '#3B82F6' : campaign.roas >= 3 ? '#60A5FA' : campaign.roas >= 2 ? '#FACC15' : '#F87171',
+                }}
+              >
                 {campaign.roas.toFixed(2)}x
               </span>
             </div>
@@ -79,13 +129,6 @@ export function CampaignPerformance() {
         </div>
       </motion.div>
     )
-  }
-
-  const getBarColor = (roas: number) => {
-    if (roas >= 4) return 'bg-[#3B82F6]/20 text-[#3B82F6]'
-    if (roas >= 3) return 'bg-[#60A5FA]/20 text-[#60A5FA]'
-    if (roas >= 2) return 'bg-[#FACC15]/20 text-[#FACC15]'
-    return 'bg-red-500/20 text-red-400'
   }
 
   const getTextColor = (roas: number) => {
@@ -100,55 +143,84 @@ export function CampaignPerformance() {
       <CardHeader>
         <div>
           <CardTitle>Performance das Campanhas</CardTitle>
-          <p className="text-xs text-[#6B6B7B] mt-1">Comparativo de investimento e resultados</p>
+          <p style={{ fontSize: '12px', color: '#6B6B7B', marginTop: '4px', margin: 0 }}>Comparativo de investimento e resultados</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#3B82F6]/10">
-            <div className="w-2 h-2 rounded-full bg-[#3B82F6]" />
-            <span className="text-xs text-[#3B82F6] font-medium">Investido</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 8px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            }}
+          >
+            <div style={{ width: '8px', height: '8px', borderRadius: '9999px', backgroundColor: '#3B82F6' }} />
+            <span style={{ fontSize: '12px', color: '#3B82F6', fontWeight: 500 }}>Investido</span>
           </div>
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#FACC15]/10">
-            <div className="w-2 h-2 rounded-full bg-[#FACC15]" />
-            <span className="text-xs text-[#FACC15] font-medium">Conversões</span>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 8px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(250, 204, 21, 0.1)',
+            }}
+          >
+            <div style={{ width: '8px', height: '8px', borderRadius: '9999px', backgroundColor: '#FACC15' }} />
+            <span style={{ fontSize: '12px', color: '#FACC15', fontWeight: 500 }}>Conversoes</span>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         {/* Summary Stats */}
-        <div className="grid grid-cols-4 gap-2 mb-4">
-          <div className="p-2.5 rounded-lg bg-white/5">
-            <div className="flex items-center gap-1.5 mb-1">
-              <DollarSign size={12} className="text-[#3B82F6]" />
-              <span className="text-xs text-[#6B6B7B]">Total Investido</span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '16px' }}>
+          <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <DollarSign size={12} style={{ color: '#3B82F6' }} />
+              <span style={{ fontSize: '12px', color: '#6B6B7B', whiteSpace: 'nowrap' }}>Total Investido</span>
             </div>
-            <p className="text-sm font-bold text-white">{formatCurrency(totalSpent)}</p>
+            <p style={{ fontSize: '14px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{formatCurrency(totalSpent)}</p>
           </div>
-          <div className="p-2.5 rounded-lg bg-white/5">
-            <div className="flex items-center gap-1.5 mb-1">
-              <Target size={12} className="text-[#FACC15]" />
-              <span className="text-xs text-[#6B6B7B]">Conversões</span>
+          <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <Target size={12} style={{ color: '#FACC15' }} />
+              <span style={{ fontSize: '12px', color: '#6B6B7B', whiteSpace: 'nowrap' }}>Conversoes</span>
             </div>
-            <p className="text-sm font-bold text-white">{formatCompactNumber(totalConversions)}</p>
+            <p style={{ fontSize: '14px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{formatCompactNumber(totalConversions)}</p>
           </div>
-          <div className="p-2.5 rounded-lg bg-white/5">
-            <div className="flex items-center gap-1.5 mb-1">
-              <TrendingUp size={12} className="text-emerald-400" />
-              <span className="text-xs text-[#6B6B7B]">ROAS Médio</span>
+          <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <TrendingUp size={12} style={{ color: '#34D399' }} />
+              <span style={{ fontSize: '12px', color: '#6B6B7B', whiteSpace: 'nowrap' }}>ROAS Medio</span>
             </div>
-            <p className="text-sm font-bold text-[#3B82F6]">{avgRoas.toFixed(2)}x</p>
+            <p style={{ fontSize: '14px', fontWeight: 700, color: '#3B82F6', margin: 0 }}>{avgRoas.toFixed(2)}x</p>
           </div>
-          <div className="p-2.5 rounded-lg bg-white/5">
-            <div className="flex items-center gap-1.5 mb-1">
-              <Award size={12} className="text-[#FACC15]" />
-              <span className="text-xs text-[#6B6B7B]">Melhor</span>
+          <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <Award size={12} style={{ color: '#FACC15' }} />
+              <span style={{ fontSize: '12px', color: '#6B6B7B', whiteSpace: 'nowrap' }}>Melhor</span>
             </div>
-            <p className="text-sm font-bold text-white truncate" title={bestCampaign.name}>
+            <p
+              style={{
+                fontSize: '14px',
+                fontWeight: 700,
+                color: '#FFFFFF',
+                margin: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+              title={bestCampaign.name}
+            >
               {bestCampaign.name.split(' ')[0]}
             </p>
           </div>
         </div>
 
-        <div className="h-64">
+        <div style={{ height: '256px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={campaignComparison}
@@ -200,25 +272,25 @@ export function CampaignPerformance() {
         </div>
 
         {/* ROAS Indicators */}
-        <div className="mt-4 pt-4 border-t border-white/10">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm text-[#A0A0B0] font-medium">ROAS por Campanha</p>
-            <div className="flex items-center gap-2 text-xs text-[#6B6B7B]">
-              <span className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-[#3B82F6]" />
+        <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <p style={{ fontSize: '14px', color: '#A0A0B0', fontWeight: 500, margin: 0 }}>ROAS por Campanha</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#6B6B7B' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '9999px', backgroundColor: '#3B82F6' }} />
                 &gt;4x
               </span>
-              <span className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-[#FACC15]" />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '9999px', backgroundColor: '#FACC15' }} />
                 2-4x
               </span>
-              <span className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-red-400" />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '9999px', backgroundColor: '#F87171' }} />
                 &lt;2x
               </span>
             </div>
           </div>
-          <div className="grid grid-cols-5 gap-2">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
             {campaignComparison.map((campaign, index) => {
               const isHovered = hoveredBar === campaign.name
               return (
@@ -227,28 +299,45 @@ export function CampaignPerformance() {
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.1 }}
-                  className={`relative p-3 rounded-xl text-center transition-all cursor-pointer ${
-                    isHovered ? 'bg-white/10 scale-105' : 'bg-white/5 hover:bg-white/8'
-                  }`}
+                  style={{
+                    position: 'relative',
+                    padding: '12px',
+                    borderRadius: '12px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    backgroundColor: isHovered ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                    transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+                    transition: 'all 0.2s ease',
+                  }}
                   onMouseEnter={() => setHoveredBar(campaign.name)}
                   onMouseLeave={() => setHoveredBar(null)}
                 >
                   {campaign.roas === bestCampaign.roas && (
-                    <div className="absolute -top-1 -right-1">
-                      <Award size={14} className="text-[#FACC15]" />
+                    <div style={{ position: 'absolute', top: '-4px', right: '-4px' }}>
+                      <Award size={14} style={{ color: '#FACC15' }} />
                     </div>
                   )}
-                  <div className="flex items-center justify-center gap-1 mb-1">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginBottom: '4px' }}>
                     {campaign.roas >= avgRoas ? (
-                      <TrendingUp size={12} className="text-emerald-400" />
+                      <TrendingUp size={12} style={{ color: '#34D399' }} />
                     ) : (
-                      <TrendingDown size={12} className="text-red-400" />
+                      <TrendingDown size={12} style={{ color: '#F87171' }} />
                     )}
-                    <p className="text-lg font-bold" style={{ color: getTextColor(campaign.roas) }}>
+                    <p style={{ fontSize: '18px', fontWeight: 700, color: getTextColor(campaign.roas), margin: 0 }}>
                       {campaign.roas.toFixed(1)}x
                     </p>
                   </div>
-                  <p className="text-xs text-[#6B6B7B] truncate" title={campaign.name}>
+                  <p
+                    style={{
+                      fontSize: '12px',
+                      color: '#6B6B7B',
+                      margin: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                    title={campaign.name}
+                  >
                     {campaign.name.split(' ')[0]}
                   </p>
                 </motion.div>

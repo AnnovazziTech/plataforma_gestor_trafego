@@ -21,17 +21,24 @@ import {
 
 export default function DashboardPage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header
         title="Dashboard"
-        subtitle="Visão geral da performance de todas as suas campanhas"
+        subtitle="Visao geral da performance de todas as suas campanhas"
         buttonType="connect"
         createButtonText="Conectar Contas"
       />
 
-      <main className="flex-1 p-4 md:p-6 overflow-x-hidden">
-        {/* Metrics Grid - 2 colunas mobile, 3 tablet, 3 desktop */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <main style={{ flex: 1, padding: '24px', overflowX: 'hidden' }}>
+        {/* Metrics Grid */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '16px',
+            marginBottom: '24px',
+          }}
+        >
           <MetricCard
             title="Total Investido"
             value={dashboardMetrics.totalSpent}
@@ -42,7 +49,7 @@ export default function DashboardPage() {
             delay={0}
           />
           <MetricCard
-            title="Impressões"
+            title="Impressoes"
             value={dashboardMetrics.totalImpressions}
             previousValue={dashboardMetrics.previousPeriod.totalImpressions}
             format="compact"
@@ -60,7 +67,7 @@ export default function DashboardPage() {
             delay={0.2}
           />
           <MetricCard
-            title="Conversões"
+            title="Conversoes"
             value={dashboardMetrics.totalConversions}
             previousValue={dashboardMetrics.previousPeriod.totalConversions}
             format="number"
@@ -78,7 +85,7 @@ export default function DashboardPage() {
             delay={0.4}
           />
           <MetricCard
-            title="ROAS Médio"
+            title="ROAS Medio"
             value={dashboardMetrics.avgRoas}
             format="number"
             icon={<Target size={20} />}
@@ -88,23 +95,43 @@ export default function DashboardPage() {
         </div>
 
         {/* Charts Row 1 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-          <div className="lg:col-span-2">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '2fr 1fr',
+            gap: '16px',
+            marginBottom: '16px',
+          }}
+        >
+          <div>
             <PerformanceChart />
           </div>
-          <div className="lg:col-span-1">
+          <div>
             <PlatformDistribution />
           </div>
         </div>
 
         {/* Charts Row 2 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '16px',
+            marginBottom: '16px',
+          }}
+        >
           <ConversionFunnel />
           <CampaignPerformance />
         </div>
 
         {/* Bottom Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '16px',
+          }}
+        >
           <TopCampaigns />
           <RecentActivity />
         </div>

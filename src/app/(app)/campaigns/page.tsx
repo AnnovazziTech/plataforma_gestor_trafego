@@ -68,13 +68,12 @@ export default function CampaignsPage() {
 
   const handleAiAnalysis = (campaignId: string, campaignName: string) => {
     setIsAnalyzing(campaignId)
-    // Simular análise da IA
     setTimeout(() => {
       const analyses = [
-        `A campanha "${campaignName}" apresenta um CTR acima da média do mercado. Recomenda-se aumentar o orçamento em 20% para escalar os resultados. O público-alvo está bem segmentado, mas considere testar novos criativos para evitar fadiga de anúncio.`,
-        `Esta campanha tem um ROAS excelente de 3.5x. Os horários de maior conversão são entre 19h-22h. Sugestão: concentrar 60% do orçamento neste período para maximizar ROI.`,
-        `A campanha "${campaignName}" está com CPC elevado comparado ao benchmark. Recomendações: 1) Revisar segmentação de público, 2) Testar novos títulos de anúncio, 3) Considerar formato de vídeo curto.`,
-        `Performance sólida com tendência de crescimento. O custo por conversão diminuiu 15% na última semana. Mantenha a estratégia atual e monitore a frequência para evitar saturação.`
+        `A campanha "${campaignName}" apresenta um CTR acima da media do mercado. Recomenda-se aumentar o orcamento em 20% para escalar os resultados. O publico-alvo esta bem segmentado, mas considere testar novos criativos para evitar fadiga de anuncio.`,
+        `Esta campanha tem um ROAS excelente de 3.5x. Os horarios de maior conversao sao entre 19h-22h. Sugestao: concentrar 60% do orcamento neste periodo para maximizar ROI.`,
+        `A campanha "${campaignName}" esta com CPC elevado comparado ao benchmark. Recomendacoes: 1) Revisar segmentacao de publico, 2) Testar novos titulos de anuncio, 3) Considerar formato de video curto.`,
+        `Performance solida com tendencia de crescimento. O custo por conversao diminuiu 15% na ultima semana. Mantenha a estrategia atual e monitore a frequencia para evitar saturacao.`
       ]
       setAiAnalysis({
         campaignId,
@@ -85,81 +84,134 @@ export default function CampaignsPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div style={{ minHeight: '100vh' }}>
       <Header
         title="Campanhas"
-        subtitle="Gerencie todas as suas campanhas de tráfego pago"
+        subtitle="Gerencie todas as suas campanhas de trafego pago"
       />
 
-      <main className="p-6 md:p-8">
-        {/* Filters Bar - Filtros e Visualização */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <main style={{ padding: '24px 32px' }}>
+        {/* Filters Bar */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '24px' }}>
           {/* Filtros */}
-          <div className="flex items-center gap-3 flex-wrap">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             {/* Filtro por Conta */}
-            <div className="relative">
+            <div style={{ position: 'relative' }}>
               <select
                 value={selectedAccount}
                 onChange={(e) => setSelectedAccount(e.target.value)}
-                className="h-11 pl-4 pr-10 rounded-xl bg-white/5 border border-white/10 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-[#3B82F6]/50 hover:border-[#3B82F6]/30 transition-all"
+                style={{
+                  height: '44px',
+                  paddingLeft: '16px',
+                  paddingRight: '40px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  fontSize: '14px',
+                  color: '#FFFFFF',
+                  appearance: 'none',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  minWidth: '180px',
+                }}
               >
-                <option value="all">Todas as Contas</option>
+                <option value="all" style={{ backgroundColor: '#12121A' }}>Todas as Contas</option>
                 {connectedAccounts.filter(a => a.connected).map((account) => (
-                  <option key={account.id} value={account.id} className="bg-[#12121A]">
+                  <option key={account.id} value={account.id} style={{ backgroundColor: '#12121A' }}>
                     {account.name}
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6B7B] pointer-events-none" />
+              <ChevronDown style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#6B6B7B', pointerEvents: 'none' }} />
             </div>
 
             {/* Filtro por Plataforma */}
-            <div className="relative">
+            <div style={{ position: 'relative' }}>
               <select
                 value={selectedPlatform}
                 onChange={(e) => setSelectedPlatform(e.target.value as Platform | 'all')}
-                className="h-11 pl-4 pr-10 rounded-xl bg-white/5 border border-white/10 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-[#3B82F6]/50 hover:border-[#3B82F6]/30 transition-all"
+                style={{
+                  height: '44px',
+                  paddingLeft: '16px',
+                  paddingRight: '40px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  fontSize: '14px',
+                  color: '#FFFFFF',
+                  appearance: 'none',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  minWidth: '180px',
+                }}
               >
-                <option value="all">Todas Plataformas</option>
+                <option value="all" style={{ backgroundColor: '#12121A' }}>Todas Plataformas</option>
                 {platforms.map((platform) => (
-                  <option key={platform} value={platform} className="bg-[#12121A]">
+                  <option key={platform} value={platform} style={{ backgroundColor: '#12121A' }}>
                     {platform.charAt(0).toUpperCase() + platform.slice(1)}
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6B7B] pointer-events-none" />
+              <ChevronDown style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#6B6B7B', pointerEvents: 'none' }} />
             </div>
 
             {/* Filtro por Status */}
-            <div className="relative">
+            <div style={{ position: 'relative' }}>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value as CampaignStatus | 'all')}
-                className="h-11 pl-4 pr-10 rounded-xl bg-white/5 border border-white/10 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-[#3B82F6]/50 hover:border-[#3B82F6]/30 transition-all"
+                style={{
+                  height: '44px',
+                  paddingLeft: '16px',
+                  paddingRight: '40px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  fontSize: '14px',
+                  color: '#FFFFFF',
+                  appearance: 'none',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  minWidth: '160px',
+                }}
               >
-                <option value="all">Todos Status</option>
+                <option value="all" style={{ backgroundColor: '#12121A' }}>Todos Status</option>
                 {statuses.map((status) => (
-                  <option key={status} value={status} className="bg-[#12121A]">
+                  <option key={status} value={status} style={{ backgroundColor: '#12121A' }}>
                     {statusLabels[status]}
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6B7B] pointer-events-none" />
+              <ChevronDown style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#6B6B7B', pointerEvents: 'none' }} />
             </div>
           </div>
 
-          {/* Modo de Visualização */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-white/5 rounded-xl p-1 border border-white/10">
+          {/* Modo de Visualizacao */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-[#3B82F6]/20 text-[#3B82F6]' : 'text-[#6B6B7B] hover:text-white'}`}
+                style={{
+                  padding: '10px',
+                  borderRadius: '8px',
+                  background: viewMode === 'grid' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: viewMode === 'grid' ? '#3B82F6' : '#6B6B7B',
+                }}
               >
                 <LayoutGrid size={18} />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-[#3B82F6]/20 text-[#3B82F6]' : 'text-[#6B6B7B] hover:text-white'}`}
+                style={{
+                  padding: '10px',
+                  borderRadius: '8px',
+                  background: viewMode === 'list' ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: viewMode === 'list' ? '#3B82F6' : '#6B6B7B',
+                }}
               >
                 <List size={18} />
               </button>
@@ -168,7 +220,7 @@ export default function CampaignsPage() {
         </div>
 
         {/* Stats Summary */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
           <StatCard
             label="Total de Campanhas"
             value={campaigns.length}
@@ -191,7 +243,7 @@ export default function CampaignsPage() {
             delay={0.2}
           />
           <StatCard
-            label="ROAS Médio"
+            label="ROAS Medio"
             value={`${(campaigns.reduce((acc, c) => acc + c.metrics.roas, 0) / campaigns.length).toFixed(2)}x`}
             icon={TrendingUp}
             color="yellow"
@@ -200,9 +252,9 @@ export default function CampaignsPage() {
         </div>
 
         {/* Campaigns Grid/List */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Lista de Campanhas - Ocupa 2 colunas */}
-          <div className="lg:col-span-2">
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+          {/* Lista de Campanhas */}
+          <div>
             <AnimatePresence mode="wait">
               {viewMode === 'grid' ? (
                 <motion.div
@@ -210,7 +262,7 @@ export default function CampaignsPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10"
+                  style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', maxHeight: '600px', overflowY: 'auto', paddingRight: '8px' }}
                 >
                   {filteredCampaigns.map((campaign, index) => (
                     <CampaignCard
@@ -228,7 +280,7 @@ export default function CampaignsPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="max-h-[600px] overflow-y-auto"
+                  style={{ maxHeight: '600px', overflowY: 'auto' }}
                 >
                   <CampaignTable campaigns={filteredCampaigns} onAiAnalysis={handleAiAnalysis} isAnalyzing={isAnalyzing} />
                 </motion.div>
@@ -236,26 +288,33 @@ export default function CampaignsPage() {
             </AnimatePresence>
 
             {filteredCampaigns.length === 0 && (
-              <div className="text-center py-20">
-                <p className="text-[#6B6B7B]">Nenhuma campanha encontrada</p>
+              <div style={{ textAlign: 'center', padding: '80px 0' }}>
+                <p style={{ color: '#6B6B7B', fontSize: '14px' }}>Nenhuma campanha encontrada</p>
               </div>
             )}
           </div>
 
-          {/* Quadro de Análise da IA */}
-          <div className="lg:col-span-1">
+          {/* Quadro de Analise da IA */}
+          <div>
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="sticky top-24 p-5 rounded-2xl bg-gradient-to-br from-[#12121A] to-[#0D0D14] border border-white/10"
+              style={{
+                position: 'sticky',
+                top: '96px',
+                padding: '20px',
+                borderRadius: '16px',
+                background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+              }}
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#3B82F6]/20 to-[#8B5CF6]/20">
-                  <Bot className="w-5 h-5 text-[#3B82F6]" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <div style={{ padding: '10px', borderRadius: '12px', background: 'linear-gradient(to bottom right, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2))' }}>
+                  <Bot style={{ width: '20px', height: '20px', color: '#3B82F6' }} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">Análise da IA</h3>
-                  <p className="text-xs text-[#6B6B7B]">Insights inteligentes sobre suas campanhas</p>
+                  <h3 style={{ fontWeight: 600, color: '#FFFFFF', fontSize: '14px', margin: 0 }}>Analise da IA</h3>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Insights inteligentes sobre suas campanhas</p>
                 </div>
               </div>
 
@@ -263,45 +322,45 @@ export default function CampaignsPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="space-y-4"
+                  style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
                 >
-                  <div className="p-4 rounded-xl bg-white/5 border border-[#3B82F6]/20">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-medium text-[#3B82F6] flex items-center gap-1.5">
+                  <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 500, color: '#3B82F6', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Sparkles size={12} />
-                        Análise Gerada
+                        Analise Gerada
                       </span>
                       <button
                         onClick={() => setAiAnalysis(null)}
-                        className="p-1 rounded hover:bg-white/10 text-[#6B6B7B] hover:text-white transition-all"
+                        style={{ padding: '4px', borderRadius: '4px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
                       >
                         <X size={14} />
                       </button>
                     </div>
-                    <p className="text-sm text-[#A0A0B0] leading-relaxed">
+                    <p style={{ fontSize: '14px', color: '#A0A0B0', lineHeight: '1.6', margin: 0 }}>
                       {aiAnalysis.analysis}
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
-                      <p className="text-xs text-emerald-400 mb-1">Recomendação</p>
-                      <p className="text-sm font-semibold text-white">Escalar</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                    <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', textAlign: 'center' }}>
+                      <p style={{ fontSize: '12px', color: '#34D399', marginBottom: '4px', margin: 0 }}>Recomendacao</p>
+                      <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Escalar</p>
                     </div>
-                    <div className="p-3 rounded-xl bg-[#FACC15]/10 border border-[#FACC15]/20 text-center">
-                      <p className="text-xs text-[#FACC15] mb-1">Prioridade</p>
-                      <p className="text-sm font-semibold text-white">Alta</p>
+                    <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(250, 204, 21, 0.1)', border: '1px solid rgba(250, 204, 21, 0.2)', textAlign: 'center' }}>
+                      <p style={{ fontSize: '12px', color: '#FACC15', marginBottom: '4px', margin: 0 }}>Prioridade</p>
+                      <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Alta</p>
                     </div>
                   </div>
                 </motion.div>
               ) : (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
-                    <Sparkles className="w-8 h-8 text-[#6B6B7B]" />
+                <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                  <div style={{ width: '64px', height: '64px', margin: '0 auto 16px', borderRadius: '9999px', backgroundColor: 'rgba(255, 255, 255, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Sparkles style={{ width: '32px', height: '32px', color: '#6B6B7B' }} />
                   </div>
-                  <p className="text-sm text-[#6B6B7B] mb-2">Nenhuma análise selecionada</p>
-                  <p className="text-xs text-[#4B4B5B]">
-                    Clique no ícone <span className="text-[#FACC15]">✨</span> em uma campanha para solicitar análise da IA
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px', margin: 0 }}>Nenhuma analise selecionada</p>
+                  <p style={{ fontSize: '12px', color: '#4B4B5B', margin: 0 }}>
+                    Clique no icone <span style={{ color: '#FACC15' }}>sparkles</span> em uma campanha para solicitar analise da IA
                   </p>
                 </div>
               )}
@@ -322,79 +381,53 @@ function CampaignCard({ campaign, index, onAiAnalysis, isAnalyzing }: { campaign
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       whileHover={{ y: -4 }}
-      className="group relative p-5 rounded-2xl bg-[#12121A]/80 border border-white/5 hover:border-[#3B82F6]/30 transition-all cursor-pointer"
+      style={{
+        position: 'relative',
+        padding: '20px',
+        borderRadius: '16px',
+        backgroundColor: 'rgba(18, 18, 26, 0.8)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        cursor: 'pointer',
+      }}
     >
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-white/5">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ padding: '10px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
             <PlatformIcon platform={campaign.platform} size={22} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
                 onClick={() => onAiAnalysis(campaign.id, campaign.name)}
-                className={`text-lg hover:scale-125 transition-transform ${isAnalyzing ? 'animate-pulse' : ''}`}
-                title="Solicitar análise da IA"
+                style={{ fontSize: '18px', background: 'none', border: 'none', cursor: 'pointer', opacity: isAnalyzing ? 0.5 : 1 }}
+                title="Solicitar analise da IA"
               >
-                ✨
+                sparkles
               </button>
-              <h3 className="text-sm font-semibold text-white group-hover:text-[#3B82F6] transition-colors line-clamp-1">
+              <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }}>
                 {campaign.name}
               </h3>
             </div>
-            <p className="text-xs text-[#6B6B7B] capitalize">{campaign.objective}</p>
+            <p style={{ fontSize: '12px', color: '#6B6B7B', textTransform: 'capitalize', margin: 0 }}>{campaign.objective}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Badge variant={statusColors[campaign.status]}>{statusLabels[campaign.status]}</Badge>
-          <div className="relative">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-[#6B6B7B] hover:text-white transition-all opacity-0 group-hover:opacity-100"
-            >
-              <MoreVertical size={16} />
-            </button>
-            <AnimatePresence>
-              {showMenu && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="absolute right-0 top-full mt-1 w-40 bg-[#1A1A25] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-10"
-                >
-                  {[
-                    { icon: Edit, label: 'Editar' },
-                    { icon: Copy, label: 'Duplicar' },
-                    { icon: campaign.status === 'active' ? Pause : Play, label: campaign.status === 'active' ? 'Pausar' : 'Ativar' },
-                    { icon: Trash2, label: 'Excluir', danger: true },
-                  ].map((action) => (
-                    <button
-                      key={action.label}
-                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-white/5 transition-colors ${action.danger ? 'text-red-400' : 'text-[#A0A0B0]'}`}
-                    >
-                      <action.icon size={14} />
-                      {action.label}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </div>
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '16px' }}>
         {[
-          { label: 'Investido', value: formatCurrency(campaign.spent), icon: DollarSign },
-          { label: 'Conversões', value: formatCompactNumber(campaign.metrics.conversions), icon: Target },
-          { label: 'CTR', value: `${campaign.metrics.ctr.toFixed(2)}%`, icon: MousePointer },
-          { label: 'ROAS', value: `${campaign.metrics.roas.toFixed(2)}x`, icon: TrendingUp, highlight: campaign.metrics.roas >= 3 },
+          { label: 'Investido', value: formatCurrency(campaign.spent) },
+          { label: 'Conversoes', value: formatCompactNumber(campaign.metrics.conversions) },
+          { label: 'CTR', value: `${campaign.metrics.ctr.toFixed(2)}%` },
+          { label: 'ROAS', value: `${campaign.metrics.roas.toFixed(2)}x`, highlight: campaign.metrics.roas >= 3 },
         ].map((metric) => (
-          <div key={metric.label} className="p-3 rounded-lg bg-white/5 text-center">
-            <p className="text-xs text-[#6B6B7B] mb-1">{metric.label}</p>
-            <p className={`text-sm font-semibold ${metric.highlight ? 'text-[#3B82F6]' : 'text-white'}`}>
+          <div key={metric.label} style={{ padding: '12px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', textAlign: 'center' }}>
+            <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px', margin: 0 }}>{metric.label}</p>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: metric.highlight ? '#3B82F6' : '#FFFFFF', margin: 0 }}>
               {metric.value}
             </p>
           </div>
@@ -403,22 +436,22 @@ function CampaignCard({ campaign, index, onAiAnalysis, isAnalyzing }: { campaign
 
       {/* Budget Progress */}
       <div>
-        <div className="flex items-center justify-between text-xs mb-1.5">
-          <span className="text-[#6B6B7B]">Budget</span>
-          <span className="text-white">{formatCurrency(campaign.spent)} / {formatCurrency(campaign.budget)}</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px' }}>
+          <span style={{ color: '#6B6B7B' }}>Budget</span>
+          <span style={{ color: '#FFFFFF' }}>{formatCurrency(campaign.spent)} / {formatCurrency(campaign.budget)}</span>
         </div>
-        <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+        <div style={{ height: '6px', backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '9999px', overflow: 'hidden' }}>
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${(campaign.spent / campaign.budget) * 100}%` }}
             transition={{ duration: 1, delay: index * 0.05 }}
-            className="h-full rounded-full bg-gradient-to-r from-[#3B82F6] to-[#FACC15]"
+            style={{ height: '100%', borderRadius: '9999px', background: 'linear-gradient(to right, #3B82F6, #FACC15)' }}
           />
         </div>
       </div>
 
       {/* Dates */}
-      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/5 text-xs text-[#6B6B7B]">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.05)', fontSize: '12px', color: '#6B6B7B' }}>
         <Calendar size={12} />
         <span>{new Date(campaign.startDate).toLocaleDateString('pt-BR')}</span>
         {campaign.endDate && (
@@ -434,14 +467,14 @@ function CampaignCard({ campaign, index, onAiAnalysis, isAnalyzing }: { campaign
 
 function CampaignTable({ campaigns, onAiAnalysis, isAnalyzing }: { campaigns: Campaign[]; onAiAnalysis: (id: string, name: string) => void; isAnalyzing: string | null }) {
   return (
-    <div className="rounded-2xl bg-gradient-to-br from-[#12121A] to-[#0D0D14] border border-white/10 overflow-hidden shadow-xl shadow-black/20">
+    <div style={{ borderRadius: '16px', background: 'linear-gradient(to bottom right, #12121A, #0D0D14)', border: '1px solid rgba(255, 255, 255, 0.1)', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2)' }}>
       {/* Table Header */}
-      <div className="px-6 py-4 border-b border-white/10 bg-white/[0.02]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-1 rounded-full bg-gradient-to-b from-[#3B82F6] to-[#60A5FA]" />
-            <h3 className="text-sm font-semibold text-white">Lista de Campanhas</h3>
-            <span className="px-2 py-0.5 rounded-full bg-[#3B82F6]/10 text-[#3B82F6] text-xs font-medium">
+      <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.02)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ height: '32px', width: '4px', borderRadius: '9999px', background: 'linear-gradient(to bottom, #3B82F6, #60A5FA)' }} />
+            <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Lista de Campanhas</h3>
+            <span style={{ padding: '2px 8px', borderRadius: '9999px', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', fontSize: '12px', fontWeight: 500 }}>
               {campaigns.length} campanhas
             </span>
           </div>
@@ -449,127 +482,69 @@ function CampaignTable({ campaigns, onAiAnalysis, isAnalyzing }: { campaigns: Ca
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr className="border-b border-white/5 bg-white/[0.01]">
-              <th className="text-left text-xs font-semibold text-[#A0A0B0] uppercase tracking-wider px-6 py-4">Campanha</th>
-              <th className="text-left text-xs font-semibold text-[#A0A0B0] uppercase tracking-wider px-4 py-4">Status</th>
-              <th className="text-right text-xs font-semibold text-[#A0A0B0] uppercase tracking-wider px-4 py-4">Investido</th>
-              <th className="text-right text-xs font-semibold text-[#A0A0B0] uppercase tracking-wider px-4 py-4">Impressões</th>
-              <th className="text-right text-xs font-semibold text-[#A0A0B0] uppercase tracking-wider px-4 py-4">Cliques</th>
-              <th className="text-right text-xs font-semibold text-[#A0A0B0] uppercase tracking-wider px-4 py-4">CTR</th>
-              <th className="text-right text-xs font-semibold text-[#A0A0B0] uppercase tracking-wider px-4 py-4">Conversões</th>
-              <th className="text-right text-xs font-semibold text-[#A0A0B0] uppercase tracking-wider px-4 py-4">ROAS</th>
-              <th className="text-center text-xs font-semibold text-[#A0A0B0] uppercase tracking-wider px-4 py-4">Ações</th>
+            <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', backgroundColor: 'rgba(255, 255, 255, 0.01)' }}>
+              <th style={{ textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px 24px' }}>Campanha</th>
+              <th style={{ textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>Status</th>
+              <th style={{ textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>Investido</th>
+              <th style={{ textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>CTR</th>
+              <th style={{ textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>Conversoes</th>
+              <th style={{ textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>ROAS</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody>
             {campaigns.map((campaign, index) => (
               <motion.tr
                 key={campaign.id}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.03 }}
-                className="group hover:bg-gradient-to-r hover:from-[#3B82F6]/5 hover:to-transparent transition-all duration-300"
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}
               >
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-white/5 group-hover:bg-white/10 transition-colors">
+                <td style={{ padding: '16px 24px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ padding: '8px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
                       <PlatformIcon platform={campaign.platform} size={20} />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => onAiAnalysis(campaign.id, campaign.name)}
-                          className={`text-base hover:scale-125 transition-transform ${isAnalyzing === campaign.id ? 'animate-pulse' : ''}`}
-                          title="Solicitar análise da IA"
-                        >
-                          ✨
-                        </button>
-                        <p className="text-sm font-medium text-white group-hover:text-[#3B82F6] transition-colors">{campaign.name}</p>
-                      </div>
-                      <p className="text-xs text-[#6B6B7B] capitalize">{campaign.objective}</p>
+                      <p style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', margin: 0 }}>{campaign.name}</p>
+                      <p style={{ fontSize: '12px', color: '#6B6B7B', textTransform: 'capitalize', margin: 0 }}>{campaign.objective}</p>
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-4">
+                <td style={{ padding: '16px' }}>
                   <Badge variant={statusColors[campaign.status]}>{statusLabels[campaign.status]}</Badge>
                 </td>
-                <td className="px-4 py-4 text-right">
-                  <span className="text-sm font-medium text-white">{formatCurrency(campaign.spent)}</span>
+                <td style={{ padding: '16px', textAlign: 'right' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF' }}>{formatCurrency(campaign.spent)}</span>
                 </td>
-                <td className="px-4 py-4 text-right">
-                  <span className="text-sm text-[#A0A0B0]">{formatCompactNumber(campaign.metrics.impressions)}</span>
+                <td style={{ padding: '16px', textAlign: 'right' }}>
+                  <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{campaign.metrics.ctr.toFixed(2)}%</span>
                 </td>
-                <td className="px-4 py-4 text-right">
-                  <span className="text-sm text-[#A0A0B0]">{formatCompactNumber(campaign.metrics.clicks)}</span>
+                <td style={{ padding: '16px', textAlign: 'right' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF' }}>{formatCompactNumber(campaign.metrics.conversions)}</span>
                 </td>
-                <td className="px-4 py-4 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <span className="text-sm text-white">{campaign.metrics.ctr.toFixed(2)}%</span>
-                    {campaign.metrics.ctr >= 2 && (
-                      <TrendingUp size={12} className="text-emerald-400" />
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-4 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <Target size={12} className="text-[#6B6B7B]" />
-                    <span className="text-sm font-medium text-white">{formatCompactNumber(campaign.metrics.conversions)}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-4 text-right">
-                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-semibold ${
-                    campaign.metrics.roas >= 3
-                      ? 'bg-[#3B82F6]/10 text-[#3B82F6]'
-                      : campaign.metrics.roas >= 2
-                        ? 'bg-[#FACC15]/10 text-[#FACC15]'
-                        : 'bg-red-500/10 text-red-400'
-                  }`}>
-                    {campaign.metrics.roas >= 3 && <TrendingUp size={12} />}
-                    {campaign.metrics.roas < 2 && <TrendingDown size={12} />}
+                <td style={{ padding: '16px', textAlign: 'right' }}>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '4px 8px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    backgroundColor: campaign.metrics.roas >= 3 ? 'rgba(59, 130, 246, 0.1)' : campaign.metrics.roas >= 2 ? 'rgba(250, 204, 21, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                    color: campaign.metrics.roas >= 3 ? '#3B82F6' : campaign.metrics.roas >= 2 ? '#FACC15' : '#EF4444',
+                  }}>
                     {campaign.metrics.roas.toFixed(2)}x
                   </span>
-                </td>
-                <td className="px-4 py-4 text-center">
-                  <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="p-2 rounded-lg bg-white/5 hover:bg-[#3B82F6]/20 text-[#6B6B7B] hover:text-[#3B82F6] transition-all" title="Editar">
-                      <Edit size={14} />
-                    </button>
-                    <button className="p-2 rounded-lg bg-white/5 hover:bg-[#FACC15]/20 text-[#6B6B7B] hover:text-[#FACC15] transition-all" title={campaign.status === 'active' ? 'Pausar' : 'Ativar'}>
-                      {campaign.status === 'active' ? <Pause size={14} /> : <Play size={14} />}
-                    </button>
-                    <button className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-[#6B6B7B] hover:text-red-400 transition-all" title="Excluir">
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
                 </td>
               </motion.tr>
             ))}
           </tbody>
         </table>
-      </div>
-
-      {/* Table Footer */}
-      <div className="px-6 py-4 border-t border-white/5 bg-white/[0.01]">
-        <div className="flex items-center justify-between text-xs text-[#6B6B7B]">
-          <span>Mostrando {campaigns.length} campanhas</span>
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full bg-[#3B82F6]" />
-              ROAS Alto (&gt;3x)
-            </span>
-            <span className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full bg-[#FACC15]" />
-              ROAS Médio (2-3x)
-            </span>
-            <span className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full bg-red-400" />
-              ROAS Baixo (&lt;2x)
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   )

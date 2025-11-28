@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Card, CardHeader, CardTitle, CardContent, Badge, PlatformIcon } from '@/components/ui'
 import { campaigns } from '@/data/mock-data'
 import { formatCurrency, formatCompactNumber } from '@/lib/utils'
-import { TrendingUp, TrendingDown, MoreVertical, ExternalLink } from 'lucide-react'
+import { TrendingUp, TrendingDown, MoreVertical } from 'lucide-react'
 
 export function TopCampaigns() {
   const topCampaigns = campaigns
@@ -13,10 +13,10 @@ export function TopCampaigns() {
     .slice(0, 5)
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'success' | 'warning' | 'error' | 'info'> = {
+    const variants: Record<string, 'success' | 'warning' | 'error' | 'info' | 'default'> = {
       active: 'success',
       paused: 'warning',
-      ended: 'default' as any,
+      ended: 'default',
       error: 'error',
     }
     const labels: Record<string, string> = {
@@ -32,10 +32,12 @@ export function TopCampaigns() {
     <Card>
       <CardHeader>
         <CardTitle>Campanhas em Destaque</CardTitle>
-        <button className="text-xs text-[#3B82F6] hover:underline">Ver todas</button>
+        <button style={{ fontSize: '12px', color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer' }}>
+          Ver todas
+        </button>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {topCampaigns.map((campaign, index) => (
             <motion.div
               key={campaign.id}
@@ -43,46 +45,61 @@ export function TopCampaigns() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               whileHover={{ x: 4 }}
-              className="group p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-[#3B82F6]/20 transition-all cursor-pointer"
+              style={{
+                padding: '16px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                cursor: 'pointer',
+              }}
             >
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="p-2 rounded-lg bg-white/5 flex-shrink-0">
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+                  <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', flexShrink: 0 }}>
                     <PlatformIcon platform={campaign.platform} size={20} />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-white group-hover:text-[#3B82F6] transition-colors truncate">
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <p style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {campaign.name}
                     </p>
-                    <p className="text-xs text-[#6B6B7B] capitalize truncate">{campaign.platform} • {campaign.objective}</p>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, textTransform: 'capitalize', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {campaign.platform} - {campaign.objective}
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                   {getStatusBadge(campaign.status)}
-                  <button className="p-1 rounded hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-all">
-                    <MoreVertical size={14} className="text-[#6B6B7B]" />
+                  <button style={{ padding: '4px', borderRadius: '4px', background: 'none', border: 'none', cursor: 'pointer' }}>
+                    <MoreVertical size={14} style={{ color: '#6B6B7B' }} />
                   </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-3">
-                <div className="min-w-0 p-2 rounded-lg bg-white/5 text-center">
-                  <p className="text-xs text-[#6B6B7B] mb-1">Investido</p>
-                  <p className="text-sm font-semibold text-white">{formatCurrency(campaign.spent)}</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+                <div style={{ minWidth: 0, padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', textAlign: 'center' }}>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px', margin: 0 }}>Investido</p>
+                  <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>{formatCurrency(campaign.spent)}</p>
                 </div>
-                <div className="min-w-0 p-2 rounded-lg bg-white/5 text-center">
-                  <p className="text-xs text-[#6B6B7B] mb-1">Conversões</p>
-                  <p className="text-sm font-semibold text-white">{formatCompactNumber(campaign.metrics.conversions)}</p>
+                <div style={{ minWidth: 0, padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', textAlign: 'center' }}>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px', margin: 0 }}>Conversoes</p>
+                  <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>{formatCompactNumber(campaign.metrics.conversions)}</p>
                 </div>
-                <div className="min-w-0 p-2 rounded-lg bg-white/5 text-center">
-                  <p className="text-xs text-[#6B6B7B] mb-1">CTR</p>
-                  <p className="text-sm font-semibold text-white">{campaign.metrics.ctr.toFixed(2)}%</p>
+                <div style={{ minWidth: 0, padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', textAlign: 'center' }}>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px', margin: 0 }}>CTR</p>
+                  <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>{campaign.metrics.ctr.toFixed(2)}%</p>
                 </div>
-                <div className="min-w-0 p-2 rounded-lg bg-white/5 text-center">
-                  <p className="text-xs text-[#6B6B7B] mb-1">ROAS</p>
-                  <p className={`text-sm font-semibold flex items-center justify-center gap-1 ${
-                    campaign.metrics.roas >= 3 ? 'text-[#3B82F6]' : campaign.metrics.roas >= 2 ? 'text-[#FACC15]' : 'text-red-400'
-                  }`}>
+                <div style={{ minWidth: 0, padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', textAlign: 'center' }}>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px', margin: 0 }}>ROAS</p>
+                  <p style={{
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    margin: 0,
+                    color: campaign.metrics.roas >= 3 ? '#3B82F6' : campaign.metrics.roas >= 2 ? '#FACC15' : '#EF4444',
+                  }}>
                     {campaign.metrics.roas >= 3 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                     {campaign.metrics.roas.toFixed(2)}x
                   </p>
@@ -90,17 +107,21 @@ export function TopCampaigns() {
               </div>
 
               {/* Budget Progress */}
-              <div className="mt-3 pt-3 border-t border-white/5">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs text-[#6B6B7B]">Budget utilizado</span>
-                  <span className="text-xs text-white">{((campaign.spent / campaign.budget) * 100).toFixed(0)}%</span>
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Budget utilizado</span>
+                  <span style={{ fontSize: '12px', color: '#FFFFFF' }}>{((campaign.spent / campaign.budget) * 100).toFixed(0)}%</span>
                 </div>
-                <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div style={{ height: '6px', backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '9999px', overflow: 'hidden' }}>
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${(campaign.spent / campaign.budget) * 100}%` }}
                     transition={{ duration: 1, delay: index * 0.1 }}
-                    className="h-full rounded-full bg-gradient-to-r from-[#3B82F6] to-[#FACC15]"
+                    style={{
+                      height: '100%',
+                      borderRadius: '9999px',
+                      background: 'linear-gradient(to right, #3B82F6, #FACC15)',
+                    }}
                   />
                 </div>
               </div>

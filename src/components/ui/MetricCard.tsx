@@ -1,20 +1,23 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { cn, formatCurrency, formatNumber, formatPercent, getPercentageChange } from '@/lib/utils'
-import { TrendingUp, TrendingDown, Minus, Sparkles } from 'lucide-react'
+import { formatCurrency, formatNumber, formatPercent, getPercentageChange } from '@/lib/utils'
+import { Sparkles, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
 
 interface MetricCardProps {
   title: string
   value: number
   previousValue?: number
-  format?: 'currency' | 'number' | 'percent' | 'compact'
+  format?: 'currency' | 'number' | 'percent' | 'compact' | 'multiplier'
   icon?: React.ReactNode
-  color?: 'blue' | 'yellow'
+  color?: 'blue' | 'yellow' | 'green' | 'purple' | 'cyan' | 'orange'
   delay?: number
-  size?: 'default' | 'large'
+  size?: 'sm' | 'default' | 'large'
   showSparkle?: boolean
   subtitle?: string
+  variant?: 'default' | 'gradient' | 'glass' | 'minimal' | 'featured'
+  comparisonLabel?: string
+  invertTrend?: boolean
 }
 
 export function MetricCard({
@@ -28,6 +31,9 @@ export function MetricCard({
   size = 'default',
   showSparkle = false,
   subtitle,
+  variant = 'default',
+  comparisonLabel = 'vs periodo anterior',
+  invertTrend = false,
 }: MetricCardProps) {
   const formatValue = (val: number) => {
     switch (format) {
@@ -35,6 +41,8 @@ export function MetricCard({
         return formatCurrency(val)
       case 'percent':
         return formatPercent(val)
+      case 'multiplier':
+        return `${val.toFixed(2)}x`
       case 'compact':
         if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`
         if (val >= 1000) return `${(val / 1000).toFixed(1)}K`
@@ -45,128 +53,155 @@ export function MetricCard({
   }
 
   const percentChange = previousValue ? getPercentageChange(value, previousValue) : 0
-  const isPositive = percentChange > 0
-  const isNegative = percentChange < 0
+  const rawIsPositive = percentChange > 0
+  const rawIsNegative = percentChange < 0
+  const isPositive = invertTrend ? rawIsNegative : rawIsPositive
+  const isNegative = invertTrend ? rawIsPositive : rawIsNegative
 
-  const colorClasses = {
-    blue: 'border-[#3B82F6]/20 hover:border-[#3B82F6]/40',
-    yellow: 'border-[#FACC15]/20 hover:border-[#FACC15]/40',
+  const colorConfig: Record<string, { accent: string; iconBg: string; iconText: string }> = {
+    blue: { accent: '#3B82F6', iconBg: 'rgba(59, 130, 246, 0.15)', iconText: '#3B82F6' },
+    yellow: { accent: '#FACC15', iconBg: 'rgba(250, 204, 21, 0.15)', iconText: '#FACC15' },
+    green: { accent: '#10B981', iconBg: 'rgba(16, 185, 129, 0.15)', iconText: '#10B981' },
+    purple: { accent: '#8B5CF6', iconBg: 'rgba(139, 92, 246, 0.15)', iconText: '#8B5CF6' },
+    cyan: { accent: '#06B6D4', iconBg: 'rgba(6, 182, 212, 0.15)', iconText: '#06B6D4' },
+    orange: { accent: '#F97316', iconBg: 'rgba(249, 115, 22, 0.15)', iconText: '#F97316' },
   }
 
-  const iconColors = {
-    blue: 'text-[#3B82F6] bg-[#3B82F6]/10',
-    yellow: 'text-[#FACC15] bg-[#FACC15]/10',
+  const sizeConfig: Record<string, { padding: string; iconSize: string; titleSize: string; valueSize: string }> = {
+    sm: { padding: '16px', iconSize: '40px', titleSize: '12px', valueSize: '20px' },
+    default: { padding: '20px 24px', iconSize: '48px', titleSize: '14px', valueSize: '28px' },
+    large: { padding: '28px 32px', iconSize: '56px', titleSize: '16px', valueSize: '36px' },
   }
 
-  const glowColors = {
-    blue: 'bg-[#3B82F6]',
-    yellow: 'bg-[#FACC15]',
-  }
-
-  const accentColors = {
-    blue: 'from-[#3B82F6]/20 to-transparent',
-    yellow: 'from-[#FACC15]/20 to-transparent',
-  }
-
-  const isLarge = size === 'large'
+  const colors = colorConfig[color]
+  const sizes = sizeConfig[size]
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay }}
-      whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className={cn(
-        'relative rounded-2xl bg-gradient-to-br from-[#12121A] to-[#0D0D14] border overflow-hidden group',
-        colorClasses[color]
-      )}
+      transition={{ duration: 0.4, delay, type: 'spring', stiffness: 100 }}
+      whileHover={{ y: -5, scale: 1.02 }}
+      style={{
+        position: 'relative',
+        padding: sizes.padding,
+        borderRadius: '16px',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+        overflow: 'hidden',
+        cursor: 'default',
+      }}
     >
-      {/* Background glow effect */}
-      <div className={cn(
-        'absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-10 group-hover:opacity-25 transition-opacity duration-500 pointer-events-none',
-        glowColors[color],
-      )} />
-
-      {/* Top accent line */}
-      <div className={cn(
-        'absolute top-0 left-0 right-0 h-1 bg-gradient-to-r',
-        accentColors[color],
-      )} />
+      {/* Top accent gradient */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '3px',
+          background: `linear-gradient(90deg, transparent, ${colors.accent}, transparent)`,
+        }}
+      />
 
       {/* Content */}
-      <div className={cn(
-        'relative h-full flex flex-col items-center text-center',
-        isLarge ? 'px-8 py-7' : 'px-6 py-5'
-      )}>
-        {/* Sparkle indicator for highlighted metrics */}
+      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+        {/* Sparkle indicator */}
         {showSparkle && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: delay + 0.3 }}
-            className="absolute top-3 right-3"
-          >
-            <Sparkles size={16} className="text-[#FACC15]" />
-          </motion.div>
+          <div style={{ position: 'absolute', top: '-4px', right: '-4px' }}>
+            <Sparkles size={16} style={{ color: '#FACC15' }} />
+          </div>
         )}
 
         {/* Icon */}
         {icon && (
-          <div className={cn(
-            'rounded-xl flex items-center justify-center mb-3',
-            iconColors[color],
-            isLarge ? 'w-14 h-14' : 'w-12 h-12'
-          )}>
+          <div
+            style={{
+              width: sizes.iconSize,
+              height: sizes.iconSize,
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px',
+              backgroundColor: colors.iconBg,
+              color: colors.iconText,
+            }}
+          >
             {icon}
           </div>
         )}
 
         {/* Title */}
-        <span className={cn(
-          'text-[#A0A0B0] font-medium mb-2',
-          isLarge ? 'text-base' : 'text-sm'
-        )}>
+        <span
+          style={{
+            fontSize: sizes.titleSize,
+            fontWeight: 500,
+            color: '#A0A0B0',
+            marginBottom: '8px',
+          }}
+        >
           {title}
         </span>
 
         {/* Value */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: delay + 0.2 }}
-          className={cn(
-            'font-bold text-white tracking-tight',
-            isLarge ? 'text-4xl' : 'text-[28px]'
-          )}
+        <div
+          style={{
+            fontSize: sizes.valueSize,
+            fontWeight: 700,
+            color: '#FFFFFF',
+          }}
         >
           {formatValue(value)}
-        </motion.div>
+        </div>
 
         {/* Subtitle */}
         {subtitle && (
-          <span className="text-xs text-[#6B6B7B] mt-1">{subtitle}</span>
+          <span
+            style={{
+              fontSize: '12px',
+              color: '#6B6B7B',
+              marginTop: '4px',
+            }}
+          >
+            {subtitle}
+          </span>
         )}
 
         {/* Change indicator */}
         {previousValue !== undefined && (
-          <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-white/5 w-full">
-            <motion.span
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: delay + 0.4 }}
-              className={cn(
-                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold',
-                isPositive && 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20',
-                isNegative && 'bg-red-500/15 text-red-400 border border-red-500/20',
-                !isPositive && !isNegative && 'bg-white/5 text-[#6B6B7B] border border-white/10'
-              )}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px',
+              marginTop: '16px',
+              paddingTop: '16px',
+              borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+              width: '100%',
+            }}
+          >
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '9999px',
+                fontSize: '12px',
+                fontWeight: 600,
+                backgroundColor: isPositive ? 'rgba(16, 185, 129, 0.15)' : isNegative ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                color: isPositive ? '#10B981' : isNegative ? '#EF4444' : '#6B6B7B',
+                border: `1px solid ${isPositive ? 'rgba(16, 185, 129, 0.25)' : isNegative ? 'rgba(239, 68, 68, 0.25)' : 'rgba(255, 255, 255, 0.1)'}`,
+              }}
             >
-              {isPositive && <TrendingUp size={14} />}
-              {isNegative && <TrendingDown size={14} />}
+              {isPositive && <ArrowUpRight size={14} />}
+              {isNegative && <ArrowDownRight size={14} />}
               {!isPositive && !isNegative && <Minus size={14} />}
-              {isPositive && '+'}{Math.abs(percentChange).toFixed(1)}%
-            </motion.span>
-            <span className="text-xs text-[#6B6B7B]">vs período anterior</span>
+              {rawIsPositive && '+'}{Math.abs(percentChange).toFixed(1)}%
+            </span>
+            <span style={{ fontSize: '12px', color: '#6B6B7B' }}>{comparisonLabel}</span>
           </div>
         )}
       </div>

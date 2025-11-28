@@ -12,10 +12,10 @@ const objectives: CampaignObjective[] = ['awareness', 'traffic', 'engagement', '
 
 const objectiveLabels: Record<CampaignObjective, string> = {
   awareness: 'Reconhecimento',
-  traffic: 'Tráfego',
+  traffic: 'Trafego',
   engagement: 'Engajamento',
-  leads: 'Geração de Leads',
-  app_installs: 'Instalações de App',
+  leads: 'Geracao de Leads',
+  app_installs: 'Instalacoes de App',
   sales: 'Vendas',
 }
 
@@ -36,7 +36,7 @@ export function CreateCampaignModal() {
     }
 
     if (!budget || parseFloat(budget) <= 0) {
-      showToast('Por favor, informe um orçamento válido', 'error')
+      showToast('Por favor, informe um orcamento valido', 'error')
       return
     }
 
@@ -96,35 +96,80 @@ export function CreateCampaignModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 9999,
+            }}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-[#12121A] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            style={{
+              position: 'fixed',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '100%',
+              maxWidth: '512px',
+              maxHeight: '90vh',
+              overflow: 'auto',
+              backgroundColor: '#12121A',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '16px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              zIndex: 10000,
+            }}
           >
-            <div className="flex items-center justify-between p-5 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#1D4ED8] flex items-center justify-center">
-                  <Megaphone className="w-5 h-5 text-white" />
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '20px',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(to bottom right, #3B82F6, #1D4ED8)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Megaphone style={{ width: '20px', height: '20px', color: '#FFFFFF' }} />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-white">Nova Campanha</h2>
-                  <p className="text-sm text-[#6B6B7B]">Configure sua nova campanha</p>
+                  <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>Nova Campanha</h2>
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Configure sua nova campanha</p>
                 </div>
               </div>
               <button
                 onClick={handleClose}
-                className="p-2 rounded-lg hover:bg-white/10 text-[#6B6B7B] hover:text-white transition-colors"
+                style={{
+                  padding: '8px',
+                  borderRadius: '8px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#6B6B7B',
+                  cursor: 'pointer',
+                }}
               >
-                <X className="w-5 h-5" />
+                <X style={{ width: '20px', height: '20px' }} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-5 space-y-5">
+            <form onSubmit={handleSubmit} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <label className="block text-sm font-medium text-[#A0A0B0] mb-2">
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
                   Nome da Campanha
                 </label>
                 <input
@@ -132,47 +177,69 @@ export function CreateCampaignModal() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ex: Black Friday 2024"
-                  className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50 transition-all"
+                  style={{
+                    width: '100%',
+                    height: '48px',
+                    padding: '0 16px',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#A0A0B0] mb-2">
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
                   Plataforma
                 </label>
-                <div className="grid grid-cols-6 gap-2">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px' }}>
                   {platforms.map((p) => (
                     <button
                       key={p}
                       type="button"
                       onClick={() => setPlatform(p)}
-                      className={`p-3 rounded-xl border transition-all ${
-                        platform === p
-                          ? 'border-[#3B82F6] bg-[#3B82F6]/10'
-                          : 'border-white/10 bg-white/5 hover:bg-white/10'
-                      }`}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '12px',
+                        border: platform === p ? '1px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
+                        backgroundColor: platform === p ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
                     >
-                      <PlatformIcon platform={p} size={24} className="mx-auto" />
+                      <PlatformIcon platform={p} size={24} />
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#A0A0B0] mb-2">
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
                   Objetivo
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                   {objectives.map((obj) => (
                     <button
                       key={obj}
                       type="button"
                       onClick={() => setObjective(obj)}
-                      className={`px-3 py-2.5 rounded-xl text-sm font-medium border transition-all ${
-                        objective === obj
-                          ? 'border-[#3B82F6] bg-[#3B82F6]/10 text-[#3B82F6]'
-                          : 'border-white/10 bg-white/5 text-white hover:bg-white/10'
-                      }`}
+                      style={{
+                        padding: '10px 12px',
+                        borderRadius: '12px',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        border: objective === obj ? '1px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
+                        backgroundColor: objective === obj ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                        color: objective === obj ? '#3B82F6' : '#FFFFFF',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                      }}
                     >
                       {objectiveLabels[obj]}
                     </button>
@@ -181,8 +248,8 @@ export function CreateCampaignModal() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#A0A0B0] mb-2">
-                  Orçamento Diário (R$)
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                  Orcamento Diario (R$)
                 </label>
                 <input
                   type="number"
@@ -191,15 +258,26 @@ export function CreateCampaignModal() {
                   placeholder="0.00"
                   min="0"
                   step="0.01"
-                  className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50 transition-all"
+                  style={{
+                    width: '100%',
+                    height: '48px',
+                    padding: '0 16px',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
                 />
               </div>
 
-              <div className="flex gap-3 pt-2">
-                <Button type="button" variant="ghost" className="flex-1" onClick={handleClose}>
+              <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>
+                <Button type="button" variant="ghost" onClick={handleClose} style={{ flex: 1 }}>
                   Cancelar
                 </Button>
-                <Button type="submit" variant="primary" className="flex-1">
+                <Button type="submit" variant="primary" style={{ flex: 1 }}>
                   Criar Campanha
                 </Button>
               </div>

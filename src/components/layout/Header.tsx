@@ -11,7 +11,6 @@ import {
   Plus,
   Link2
 } from 'lucide-react'
-import { Button } from '@/components/ui'
 import { useApp } from '@/contexts'
 import { cn } from '@/lib/utils'
 
@@ -85,54 +84,144 @@ export function Header({
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-[#0A0A0F]/95 backdrop-blur-xl border-b border-white/10">
-      <div className="flex items-center justify-between h-[72px] px-6 lg:px-8 gap-6">
-        {/* Título e Subtítulo */}
-        <div className="min-w-0 flex-shrink-0 mr-auto">
-          <h1 className="text-lg md:text-xl font-bold text-white truncate">
+    <header
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 40,
+        backgroundColor: 'rgba(10, 10, 15, 0.95)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          height: '72px',
+          paddingLeft: '32px',
+          paddingRight: '32px',
+        }}
+      >
+        {/* Lado Esquerdo - Título */}
+        <div style={{ flexShrink: 0 }}>
+          <h1
+            style={{
+              fontSize: '20px',
+              fontWeight: 700,
+              color: '#FFFFFF',
+              margin: 0,
+            }}
+          >
             {title}
           </h1>
           {subtitle && (
-            <p className="text-xs text-[#6B6B7B] mt-0.5 truncate max-w-[200px] md:max-w-[300px]">
+            <p
+              style={{
+                fontSize: '12px',
+                color: '#6B6B7B',
+                marginTop: '2px',
+                margin: 0,
+              }}
+            >
               {subtitle}
             </p>
           )}
         </div>
 
-        {/* Campo de Busca Global */}
-        <form onSubmit={handleSearch} className="relative hidden lg:flex items-center flex-shrink-0">
-          <Search className="absolute left-3.5 w-4 h-4 text-[#6B6B7B] pointer-events-none z-10" />
-          <input
-            type="text"
-            placeholder="Buscar campanhas..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-52 xl:w-64 h-10 pl-10 pr-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50 focus:bg-white/10 transition-all"
-          />
-        </form>
-
-        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+        {/* Lado Direito - Ações */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Campo de Busca */}
+          <form onSubmit={handleSearch} className="hidden lg:block">
+            <div style={{ position: 'relative', width: '220px' }}>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar campanhas..."
+                style={{
+                  width: '100%',
+                  height: '40px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                  color: '#FFFFFF',
+                  paddingLeft: '40px',
+                  paddingRight: '16px',
+                  outline: 'none',
+                }}
+              />
+              <Search
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: '16px',
+                  height: '16px',
+                  color: '#6B6B7B',
+                }}
+              />
+            </div>
+          </form>
 
           {/* Seletor de Período */}
-          <div className="relative hidden md:block">
+          <div style={{ position: 'relative' }} className="hidden md:block">
             <button
               onClick={() => setShowDatePicker(!showDatePicker)}
-              className="flex items-center gap-2 h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white hover:bg-white/10 hover:border-[#3B82F6]/30 transition-all"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                height: '40px',
+                padding: '0 12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '12px',
+                color: '#FFFFFF',
+                cursor: 'pointer',
+                fontSize: '12px',
+              }}
             >
-              <Calendar className="w-4 h-4 text-[#3B82F6]" />
-              <span className="hidden xl:inline text-xs">{dateRange}</span>
-              <ChevronDown className={cn('w-3.5 h-3.5 text-[#6B6B7B] transition-transform', showDatePicker && 'rotate-180')} />
+              <Calendar style={{ width: '16px', height: '16px', color: '#3B82F6' }} />
+              <span className="hidden xl:inline">{dateRange}</span>
+              <ChevronDown
+                style={{
+                  width: '14px',
+                  height: '14px',
+                  color: '#6B6B7B',
+                  transform: showDatePicker ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s',
+                }}
+              />
             </button>
 
             <AnimatePresence>
               {showDatePicker && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowDatePicker(false)} />
+                  <div
+                    style={{ position: 'fixed', inset: 0, zIndex: 40 }}
+                    onClick={() => setShowDatePicker(false)}
+                  />
                   <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 top-full mt-2 w-48 bg-[#12121A] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: '100%',
+                      marginTop: '8px',
+                      width: '192px',
+                      backgroundColor: '#12121A',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '12px',
+                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                      overflow: 'hidden',
+                      zIndex: 50,
+                    }}
                   >
                     {dateRanges.map((range) => (
                       <button
@@ -142,10 +231,16 @@ export function Header({
                           setShowDatePicker(false)
                           showToast('Período alterado: ' + range, 'info')
                         }}
-                        className={cn(
-                          'w-full px-4 py-2.5 text-left text-sm transition-colors',
-                          dateRange === range ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'text-white hover:bg-white/5'
-                        )}
+                        style={{
+                          width: '100%',
+                          padding: '10px 16px',
+                          textAlign: 'left',
+                          fontSize: '14px',
+                          color: dateRange === range ? '#3B82F6' : '#FFFFFF',
+                          backgroundColor: dateRange === range ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                        }}
                       >
                         {range}
                       </button>
@@ -159,22 +254,68 @@ export function Header({
           {/* Botão Atualizar */}
           <button
             onClick={handleRefresh}
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/10 hover:border-[#3B82F6]/30 transition-all"
             title="Atualizar dados"
+            style={{
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px',
+              color: '#A0A0B0',
+              cursor: 'pointer',
+            }}
           >
-            <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} />
+            <RefreshCw
+              style={{
+                width: '16px',
+                height: '16px',
+                animation: isRefreshing ? 'spin 1s linear infinite' : 'none',
+              }}
+            />
           </button>
 
           {/* Notificações */}
-          <div className="relative">
+          <div style={{ position: 'relative' }}>
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-[#A0A0B0] hover:text-white hover:bg-white/10 hover:border-[#3B82F6]/30 transition-all"
               title="Notificações"
+              style={{
+                position: 'relative',
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '12px',
+                color: '#A0A0B0',
+                cursor: 'pointer',
+              }}
             >
-              <Bell className="w-4 h-4" />
+              <Bell style={{ width: '16px', height: '16px' }} />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-[#FACC15] text-[#0A0A0F] rounded-full">
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-4px',
+                    minWidth: '20px',
+                    height: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    backgroundColor: '#FACC15',
+                    color: '#0A0A0F',
+                    borderRadius: '9999px',
+                    padding: '0 4px',
+                  }}
+                >
                   {unreadCount}
                 </span>
               )}
@@ -183,64 +324,113 @@ export function Header({
             <AnimatePresence>
               {showNotifications && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
+                  <div
+                    style={{ position: 'fixed', inset: 0, zIndex: 40 }}
+                    onClick={() => setShowNotifications(false)}
+                  />
                   <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 top-full mt-2 w-80 bg-[#12121A] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: '100%',
+                      marginTop: '8px',
+                      width: '320px',
+                      backgroundColor: '#12121A',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '12px',
+                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                      overflow: 'hidden',
+                      zIndex: 50,
+                    }}
                   >
-                    <div className="p-4 border-b border-white/10">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-white">Notificações</h3>
-                        <button
-                          onClick={() => {
-                            markAllNotificationsAsRead()
-                            setShowNotifications(false)
-                          }}
-                          className="text-xs text-[#3B82F6] cursor-pointer hover:underline"
-                        >
-                          Marcar lidas
-                        </button>
-                      </div>
+                    <div
+                      style={{
+                        padding: '16px',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <h3 style={{ fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Notificações</h3>
+                      <button
+                        onClick={() => {
+                          markAllNotificationsAsRead()
+                          setShowNotifications(false)
+                        }}
+                        style={{
+                          fontSize: '12px',
+                          color: '#3B82F6',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Marcar lidas
+                      </button>
                     </div>
-                    <div className="max-h-80 overflow-y-auto">
+                    <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
                       {notifications.length === 0 ? (
-                        <div className="p-6 text-center text-sm text-[#6B6B7B]">Nenhuma notificação</div>
+                        <div style={{ padding: '24px', textAlign: 'center', fontSize: '14px', color: '#6B6B7B' }}>
+                          Nenhuma notificação
+                        </div>
                       ) : (
                         notifications.slice(0, 5).map((notification) => (
                           <div
                             key={notification.id}
                             onClick={() => markNotificationAsRead(notification.id)}
-                            className={cn(
-                              'p-4 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer',
-                              !notification.read && 'bg-[#3B82F6]/5'
-                            )}
+                            style={{
+                              padding: '16px',
+                              borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                              cursor: 'pointer',
+                              backgroundColor: !notification.read ? 'rgba(59, 130, 246, 0.05)' : 'transparent',
+                            }}
                           >
-                            <div className="flex items-start gap-3">
-                              <div className={cn(
-                                'w-2 h-2 rounded-full mt-2 flex-shrink-0',
-                                notification.type === 'alert' && 'bg-red-500',
-                                notification.type === 'success' && 'bg-[#3B82F6]',
-                                notification.type === 'warning' && 'bg-[#FACC15]',
-                                notification.type === 'info' && 'bg-[#60A5FA]',
-                              )} />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white">{notification.title}</p>
-                                <p className="text-xs text-[#6B6B7B] mt-1 line-clamp-2">{notification.message}</p>
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                              <div
+                                style={{
+                                  width: '8px',
+                                  height: '8px',
+                                  borderRadius: '9999px',
+                                  marginTop: '8px',
+                                  flexShrink: 0,
+                                  backgroundColor:
+                                    notification.type === 'alert' ? '#EF4444' :
+                                    notification.type === 'success' ? '#3B82F6' :
+                                    notification.type === 'warning' ? '#FACC15' : '#60A5FA',
+                                }}
+                              />
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <p style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
+                                  {notification.title}
+                                </p>
+                                <p style={{ fontSize: '12px', color: '#6B6B7B', marginTop: '4px' }}>
+                                  {notification.message}
+                                </p>
                               </div>
                             </div>
                           </div>
                         ))
                       )}
                     </div>
-                    <div className="p-3 bg-white/5">
+                    <div style={{ padding: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
                       <button
                         onClick={() => {
                           setShowNotifications(false)
                           showToast('Em desenvolvimento', 'info')
                         }}
-                        className="w-full text-center text-sm text-[#3B82F6] hover:underline"
+                        style={{
+                          width: '100%',
+                          textAlign: 'center',
+                          fontSize: '14px',
+                          color: '#3B82F6',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                        }}
                       >
                         Ver todas
                       </button>
@@ -253,13 +443,42 @@ export function Header({
 
           {/* Botão Principal */}
           {showCreateButton && (
-            <Button variant="primary" className="gap-2 hidden sm:flex h-10 px-4" onClick={handleCreateClick}>
-              {buttonType === 'connect' ? <Link2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-              <span className="hidden lg:inline text-sm">{createButtonText}</span>
-            </Button>
+            <button
+              onClick={handleCreateClick}
+              className="hidden sm:flex"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                height: '40px',
+                padding: '0 16px',
+                background: 'linear-gradient(to right, #3B82F6, #1D4ED8)',
+                border: 'none',
+                borderRadius: '12px',
+                color: '#FFFFFF',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {buttonType === 'connect' ? (
+                <Link2 style={{ width: '16px', height: '16px' }} />
+              ) : (
+                <Plus style={{ width: '16px', height: '16px' }} />
+              )}
+              <span className="hidden lg:inline">{createButtonText}</span>
+            </button>
           )}
         </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </header>
   )
 }

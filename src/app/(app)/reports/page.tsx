@@ -29,7 +29,6 @@ import {
   Check,
   X,
   CalendarClock,
-  Send,
   MessageCircle,
 } from 'lucide-react'
 import { Report, Platform } from '@/types'
@@ -76,16 +75,16 @@ export default function ReportsPage() {
   const [editingSchedule, setEditingSchedule] = useState<any | null>(null)
 
   return (
-    <div className="min-h-screen">
+    <div style={{ minHeight: '100vh' }}>
       <Header
         title="Relatórios"
         subtitle="Crie e gerencie relatórios automatizados"
         showCreateButton={false}
       />
 
-      <main className="p-8">
+      <main style={{ padding: '24px 32px', paddingBottom: '80px' }}>
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
           <StatCard
             label="Relatórios Ativos"
             value={reports.filter(r => r.status === 'active').length}
@@ -117,22 +116,26 @@ export default function ReportsPage() {
         </div>
 
         {/* Action Bar */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-white">Meus Relatórios</h2>
-          <div className="flex items-center gap-3">
-            <Button variant="secondary" className="gap-2" onClick={() => setShowScheduleModal(true)}>
-              <CalendarClock size={18} />
-              Programar
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Meus Relatórios</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Button variant="secondary" onClick={() => setShowScheduleModal(true)}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CalendarClock size={18} />
+                Programar
+              </span>
             </Button>
-            <Button variant="primary" className="gap-2" onClick={() => setShowCreateModal(true)}>
-              <Plus size={18} />
-              Novo Relatório
+            <Button variant="primary" onClick={() => setShowCreateModal(true)}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Plus size={18} />
+                Novo Relatório
+              </span>
             </Button>
           </div>
         </div>
 
         {/* Reports Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '48px' }}>
           {reports.map((report, index) => (
             <ReportCard key={report.id} report={report} index={index} />
           ))}
@@ -143,22 +146,39 @@ export default function ReportsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: reports.length * 0.1 }}
             onClick={() => setShowCreateModal(true)}
-            className="p-6 rounded-2xl border-2 border-dashed border-white/10 hover:border-[#3B82F6]/30 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all group min-h-[280px]"
+            style={{
+              padding: '24px',
+              borderRadius: '16px',
+              border: '2px dashed rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '16px',
+              cursor: 'pointer',
+              minHeight: '280px',
+              transition: 'all 0.2s',
+            }}
+            whileHover={{ borderColor: 'rgba(59, 130, 246, 0.3)' }}
           >
-            <div className="p-4 rounded-full bg-white/5 group-hover:bg-[#3B82F6]/10 transition-colors">
-              <Plus size={24} className="text-[#6B6B7B] group-hover:text-[#3B82F6] transition-colors" />
+            <div style={{
+              padding: '16px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            }}>
+              <Plus size={24} style={{ color: '#6B6B7B' }} />
             </div>
-            <div className="text-center">
-              <p className="text-sm font-medium text-white mb-1">Criar Novo Relatório</p>
-              <p className="text-xs text-[#6B6B7B]">Configure relatórios automáticos</p>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '4px' }}>Criar Novo Relatório</p>
+              <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Configure relatórios automáticos</p>
             </div>
           </motion.div>
         </div>
 
         {/* Report Templates */}
-        <div className="mt-12">
-          <h2 className="text-lg font-semibold text-white mb-6">Templates Disponíveis</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div style={{ marginTop: '48px', paddingTop: '32px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', marginBottom: '24px' }}>Templates Disponíveis</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', paddingBottom: '32px' }}>
             {[
               { name: 'Performance Semanal', description: 'Métricas de performance completas', icon: TrendingUp, color: 'blue' },
               { name: 'Análise de Audiência', description: 'Demografia e comportamento', icon: Users, color: 'blue' },
@@ -171,17 +191,29 @@ export default function ReportsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ y: -4 }}
-                className="p-5 rounded-xl bg-white/5 border border-white/10 hover:border-[#3B82F6]/30 cursor-pointer transition-all group"
+                style={{
+                  padding: '24px',
+                  borderRadius: '16px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
               >
-                <div className={`p-3 rounded-xl mb-4 w-fit ${
-                  template.color === 'blue' ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-[#FACC15]/10 text-[#FACC15]'
-                }`}>
+                <div style={{
+                  padding: '12px',
+                  borderRadius: '12px',
+                  marginBottom: '16px',
+                  width: 'fit-content',
+                  backgroundColor: template.color === 'blue' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(250, 204, 21, 0.1)',
+                  color: template.color === 'blue' ? '#3B82F6' : '#FACC15',
+                }}>
                   <template.icon size={20} />
                 </div>
-                <h3 className="text-sm font-semibold text-white mb-1 group-hover:text-[#3B82F6] transition-colors">
+                <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '8px' }}>
                   {template.name}
                 </h3>
-                <p className="text-xs text-[#6B6B7B]">{template.description}</p>
+                <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>{template.description}</p>
               </motion.div>
             ))}
           </div>
@@ -270,48 +302,97 @@ function CreateReportModal({ isOpen, onClose, connectedAccounts }: { isOpen: boo
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={onClose}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 50,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(4px)',
+          }}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl bg-gradient-to-br from-[#12121A] to-[#0D0D14] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+            style={{
+              width: '100%',
+              maxWidth: '672px',
+              background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '16px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              overflow: 'hidden',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+            }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-[#3B82F6]/10">
-                  <FileText className="w-5 h-5 text-[#3B82F6]" />
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '24px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  padding: '8px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                }}>
+                  <FileText style={{ width: '20px', height: '20px', color: '#3B82F6' }} />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-white">Criar Novo Relatório</h2>
-                  <p className="text-sm text-[#6B6B7B]">Configure os detalhes do relatório</p>
+                  <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Criar Novo Relatório</h2>
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Configure os detalhes do relatório</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg text-[#6B6B7B] hover:text-white hover:bg-white/10 transition-all"
+                style={{
+                  padding: '8px',
+                  borderRadius: '8px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#6B6B7B',
+                  cursor: 'pointer',
+                }}
               >
                 <X size={20} />
               </button>
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-5">
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Conta de anúncios */}
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Conta de Anúncios *</label>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Conta de Anúncios *</label>
                 <select
                   value={formData.account}
                   onChange={(e) => setFormData(prev => ({ ...prev, account: e.target.value }))}
-                  className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50"
+                  style={{
+                    width: '100%',
+                    height: '44px',
+                    padding: '0 16px',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    fontSize: '14px',
+                    color: '#FFFFFF',
+                    outline: 'none',
+                    appearance: 'none',
+                    cursor: 'pointer',
+                  }}
                 >
-                  <option value="">Selecione uma conta</option>
+                  <option value="" style={{ backgroundColor: '#12121A' }}>Selecione uma conta</option>
                   {connectedAccounts.filter(a => a.connected).map((account) => (
-                    <option key={account.id} value={account.id} className="bg-[#12121A]">
+                    <option key={account.id} value={account.id} style={{ backgroundColor: '#12121A' }}>
                       {account.name}
                     </option>
                   ))}
@@ -320,72 +401,118 @@ function CreateReportModal({ isOpen, onClose, connectedAccounts }: { isOpen: boo
 
               {/* Plataforma */}
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Plataforma Ads *</label>
-                <div className="grid grid-cols-4 gap-3">
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Plataforma Ads *</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
                   {['meta', 'google', 'linkedin', 'tiktok'].map((platform) => (
                     <button
                       key={platform}
                       onClick={() => setFormData(prev => ({ ...prev, platform }))}
-                      className={`p-3 rounded-xl border transition-all flex flex-col items-center gap-2 ${
-                        formData.platform === platform
-                          ? 'bg-[#3B82F6]/10 border-[#3B82F6]/50'
-                          : 'bg-white/5 border-white/10 hover:border-white/20'
-                      }`}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '12px',
+                        border: formData.platform === platform ? '1px solid rgba(59, 130, 246, 0.5)' : '1px solid rgba(255, 255, 255, 0.1)',
+                        backgroundColor: formData.platform === platform ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
                     >
                       <PlatformIcon platform={platform as Platform} size={24} />
-                      <span className="text-xs text-white capitalize">{platform === 'meta' ? 'Meta Ads' : `${platform} Ads`}</span>
+                      <span style={{ fontSize: '12px', color: '#FFFFFF', textTransform: 'capitalize' }}>
+                        {platform === 'meta' ? 'Meta Ads' : `${platform} Ads`}
+                      </span>
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Datas */}
-              <div className="grid grid-cols-2 gap-4">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Data Início *</label>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Data Início *</label>
                   <input
                     type="date"
                     value={formData.startDate}
                     onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                    className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50"
+                    style={{
+                      width: '100%',
+                      height: '44px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      fontSize: '14px',
+                      color: '#FFFFFF',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Data Fim *</label>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Data Fim *</label>
                   <input
                     type="date"
                     value={formData.endDate}
                     onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                    className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50"
+                    style={{
+                      width: '100%',
+                      height: '44px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      fontSize: '14px',
+                      color: '#FFFFFF',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
                   />
                 </div>
               </div>
 
               {/* Nome do Relatório */}
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Nome do Relatório *</label>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Nome do Relatório *</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Ex: Relatório Mensal - Cliente X"
-                  className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50"
+                  style={{
+                    width: '100%',
+                    height: '44px',
+                    padding: '0 16px',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    fontSize: '14px',
+                    color: '#FFFFFF',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
                 />
               </div>
 
               {/* Métricas */}
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Métricas do Relatório</label>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Métricas do Relatório</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
                   {metricsOptions.map((metric) => (
                     <button
                       key={metric.id}
                       onClick={() => handleMetricToggle(metric.id)}
-                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                        formData.metrics.includes(metric.id)
-                          ? 'bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]/30'
-                          : 'bg-white/5 text-[#A0A0B0] border border-white/10 hover:border-white/20'
-                      }`}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        border: formData.metrics.includes(metric.id) ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                        backgroundColor: formData.metrics.includes(metric.id) ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                        color: formData.metrics.includes(metric.id) ? '#3B82F6' : '#A0A0B0',
+                        cursor: 'pointer',
+                      }}
                     >
                       {metric.label}
                     </button>
@@ -395,20 +522,33 @@ function CreateReportModal({ isOpen, onClose, connectedAccounts }: { isOpen: boo
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between p-6 border-t border-white/10 bg-white/[0.02]">
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '24px',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              backgroundColor: 'rgba(255, 255, 255, 0.02)',
+            }}>
               <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-              <div className="flex items-center gap-2">
-                <Button variant="secondary" className="gap-2" onClick={() => handleExport('email')}>
-                  <Mail size={16} />
-                  Enviar E-mail
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Button variant="secondary" onClick={() => handleExport('email')}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Mail size={16} />
+                    Enviar E-mail
+                  </span>
                 </Button>
-                <Button variant="secondary" className="gap-2" onClick={() => handleExport('whatsapp')}>
-                  <MessageCircle size={16} />
-                  WhatsApp
+                <Button variant="secondary" onClick={() => handleExport('whatsapp')}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <MessageCircle size={16} />
+                    WhatsApp
+                  </span>
                 </Button>
-                <Button variant="primary" className="gap-2" onClick={() => handleExport('download')}>
-                  <Download size={16} />
-                  Baixar PDF
+                <Button variant="primary" onClick={() => handleExport('download')}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Download size={16} />
+                    Baixar PDF
+                  </span>
                 </Button>
               </div>
             </div>
@@ -503,145 +643,258 @@ function ScheduleReportModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={onClose}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 50,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(4px)',
+          }}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-3xl bg-gradient-to-br from-[#12121A] to-[#0D0D14] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
+            style={{
+              width: '100%',
+              maxWidth: '768px',
+              background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '16px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              overflow: 'hidden',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+            }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-[#FACC15]/10">
-                  <CalendarClock className="w-5 h-5 text-[#FACC15]" />
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '24px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  padding: '8px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(250, 204, 21, 0.1)',
+                }}>
+                  <CalendarClock style={{ width: '20px', height: '20px', color: '#FACC15' }} />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-white">Programar Relatórios</h2>
-                  <p className="text-sm text-[#6B6B7B]">Configure envios automáticos para seus clientes</p>
+                  <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Programar Relatórios</h2>
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Configure envios automáticos para seus clientes</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg text-[#6B6B7B] hover:text-white hover:bg-white/10 transition-all"
+                style={{
+                  padding: '8px',
+                  borderRadius: '8px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#6B6B7B',
+                  cursor: 'pointer',
+                }}
               >
                 <X size={20} />
               </button>
             </div>
 
             {/* Content */}
-            <div className="p-6">
+            <div style={{ padding: '24px' }}>
               {!showForm && !editingSchedule ? (
                 <>
                   {/* Lista de relatórios programados */}
                   {scheduledReports.length > 0 ? (
-                    <div className="space-y-3 mb-6">
-                      <h3 className="text-sm font-medium text-white mb-3">Relatórios Programados</h3>
-                      {scheduledReports.map((schedule) => (
-                        <div
-                          key={schedule.id}
-                          className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between"
-                        >
-                          <div>
-                            <p className="text-sm font-medium text-white">{schedule.name}</p>
-                            <p className="text-xs text-[#6B6B7B]">
-                              Dias: {schedule.days.join(', ')} | Via {schedule.sendMethod === 'email' ? 'E-mail' : 'WhatsApp'}
-                            </p>
+                    <div style={{ marginBottom: '24px' }}>
+                      <h3 style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>Relatórios Programados</h3>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {scheduledReports.map((schedule) => (
+                          <div
+                            key={schedule.id}
+                            style={{
+                              padding: '16px',
+                              borderRadius: '12px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                            }}
+                          >
+                            <div>
+                              <p style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', margin: 0 }}>{schedule.name}</p>
+                              <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>
+                                Dias: {schedule.days.join(', ')} | Via {schedule.sendMethod === 'email' ? 'E-mail' : 'WhatsApp'}
+                              </p>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <button
+                                onClick={() => onEdit(schedule)}
+                                style={{
+                                  padding: '8px',
+                                  borderRadius: '8px',
+                                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                  border: 'none',
+                                  color: '#6B6B7B',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <Edit size={14} />
+                              </button>
+                              <button
+                                onClick={() => onDelete(schedule.id)}
+                                style={{
+                                  padding: '8px',
+                                  borderRadius: '8px',
+                                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                  border: 'none',
+                                  color: '#6B6B7B',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => onEdit(schedule)}
-                              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-[#6B6B7B] hover:text-white transition-all"
-                            >
-                              <Edit size={14} />
-                            </button>
-                            <button
-                              onClick={() => onDelete(schedule.id)}
-                              className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-[#6B6B7B] hover:text-red-400 transition-all"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
-                        <CalendarClock className="w-8 h-8 text-[#6B6B7B]" />
+                    <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                      <div style={{
+                        width: '64px',
+                        height: '64px',
+                        margin: '0 auto 16px',
+                        borderRadius: '50%',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                        <CalendarClock style={{ width: '32px', height: '32px', color: '#6B6B7B' }} />
                       </div>
-                      <p className="text-sm text-[#6B6B7B] mb-2">Nenhum relatório programado</p>
-                      <p className="text-xs text-[#4B4B5B]">Crie sua primeira programação de envio automático</p>
+                      <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px' }}>Nenhum relatório programado</p>
+                      <p style={{ fontSize: '12px', color: '#4B4B5B', margin: 0 }}>Crie sua primeira programação de envio automático</p>
                     </div>
                   )}
 
-                  <Button variant="primary" className="w-full gap-2" onClick={() => setShowForm(true)}>
-                    <Plus size={18} />
-                    Criar Programação
+                  <Button variant="primary" onClick={() => setShowForm(true)} style={{ width: '100%' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                      <Plus size={18} />
+                      Criar Programação
+                    </span>
                   </Button>
                 </>
               ) : (
-                <div className="space-y-5">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   {/* Formulário de programação */}
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">Nome da Programação *</label>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Nome da Programação *</label>
                     <input
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                       placeholder="Ex: Relatório Semanal - Cliente X"
-                      className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50"
+                      style={{
+                        width: '100%',
+                        height: '44px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        fontSize: '14px',
+                        color: '#FFFFFF',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                     <div>
-                      <label className="block text-sm font-medium text-white mb-2">Conta de Anúncios</label>
+                      <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Conta de Anúncios</label>
                       <select
                         value={formData.account}
                         onChange={(e) => setFormData(prev => ({ ...prev, account: e.target.value }))}
-                        className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50"
+                        style={{
+                          width: '100%',
+                          height: '44px',
+                          padding: '0 16px',
+                          borderRadius: '12px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          fontSize: '14px',
+                          color: '#FFFFFF',
+                          outline: 'none',
+                          appearance: 'none',
+                          cursor: 'pointer',
+                        }}
                       >
-                        <option value="">Selecione</option>
+                        <option value="" style={{ backgroundColor: '#12121A' }}>Selecione</option>
                         {connectedAccounts.filter(a => a.connected).map((account) => (
-                          <option key={account.id} value={account.id} className="bg-[#12121A]">
+                          <option key={account.id} value={account.id} style={{ backgroundColor: '#12121A' }}>
                             {account.name}
                           </option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-white mb-2">Plataforma</label>
+                      <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Plataforma</label>
                       <select
                         value={formData.platform}
                         onChange={(e) => setFormData(prev => ({ ...prev, platform: e.target.value }))}
-                        className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50"
+                        style={{
+                          width: '100%',
+                          height: '44px',
+                          padding: '0 16px',
+                          borderRadius: '12px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          fontSize: '14px',
+                          color: '#FFFFFF',
+                          outline: 'none',
+                          appearance: 'none',
+                          cursor: 'pointer',
+                        }}
                       >
-                        <option value="">Selecione</option>
-                        <option value="meta" className="bg-[#12121A]">Meta Ads</option>
-                        <option value="google" className="bg-[#12121A]">Google Ads</option>
-                        <option value="linkedin" className="bg-[#12121A]">LinkedIn Ads</option>
-                        <option value="tiktok" className="bg-[#12121A]">TikTok Ads</option>
+                        <option value="" style={{ backgroundColor: '#12121A' }}>Selecione</option>
+                        <option value="meta" style={{ backgroundColor: '#12121A' }}>Meta Ads</option>
+                        <option value="google" style={{ backgroundColor: '#12121A' }}>Google Ads</option>
+                        <option value="linkedin" style={{ backgroundColor: '#12121A' }}>LinkedIn Ads</option>
+                        <option value="tiktok" style={{ backgroundColor: '#12121A' }}>TikTok Ads</option>
                       </select>
                     </div>
                   </div>
 
                   {/* Dias do mês */}
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">Dias do Mês para Envio</label>
-                    <div className="flex flex-wrap gap-2">
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Dias do Mês para Envio</label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                       {[1, 5, 10, 15, 20, 25, 30].map((day) => (
                         <button
                           key={day}
                           onClick={() => handleDayToggle(day)}
-                          className={`w-10 h-10 rounded-lg text-sm font-medium transition-all ${
-                            formData.days.includes(day)
-                              ? 'bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]/30'
-                              : 'bg-white/5 text-[#A0A0B0] border border-white/10'
-                          }`}
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: 500,
+                            border: formData.days.includes(day) ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                            backgroundColor: formData.days.includes(day) ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                            color: formData.days.includes(day) ? '#3B82F6' : '#A0A0B0',
+                            cursor: 'pointer',
+                          }}
                         >
                           {day}
                         </button>
@@ -651,17 +904,22 @@ function ScheduleReportModal({
 
                   {/* Meses */}
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">Meses para Envio</label>
-                    <div className="grid grid-cols-6 gap-2">
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Meses para Envio</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px' }}>
                       {['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].map((month, idx) => (
                         <button
                           key={month}
                           onClick={() => handleMonthToggle(idx + 1)}
-                          className={`py-2 rounded-lg text-xs font-medium transition-all ${
-                            formData.months.includes(idx + 1)
-                              ? 'bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]/30'
-                              : 'bg-white/5 text-[#A0A0B0] border border-white/10'
-                          }`}
+                          style={{
+                            padding: '8px',
+                            borderRadius: '8px',
+                            fontSize: '12px',
+                            fontWeight: 500,
+                            border: formData.months.includes(idx + 1) ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                            backgroundColor: formData.months.includes(idx + 1) ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                            color: formData.months.includes(idx + 1) ? '#3B82F6' : '#A0A0B0',
+                            cursor: 'pointer',
+                          }}
                         >
                           {month}
                         </button>
@@ -671,17 +929,22 @@ function ScheduleReportModal({
 
                   {/* Métricas */}
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">Métricas</label>
-                    <div className="grid grid-cols-5 gap-2">
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Métricas</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
                       {metricsOptions.slice(0, 5).map((metric) => (
                         <button
                           key={metric.id}
                           onClick={() => handleMetricToggle(metric.id)}
-                          className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                            formData.metrics.includes(metric.id)
-                              ? 'bg-[#FACC15]/20 text-[#FACC15] border border-[#FACC15]/30'
-                              : 'bg-white/5 text-[#A0A0B0] border border-white/10'
-                          }`}
+                          style={{
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            fontSize: '12px',
+                            fontWeight: 500,
+                            border: formData.metrics.includes(metric.id) ? '1px solid rgba(250, 204, 21, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                            backgroundColor: formData.metrics.includes(metric.id) ? 'rgba(250, 204, 21, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                            color: formData.metrics.includes(metric.id) ? '#FACC15' : '#A0A0B0',
+                            cursor: 'pointer',
+                          }}
                         >
                           {metric.label}
                         </button>
@@ -691,36 +954,46 @@ function ScheduleReportModal({
 
                   {/* Método de envio */}
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">Enviar Via</label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Enviar Via</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
                       <button
                         onClick={() => setFormData(prev => ({ ...prev, sendMethod: 'email' }))}
-                        className={`p-4 rounded-xl border transition-all flex items-center gap-3 ${
-                          formData.sendMethod === 'email'
-                            ? 'bg-[#3B82F6]/10 border-[#3B82F6]/50'
-                            : 'bg-white/5 border-white/10'
-                        }`}
+                        style={{
+                          padding: '16px',
+                          borderRadius: '12px',
+                          border: formData.sendMethod === 'email' ? '1px solid rgba(59, 130, 246, 0.5)' : '1px solid rgba(255, 255, 255, 0.1)',
+                          backgroundColor: formData.sendMethod === 'email' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                        }}
                       >
-                        <Mail size={20} className={formData.sendMethod === 'email' ? 'text-[#3B82F6]' : 'text-[#6B6B7B]'} />
-                        <span className="text-sm text-white">E-mail</span>
+                        <Mail size={20} style={{ color: formData.sendMethod === 'email' ? '#3B82F6' : '#6B6B7B' }} />
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>E-mail</span>
                       </button>
                       <button
                         onClick={() => setFormData(prev => ({ ...prev, sendMethod: 'whatsapp' }))}
-                        className={`p-4 rounded-xl border transition-all flex items-center gap-3 ${
-                          formData.sendMethod === 'whatsapp'
-                            ? 'bg-[#25D366]/10 border-[#25D366]/50'
-                            : 'bg-white/5 border-white/10'
-                        }`}
+                        style={{
+                          padding: '16px',
+                          borderRadius: '12px',
+                          border: formData.sendMethod === 'whatsapp' ? '1px solid rgba(37, 211, 102, 0.5)' : '1px solid rgba(255, 255, 255, 0.1)',
+                          backgroundColor: formData.sendMethod === 'whatsapp' ? 'rgba(37, 211, 102, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                        }}
                       >
-                        <MessageCircle size={20} className={formData.sendMethod === 'whatsapp' ? 'text-[#25D366]' : 'text-[#6B6B7B]'} />
-                        <span className="text-sm text-white">WhatsApp</span>
+                        <MessageCircle size={20} style={{ color: formData.sendMethod === 'whatsapp' ? '#25D366' : '#6B6B7B' }} />
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>WhatsApp</span>
                       </button>
                     </div>
                   </div>
 
                   {/* Destinatário */}
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>
                       {formData.sendMethod === 'email' ? 'E-mail do Destinatário' : 'WhatsApp do Destinatário'}
                     </label>
                     <input
@@ -728,7 +1001,18 @@ function ScheduleReportModal({
                       value={formData.recipient}
                       onChange={(e) => setFormData(prev => ({ ...prev, recipient: e.target.value }))}
                       placeholder={formData.sendMethod === 'email' ? 'cliente@email.com' : '+55 11 99999-9999'}
-                      className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50"
+                      style={{
+                        width: '100%',
+                        height: '44px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        fontSize: '14px',
+                        color: '#FFFFFF',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
                     />
                   </div>
                 </div>
@@ -737,16 +1021,25 @@ function ScheduleReportModal({
 
             {/* Footer */}
             {(showForm || editingSchedule) && (
-              <div className="flex items-center justify-between p-6 border-t border-white/10 bg-white/[0.02]">
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '24px',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: 'rgba(255, 255, 255, 0.02)',
+              }}>
                 <Button variant="ghost" onClick={() => {
                   setShowForm(false)
                   onClose()
                 }}>
                   Cancelar
                 </Button>
-                <Button variant="primary" className="gap-2" onClick={handleSave}>
-                  <CalendarClock size={16} />
-                  Programar
+                <Button variant="primary" onClick={handleSave}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <CalendarClock size={16} />
+                    Programar
+                  </span>
                 </Button>
               </div>
             )}
@@ -771,34 +1064,53 @@ function ReportCard({ report, index }: { report: Report; index: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="group p-5 rounded-2xl bg-[#12121A]/80 border border-white/5 hover:border-[#3B82F6]/30 transition-all"
+      style={{
+        padding: '20px',
+        borderRadius: '16px',
+        backgroundColor: 'rgba(18, 18, 26, 0.8)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        transition: 'all 0.2s',
+      }}
     >
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className={`p-2.5 rounded-xl ${
-            report.type === 'performance' ? 'bg-[#3B82F6]/10 text-[#3B82F6]' :
-            report.type === 'audience' ? 'bg-[#60A5FA]/10 text-[#60A5FA]' :
-            report.type === 'creative' ? 'bg-[#FACC15]/10 text-[#FACC15]' :
-            'bg-[#FDE047]/10 text-[#FDE047]'
-          }`}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            padding: '10px',
+            borderRadius: '12px',
+            backgroundColor: report.type === 'performance' ? 'rgba(59, 130, 246, 0.1)' :
+              report.type === 'audience' ? 'rgba(96, 165, 250, 0.1)' :
+              report.type === 'creative' ? 'rgba(250, 204, 21, 0.1)' :
+              'rgba(253, 224, 71, 0.1)',
+            color: report.type === 'performance' ? '#3B82F6' :
+              report.type === 'audience' ? '#60A5FA' :
+              report.type === 'creative' ? '#FACC15' :
+              '#FDE047',
+          }}>
             {reportTypeIcons[report.type]}
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white group-hover:text-[#3B82F6] transition-colors">
+            <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>
               {report.name}
             </h3>
-            <p className="text-xs text-[#6B6B7B]">{reportTypeLabels[report.type]}</p>
+            <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>{reportTypeLabels[report.type]}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Badge variant={report.status === 'active' ? 'success' : 'warning'}>
             {report.status === 'active' ? 'Ativo' : 'Pausado'}
           </Badge>
-          <div className="relative">
+          <div style={{ position: 'relative' }}>
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-[#6B6B7B] hover:text-white transition-all opacity-0 group-hover:opacity-100"
+              style={{
+                padding: '6px',
+                borderRadius: '8px',
+                background: 'none',
+                border: 'none',
+                color: '#6B6B7B',
+                cursor: 'pointer',
+              }}
             >
               <MoreVertical size={16} />
             </button>
@@ -808,7 +1120,19 @@ function ReportCard({ report, index }: { report: Report; index: number }) {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="absolute right-0 top-full mt-1 w-40 bg-[#1A1A25] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-10"
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: '100%',
+                    marginTop: '4px',
+                    width: '160px',
+                    backgroundColor: '#1A1A25',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '12px',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                    overflow: 'hidden',
+                    zIndex: 10,
+                  }}
                 >
                   {[
                     { icon: Edit, label: 'Editar' },
@@ -819,7 +1143,18 @@ function ReportCard({ report, index }: { report: Report; index: number }) {
                   ].map((action) => (
                     <button
                       key={action.label}
-                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-white/5 transition-colors ${action.danger ? 'text-red-400' : 'text-[#A0A0B0]'}`}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 12px',
+                        fontSize: '14px',
+                        background: 'none',
+                        border: 'none',
+                        color: action.danger ? '#EF4444' : '#A0A0B0',
+                        cursor: 'pointer',
+                      }}
                     >
                       <action.icon size={14} />
                       {action.label}
@@ -833,27 +1168,27 @@ function ReportCard({ report, index }: { report: Report; index: number }) {
       </div>
 
       {/* Info */}
-      <div className="space-y-3 mb-4">
-        <div className="flex items-center gap-2 text-xs text-[#6B6B7B]">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#6B6B7B' }}>
           <Clock size={12} />
           <span>Frequência: {frequencyLabels[report.frequency]}</span>
         </div>
-        <div className="flex items-center gap-2 text-xs text-[#6B6B7B]">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#6B6B7B' }}>
           <Calendar size={12} />
           <span>
             {new Date(report.dateRange.start).toLocaleDateString('pt-BR')} - {new Date(report.dateRange.end).toLocaleDateString('pt-BR')}
           </span>
         </div>
-        <div className="flex items-center gap-2 text-xs text-[#6B6B7B]">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#6B6B7B' }}>
           <Mail size={12} />
           <span>{report.recipients.length} destinatário(s)</span>
         </div>
       </div>
 
       {/* Platforms */}
-      <div className="flex items-center gap-2 mb-4">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
         {report.platforms.map((platform) => (
-          <div key={platform} className="p-1.5 rounded-lg bg-white/5">
+          <div key={platform} style={{ padding: '6px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
             <PlatformIcon platform={platform} size={14} />
           </div>
         ))}
@@ -861,10 +1196,10 @@ function ReportCard({ report, index }: { report: Report; index: number }) {
 
       {/* Last Generated */}
       {report.lastGenerated && (
-        <div className="pt-4 border-t border-white/5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-[#6B6B7B]">Última geração</span>
-            <span className="text-xs text-white">
+        <div style={{ paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Última geração</span>
+            <span style={{ fontSize: '12px', color: '#FFFFFF' }}>
               {new Date(report.lastGenerated).toLocaleString('pt-BR')}
             </span>
           </div>
@@ -872,16 +1207,25 @@ function ReportCard({ report, index }: { report: Report; index: number }) {
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-2 mt-4">
-        <Button variant="secondary" size="sm" className="flex-1 gap-1.5">
-          <Download size={14} />
-          Baixar
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
+        <Button variant="secondary" size="sm" style={{ flex: 1 }}>
+          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <Download size={14} />
+            Baixar
+          </span>
         </Button>
         <button
           onClick={handleCopy}
-          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-[#6B6B7B] hover:text-white transition-all"
+          style={{
+            padding: '8px',
+            borderRadius: '8px',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            border: 'none',
+            color: copied ? '#10B981' : '#6B6B7B',
+            cursor: 'pointer',
+          }}
         >
-          {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+          {copied ? <Check size={14} /> : <Copy size={14} />}
         </button>
       </div>
     </motion.div>

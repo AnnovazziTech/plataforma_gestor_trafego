@@ -8,13 +8,12 @@ import {
   Cell,
   ResponsiveContainer,
   Tooltip,
-  Sector,
 } from 'recharts'
 import { Card, CardHeader, CardTitle, CardContent, PlatformIcon } from '@/components/ui'
 import { platformMetrics } from '@/data/mock-data'
-import { formatCurrency, formatCompactNumber } from '@/lib/utils'
+import { formatCurrency } from '@/lib/utils'
 import { Platform } from '@/types'
-import { TrendingUp, Users, Target, DollarSign } from 'lucide-react'
+import { TrendingUp, Target, DollarSign } from 'lucide-react'
 
 const platformColors: Record<Platform, string> = {
   meta: '#0081FB',
@@ -31,34 +30,6 @@ export function PlatformDistribution() {
   const totalCampaigns = platformMetrics.reduce((acc, p) => acc + p.campaigns, 0)
   const avgRoas = platformMetrics.reduce((acc, p) => acc + p.roas, 0) / platformMetrics.length
 
-  const renderActiveShape = (props: any) => {
-    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props
-    return (
-      <g>
-        <Sector
-          cx={cx}
-          cy={cy}
-          innerRadius={innerRadius}
-          outerRadius={outerRadius + 8}
-          startAngle={startAngle}
-          endAngle={endAngle}
-          fill={fill}
-          style={{ filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.3))' }}
-        />
-        <Sector
-          cx={cx}
-          cy={cy}
-          innerRadius={innerRadius - 4}
-          outerRadius={innerRadius}
-          startAngle={startAngle}
-          endAngle={endAngle}
-          fill={fill}
-          opacity={0.3}
-        />
-      </g>
-    )
-  }
-
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload?.[0]) return null
     const data = payload[0].payload
@@ -69,36 +40,68 @@ export function PlatformDistribution() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-gradient-to-br from-[#1A1A25] to-[#12121A] border border-white/20 rounded-xl p-4 shadow-2xl min-w-[180px]"
+        style={{
+          background: 'linear-gradient(to bottom right, #1A1A25, #12121A)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '12px',
+          padding: '16px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          minWidth: '180px',
+        }}
       >
-        <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/10">
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '12px',
+            paddingBottom: '8px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
           <PlatformIcon platform={data.platform} size={20} />
-          <span className="text-sm font-semibold text-white capitalize">{data.platform}</span>
-          <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: `${platformColor}20`, color: platformColor }}>
+          <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', textTransform: 'capitalize' }}>{data.platform}</span>
+          <span
+            style={{
+              marginLeft: 'auto',
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: `${platformColor}20`,
+              color: platformColor,
+            }}
+          >
             {percentage.toFixed(1)}%
           </span>
         </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs text-[#A0A0B0]">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#A0A0B0' }}>
               <DollarSign size={12} />
               Investido
             </div>
-            <span className="text-sm font-medium text-white">{formatCurrency(data.spent)}</span>
+            <span style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF' }}>{formatCurrency(data.spent)}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs text-[#A0A0B0]">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#A0A0B0' }}>
               <Target size={12} />
               Campanhas
             </div>
-            <span className="text-sm font-medium text-white">{data.campaigns}</span>
+            <span style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF' }}>{data.campaigns}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs text-[#A0A0B0]">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#A0A0B0' }}>
               <TrendingUp size={12} />
               ROAS
             </div>
-            <span className={`text-sm font-semibold ${data.roas >= 3 ? 'text-[#3B82F6]' : data.roas >= 2 ? 'text-[#FACC15]' : 'text-red-400'}`}>
+            <span
+              style={{
+                fontSize: '14px',
+                fontWeight: 600,
+                color: data.roas >= 3 ? '#3B82F6' : data.roas >= 2 ? '#FACC15' : '#F87171',
+              }}
+            >
               {data.roas.toFixed(2)}x
             </span>
           </div>
@@ -111,30 +114,30 @@ export function PlatformDistribution() {
     <Card variant="gradient" accentColor="blue" showAccentLine>
       <CardHeader>
         <div>
-          <CardTitle>Distribuição por Plataforma</CardTitle>
-          <p className="text-xs text-[#6B6B7B] mt-1">Investimento por canal de aquisição</p>
+          <CardTitle>Distribuicao por Plataforma</CardTitle>
+          <p style={{ fontSize: '12px', color: '#6B6B7B', marginTop: '4px', margin: 0 }}>Investimento por canal de aquisicao</p>
         </div>
       </CardHeader>
       <CardContent>
         {/* Summary Stats */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          <div className="p-2.5 rounded-lg bg-white/5 text-center">
-            <p className="text-lg font-bold text-white">{formatCurrency(totalSpent)}</p>
-            <p className="text-xs text-[#6B6B7B]">Total Investido</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
+          <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', textAlign: 'center' }}>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{formatCurrency(totalSpent)}</p>
+            <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Total Investido</p>
           </div>
-          <div className="p-2.5 rounded-lg bg-white/5 text-center">
-            <p className="text-lg font-bold text-white">{totalCampaigns}</p>
-            <p className="text-xs text-[#6B6B7B]">Campanhas</p>
+          <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', textAlign: 'center' }}>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{totalCampaigns}</p>
+            <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Campanhas</p>
           </div>
-          <div className="p-2.5 rounded-lg bg-white/5 text-center">
-            <p className="text-lg font-bold text-[#3B82F6]">{avgRoas.toFixed(2)}x</p>
-            <p className="text-xs text-[#6B6B7B]">ROAS Médio</p>
+          <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', textAlign: 'center' }}>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: '#3B82F6', margin: 0 }}>{avgRoas.toFixed(2)}x</p>
+            <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>ROAS Medio</p>
           </div>
         </div>
 
         {/* Pie Chart */}
-        <div className="flex justify-center mb-4">
-          <div className="w-48 h-48 relative">
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <div style={{ width: '192px', height: '192px', position: 'relative' }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -162,7 +165,17 @@ export function PlatformDistribution() {
               </PieChart>
             </ResponsiveContainer>
             {/* Center Text */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                pointerEvents: 'none',
+              }}
+            >
               <AnimatePresence mode="wait">
                 {activeIndex !== null ? (
                   <motion.div
@@ -170,10 +183,19 @@ export function PlatformDistribution() {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
-                    className="text-center"
+                    style={{ textAlign: 'center' }}
                   >
-                    <PlatformIcon platform={platformMetrics[activeIndex].platform} size={24} className="mx-auto mb-1" />
-                    <span className="text-xs font-medium text-white capitalize block">
+                    <PlatformIcon platform={platformMetrics[activeIndex].platform} size={24} />
+                    <span
+                      style={{
+                        display: 'block',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        color: '#FFFFFF',
+                        textTransform: 'capitalize',
+                        marginTop: '4px',
+                      }}
+                    >
                       {platformMetrics[activeIndex].platform}
                     </span>
                   </motion.div>
@@ -183,10 +205,10 @@ export function PlatformDistribution() {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
-                    className="text-center"
+                    style={{ textAlign: 'center' }}
                   >
-                    <span className="text-[10px] text-[#6B6B7B] block">Total</span>
-                    <span className="text-sm font-bold text-white">{formatCurrency(totalSpent)}</span>
+                    <span style={{ display: 'block', fontSize: '10px', color: '#6B6B7B' }}>Total</span>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#FFFFFF' }}>{formatCurrency(totalSpent)}</span>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -195,7 +217,7 @@ export function PlatformDistribution() {
         </div>
 
         {/* Legend - compact list */}
-        <div className="space-y-1.5">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {platformMetrics.map((platform, index) => {
             const percentage = (platform.spent / totalSpent) * 100
             const isActive = activeIndex === index
@@ -208,30 +230,68 @@ export function PlatformDistribution() {
                 transition={{ delay: index * 0.1 }}
                 onMouseEnter={() => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(null)}
-                className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-all cursor-pointer ${
-                  isActive ? 'bg-white/10 scale-[1.02]' : 'hover:bg-white/5'
-                }`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  backgroundColor: isActive ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                  transform: isActive ? 'scale(1.02)' : 'scale(1)',
+                  transition: 'all 0.2s ease',
+                }}
               >
-                <PlatformIcon platform={platform.platform} size={18} className="flex-shrink-0" />
-                <span className={`text-sm capitalize w-14 flex-shrink-0 transition-colors ${isActive ? 'text-white font-medium' : 'text-[#A0A0B0]'}`}>
+                <PlatformIcon platform={platform.platform} size={18} />
+                <span
+                  style={{
+                    fontSize: '14px',
+                    textTransform: 'capitalize',
+                    width: '56px',
+                    flexShrink: 0,
+                    color: isActive ? '#FFFFFF' : '#A0A0B0',
+                    fontWeight: isActive ? 500 : 400,
+                    transition: 'color 0.2s ease',
+                  }}
+                >
                   {platform.platform}
                 </span>
-                <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden min-w-[60px]">
+                <div
+                  style={{
+                    flex: 1,
+                    height: '8px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: '9999px',
+                    overflow: 'hidden',
+                    minWidth: '60px',
+                  }}
+                >
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${percentage}%` }}
                     transition={{ duration: 1, delay: index * 0.1 }}
-                    className="h-full rounded-full transition-all"
                     style={{
+                      height: '100%',
+                      borderRadius: '9999px',
                       backgroundColor: platformColors[platform.platform],
-                      boxShadow: isActive ? `0 0 10px ${platformColors[platform.platform]}50` : 'none'
+                      boxShadow: isActive ? `0 0 10px ${platformColors[platform.platform]}50` : 'none',
+                      transition: 'box-shadow 0.2s ease',
                     }}
                   />
                 </div>
-                <span className="text-xs text-[#6B6B7B] w-10 text-right flex-shrink-0">{percentage.toFixed(0)}%</span>
-                <span className={`text-xs font-medium w-14 text-right flex-shrink-0 ${
-                  platform.roas >= 3 ? 'text-[#3B82F6]' : platform.roas >= 2 ? 'text-[#FACC15]' : 'text-red-400'
-                }`}>
+                <span style={{ fontSize: '12px', color: '#6B6B7B', width: '40px', textAlign: 'right', flexShrink: 0 }}>
+                  {percentage.toFixed(0)}%
+                </span>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    width: '56px',
+                    textAlign: 'right',
+                    flexShrink: 0,
+                    color: platform.roas >= 3 ? '#3B82F6' : platform.roas >= 2 ? '#FACC15' : '#F87171',
+                  }}
+                >
                   {platform.roas.toFixed(1)}x
                 </span>
               </motion.div>

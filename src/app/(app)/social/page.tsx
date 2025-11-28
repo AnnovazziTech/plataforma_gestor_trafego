@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
-import { Card, Button, Badge, StatCard } from '@/components/ui'
+import { Button, Badge, StatCard } from '@/components/ui'
 import { useApp } from '@/contexts'
 import {
   Globe,
@@ -13,11 +13,9 @@ import {
   Plus,
   Search,
   BarChart3,
-  TrendingUp,
   Users,
   Eye,
   Heart,
-  MessageCircle,
   Instagram,
   Facebook,
   Linkedin,
@@ -27,7 +25,6 @@ import {
   Trash2,
   X,
   Upload,
-  Video,
   Layout,
   Film,
 } from 'lucide-react'
@@ -45,9 +42,9 @@ interface ScheduledPost {
 }
 
 const mockPosts: ScheduledPost[] = [
-  { id: '1', name: 'Lançamento Produto', platform: 'instagram', date: '2024-02-20', time: '10:00', format: 'feed', text: 'Novidade chegando! 🚀', status: 'scheduled' },
+  { id: '1', name: 'Lançamento Produto', platform: 'instagram', date: '2024-02-20', time: '10:00', format: 'feed', text: 'Novidade chegando!', status: 'scheduled' },
   { id: '2', name: 'Dica do Dia', platform: 'facebook', date: '2024-02-21', time: '14:30', format: 'feed', text: 'Dica importante para seu negócio...', status: 'scheduled' },
-  { id: '3', name: 'Bastidores', platform: 'instagram', date: '2024-02-19', time: '18:00', format: 'story', text: 'Por trás das câmeras 📸', status: 'published' },
+  { id: '3', name: 'Bastidores', platform: 'instagram', date: '2024-02-19', time: '18:00', format: 'story', text: 'Por trás das câmeras', status: 'published' },
 ]
 
 const socialMetrics = {
@@ -105,16 +102,16 @@ export default function SocialPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div style={{ minHeight: '100vh' }}>
       <Header
         title="Redes Sociais"
         subtitle="Análise de sites, redes sociais e agendamento de posts"
         showCreateButton={false}
       />
 
-      <main className="p-6 md:p-8">
+      <main style={{ padding: '24px 32px', paddingBottom: '80px' }}>
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
           <StatCard
             label="Seguidores Totais"
             value={`${(socialMetrics.totalFollowers / 1000).toFixed(0)}K`}
@@ -146,16 +143,25 @@ export default function SocialPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]/30'
-                  : 'bg-white/5 text-[#A0A0B0] border border-white/10 hover:border-white/20'
-              }`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 16px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: 500,
+                border: activeTab === tab.id ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: activeTab === tab.id ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                color: activeTab === tab.id ? '#3B82F6' : '#A0A0B0',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
             >
               <tab.icon size={16} />
               {tab.label}
@@ -172,48 +178,65 @@ export default function SocialPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="p-6 rounded-2xl bg-[#12121A]/80 border border-white/5">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 rounded-xl bg-[#3B82F6]/10">
-                    <Globe size={24} className="text-[#3B82F6]" />
+              <div style={{
+                padding: '24px',
+                borderRadius: '16px',
+                backgroundColor: 'rgba(18, 18, 26, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                  <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
+                    <Globe size={24} style={{ color: '#3B82F6' }} />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Análise de Site</h2>
-                    <p className="text-sm text-[#6B6B7B]">Analise o tráfego e performance de qualquer site</p>
+                    <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Análise de Site</h2>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Analise o tráfego e performance de qualquer site</p>
                   </div>
                 </div>
 
-                <div className="flex gap-3 mb-6">
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
                   <input
                     type="url"
                     value={siteUrl}
                     onChange={(e) => setSiteUrl(e.target.value)}
                     placeholder="https://exemplo.com.br"
-                    className="flex-1 h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50"
+                    style={{
+                      flex: 1,
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      fontSize: '14px',
+                      color: '#FFFFFF',
+                      outline: 'none',
+                    }}
                   />
-                  <Button variant="primary" className="gap-2 px-6" onClick={handleAnalyzeSite} disabled={analyzing}>
-                    {analyzing ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <Search size={18} />
-                    )}
-                    Analisar
+                  <Button variant="primary" onClick={handleAnalyzeSite}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {analyzing ? (
+                        <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255, 255, 255, 0.3)', borderTopColor: '#FFFFFF', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                      ) : (
+                        <Search size={18} />
+                      )}
+                      Analisar
+                    </span>
                   </Button>
                 </div>
 
                 {/* Resultado da Análise */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
                   {[
                     { label: 'Tráfego Mensal', value: '125K', trend: '+12%' },
                     { label: 'Tempo no Site', value: '2:45', trend: '+5%' },
                     { label: 'Taxa de Rejeição', value: '42%', trend: '-8%' },
                     { label: 'Páginas/Sessão', value: '3.2', trend: '+15%' },
                   ].map((metric, idx) => (
-                    <div key={idx} className="p-4 rounded-xl bg-white/5 border border-white/10">
-                      <p className="text-xs text-[#6B6B7B] mb-1">{metric.label}</p>
-                      <div className="flex items-end justify-between">
-                        <p className="text-2xl font-bold text-white">{metric.value}</p>
-                        <span className={`text-xs font-medium ${metric.trend.startsWith('+') ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <div key={idx} style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                      <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px' }}>{metric.label}</p>
+                      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                        <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{metric.value}</p>
+                        <span style={{ fontSize: '12px', fontWeight: 500, color: metric.trend.startsWith('+') ? '#10B981' : '#EF4444' }}>
                           {metric.trend}
                         </span>
                       </div>
@@ -221,19 +244,19 @@ export default function SocialPage() {
                   ))}
                 </div>
 
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <h4 className="text-sm font-medium text-white mb-3">Fontes de Tráfego</h4>
-                  <div className="space-y-2">
+                <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>Fontes de Tráfego</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {[
                       { source: 'Busca Orgânica', value: 45, color: '#3B82F6' },
                       { source: 'Redes Sociais', value: 25, color: '#FACC15' },
                       { source: 'Direto', value: 20, color: '#8B5CF6' },
                       { source: 'Referência', value: 10, color: '#22C55E' },
                     ].map((item) => (
-                      <div key={item.source} className="flex items-center gap-3">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                        <span className="text-sm text-[#A0A0B0] flex-1">{item.source}</span>
-                        <span className="text-sm font-medium text-white">{item.value}%</span>
+                      <div key={item.source} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: item.color }} />
+                        <span style={{ fontSize: '14px', color: '#A0A0B0', flex: 1 }}>{item.source}</span>
+                        <span style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF' }}>{item.value}%</span>
                       </div>
                     ))}
                   </div>
@@ -249,37 +272,54 @@ export default function SocialPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="p-6 rounded-2xl bg-[#12121A]/80 border border-white/5">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 rounded-xl bg-[#FACC15]/10">
-                    <Share2 size={24} className="text-[#FACC15]" />
+              <div style={{
+                padding: '24px',
+                borderRadius: '16px',
+                backgroundColor: 'rgba(18, 18, 26, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                  <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(250, 204, 21, 0.1)' }}>
+                    <Share2 size={24} style={{ color: '#FACC15' }} />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Análise de Redes Sociais</h2>
-                    <p className="text-sm text-[#6B6B7B]">Monitore a performance de qualquer perfil</p>
+                    <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Análise de Redes Sociais</h2>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Monitore a performance de qualquer perfil</p>
                   </div>
                 </div>
 
-                <div className="flex gap-3 mb-6">
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
                   <input
                     type="text"
                     value={socialHandle}
                     onChange={(e) => setSocialHandle(e.target.value)}
                     placeholder="@usuario ou nome da página"
-                    className="flex-1 h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50"
+                    style={{
+                      flex: 1,
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      fontSize: '14px',
+                      color: '#FFFFFF',
+                      outline: 'none',
+                    }}
                   />
-                  <Button variant="primary" className="gap-2 px-6" onClick={handleAnalyzeSocial} disabled={analyzing}>
-                    {analyzing ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <Search size={18} />
-                    )}
-                    Analisar
+                  <Button variant="primary" onClick={handleAnalyzeSocial}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {analyzing ? (
+                        <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255, 255, 255, 0.3)', borderTopColor: '#FFFFFF', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                      ) : (
+                        <Search size={18} />
+                      )}
+                      Analisar
+                    </span>
                   </Button>
                 </div>
 
                 {/* Métricas por Plataforma */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
                   {[
                     { platform: 'Instagram', icon: Instagram, followers: '45K', engagement: '5.2%', color: '#E4405F' },
                     { platform: 'Facebook', icon: Facebook, followers: '32K', engagement: '3.8%', color: '#1877F2' },
@@ -288,21 +328,27 @@ export default function SocialPage() {
                   ].map((item) => (
                     <div
                       key={item.platform}
-                      className="p-4 rounded-xl border transition-all hover:scale-105 cursor-pointer"
-                      style={{ backgroundColor: `${item.color}10`, borderColor: `${item.color}30` }}
+                      style={{
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: `1px solid ${item.color}30`,
+                        backgroundColor: `${item.color}10`,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                      }}
                     >
-                      <div className="flex items-center gap-2 mb-3">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                         <item.icon size={20} style={{ color: item.color }} />
-                        <span className="text-sm font-medium text-white">{item.platform}</span>
+                        <span style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF' }}>{item.platform}</span>
                       </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-[#6B6B7B]">Seguidores</span>
-                          <span className="text-sm font-semibold text-white">{item.followers}</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Seguidores</span>
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF' }}>{item.followers}</span>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-[#6B6B7B]">Engajamento</span>
-                          <span className="text-sm font-semibold" style={{ color: item.color }}>{item.engagement}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Engajamento</span>
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: item.color }}>{item.engagement}</span>
                         </div>
                       </div>
                     </div>
@@ -319,32 +365,58 @@ export default function SocialPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="p-6 rounded-2xl bg-[#12121A]/80 border border-white/5">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 rounded-xl bg-[#8B5CF6]/10">
-                    <Image size={24} className="text-[#8B5CF6]" />
+              <div style={{
+                padding: '24px',
+                borderRadius: '16px',
+                backgroundColor: 'rgba(18, 18, 26, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                  <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(139, 92, 246, 0.1)' }}>
+                    <Image size={24} style={{ color: '#8B5CF6' }} />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Análise de Post</h2>
-                    <p className="text-sm text-[#6B6B7B]">Analise a performance de posts específicos</p>
+                    <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Análise de Post</h2>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Analise a performance de posts específicos</p>
                   </div>
                 </div>
 
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-white/5 flex items-center justify-center">
-                    <Upload size={32} className="text-[#6B6B7B]" />
+                <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                  <div style={{
+                    width: '80px',
+                    height: '80px',
+                    margin: '0 auto 16px',
+                    borderRadius: '16px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <Upload size={32} style={{ color: '#6B6B7B' }} />
                   </div>
-                  <p className="text-sm text-[#6B6B7B] mb-2">Cole o link do post ou faça upload da imagem</p>
-                  <p className="text-xs text-[#4B4B5B] mb-6">Suportamos Instagram, Facebook, LinkedIn e Twitter</p>
-                  <div className="flex items-center justify-center gap-3">
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px' }}>Cole o link do post ou faça upload da imagem</p>
+                  <p style={{ fontSize: '12px', color: '#4B4B5B', marginBottom: '24px' }}>Suportamos Instagram, Facebook, LinkedIn e Twitter</p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
                     <input
                       type="text"
                       placeholder="Cole o link do post aqui..."
-                      className="w-96 h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50"
+                      style={{
+                        width: '384px',
+                        height: '44px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        fontSize: '14px',
+                        color: '#FFFFFF',
+                        outline: 'none',
+                      }}
                     />
-                    <Button variant="primary" className="gap-2">
-                      <BarChart3 size={16} />
-                      Analisar
+                    <Button variant="primary">
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <BarChart3 size={16} />
+                        Analisar
+                      </span>
                     </Button>
                   </div>
                 </div>
@@ -359,50 +431,58 @@ export default function SocialPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-white">Agendamento de Posts</h2>
-                <Button variant="primary" className="gap-2" onClick={() => setShowScheduleModal(true)}>
-                  <Plus size={16} />
-                  Nova Programação
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Agendamento de Posts</h2>
+                <Button variant="primary" onClick={() => setShowScheduleModal(true)}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Plus size={16} />
+                    Nova Programação
+                  </span>
                 </Button>
               </div>
 
-              <div className="space-y-4">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {scheduledPosts.map((post) => {
                   const PlatformIcon = platformIcons[post.platform]
+                  const platformColors: Record<string, string> = {
+                    instagram: '#E4405F',
+                    facebook: '#1877F2',
+                    linkedin: '#0A66C2',
+                    twitter: '#1DA1F2',
+                  }
                   return (
                     <div
                       key={post.id}
-                      className="p-5 rounded-2xl bg-[#12121A]/80 border border-white/5 hover:border-[#3B82F6]/30 transition-all"
+                      style={{
+                        padding: '20px',
+                        borderRadius: '16px',
+                        backgroundColor: 'rgba(18, 18, 26, 0.8)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        transition: 'all 0.2s',
+                      }}
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-xl ${
-                            post.platform === 'instagram' ? 'bg-[#E4405F]/10' :
-                            post.platform === 'facebook' ? 'bg-[#1877F2]/10' :
-                            post.platform === 'linkedin' ? 'bg-[#0A66C2]/10' :
-                            'bg-[#1DA1F2]/10'
-                          }`}>
-                            <PlatformIcon size={20} className={
-                              post.platform === 'instagram' ? 'text-[#E4405F]' :
-                              post.platform === 'facebook' ? 'text-[#1877F2]' :
-                              post.platform === 'linkedin' ? 'text-[#0A66C2]' :
-                              'text-[#1DA1F2]'
-                            } />
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <div style={{
+                            padding: '12px',
+                            borderRadius: '12px',
+                            backgroundColor: `${platformColors[post.platform]}10`,
+                          }}>
+                            <PlatformIcon size={20} style={{ color: platformColors[post.platform] }} />
                           </div>
                           <div>
-                            <h3 className="font-medium text-white">{post.name}</h3>
-                            <p className="text-sm text-[#6B6B7B] mt-1">{post.text}</p>
-                            <div className="flex items-center gap-4 mt-2 text-xs text-[#6B6B7B]">
-                              <span className="flex items-center gap-1">
+                            <h3 style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '4px' }}>{post.name}</h3>
+                            <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px' }}>{post.text}</p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '12px', color: '#6B6B7B' }}>
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <Calendar size={12} />
                                 {new Date(post.date).toLocaleDateString('pt-BR')}
                               </span>
-                              <span className="flex items-center gap-1">
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <Clock size={12} />
                                 {post.time}
                               </span>
-                              <span className="flex items-center gap-1 capitalize">
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', textTransform: 'capitalize' }}>
                                 {post.format === 'feed' && <Layout size={12} />}
                                 {post.format === 'story' && <Image size={12} />}
                                 {post.format === 'reels' && <Film size={12} />}
@@ -411,14 +491,14 @@ export default function SocialPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <Badge variant={post.status === 'scheduled' ? 'warning' : post.status === 'published' ? 'success' : 'error'}>
                             {post.status === 'scheduled' ? 'Agendado' : post.status === 'published' ? 'Publicado' : 'Falhou'}
                           </Badge>
-                          <button className="p-2 rounded-lg hover:bg-white/10 text-[#6B6B7B] hover:text-white transition-all">
+                          <button style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
                             <Edit size={14} />
                           </button>
-                          <button className="p-2 rounded-lg hover:bg-red-500/20 text-[#6B6B7B] hover:text-red-400 transition-all">
+                          <button style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
                             <Trash2 size={14} />
                           </button>
                         </div>
@@ -428,12 +508,21 @@ export default function SocialPage() {
                 })}
 
                 {scheduledPosts.length === 0 && (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
-                      <Calendar className="w-8 h-8 text-[#6B6B7B]" />
+                  <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                    <div style={{
+                      width: '64px',
+                      height: '64px',
+                      margin: '0 auto 16px',
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <Calendar style={{ width: '32px', height: '32px', color: '#6B6B7B' }} />
                     </div>
-                    <p className="text-sm text-[#6B6B7B] mb-2">Nenhum post agendado</p>
-                    <p className="text-xs text-[#4B4B5B]">Crie sua primeira programação de post</p>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px' }}>Nenhum post agendado</p>
+                    <p style={{ fontSize: '12px', color: '#4B4B5B' }}>Crie sua primeira programação de post</p>
                   </div>
                 )}
               </div>
@@ -449,82 +538,151 @@ export default function SocialPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowScheduleModal(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+            }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg bg-gradient-to-br from-[#12121A] to-[#0D0D14] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+              style={{
+                width: '100%',
+                maxWidth: '512px',
+                background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '16px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                overflow: 'hidden',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+              }}
             >
-              <div className="flex items-center justify-between p-6 border-b border-white/10">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-[#3B82F6]/10">
-                    <Calendar className="w-5 h-5 text-[#3B82F6]" />
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '24px',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ padding: '8px', borderRadius: '12px', backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
+                    <Calendar style={{ width: '20px', height: '20px', color: '#3B82F6' }} />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Agendar Post</h2>
-                    <p className="text-sm text-[#6B6B7B]">Programe suas postagens</p>
+                    <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Agendar Post</h2>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Programe suas postagens</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowScheduleModal(false)}
-                  className="p-2 rounded-lg text-[#6B6B7B] hover:text-white hover:bg-white/10 transition-all"
+                  style={{ padding: '8px', borderRadius: '8px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              <div className="p-6 space-y-4">
+              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Nome da Programação</label>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Nome da Programação</label>
                   <input
                     type="text"
                     placeholder="Ex: Post de Lançamento"
-                    className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50"
+                    style={{
+                      width: '100%',
+                      height: '44px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      fontSize: '14px',
+                      color: '#FFFFFF',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Plataforma</label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Plataforma</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
                     {['instagram', 'facebook', 'linkedin', 'twitter'].map((platform) => {
                       const Icon = platformIcons[platform]
                       return (
                         <button
                           key={platform}
-                          className="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-[#3B82F6]/30 transition-all flex flex-col items-center gap-1"
+                          style={{
+                            padding: '12px',
+                            borderRadius: '12px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
                         >
-                          <Icon size={20} className="text-[#6B6B7B]" />
-                          <span className="text-xs text-[#6B6B7B] capitalize">{platform}</span>
+                          <Icon size={20} style={{ color: '#6B6B7B' }} />
+                          <span style={{ fontSize: '12px', color: '#6B6B7B', textTransform: 'capitalize' }}>{platform}</span>
                         </button>
                       )
                     })}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">Data</label>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Data</label>
                     <input
                       type="date"
-                      className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50"
+                      style={{
+                        width: '100%',
+                        height: '44px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        fontSize: '14px',
+                        color: '#FFFFFF',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white mb-2">Horário</label>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Horário</label>
                     <input
                       type="time"
-                      className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-[#3B82F6]/50"
+                      style={{
+                        width: '100%',
+                        height: '44px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        fontSize: '14px',
+                        color: '#FFFFFF',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Formato</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Formato</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                     {[
                       { id: 'feed', label: 'Feed', icon: Layout },
                       { id: 'story', label: 'Story', icon: Image },
@@ -532,41 +690,77 @@ export default function SocialPage() {
                     ].map((format) => (
                       <button
                         key={format.id}
-                        className="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-[#3B82F6]/30 transition-all flex items-center justify-center gap-2"
+                        style={{
+                          padding: '12px',
+                          borderRadius: '12px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                        }}
                       >
-                        <format.icon size={16} className="text-[#6B6B7B]" />
-                        <span className="text-sm text-[#6B6B7B]">{format.label}</span>
+                        <format.icon size={16} style={{ color: '#6B6B7B' }} />
+                        <span style={{ fontSize: '14px', color: '#6B6B7B' }}>{format.label}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Mídia</label>
-                  <div className="p-8 rounded-xl border-2 border-dashed border-white/10 text-center cursor-pointer hover:border-[#3B82F6]/30 transition-all">
-                    <Upload size={24} className="mx-auto text-[#6B6B7B] mb-2" />
-                    <p className="text-sm text-[#6B6B7B]">Arraste ou clique para upload</p>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Mídia</label>
+                  <div style={{
+                    padding: '32px',
+                    borderRadius: '12px',
+                    border: '2px dashed rgba(255, 255, 255, 0.1)',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                  }}>
+                    <Upload size={24} style={{ margin: '0 auto', color: '#6B6B7B', marginBottom: '8px' }} />
+                    <p style={{ fontSize: '14px', color: '#6B6B7B' }}>Arraste ou clique para upload</p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Texto do Post</label>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Texto do Post</label>
                   <textarea
                     rows={3}
                     placeholder="Digite o texto da sua postagem..."
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#6B6B7B] focus:outline-none focus:border-[#3B82F6]/50 resize-none"
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      fontSize: '14px',
+                      color: '#FFFFFF',
+                      outline: 'none',
+                      resize: 'none',
+                      boxSizing: 'border-box',
+                    }}
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 p-6 border-t border-white/10">
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                gap: '12px',
+                padding: '24px',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              }}>
                 <Button variant="ghost" onClick={() => setShowScheduleModal(false)}>Cancelar</Button>
-                <Button variant="primary" className="gap-2" onClick={() => {
+                <Button variant="primary" onClick={() => {
                   showToast('Post agendado com sucesso!', 'success')
                   setShowScheduleModal(false)
                 }}>
-                  <Calendar size={16} />
-                  Agendar
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Calendar size={16} />
+                    Agendar
+                  </span>
                 </Button>
               </div>
             </motion.div>

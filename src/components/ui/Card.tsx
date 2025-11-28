@@ -1,16 +1,16 @@
 'use client'
 
-import { forwardRef, HTMLAttributes, ReactNode } from 'react'
-import { cn } from '@/lib/utils'
+import { forwardRef, HTMLAttributes, ReactNode, CSSProperties } from 'react'
 import { motion, HTMLMotionProps } from 'framer-motion'
 
-interface CardProps extends Omit<HTMLMotionProps<'div'>, 'ref' | 'children'> {
+interface CardProps extends Omit<HTMLMotionProps<'div'>, 'ref' | 'children' | 'style'> {
   variant?: 'default' | 'glass' | 'gradient' | 'elevated' | 'outlined'
   hover?: boolean
   accentColor?: 'blue' | 'yellow' | 'green' | 'red' | 'none'
   showAccentLine?: boolean
   size?: 'sm' | 'default' | 'lg'
   children?: ReactNode
+  style?: CSSProperties
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
@@ -22,36 +22,33 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
     showAccentLine = false,
     size = 'default',
     children,
+    style,
     ...props
   }, ref) => {
-    const variants = {
-      default: 'bg-[#12121A]/80 border border-white/5',
-      glass: 'glass-strong backdrop-blur-xl bg-white/5 border border-white/10',
-      gradient: 'bg-gradient-to-br from-[#12121A] to-[#0D0D14] border border-white/10',
-      elevated: 'bg-[#12121A] border border-white/5 shadow-xl shadow-black/20',
-      outlined: 'bg-transparent border-2 border-white/10',
-    }
-
-    const accentColors = {
-      blue: 'from-[#3B82F6] to-[#60A5FA]',
-      yellow: 'from-[#FACC15] to-[#FDE047]',
-      green: 'from-emerald-500 to-emerald-400',
-      red: 'from-red-500 to-red-400',
+    const accentColors: Record<string, string> = {
+      blue: '#3B82F6',
+      yellow: '#FACC15',
+      green: '#10B981',
+      red: '#EF4444',
       none: '',
     }
 
-    const hoverAccentColors = {
-      blue: 'hover:border-[#3B82F6]/30',
-      yellow: 'hover:border-[#FACC15]/30',
-      green: 'hover:border-emerald-500/30',
-      red: 'hover:border-red-500/30',
-      none: 'hover:border-[#3B82F6]/20',
+    const sizeConfig: Record<string, { padding: string; borderRadius: string }> = {
+      sm: { padding: '16px', borderRadius: '12px' },
+      default: { padding: '24px', borderRadius: '16px' },
+      lg: { padding: '32px', borderRadius: '16px' },
     }
 
-    const sizeClasses = {
-      sm: 'rounded-xl p-4',
-      default: 'rounded-2xl p-6',
-      lg: 'rounded-2xl p-8',
+    const sizes = sizeConfig[size]
+
+    const baseStyle: CSSProperties = {
+      position: 'relative',
+      padding: sizes.padding,
+      borderRadius: sizes.borderRadius,
+      border: '1px solid rgba(255, 255, 255, 0.05)',
+      background: 'linear-gradient(to bottom right, rgba(18, 18, 26, 0.8), rgba(13, 13, 20, 0.8))',
+      overflow: 'hidden',
+      ...style,
     }
 
     return (
@@ -60,36 +57,25 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        whileHover={hover ? { y: -2, boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)' } : undefined}
-        className={cn(
-          'relative transition-all duration-300 overflow-hidden group',
-          sizeClasses[size],
-          variants[variant],
-          hover && hoverAccentColors[accentColor],
-          className
-        )}
+        whileHover={hover ? { y: -2 } : undefined}
+        style={baseStyle}
         {...props}
       >
         {/* Accent line at top */}
         {showAccentLine && accentColor !== 'none' && (
-          <div className={cn(
-            'absolute top-0 left-0 right-0 h-1 bg-gradient-to-r opacity-80 group-hover:opacity-100 transition-opacity',
-            accentColors[accentColor]
-          )} />
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: `linear-gradient(90deg, ${accentColors[accentColor]}, ${accentColors[accentColor]}80)`,
+            }}
+          />
         )}
 
-        {/* Background glow on hover */}
-        {hover && accentColor !== 'none' && (
-          <div className={cn(
-            'absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none',
-            accentColor === 'blue' && 'bg-[#3B82F6]',
-            accentColor === 'yellow' && 'bg-[#FACC15]',
-            accentColor === 'green' && 'bg-emerald-500',
-            accentColor === 'red' && 'bg-red-500'
-          )} />
-        )}
-
-        <div className="relative">
+        <div style={{ position: 'relative' }}>
           {children}
         </div>
       </motion.div>
@@ -105,11 +91,27 @@ interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
-  ({ className, icon, action, children, ...props }, ref) => (
-    <div ref={ref} className={cn('flex items-center justify-between mb-5', className)} {...props}>
-      <div className="flex items-center gap-3">
+  ({ className, icon, action, children, style, ...props }, ref) => (
+    <div
+      ref={ref}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '20px',
+        ...style,
+      }}
+      {...props}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {icon && (
-          <div className="p-2.5 rounded-xl bg-white/5">
+          <div
+            style={{
+              padding: '10px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            }}
+          >
             {icon}
           </div>
         )}
@@ -122,8 +124,18 @@ const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
 CardHeader.displayName = 'CardHeader'
 
 const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
-    <h3 ref={ref} className={cn('text-lg font-semibold text-white', className)} {...props} />
+  ({ className, style, ...props }, ref) => (
+    <h3
+      ref={ref}
+      style={{
+        fontSize: '18px',
+        fontWeight: 600,
+        color: '#FFFFFF',
+        margin: 0,
+        ...style,
+      }}
+      {...props}
+    />
   )
 )
 CardTitle.displayName = 'CardTitle'
@@ -131,15 +143,25 @@ CardTitle.displayName = 'CardTitle'
 interface CardDescriptionProps extends HTMLAttributes<HTMLParagraphElement> {}
 
 const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
-  ({ className, ...props }, ref) => (
-    <p ref={ref} className={cn('text-sm text-[#6B6B7B] mt-1', className)} {...props} />
+  ({ className, style, ...props }, ref) => (
+    <p
+      ref={ref}
+      style={{
+        fontSize: '14px',
+        color: '#6B6B7B',
+        marginTop: '4px',
+        margin: 0,
+        ...style,
+      }}
+      {...props}
+    />
   )
 )
 CardDescription.displayName = 'CardDescription'
 
 const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('', className)} {...props} />
+  ({ className, style, ...props }, ref) => (
+    <div ref={ref} style={{ ...style }} {...props} />
   )
 )
 CardContent.displayName = 'CardContent'
@@ -149,14 +171,18 @@ interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
-  ({ className, bordered = true, ...props }, ref) => (
+  ({ className, bordered = true, style, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(
-        'flex items-center justify-between mt-4 pt-4',
-        bordered && 'border-t border-white/5',
-        className
-      )}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: '16px',
+        paddingTop: '16px',
+        borderTop: bordered ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
+        ...style,
+      }}
       {...props}
     />
   )

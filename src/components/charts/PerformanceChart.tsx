@@ -10,7 +10,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  ReferenceLine,
 } from 'recharts'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 import { timeSeriesData } from '@/data/mock-data'
@@ -20,9 +19,9 @@ import { TrendingUp, TrendingDown, Activity, Eye, MousePointer, DollarSign } fro
 type MetricKey = 'impressions' | 'clicks' | 'conversions' | 'spent' | 'revenue'
 
 const metrics: { key: MetricKey; label: string; color: string; icon: any }[] = [
-  { key: 'impressions', label: 'Impressões', color: '#3B82F6', icon: Eye },
+  { key: 'impressions', label: 'Impressoes', color: '#3B82F6', icon: Eye },
   { key: 'clicks', label: 'Cliques', color: '#60A5FA', icon: MousePointer },
-  { key: 'conversions', label: 'Conversões', color: '#FACC15', icon: Activity },
+  { key: 'conversions', label: 'Conversoes', color: '#FACC15', icon: Activity },
   { key: 'spent', label: 'Investido', color: '#1D4ED8', icon: DollarSign },
   { key: 'revenue', label: 'Receita', color: '#FDE047', icon: DollarSign },
 ]
@@ -62,15 +61,38 @@ export function PerformanceChart() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-gradient-to-br from-[#1A1A25] to-[#12121A] border border-[#3B82F6]/30 rounded-xl p-4 shadow-2xl backdrop-blur-xl"
+        style={{
+          background: 'linear-gradient(to bottom right, #1A1A25, #12121A)',
+          border: '1px solid rgba(59, 130, 246, 0.3)',
+          borderRadius: '12px',
+          padding: '16px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(12px)',
+        }}
       >
-        <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/10">
-          <div className="w-2 h-2 rounded-full bg-[#3B82F6] animate-pulse" />
-          <p className="text-sm font-semibold text-white">
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '12px',
+            paddingBottom: '8px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          <div
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '9999px',
+              backgroundColor: '#3B82F6',
+            }}
+          />
+          <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>
             {new Date(label).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' })}
           </p>
         </div>
-        <div className="space-y-2">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {payload.map((entry: any, index: number) => {
             const metric = metrics.find(m => m.key === entry.dataKey)
             const Icon = metric?.icon || Activity
@@ -80,17 +102,22 @@ export function PerformanceChart() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="flex items-center justify-between gap-6"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '24px',
+                }}
               >
-                <div className="flex items-center gap-2">
-                  <div className="p-1 rounded" style={{ backgroundColor: `${entry.color}20` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ padding: '4px', borderRadius: '4px', backgroundColor: `${entry.color}20` }}>
                     <Icon size={12} style={{ color: entry.color }} />
                   </div>
-                  <span className="text-xs text-[#A0A0B0]">
+                  <span style={{ fontSize: '12px', color: '#A0A0B0' }}>
                     {metric?.label}
                   </span>
                 </div>
-                <span className="text-sm font-semibold text-white">
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF' }}>
                   {entry.dataKey === 'spent' || entry.dataKey === 'revenue'
                     ? formatCurrency(entry.value)
                     : formatCompactNumber(entry.value)
@@ -105,13 +132,13 @@ export function PerformanceChart() {
   }
 
   return (
-    <Card className="col-span-2" variant="gradient" accentColor="blue" showAccentLine>
+    <Card style={{ gridColumn: 'span 2' }} variant="gradient" accentColor="blue" showAccentLine>
       <CardHeader>
         <div>
           <CardTitle>Performance ao Longo do Tempo</CardTitle>
-          <p className="text-xs text-[#6B6B7B] mt-1">Acompanhe a evolução das suas métricas principais</p>
+          <p style={{ fontSize: '12px', color: '#6B6B7B', marginTop: '4px', margin: 0 }}>Acompanhe a evolucao das suas metricas principais</p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           {metrics.map((metric) => {
             const Icon = metric.icon
             return (
@@ -120,17 +147,22 @@ export function PerformanceChart() {
                 whileTap={{ scale: 0.95 }}
                 whileHover={{ scale: 1.02 }}
                 onClick={() => toggleMetric(metric.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap ${
-                  activeMetrics.includes(metric.key)
-                    ? 'text-white shadow-lg'
-                    : 'text-[#6B6B7B] hover:text-white'
-                }`}
                 style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  borderRadius: '8px',
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer',
+                  color: activeMetrics.includes(metric.key) ? '#FFFFFF' : '#6B6B7B',
                   backgroundColor: activeMetrics.includes(metric.key)
                     ? `${metric.color}20`
                     : 'rgba(255,255,255,0.05)',
                   border: `1px solid ${activeMetrics.includes(metric.key) ? metric.color : 'rgba(255,255,255,0.1)'}`,
-                  boxShadow: activeMetrics.includes(metric.key) ? `0 0 20px ${metric.color}20` : 'none'
+                  boxShadow: activeMetrics.includes(metric.key) ? `0 0 20px ${metric.color}20` : 'none',
                 }}
               >
                 <Icon size={12} />
@@ -142,7 +174,7 @@ export function PerformanceChart() {
       </CardHeader>
       <CardContent>
         {/* Mini Stats for Active Metrics */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '16px' }}>
           {activeMetrics.slice(0, 3).map((key) => {
             const metric = metrics.find(m => m.key === key)
             const stats = metricStats[key]
@@ -153,19 +185,32 @@ export function PerformanceChart() {
                 key={key}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3 rounded-xl bg-white/5 border border-white/5"
+                style={{
+                  padding: '12px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                }}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Icon size={12} style={{ color: metric.color }} />
-                    <span className="text-xs text-[#6B6B7B]">{metric.label}</span>
+                    <span style={{ fontSize: '12px', color: '#6B6B7B' }}>{metric.label}</span>
                   </div>
-                  <div className={`flex items-center gap-0.5 text-xs ${stats.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '2px',
+                      fontSize: '12px',
+                      color: stats.change >= 0 ? '#34D399' : '#F87171',
+                    }}
+                  >
                     {stats.change >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
                     {Math.abs(stats.change).toFixed(1)}%
                   </div>
                 </div>
-                <p className="text-lg font-bold text-white">
+                <p style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
                   {key === 'spent' || key === 'revenue'
                     ? formatCurrency(stats.current)
                     : formatCompactNumber(stats.current)}
@@ -175,7 +220,7 @@ export function PerformanceChart() {
           })}
         </div>
 
-        <div className="h-72">
+        <div style={{ height: '288px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={timeSeriesData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>

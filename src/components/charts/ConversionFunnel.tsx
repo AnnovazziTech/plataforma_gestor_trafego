@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 import { conversionFunnel } from '@/data/mock-data'
 import { formatCompactNumber } from '@/lib/utils'
-import { TrendingDown, Target, DollarSign, Percent, ChevronDown, ArrowDownRight } from 'lucide-react'
+import { Target, DollarSign, Percent, ChevronDown, ArrowDownRight } from 'lucide-react'
 
 const stageIcons = [
   { icon: Target, color: '#3B82F6' },
@@ -21,23 +21,41 @@ export function ConversionFunnel() {
     <Card variant="gradient" accentColor="yellow" showAccentLine>
       <CardHeader>
         <div>
-          <CardTitle>Funil de Conversão</CardTitle>
-          <p className="text-xs text-[#6B6B7B] mt-1">Visualize a jornada do seu cliente</p>
+          <CardTitle>Funil de Conversao</CardTitle>
+          <p style={{ fontSize: '12px', color: '#6B6B7B', marginTop: '4px', margin: 0 }}>Visualize a jornada do seu cliente</p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-[#6B6B7B]">
-          <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5">
-            <div className="w-2 h-2 rounded-full bg-[#3B82F6]" />
-            Início
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#6B6B7B' }}>
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 8px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            }}
+          >
+            <div style={{ width: '8px', height: '8px', borderRadius: '9999px', backgroundColor: '#3B82F6' }} />
+            Inicio
           </span>
-          <ChevronDown size={12} className="rotate-[-90deg]" />
-          <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5">
-            <div className="w-2 h-2 rounded-full bg-[#FACC15]" />
-            Conversão
+          <ChevronDown size={12} style={{ transform: 'rotate(-90deg)' }} />
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 8px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            }}
+          >
+            <div style={{ width: '8px', height: '8px', borderRadius: '9999px', backgroundColor: '#FACC15' }} />
+            Conversao
           </span>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {conversionFunnel.map((stage, index) => {
             const widthPercentage = (stage.value / maxValue) * 100
             const dropOff = index > 0 ? ((1 - stage.value / conversionFunnel[index - 1].value) * 100) : 0
@@ -49,68 +67,118 @@ export function ConversionFunnel() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="group relative"
+                style={{ position: 'relative' }}
               >
                 {/* Drop-off connector */}
                 {index > 0 && (
-                  <div className="absolute -top-3 left-8 flex items-center gap-1 text-xs">
-                    <ArrowDownRight size={10} className="text-red-400" />
-                    <span className="text-red-400 font-medium">
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '-12px',
+                      left: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '12px',
+                    }}
+                  >
+                    <ArrowDownRight size={10} style={{ color: '#F87171' }} />
+                    <span style={{ color: '#F87171', fontWeight: 500 }}>
                       -{dropOff.toFixed(1)}%
                     </span>
                   </div>
                 )}
 
-                <div className="flex items-center gap-3">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   {/* Stage Icon */}
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: index * 0.15 }}
-                    className="flex-shrink-0 p-2 rounded-xl"
-                    style={{ backgroundColor: `${stageConfig.color}15` }}
+                    style={{
+                      flexShrink: 0,
+                      padding: '8px',
+                      borderRadius: '12px',
+                      backgroundColor: `${stageConfig.color}15`,
+                    }}
                   >
                     <stageConfig.icon size={16} style={{ color: stageConfig.color }} />
                   </motion.div>
 
                   {/* Bar Container */}
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-sm font-medium text-white group-hover:text-[#3B82F6] transition-colors">
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '6px',
+                      }}
+                    >
+                      <span style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF' }}>
                         {stage.stage}
                       </span>
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-semibold text-white">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF' }}>
                           {formatCompactNumber(stage.value)}
                         </span>
-                        <span className="px-2 py-0.5 rounded-full bg-white/5 text-xs text-[#A0A0B0]">
+                        <span
+                          style={{
+                            padding: '2px 8px',
+                            borderRadius: '9999px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            fontSize: '12px',
+                            color: '#A0A0B0',
+                          }}
+                        >
                           {stage.percentage.toFixed(1)}%
                         </span>
                       </div>
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="h-7 bg-white/5 rounded-lg overflow-hidden relative group-hover:bg-white/10 transition-colors">
+                    <div
+                      style={{
+                        height: '28px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        position: 'relative',
+                      }}
+                    >
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${widthPercentage}%` }}
                         transition={{ duration: 1, delay: index * 0.15, ease: 'easeOut' }}
-                        className="h-full rounded-lg relative overflow-hidden"
                         style={{
-                          background: `linear-gradient(90deg,
-                            ${stageConfig.color} 0%,
-                            ${stageConfig.color}CC 100%
-                          )`,
+                          height: '100%',
+                          borderRadius: '8px',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          background: `linear-gradient(90deg, ${stageConfig.color} 0%, ${stageConfig.color}CC 100%)`,
                         }}
                       >
                         {/* Inner value indicator */}
-                        <div className="absolute inset-y-0 right-2 flex items-center">
-                          <span className="text-xs font-semibold text-white/90 drop-shadow">
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            bottom: 0,
+                            right: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              color: 'rgba(255, 255, 255, 0.9)',
+                            }}
+                          >
                             {formatCompactNumber(stage.value)}
                           </span>
                         </div>
-                        {/* Shimmer effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
                       </motion.div>
                     </div>
                   </div>
@@ -121,51 +189,69 @@ export function ConversionFunnel() {
         </div>
 
         {/* Summary Stats */}
-        <div className="mt-8 pt-5 border-t border-white/10">
-          <div className="grid grid-cols-3 gap-4">
+        <div style={{ marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="relative p-4 rounded-xl bg-gradient-to-br from-[#3B82F6]/10 to-transparent border border-[#3B82F6]/20 group hover:border-[#3B82F6]/40 transition-all"
+              style={{
+                position: 'relative',
+                padding: '16px',
+                borderRadius: '12px',
+                background: 'linear-gradient(to bottom right, rgba(59, 130, 246, 0.1), transparent)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+              }}
             >
-              <div className="absolute top-3 right-3">
-                <Percent size={14} className="text-[#3B82F6]/50" />
+              <div style={{ position: 'absolute', top: '12px', right: '12px' }}>
+                <Percent size={14} style={{ color: 'rgba(59, 130, 246, 0.5)' }} />
               </div>
-              <p className="text-2xl font-bold text-[#3B82F6] mb-1">
+              <p style={{ fontSize: '24px', fontWeight: 700, color: '#3B82F6', marginBottom: '4px', margin: 0 }}>
                 {((conversionFunnel[conversionFunnel.length - 1].value / conversionFunnel[1].value) * 100).toFixed(2)}%
               </p>
-              <p className="text-xs text-[#6B6B7B]">Taxa de Conversão</p>
+              <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Taxa de Conversao</p>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="relative p-4 rounded-xl bg-gradient-to-br from-[#60A5FA]/10 to-transparent border border-[#60A5FA]/20 group hover:border-[#60A5FA]/40 transition-all"
+              style={{
+                position: 'relative',
+                padding: '16px',
+                borderRadius: '12px',
+                background: 'linear-gradient(to bottom right, rgba(96, 165, 250, 0.1), transparent)',
+                border: '1px solid rgba(96, 165, 250, 0.2)',
+              }}
             >
-              <div className="absolute top-3 right-3">
-                <Target size={14} className="text-[#60A5FA]/50" />
+              <div style={{ position: 'absolute', top: '12px', right: '12px' }}>
+                <Target size={14} style={{ color: 'rgba(96, 165, 250, 0.5)' }} />
               </div>
-              <p className="text-2xl font-bold text-[#60A5FA] mb-1">
+              <p style={{ fontSize: '24px', fontWeight: 700, color: '#60A5FA', marginBottom: '4px', margin: 0 }}>
                 {formatCompactNumber(conversionFunnel[conversionFunnel.length - 1].value)}
               </p>
-              <p className="text-xs text-[#6B6B7B]">Conversões Totais</p>
+              <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Conversoes Totais</p>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
-              className="relative p-4 rounded-xl bg-gradient-to-br from-[#FACC15]/10 to-transparent border border-[#FACC15]/20 group hover:border-[#FACC15]/40 transition-all"
+              style={{
+                position: 'relative',
+                padding: '16px',
+                borderRadius: '12px',
+                background: 'linear-gradient(to bottom right, rgba(250, 204, 21, 0.1), transparent)',
+                border: '1px solid rgba(250, 204, 21, 0.2)',
+              }}
             >
-              <div className="absolute top-3 right-3">
-                <DollarSign size={14} className="text-[#FACC15]/50" />
+              <div style={{ position: 'absolute', top: '12px', right: '12px' }}>
+                <DollarSign size={14} style={{ color: 'rgba(250, 204, 21, 0.5)' }} />
               </div>
-              <p className="text-2xl font-bold text-[#FACC15] mb-1">
+              <p style={{ fontSize: '24px', fontWeight: 700, color: '#FACC15', marginBottom: '4px', margin: 0 }}>
                 R$ 17,74
               </p>
-              <p className="text-xs text-[#6B6B7B]">Custo por Conversão</p>
+              <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Custo por Conversao</p>
             </motion.div>
           </div>
         </div>
