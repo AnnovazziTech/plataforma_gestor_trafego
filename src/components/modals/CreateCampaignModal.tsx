@@ -90,7 +90,6 @@ export function CreateCampaignModal() {
   return (
     <AnimatePresence>
       {isCreateCampaignModalOpen && (
-        <>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -98,30 +97,33 @@ export function CreateCampaignModal() {
             onClick={handleClose}
             style={{
               position: 'fixed',
-              inset: 0,
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
               backgroundColor: 'rgba(0, 0, 0, 0.6)',
               backdropFilter: 'blur(4px)',
               zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
             }}
-          />
+          >
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
+            onClick={(e) => e.stopPropagation()}
             style={{
-              position: 'fixed',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
               width: '100%',
               maxWidth: '512px',
-              maxHeight: '90vh',
+              maxHeight: 'calc(100vh - 40px)',
               overflow: 'auto',
               backgroundColor: '#12121A',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: '16px',
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-              zIndex: 10000,
             }}
           >
             <div
@@ -283,7 +285,7 @@ export function CreateCampaignModal() {
               </div>
             </form>
           </motion.div>
-        </>
+          </motion.div>
       )}
     </AnimatePresence>
   )
