@@ -28,7 +28,26 @@ import {
   Sparkles,
   Bot,
   X,
+  BarChart3,
+  Settings,
+  Check,
+  Eye,
+  EyeOff,
+  ArrowUpRight,
+  ArrowDownRight,
 } from 'lucide-react'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  Legend,
+} from 'recharts'
 
 const statusLabels: Record<CampaignStatus, string> = {
   active: 'Ativo',
@@ -46,8 +65,78 @@ const statusColors: Record<CampaignStatus, 'success' | 'warning' | 'error' | 'in
   error: 'error',
 }
 
+// Todas as métricas disponíveis do Meta Ads
+const allMetrics = [
+  { key: 'impressions', label: 'Impressões', category: 'Alcance' },
+  { key: 'reach', label: 'Alcance', category: 'Alcance' },
+  { key: 'frequency', label: 'Frequência', category: 'Alcance' },
+  { key: 'clicks', label: 'Cliques', category: 'Engajamento' },
+  { key: 'ctr', label: 'CTR (%)', category: 'Engajamento' },
+  { key: 'engagement', label: 'Engajamento', category: 'Engajamento' },
+  { key: 'videoViews', label: 'Visualizações de Vídeo', category: 'Vídeo' },
+  { key: 'videoCompletionRate', label: 'Taxa de Conclusão (%)', category: 'Vídeo' },
+  { key: 'conversions', label: 'Conversões', category: 'Conversão' },
+  { key: 'conversionRate', label: 'Taxa de Conversão (%)', category: 'Conversão' },
+  { key: 'costPerConversion', label: 'Custo por Conversão', category: 'Conversão' },
+  { key: 'spent', label: 'Valor Gasto', category: 'Custo' },
+  { key: 'cpc', label: 'CPC', category: 'Custo' },
+  { key: 'cpm', label: 'CPM', category: 'Custo' },
+  { key: 'roas', label: 'ROAS', category: 'Retorno' },
+]
+
+// Mock de dados históricos de 4 semanas para campanhas
+const generateWeeklyData = (campaign: Campaign) => {
+  const baseMetrics = campaign.metrics
+  return [
+    {
+      week: 'Semana 1',
+      impressions: Math.round(baseMetrics.impressions * 0.75),
+      clicks: Math.round(baseMetrics.clicks * 0.72),
+      conversions: Math.round(baseMetrics.conversions * 0.68),
+      spent: baseMetrics.cpc * baseMetrics.clicks * 0.70,
+      ctr: baseMetrics.ctr * 0.92,
+      cpc: baseMetrics.cpc * 1.08,
+      roas: baseMetrics.roas * 0.85,
+      reach: Math.round(baseMetrics.reach * 0.73),
+    },
+    {
+      week: 'Semana 2',
+      impressions: Math.round(baseMetrics.impressions * 0.85),
+      clicks: Math.round(baseMetrics.clicks * 0.82),
+      conversions: Math.round(baseMetrics.conversions * 0.80),
+      spent: baseMetrics.cpc * baseMetrics.clicks * 0.80,
+      ctr: baseMetrics.ctr * 0.96,
+      cpc: baseMetrics.cpc * 1.02,
+      roas: baseMetrics.roas * 0.92,
+      reach: Math.round(baseMetrics.reach * 0.83),
+    },
+    {
+      week: 'Semana 3',
+      impressions: Math.round(baseMetrics.impressions * 0.92),
+      clicks: Math.round(baseMetrics.clicks * 0.90),
+      conversions: Math.round(baseMetrics.conversions * 0.88),
+      spent: baseMetrics.cpc * baseMetrics.clicks * 0.88,
+      ctr: baseMetrics.ctr * 0.98,
+      cpc: baseMetrics.cpc * 1.00,
+      roas: baseMetrics.roas * 0.96,
+      reach: Math.round(baseMetrics.reach * 0.90),
+    },
+    {
+      week: 'Semana 4 (Atual)',
+      impressions: baseMetrics.impressions,
+      clicks: baseMetrics.clicks,
+      conversions: baseMetrics.conversions,
+      spent: baseMetrics.cpc * baseMetrics.clicks,
+      ctr: baseMetrics.ctr,
+      cpc: baseMetrics.cpc,
+      roas: baseMetrics.roas,
+      reach: baseMetrics.reach,
+    },
+  ]
+}
+
 export default function CampaignsPage() {
-  const { connectedAccounts, selectedAccount, setSelectedAccount } = useApp()
+  const { connectedAccounts, selectedAccount, setSelectedAccount, showToast } = useApp()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | 'all'>('all')
@@ -55,6 +144,14 @@ export default function CampaignsPage() {
   const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null)
   const [aiAnalysis, setAiAnalysis] = useState<{ campaignId: string; analysis: string } | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState<string | null>(null)
+
+  // Estado para métricas visíveis
+  const [showMetricsModal, setShowMetricsModal] = useState(false)
+  const [visibleMetrics, setVisibleMetrics] = useState<string[]>(['impressions', 'clicks', 'conversions', 'spent', 'ctr', 'roas'])
+
+  // Estado para comparação de campanhas
+  const [campaignForComparison, setCampaignForComparison] = useState<Campaign | null>(null)
+  const [weeklyData, setWeeklyData] = useState<any[]>([])
 
   const filteredCampaigns = campaigns.filter((campaign) => {
     const matchesSearch = campaign.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -68,6 +165,14 @@ export default function CampaignsPage() {
 
   const handleAiAnalysis = (campaignId: string, campaignName: string) => {
     setIsAnalyzing(campaignId)
+
+    // Encontrar a campanha e gerar dados de comparação
+    const campaign = campaigns.find(c => c.id === campaignId)
+    if (campaign) {
+      setCampaignForComparison(campaign)
+      setWeeklyData(generateWeeklyData(campaign))
+    }
+
     setTimeout(() => {
       const analyses = [
         `A campanha "${campaignName}" apresenta um CTR acima da media do mercado. Recomenda-se aumentar o orcamento em 20% para escalar os resultados. O publico-alvo esta bem segmentado, mas considere testar novos criativos para evitar fadiga de anuncio.`,
@@ -83,6 +188,49 @@ export default function CampaignsPage() {
     }, 2000)
   }
 
+  const toggleMetric = (metricKey: string) => {
+    setVisibleMetrics(prev =>
+      prev.includes(metricKey)
+        ? prev.filter(m => m !== metricKey)
+        : [...prev, metricKey]
+    )
+  }
+
+  const getMetricValue = (campaign: Campaign, metricKey: string): string | number => {
+    const metrics = campaign.metrics as any
+    switch(metricKey) {
+      case 'spent':
+        return formatCurrency(campaign.spent)
+      case 'impressions':
+      case 'reach':
+      case 'clicks':
+      case 'conversions':
+      case 'engagement':
+      case 'videoViews':
+        return formatCompactNumber(metrics[metricKey] || 0)
+      case 'ctr':
+      case 'conversionRate':
+      case 'videoCompletionRate':
+        return `${(metrics[metricKey] || 0).toFixed(2)}%`
+      case 'cpc':
+      case 'cpm':
+      case 'costPerConversion':
+        return formatCurrency(metrics[metricKey] || 0)
+      case 'roas':
+        return `${(metrics[metricKey] || 0).toFixed(2)}x`
+      case 'frequency':
+        return (metrics[metricKey] || 0).toFixed(2)
+      default:
+        return metrics[metricKey] || 0
+    }
+  }
+
+  const calculateChange = (current: number, previous: number): { value: number; isPositive: boolean } => {
+    if (previous === 0) return { value: 0, isPositive: true }
+    const change = ((current - previous) / previous) * 100
+    return { value: Math.abs(change), isPositive: change >= 0 }
+  }
+
   return (
     <div style={{ minHeight: '100vh' }}>
       <Header
@@ -90,7 +238,7 @@ export default function CampaignsPage() {
         subtitle="Gerencie todas as suas campanhas de trafego pago"
       />
 
-      <main style={{ padding: '24px 32px' }}>
+      <main style={{ padding: '24px 32px', paddingBottom: '80px' }}>
         {/* Filters Bar */}
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '24px' }}>
           {/* Filtros */}
@@ -186,8 +334,30 @@ export default function CampaignsPage() {
             </div>
           </div>
 
-          {/* Modo de Visualizacao */}
+          {/* Modo de Visualizacao e Métricas */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Botão de Métricas */}
+            <button
+              onClick={() => setShowMetricsModal(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                height: '44px',
+                padding: '0 16px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                color: '#3B82F6',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
+              <BarChart3 size={18} />
+              Métricas
+            </button>
+
             <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
               <button
                 onClick={() => setViewMode('grid')}
@@ -271,6 +441,8 @@ export default function CampaignsPage() {
                       index={index}
                       onAiAnalysis={handleAiAnalysis}
                       isAnalyzing={isAnalyzing === campaign.id}
+                      visibleMetrics={visibleMetrics}
+                      getMetricValue={getMetricValue}
                     />
                   ))}
                 </motion.div>
@@ -282,7 +454,12 @@ export default function CampaignsPage() {
                   exit={{ opacity: 0 }}
                   style={{ maxHeight: '600px', overflowY: 'auto' }}
                 >
-                  <CampaignTable campaigns={filteredCampaigns} onAiAnalysis={handleAiAnalysis} isAnalyzing={isAnalyzing} />
+                  <CampaignTable
+                    campaigns={filteredCampaigns}
+                    onAiAnalysis={handleAiAnalysis}
+                    isAnalyzing={isAnalyzing}
+                    visibleMetrics={visibleMetrics}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -331,7 +508,11 @@ export default function CampaignsPage() {
                         Analise Gerada
                       </span>
                       <button
-                        onClick={() => setAiAnalysis(null)}
+                        onClick={() => {
+                          setAiAnalysis(null)
+                          setCampaignForComparison(null)
+                          setWeeklyData([])
+                        }}
                         style={{ padding: '4px', borderRadius: '4px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
                       >
                         <X size={14} />
@@ -360,21 +541,339 @@ export default function CampaignsPage() {
                   </div>
                   <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px', margin: 0 }}>Nenhuma analise selecionada</p>
                   <p style={{ fontSize: '12px', color: '#4B4B5B', margin: 0 }}>
-                    Clique no icone <span style={{ color: '#FACC15' }}>sparkles</span> em uma campanha para solicitar analise da IA
+                    Clique no icone <span style={{ color: '#FACC15' }}>✨</span> em uma campanha para solicitar analise da IA
                   </p>
                 </div>
               )}
             </motion.div>
           </div>
         </div>
+
+        {/* Comparação de Campanhas - Últimas 4 Semanas */}
+        <AnimatePresence>
+          {campaignForComparison && weeklyData.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              style={{ marginTop: '32px' }}
+            >
+              <div
+                style={{
+                  padding: '24px',
+                  borderRadius: '20px',
+                  background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                }}
+              >
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
+                      <BarChart3 size={24} style={{ color: '#3B82F6' }} />
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>
+                        Comparação das Últimas 4 Semanas
+                      </h3>
+                      <p style={{ fontSize: '14px', color: '#6B6B7B', margin: '4px 0 0' }}>
+                        {campaignForComparison.name}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setCampaignForComparison(null)
+                      setWeeklyData([])
+                    }}
+                    style={{ padding: '8px', borderRadius: '8px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {/* Métricas Cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                  {[
+                    { key: 'impressions', label: 'Impressões', format: (v: number) => formatCompactNumber(v) },
+                    { key: 'clicks', label: 'Cliques', format: (v: number) => formatCompactNumber(v) },
+                    { key: 'conversions', label: 'Conversões', format: (v: number) => v.toString() },
+                    { key: 'roas', label: 'ROAS', format: (v: number) => `${v.toFixed(2)}x` },
+                  ].map((metric) => {
+                    const currentValue = weeklyData[3][metric.key]
+                    const previousValue = weeklyData[2][metric.key]
+                    const change = calculateChange(currentValue, previousValue)
+
+                    return (
+                      <div
+                        key={metric.key}
+                        style={{
+                          padding: '20px',
+                          borderRadius: '16px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                        }}
+                      >
+                        <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '8px' }}>{metric.label}</p>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
+                            {metric.format(currentValue)}
+                          </p>
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '4px 8px',
+                              borderRadius: '8px',
+                              backgroundColor: change.isPositive ? 'rgba(52, 211, 153, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                              color: change.isPositive ? '#34D399' : '#EF4444',
+                              fontSize: '12px',
+                              fontWeight: 500,
+                            }}
+                          >
+                            {change.isPositive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                            {change.value.toFixed(1)}%
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Gráficos */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px' }}>
+                  {/* Gráfico de Performance */}
+                  <div
+                    style={{
+                      padding: '20px',
+                      borderRadius: '16px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                    }}
+                  >
+                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px' }}>
+                      Evolução de Impressões e Cliques
+                    </h4>
+                    <div style={{ height: '240px' }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={weeklyData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                          <XAxis dataKey="week" stroke="#6B6B7B" fontSize={11} />
+                          <YAxis stroke="#6B6B7B" fontSize={11} />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: '#12121A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                            labelStyle={{ color: '#fff' }}
+                            formatter={(value: number, name: string) => [
+                              formatCompactNumber(value),
+                              name === 'impressions' ? 'Impressões' : 'Cliques'
+                            ]}
+                          />
+                          <Legend />
+                          <Bar dataKey="impressions" name="Impressões" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="clicks" name="Cliques" fill="#FACC15" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Gráfico de ROAS e CTR */}
+                  <div
+                    style={{
+                      padding: '20px',
+                      borderRadius: '16px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                    }}
+                  >
+                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px' }}>
+                      Evolução de ROAS e CTR
+                    </h4>
+                    <div style={{ height: '240px' }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={weeklyData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                          <XAxis dataKey="week" stroke="#6B6B7B" fontSize={11} />
+                          <YAxis yAxisId="left" stroke="#6B6B7B" fontSize={11} />
+                          <YAxis yAxisId="right" orientation="right" stroke="#6B6B7B" fontSize={11} />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: '#12121A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                            labelStyle={{ color: '#fff' }}
+                            formatter={(value: number, name: string) => [
+                              name === 'roas' ? `${value.toFixed(2)}x` : `${value.toFixed(2)}%`,
+                              name === 'roas' ? 'ROAS' : 'CTR'
+                            ]}
+                          />
+                          <Legend />
+                          <Line yAxisId="left" type="monotone" dataKey="roas" name="ROAS" stroke="#34D399" strokeWidth={2} dot={{ fill: '#34D399' }} />
+                          <Line yAxisId="right" type="monotone" dataKey="ctr" name="CTR" stroke="#A855F7" strokeWidth={2} dot={{ fill: '#A855F7' }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tabela de Dados Semanais */}
+                <div style={{ marginTop: '24px', overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                        <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#A0A0B0' }}>Período</th>
+                        <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#A0A0B0' }}>Impressões</th>
+                        <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#A0A0B0' }}>Cliques</th>
+                        <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#A0A0B0' }}>CTR</th>
+                        <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#A0A0B0' }}>Conversões</th>
+                        <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#A0A0B0' }}>CPC</th>
+                        <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#A0A0B0' }}>ROAS</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {weeklyData.map((week, idx) => (
+                        <tr key={week.week} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', backgroundColor: idx === 3 ? 'rgba(59, 130, 246, 0.05)' : 'transparent' }}>
+                          <td style={{ padding: '12px 16px', fontSize: '14px', fontWeight: idx === 3 ? 600 : 400, color: idx === 3 ? '#3B82F6' : '#FFFFFF' }}>{week.week}</td>
+                          <td style={{ padding: '12px 16px', fontSize: '14px', color: '#A0A0B0', textAlign: 'right' }}>{formatCompactNumber(week.impressions)}</td>
+                          <td style={{ padding: '12px 16px', fontSize: '14px', color: '#A0A0B0', textAlign: 'right' }}>{formatCompactNumber(week.clicks)}</td>
+                          <td style={{ padding: '12px 16px', fontSize: '14px', color: '#A0A0B0', textAlign: 'right' }}>{week.ctr.toFixed(2)}%</td>
+                          <td style={{ padding: '12px 16px', fontSize: '14px', color: '#A0A0B0', textAlign: 'right' }}>{week.conversions}</td>
+                          <td style={{ padding: '12px 16px', fontSize: '14px', color: '#A0A0B0', textAlign: 'right' }}>{formatCurrency(week.cpc)}</td>
+                          <td style={{ padding: '12px 16px', fontSize: '14px', fontWeight: 600, color: week.roas >= 3 ? '#34D399' : week.roas >= 2 ? '#FACC15' : '#EF4444', textAlign: 'right' }}>{week.roas.toFixed(2)}x</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
+
+      {/* Modal de Seleção de Métricas */}
+      <AnimatePresence>
+        {showMetricsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowMetricsModal(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '600px',
+                maxHeight: '80vh',
+                background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '20px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ padding: '10px', borderRadius: '12px', backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
+                    <BarChart3 size={20} style={{ color: '#3B82F6' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Selecionar Métricas</h2>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Escolha as métricas que deseja visualizar</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowMetricsModal(false)}
+                  style={{ padding: '8px', borderRadius: '8px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+                {['Alcance', 'Engajamento', 'Vídeo', 'Conversão', 'Custo', 'Retorno'].map((category) => (
+                  <div key={category} style={{ marginBottom: '24px' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '12px' }}>{category}</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                      {allMetrics.filter(m => m.category === category).map((metric) => (
+                        <button
+                          key={metric.key}
+                          onClick={() => toggleMetric(metric.key)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '12px 16px',
+                            borderRadius: '12px',
+                            backgroundColor: visibleMetrics.includes(metric.key) ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                            border: `1px solid ${visibleMetrics.includes(metric.key) ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+                            color: visibleMetrics.includes(metric.key) ? '#3B82F6' : '#A0A0B0',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                          }}
+                        >
+                          <span>{metric.label}</span>
+                          {visibleMetrics.includes(metric.key) ? (
+                            <Eye size={16} />
+                          ) : (
+                            <EyeOff size={16} />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer */}
+              <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '12px', color: '#6B6B7B' }}>
+                  {visibleMetrics.length} métricas selecionadas
+                </span>
+                <Button variant="primary" onClick={() => setShowMetricsModal(false)}>
+                  Aplicar
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
 
-function CampaignCard({ campaign, index, onAiAnalysis, isAnalyzing }: { campaign: Campaign; index: number; onAiAnalysis: (id: string, name: string) => void; isAnalyzing: boolean }) {
-  const [showMenu, setShowMenu] = useState(false)
-
+function CampaignCard({
+  campaign,
+  index,
+  onAiAnalysis,
+  isAnalyzing,
+  visibleMetrics,
+  getMetricValue,
+}: {
+  campaign: Campaign
+  index: number
+  onAiAnalysis: (id: string, name: string) => void
+  isAnalyzing: boolean
+  visibleMetrics: string[]
+  getMetricValue: (campaign: Campaign, metricKey: string) => string | number
+}) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -403,7 +902,7 @@ function CampaignCard({ campaign, index, onAiAnalysis, isAnalyzing }: { campaign
                 style={{ fontSize: '18px', background: 'none', border: 'none', cursor: 'pointer', opacity: isAnalyzing ? 0.5 : 1 }}
                 title="Solicitar analise da IA"
               >
-                sparkles
+                ✨
               </button>
               <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }}>
                 {campaign.name}
@@ -419,19 +918,17 @@ function CampaignCard({ campaign, index, onAiAnalysis, isAnalyzing }: { campaign
 
       {/* Metrics Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '16px' }}>
-        {[
-          { label: 'Investido', value: formatCurrency(campaign.spent) },
-          { label: 'Conversoes', value: formatCompactNumber(campaign.metrics.conversions) },
-          { label: 'CTR', value: `${campaign.metrics.ctr.toFixed(2)}%` },
-          { label: 'ROAS', value: `${campaign.metrics.roas.toFixed(2)}x`, highlight: campaign.metrics.roas >= 3 },
-        ].map((metric) => (
-          <div key={metric.label} style={{ padding: '12px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', textAlign: 'center' }}>
-            <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px', margin: 0 }}>{metric.label}</p>
-            <p style={{ fontSize: '14px', fontWeight: 600, color: metric.highlight ? '#3B82F6' : '#FFFFFF', margin: 0 }}>
-              {metric.value}
-            </p>
-          </div>
-        ))}
+        {visibleMetrics.slice(0, 4).map((metricKey) => {
+          const metric = allMetrics.find(m => m.key === metricKey)
+          return (
+            <div key={metricKey} style={{ padding: '12px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', textAlign: 'center' }}>
+              <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px', margin: 0 }}>{metric?.label || metricKey}</p>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: metricKey === 'roas' && campaign.metrics.roas >= 3 ? '#3B82F6' : '#FFFFFF', margin: 0 }}>
+                {getMetricValue(campaign, metricKey)}
+              </p>
+            </div>
+          )
+        })}
       </div>
 
       {/* Budget Progress */}
@@ -465,7 +962,17 @@ function CampaignCard({ campaign, index, onAiAnalysis, isAnalyzing }: { campaign
   )
 }
 
-function CampaignTable({ campaigns, onAiAnalysis, isAnalyzing }: { campaigns: Campaign[]; onAiAnalysis: (id: string, name: string) => void; isAnalyzing: string | null }) {
+function CampaignTable({
+  campaigns,
+  onAiAnalysis,
+  isAnalyzing,
+  visibleMetrics,
+}: {
+  campaigns: Campaign[]
+  onAiAnalysis: (id: string, name: string) => void
+  isAnalyzing: string | null
+  visibleMetrics: string[]
+}) {
   return (
     <div style={{ borderRadius: '16px', background: 'linear-gradient(to bottom right, #12121A, #0D0D14)', border: '1px solid rgba(255, 255, 255, 0.1)', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2)' }}>
       {/* Table Header */}
@@ -488,10 +995,15 @@ function CampaignTable({ campaigns, onAiAnalysis, isAnalyzing }: { campaigns: Ca
             <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', backgroundColor: 'rgba(255, 255, 255, 0.01)' }}>
               <th style={{ textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px 24px' }}>Campanha</th>
               <th style={{ textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>Status</th>
-              <th style={{ textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>Investido</th>
-              <th style={{ textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>CTR</th>
-              <th style={{ textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>Conversoes</th>
-              <th style={{ textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>ROAS</th>
+              {visibleMetrics.slice(0, 4).map((metricKey) => {
+                const metric = allMetrics.find(m => m.key === metricKey)
+                return (
+                  <th key={metricKey} style={{ textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>
+                    {metric?.label || metricKey}
+                  </th>
+                )
+              })}
+              <th style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>IA</th>
             </tr>
           </thead>
           <tbody>
@@ -517,29 +1029,69 @@ function CampaignTable({ campaigns, onAiAnalysis, isAnalyzing }: { campaigns: Ca
                 <td style={{ padding: '16px' }}>
                   <Badge variant={statusColors[campaign.status]}>{statusLabels[campaign.status]}</Badge>
                 </td>
-                <td style={{ padding: '16px', textAlign: 'right' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF' }}>{formatCurrency(campaign.spent)}</span>
-                </td>
-                <td style={{ padding: '16px', textAlign: 'right' }}>
-                  <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{campaign.metrics.ctr.toFixed(2)}%</span>
-                </td>
-                <td style={{ padding: '16px', textAlign: 'right' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF' }}>{formatCompactNumber(campaign.metrics.conversions)}</span>
-                </td>
-                <td style={{ padding: '16px', textAlign: 'right' }}>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '4px 8px',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    backgroundColor: campaign.metrics.roas >= 3 ? 'rgba(59, 130, 246, 0.1)' : campaign.metrics.roas >= 2 ? 'rgba(250, 204, 21, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                    color: campaign.metrics.roas >= 3 ? '#3B82F6' : campaign.metrics.roas >= 2 ? '#FACC15' : '#EF4444',
-                  }}>
-                    {campaign.metrics.roas.toFixed(2)}x
-                  </span>
+                {visibleMetrics.slice(0, 4).map((metricKey) => {
+                  const metrics = campaign.metrics as any
+                  let value: string
+                  let highlight = false
+
+                  switch(metricKey) {
+                    case 'spent':
+                      value = formatCurrency(campaign.spent)
+                      break
+                    case 'ctr':
+                    case 'conversionRate':
+                    case 'videoCompletionRate':
+                      value = `${(metrics[metricKey] || 0).toFixed(2)}%`
+                      break
+                    case 'cpc':
+                    case 'cpm':
+                    case 'costPerConversion':
+                      value = formatCurrency(metrics[metricKey] || 0)
+                      break
+                    case 'roas':
+                      value = `${(metrics[metricKey] || 0).toFixed(2)}x`
+                      highlight = metrics[metricKey] >= 3
+                      break
+                    case 'frequency':
+                      value = (metrics[metricKey] || 0).toFixed(2)
+                      break
+                    default:
+                      value = formatCompactNumber(metrics[metricKey] || 0)
+                  }
+
+                  return (
+                    <td key={metricKey} style={{ padding: '16px', textAlign: 'right' }}>
+                      <span style={{
+                        display: metricKey === 'roas' ? 'inline-flex' : undefined,
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: metricKey === 'roas' ? '4px 8px' : undefined,
+                        borderRadius: metricKey === 'roas' ? '8px' : undefined,
+                        fontSize: '14px',
+                        fontWeight: metricKey === 'roas' ? 600 : 500,
+                        backgroundColor: metricKey === 'roas' ? (highlight ? 'rgba(59, 130, 246, 0.1)' : metrics.roas >= 2 ? 'rgba(250, 204, 21, 0.1)' : 'rgba(239, 68, 68, 0.1)') : undefined,
+                        color: metricKey === 'roas' ? (highlight ? '#3B82F6' : metrics.roas >= 2 ? '#FACC15' : '#EF4444') : '#FFFFFF',
+                      }}>
+                        {value}
+                      </span>
+                    </td>
+                  )
+                })}
+                <td style={{ padding: '16px', textAlign: 'center' }}>
+                  <button
+                    onClick={() => onAiAnalysis(campaign.id, campaign.name)}
+                    disabled={isAnalyzing === campaign.id}
+                    style={{
+                      padding: '8px',
+                      borderRadius: '8px',
+                      backgroundColor: 'rgba(250, 204, 21, 0.1)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      opacity: isAnalyzing === campaign.id ? 0.5 : 1,
+                    }}
+                  >
+                    <Sparkles size={16} style={{ color: '#FACC15' }} />
+                  </button>
                 </td>
               </motion.tr>
             ))}
