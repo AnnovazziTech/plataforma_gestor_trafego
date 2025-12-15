@@ -21,6 +21,7 @@ interface HeaderProps {
   onCreateClick?: () => void
   createButtonText?: string
   buttonType?: 'campaign' | 'connect'
+  onRefresh?: () => Promise<void> | void
 }
 
 export function Header({
@@ -29,7 +30,8 @@ export function Header({
   showCreateButton = true,
   onCreateClick,
   createButtonText = 'Nova Campanha',
-  buttonType = 'campaign'
+  buttonType = 'campaign',
+  onRefresh,
 }: HeaderProps) {
   const {
     notifications,
@@ -60,10 +62,18 @@ export function Header({
     'Este ano',
   ]
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setIsRefreshing(true)
-    showToast('Dados atualizados!', 'success')
-    setTimeout(() => setIsRefreshing(false), 1500)
+    try {
+      if (onRefresh) {
+        await onRefresh()
+      }
+      showToast('Dados atualizados!', 'success')
+    } catch (error) {
+      showToast('Erro ao atualizar dados', 'error')
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 1500)
+    }
   }
 
   const handleSearch = (e: React.FormEvent) => {

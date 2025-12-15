@@ -135,7 +135,17 @@ const generateWeeklyData = (campaign: Campaign) => {
 }
 
 export default function CampaignsPage() {
-  const { connectedAccounts, selectedAccount, setSelectedAccount, showToast, campaigns } = useApp()
+  const {
+    connectedAccounts,
+    selectedAccount,
+    setSelectedAccount,
+    showToast,
+    campaigns,
+    deleteCampaign,
+    toggleCampaignStatus,
+    updateCampaign,
+    addCampaign,
+  } = useApp()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | 'all'>('all')
@@ -152,14 +162,22 @@ export default function CampaignsPage() {
   const [campaignForComparison, setCampaignForComparison] = useState<Campaign | null>(null)
   const [weeklyData, setWeeklyData] = useState<any[]>([])
 
+  // Estado para modal de edição
+  const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+
   const filteredCampaigns = useMemo(() => {
     return campaigns.filter((campaign) => {
       const matchesSearch = campaign.name.toLowerCase().includes(searchTerm.toLowerCase())
       const matchesPlatform = selectedPlatform === 'all' || campaign.platform === selectedPlatform
       const matchesStatus = selectedStatus === 'all' || campaign.status === selectedStatus
-      return matchesSearch && matchesPlatform && matchesStatus
+      // Filtro por conta conectada
+      const matchesAccount = selectedAccount === 'all' ||
+        connectedAccounts.find(a => a.id === selectedAccount)?.platform === campaign.platform
+      return matchesSearch && matchesPlatform && matchesStatus && matchesAccount
     })
-  }, [campaigns, searchTerm, selectedPlatform, selectedStatus])
+  }, [campaigns, searchTerm, selectedPlatform, selectedStatus, selectedAccount, connectedAccounts])
 
   const platforms: Platform[] = ['meta', 'google', 'tiktok', 'linkedin', 'twitter']
   const statuses: CampaignStatus[] = ['active', 'paused', 'ended', 'draft', 'error']
@@ -230,6 +248,44 @@ export default function CampaignsPage() {
     if (previous === 0) return { value: 0, isPositive: true }
     const change = ((current - previous) / previous) * 100
     return { value: Math.abs(change), isPositive: change >= 0 }
+  }
+
+  // Handlers para ações de campanha
+  const handleEditCampaign = (campaign: Campaign) => {
+    setEditingCampaign(campaign)
+    setOpenMenuId(null)
+  }
+
+  const handleDeleteCampaign = async (campaignId: string) => {
+    await deleteCampaign(campaignId)
+    setShowDeleteConfirm(null)
+    setOpenMenuId(null)
+  }
+
+  const handleToggleStatus = async (campaignId: string) => {
+    await toggleCampaignStatus(campaignId)
+    setOpenMenuId(null)
+  }
+
+  const handleDuplicateCampaign = async (campaign: Campaign) => {
+    const duplicatedData = {
+      name: `${campaign.name} (Cópia)`,
+      platform: campaign.platform.toUpperCase(),
+      objective: campaign.objective.toUpperCase(),
+      budget: campaign.budget,
+      budgetType: 'DAILY',
+    }
+    await addCampaign(duplicatedData)
+    setOpenMenuId(null)
+  }
+
+  const handleSaveEdit = async (updatedCampaign: Campaign) => {
+    await updateCampaign(updatedCampaign.id, {
+      name: updatedCampaign.name,
+      budget: updatedCampaign.budget,
+      status: updatedCampaign.status.toUpperCase(),
+    })
+    setEditingCampaign(null)
   }
 
   return (
@@ -444,6 +500,12 @@ export default function CampaignsPage() {
                       isAnalyzing={isAnalyzing === campaign.id}
                       visibleMetrics={visibleMetrics}
                       getMetricValue={getMetricValue}
+                      onEdit={handleEditCampaign}
+                      onDelete={(id) => setShowDeleteConfirm(id)}
+                      onToggleStatus={handleToggleStatus}
+                      onDuplicate={handleDuplicateCampaign}
+                      openMenuId={openMenuId}
+                      setOpenMenuId={setOpenMenuId}
                     />
                   ))}
                 </motion.div>
@@ -460,6 +522,12 @@ export default function CampaignsPage() {
                     onAiAnalysis={handleAiAnalysis}
                     isAnalyzing={isAnalyzing}
                     visibleMetrics={visibleMetrics}
+                    onEdit={handleEditCampaign}
+                    onDelete={(id) => setShowDeleteConfirm(id)}
+                    onToggleStatus={handleToggleStatus}
+                    onDuplicate={handleDuplicateCampaign}
+                    openMenuId={openMenuId}
+                    setOpenMenuId={setOpenMenuId}
                   />
                 </motion.div>
               )}
@@ -856,6 +924,240 @@ export default function CampaignsPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Modal de Confirmação de Exclusão */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowDeleteConfirm(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '400px',
+                background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '20px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                overflow: 'hidden',
+                padding: '24px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+                <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
+                  <Trash2 size={24} style={{ color: '#EF4444' }} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Excluir Campanha</h2>
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', margin: '4px 0 0' }}>Esta acao nao pode ser desfeita</p>
+                </div>
+              </div>
+              <p style={{ fontSize: '14px', color: '#A0A0B0', marginBottom: '24px', lineHeight: '1.6' }}>
+                Tem certeza que deseja excluir esta campanha? Todos os dados relacionados serao perdidos permanentemente.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowDeleteConfirm(null)}
+                >
+                  Cancelar
+                </Button>
+                <button
+                  onClick={() => handleDeleteCampaign(showDeleteConfirm)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 20px',
+                    borderRadius: '10px',
+                    backgroundColor: '#EF4444',
+                    border: 'none',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Trash2 size={16} />
+                  Excluir
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal de Edição de Campanha */}
+      <AnimatePresence>
+        {editingCampaign && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setEditingCampaign(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '500px',
+                maxHeight: '80vh',
+                background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '20px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ padding: '10px', borderRadius: '12px', backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
+                    <Edit size={20} style={{ color: '#3B82F6' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Editar Campanha</h2>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Atualize os dados da campanha</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEditingCampaign(null)}
+                  style={{ padding: '8px', borderRadius: '8px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Form */}
+              <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Nome da Campanha</label>
+                  <input
+                    type="text"
+                    value={editingCampaign.name}
+                    onChange={(e) => setEditingCampaign({ ...editingCampaign, name: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Orcamento Diario</label>
+                  <input
+                    type="number"
+                    value={editingCampaign.budget}
+                    onChange={(e) => setEditingCampaign({ ...editingCampaign, budget: parseFloat(e.target.value) || 0 })}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Status</label>
+                  <select
+                    value={editingCampaign.status}
+                    onChange={(e) => setEditingCampaign({ ...editingCampaign, status: e.target.value as CampaignStatus })}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      appearance: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {statuses.map((status) => (
+                      <option key={status} value={status} style={{ backgroundColor: '#12121A' }}>
+                        {statusLabels[status]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Plataforma</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                      <PlatformIcon platform={editingCampaign.platform} size={18} />
+                      <span style={{ color: '#A0A0B0', fontSize: '14px', textTransform: 'capitalize' }}>{editingCampaign.platform}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Objetivo</label>
+                    <div style={{ padding: '12px 16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                      <span style={{ color: '#A0A0B0', fontSize: '14px', textTransform: 'capitalize' }}>{editingCampaign.objective}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px' }}>
+                <Button variant="secondary" onClick={() => setEditingCampaign(null)}>
+                  Cancelar
+                </Button>
+                <Button variant="primary" onClick={() => handleSaveEdit(editingCampaign)}>
+                  Salvar Alteracoes
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -867,6 +1169,12 @@ function CampaignCard({
   isAnalyzing,
   visibleMetrics,
   getMetricValue,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+  onDuplicate,
+  openMenuId,
+  setOpenMenuId,
 }: {
   campaign: Campaign
   index: number
@@ -874,7 +1182,15 @@ function CampaignCard({
   isAnalyzing: boolean
   visibleMetrics: string[]
   getMetricValue: (campaign: Campaign, metricKey: string) => string | number
+  onEdit: (campaign: Campaign) => void
+  onDelete: (id: string) => void
+  onToggleStatus: (id: string) => void
+  onDuplicate: (campaign: Campaign) => void
+  openMenuId: string | null
+  setOpenMenuId: (id: string | null) => void
 }) {
+  const isMenuOpen = openMenuId === campaign.id
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -914,6 +1230,153 @@ function CampaignCard({
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Badge variant={statusColors[campaign.status]}>{statusLabels[campaign.status]}</Badge>
+          {/* Menu Dropdown */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setOpenMenuId(isMenuOpen ? null : campaign.id)
+              }}
+              style={{
+                padding: '6px',
+                borderRadius: '8px',
+                backgroundColor: isMenuOpen ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#6B6B7B',
+              }}
+            >
+              <MoreVertical size={16} />
+            </button>
+            {isMenuOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '4px',
+                  padding: '8px',
+                  borderRadius: '12px',
+                  backgroundColor: '#1A1A25',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
+                  zIndex: 100,
+                  minWidth: '160px',
+                }}
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onEdit(campaign)
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <Edit size={16} style={{ color: '#3B82F6' }} />
+                  Editar
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleStatus(campaign.id)
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  {campaign.status === 'active' ? (
+                    <>
+                      <Pause size={16} style={{ color: '#FACC15' }} />
+                      Pausar
+                    </>
+                  ) : (
+                    <>
+                      <Play size={16} style={{ color: '#34D399' }} />
+                      Ativar
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDuplicate(campaign)
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <Copy size={16} style={{ color: '#A855F7' }} />
+                  Duplicar
+                </button>
+                <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.1)', margin: '8px 0' }} />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete(campaign.id)
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#EF4444',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <Trash2 size={16} />
+                  Excluir
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -968,11 +1431,23 @@ function CampaignTable({
   onAiAnalysis,
   isAnalyzing,
   visibleMetrics,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+  onDuplicate,
+  openMenuId,
+  setOpenMenuId,
 }: {
   campaigns: Campaign[]
   onAiAnalysis: (id: string, name: string) => void
   isAnalyzing: string | null
   visibleMetrics: string[]
+  onEdit: (campaign: Campaign) => void
+  onDelete: (id: string) => void
+  onToggleStatus: (id: string) => void
+  onDuplicate: (campaign: Campaign) => void
+  openMenuId: string | null
+  setOpenMenuId: (id: string | null) => void
 }) {
   return (
     <div style={{ borderRadius: '16px', background: 'linear-gradient(to bottom right, #12121A, #0D0D14)', border: '1px solid rgba(255, 255, 255, 0.1)', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2)' }}>
@@ -1005,6 +1480,7 @@ function CampaignTable({
                 )
               })}
               <th style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>IA</th>
+              <th style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>Acoes</th>
             </tr>
           </thead>
           <tbody>
@@ -1093,6 +1569,155 @@ function CampaignTable({
                   >
                     <Sparkles size={16} style={{ color: '#FACC15' }} />
                   </button>
+                </td>
+                {/* Coluna de Ações */}
+                <td style={{ padding: '16px', textAlign: 'center' }}>
+                  <div style={{ position: 'relative', display: 'inline-block' }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setOpenMenuId(openMenuId === campaign.id ? null : campaign.id)
+                      }}
+                      style={{
+                        padding: '8px',
+                        borderRadius: '8px',
+                        backgroundColor: openMenuId === campaign.id ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: '#6B6B7B',
+                      }}
+                    >
+                      <MoreVertical size={16} />
+                    </button>
+                    {openMenuId === campaign.id && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '100%',
+                          right: 0,
+                          marginTop: '4px',
+                          padding: '8px',
+                          borderRadius: '12px',
+                          backgroundColor: '#1A1A25',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
+                          zIndex: 100,
+                          minWidth: '160px',
+                        }}
+                      >
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onEdit(campaign)
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            width: '100%',
+                            padding: '10px 12px',
+                            borderRadius: '8px',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            color: '#FFFFFF',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <Edit size={16} style={{ color: '#3B82F6' }} />
+                          Editar
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onToggleStatus(campaign.id)
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            width: '100%',
+                            padding: '10px 12px',
+                            borderRadius: '8px',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            color: '#FFFFFF',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          {campaign.status === 'active' ? (
+                            <>
+                              <Pause size={16} style={{ color: '#FACC15' }} />
+                              Pausar
+                            </>
+                          ) : (
+                            <>
+                              <Play size={16} style={{ color: '#34D399' }} />
+                              Ativar
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onDuplicate(campaign)
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            width: '100%',
+                            padding: '10px 12px',
+                            borderRadius: '8px',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            color: '#FFFFFF',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <Copy size={16} style={{ color: '#A855F7' }} />
+                          Duplicar
+                        </button>
+                        <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.1)', margin: '8px 0' }} />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onDelete(campaign.id)
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            width: '100%',
+                            padding: '10px 12px',
+                            borderRadius: '8px',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            color: '#EF4444',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <Trash2 size={16} />
+                          Excluir
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </td>
               </motion.tr>
             ))}

@@ -323,8 +323,26 @@ function ProfileSection({
     website: 'https://agencia.com.br',
   })
 
-  const handleSave = () => {
-    showToast('Perfil atualizado com sucesso!', 'success')
+  const [saving, setSaving] = useState(false)
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      if (response.ok) {
+        showToast('Perfil atualizado com sucesso!', 'success')
+      } else {
+        showToast('Erro ao salvar perfil', 'error')
+      }
+    } catch (error) {
+      showToast('Erro ao salvar perfil', 'error')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -598,10 +616,10 @@ function ProfileSection({
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '16px' }}>
-          <Button variant="primary" onClick={handleSave}>
+          <Button variant="primary" onClick={handleSave} disabled={saving}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Save size={16} />
-              Salvar Alterações
+              <Save size={16} style={{ animation: saving ? 'spin 1s linear infinite' : 'none' }} />
+              {saving ? 'Salvando...' : 'Salvar Alterações'}
             </span>
           </Button>
         </div>
@@ -1192,6 +1210,20 @@ function BillingSection({ showToast }: { showToast: (msg: string, type: any) => 
 function PreferencesSection({ showToast }: { showToast: (msg: string, type: any) => void }) {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
   const [language, setLanguage] = useState('pt-BR')
+  const [timezone, setTimezone] = useState('America/Sao_Paulo')
+  const [currency, setCurrency] = useState('BRL')
+
+  const savePreference = async (key: string, value: string) => {
+    try {
+      await fetch('/api/user/preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [key]: value }),
+      })
+    } catch (error) {
+      console.error('Erro ao salvar preferência:', error)
+    }
+  }
 
   return (
     <motion.div
@@ -1300,6 +1332,12 @@ function PreferencesSection({ showToast }: { showToast: (msg: string, type: any)
             Fuso Horário
           </label>
           <select
+            value={timezone}
+            onChange={(e) => {
+              setTimezone(e.target.value)
+              savePreference('timezone', e.target.value)
+              showToast('Fuso horário alterado!', 'success')
+            }}
             style={{
               width: '100%',
               height: '44px',
@@ -1326,6 +1364,12 @@ function PreferencesSection({ showToast }: { showToast: (msg: string, type: any)
             Moeda Padrão
           </label>
           <select
+            value={currency}
+            onChange={(e) => {
+              setCurrency(e.target.value)
+              savePreference('currency', e.target.value)
+              showToast('Moeda alterada!', 'success')
+            }}
             style={{
               width: '100%',
               height: '44px',

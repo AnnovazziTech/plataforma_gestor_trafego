@@ -64,11 +64,127 @@ const actionIcons: Record<string, ReactNode> = {
 }
 
 export default function AutomationPage() {
-  const { automations } = useApp()
+  const { automations, addAutomation, updateAutomation, deleteAutomation, toggleAutomationStatus, showToast } = useApp()
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [editingAutomation, setEditingAutomation] = useState<Automation | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+
+  // Form state for creating automation
+  const [formData, setFormData] = useState({
+    name: '',
+    type: 'rule' as 'rule' | 'schedule' | 'trigger',
+    conditionMetric: 'cpa',
+    conditionOperator: 'gt',
+    conditionValue: '',
+    timeframe: 'day' as 'hour' | 'day' | 'week',
+    actionType: 'pause' as 'pause' | 'activate' | 'adjust_budget' | 'adjust_bid' | 'notify',
+    actionValue: '',
+    target: 'campaign' as 'campaign' | 'adset' | 'ad',
+  })
 
   // Use automations from context with fallback to empty array
   const automationsData = useMemo(() => automations || [], [automations])
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      type: 'rule',
+      conditionMetric: 'cpa',
+      conditionOperator: 'gt',
+      conditionValue: '',
+      timeframe: 'day',
+      actionType: 'pause',
+      actionValue: '',
+      target: 'campaign',
+    })
+  }
+
+  const handleCreateAutomation = async () => {
+    if (!formData.name || !formData.conditionValue) {
+      showToast('Preencha todos os campos obrigatórios', 'error')
+      return
+    }
+    await addAutomation({
+      name: formData.name,
+      type: formData.type.toUpperCase(),
+      status: 'ACTIVE',
+      conditions: [{
+        metric: formData.conditionMetric.toUpperCase(),
+        operator: formData.conditionOperator.toUpperCase(),
+        value: parseFloat(formData.conditionValue),
+        timeframe: formData.timeframe.toUpperCase(),
+      }],
+      actions: [{
+        type: formData.actionType.toUpperCase(),
+        value: formData.actionValue ? parseFloat(formData.actionValue) : null,
+        target: formData.target.toUpperCase(),
+      }],
+    })
+    setShowCreateModal(false)
+    resetForm()
+  }
+
+  const handleEditAutomation = (automation: Automation) => {
+    setEditingAutomation(automation)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingAutomation) return
+    await updateAutomation(editingAutomation.id, {
+      name: editingAutomation.name,
+      status: editingAutomation.status.toUpperCase(),
+    })
+    setEditingAutomation(null)
+  }
+
+  const handleDeleteAutomation = async (id: string) => {
+    await deleteAutomation(id)
+    setShowDeleteConfirm(null)
+  }
+
+  const handleToggleStatus = async (id: string) => {
+    await toggleAutomationStatus(id)
+  }
+
+  const handleTemplateClick = (template: { title: string; conditions: string; action: string }) => {
+    // Pre-fill form based on template
+    let metric = 'cpa'
+    let operator = 'gt'
+    let value = '50'
+    let actionType = 'pause'
+
+    if (template.title.includes('CPA')) {
+      metric = 'cpa'
+      operator = 'gt'
+      value = '50'
+      actionType = 'pause'
+    } else if (template.title.includes('ROAS')) {
+      metric = 'roas'
+      operator = 'gte'
+      value = '4'
+      actionType = 'adjust_budget'
+    } else if (template.title.includes('CTR')) {
+      metric = 'ctr'
+      operator = 'lt'
+      value = '1'
+      actionType = 'notify'
+    } else if (template.title.includes('Frequência')) {
+      metric = 'frequency'
+      operator = 'gt'
+      value = '5'
+      actionType = 'pause'
+    }
+
+    setFormData({
+      ...formData,
+      name: template.title,
+      conditionMetric: metric,
+      conditionOperator: operator,
+      conditionValue: value,
+      actionType: actionType as any,
+    })
+    setShowCreateModal(true)
+  }
 
   const totalTriggers = useMemo(() => automationsData.reduce((acc, a) => acc + (a.triggerCount || 0), 0), [automationsData])
   const activeAutomations = useMemo(() => automationsData.filter(a => a.status === 'active').length, [automationsData])
@@ -127,7 +243,14 @@ export default function AutomationPage() {
         {/* Automations List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '48px' }}>
           {automationsData.map((automation, index) => (
-            <AutomationCard key={automation.id} automation={automation as Automation} index={index} />
+            <AutomationCard
+              key={automation.id}
+              automation={automation as Automation}
+              index={index}
+              onEdit={handleEditAutomation}
+              onDelete={(id) => setShowDeleteConfirm(id)}
+              onToggleStatus={handleToggleStatus}
+            />
           ))}
         </div>
 
@@ -191,6 +314,7 @@ export default function AutomationPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ y: -4 }}
+                onClick={() => handleTemplateClick(template)}
                 style={{
                   padding: '24px',
                   borderRadius: '16px',
@@ -327,6 +451,8 @@ export default function AutomationPage() {
                   <input
                     type="text"
                     placeholder="Ex: Pausar CPA Alto"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     style={{
                       width: '100%',
                       height: '48px',
@@ -356,11 +482,12 @@ export default function AutomationPage() {
                       <button
                         key={type.id}
                         type="button"
+                        onClick={() => setFormData({ ...formData, type: type.id as any })}
                         style={{
                           padding: '12px',
                           borderRadius: '12px',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: formData.type === type.id ? '1px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
+                          backgroundColor: formData.type === type.id ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.05)',
                           color: '#FFFFFF',
                           cursor: 'pointer',
                           display: 'flex',
@@ -369,7 +496,7 @@ export default function AutomationPage() {
                           gap: '8px',
                         }}
                       >
-                        <type.icon size={20} style={{ color: '#3B82F6' }} />
+                        <type.icon size={20} style={{ color: formData.type === type.id ? '#3B82F6' : '#6B6B7B' }} />
                         <span style={{ fontSize: '12px' }}>{type.label}</span>
                       </button>
                     ))}
@@ -383,6 +510,8 @@ export default function AutomationPage() {
                   </label>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <select
+                      value={formData.conditionMetric}
+                      onChange={(e) => setFormData({ ...formData, conditionMetric: e.target.value })}
                       style={{
                         flex: 1,
                         height: '48px',
@@ -395,14 +524,17 @@ export default function AutomationPage() {
                         outline: 'none',
                       }}
                     >
-                      <option value="cpa">CPA</option>
-                      <option value="roas">ROAS</option>
-                      <option value="ctr">CTR</option>
-                      <option value="cpc">CPC</option>
-                      <option value="impressions">Impressões</option>
-                      <option value="conversions">Conversões</option>
+                      <option value="cpa" style={{ backgroundColor: '#12121A' }}>CPA</option>
+                      <option value="roas" style={{ backgroundColor: '#12121A' }}>ROAS</option>
+                      <option value="ctr" style={{ backgroundColor: '#12121A' }}>CTR</option>
+                      <option value="cpc" style={{ backgroundColor: '#12121A' }}>CPC</option>
+                      <option value="impressions" style={{ backgroundColor: '#12121A' }}>Impressões</option>
+                      <option value="conversions" style={{ backgroundColor: '#12121A' }}>Conversões</option>
+                      <option value="frequency" style={{ backgroundColor: '#12121A' }}>Frequência</option>
                     </select>
                     <select
+                      value={formData.conditionOperator}
+                      onChange={(e) => setFormData({ ...formData, conditionOperator: e.target.value })}
                       style={{
                         width: '120px',
                         height: '48px',
@@ -415,15 +547,17 @@ export default function AutomationPage() {
                         outline: 'none',
                       }}
                     >
-                      <option value="gt">Maior que</option>
-                      <option value="lt">Menor que</option>
-                      <option value="eq">Igual a</option>
-                      <option value="gte">Maior ou igual</option>
-                      <option value="lte">Menor ou igual</option>
+                      <option value="gt" style={{ backgroundColor: '#12121A' }}>Maior que</option>
+                      <option value="lt" style={{ backgroundColor: '#12121A' }}>Menor que</option>
+                      <option value="eq" style={{ backgroundColor: '#12121A' }}>Igual a</option>
+                      <option value="gte" style={{ backgroundColor: '#12121A' }}>Maior ou igual</option>
+                      <option value="lte" style={{ backgroundColor: '#12121A' }}>Menor ou igual</option>
                     </select>
                     <input
                       type="number"
                       placeholder="Valor"
+                      value={formData.conditionValue}
+                      onChange={(e) => setFormData({ ...formData, conditionValue: e.target.value })}
                       style={{
                         width: '100px',
                         height: '48px',
@@ -445,6 +579,8 @@ export default function AutomationPage() {
                     Período de Análise
                   </label>
                   <select
+                    value={formData.timeframe}
+                    onChange={(e) => setFormData({ ...formData, timeframe: e.target.value as any })}
                     style={{
                       width: '100%',
                       height: '48px',
@@ -457,9 +593,9 @@ export default function AutomationPage() {
                       outline: 'none',
                     }}
                   >
-                    <option value="hour">Última hora</option>
-                    <option value="day">Último dia</option>
-                    <option value="week">Última semana</option>
+                    <option value="hour" style={{ backgroundColor: '#12121A' }}>Última hora</option>
+                    <option value="day" style={{ backgroundColor: '#12121A' }}>Último dia</option>
+                    <option value="week" style={{ backgroundColor: '#12121A' }}>Última semana</option>
                   </select>
                 </div>
 
@@ -478,11 +614,12 @@ export default function AutomationPage() {
                       <button
                         key={action.id}
                         type="button"
+                        onClick={() => setFormData({ ...formData, actionType: action.id as any })}
                         style={{
                           padding: '12px',
                           borderRadius: '12px',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: formData.actionType === action.id ? '1px solid #10B981' : '1px solid rgba(255, 255, 255, 0.1)',
+                          backgroundColor: formData.actionType === action.id ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.05)',
                           color: '#FFFFFF',
                           cursor: 'pointer',
                           display: 'flex',
@@ -490,7 +627,7 @@ export default function AutomationPage() {
                           gap: '8px',
                         }}
                       >
-                        <action.icon size={16} style={{ color: '#10B981' }} />
+                        <action.icon size={16} style={{ color: formData.actionType === action.id ? '#10B981' : '#6B6B7B' }} />
                         <span style={{ fontSize: '14px' }}>{action.label}</span>
                       </button>
                     ))}
@@ -503,6 +640,8 @@ export default function AutomationPage() {
                     Aplicar em
                   </label>
                   <select
+                    value={formData.target}
+                    onChange={(e) => setFormData({ ...formData, target: e.target.value as any })}
                     style={{
                       width: '100%',
                       height: '48px',
@@ -515,21 +654,208 @@ export default function AutomationPage() {
                       outline: 'none',
                     }}
                   >
-                    <option value="campaign">Campanha</option>
-                    <option value="adset">Conjunto de Anúncios</option>
-                    <option value="ad">Anúncio</option>
+                    <option value="campaign" style={{ backgroundColor: '#12121A' }}>Campanha</option>
+                    <option value="adset" style={{ backgroundColor: '#12121A' }}>Conjunto de Anúncios</option>
+                    <option value="ad" style={{ backgroundColor: '#12121A' }}>Anúncio</option>
                   </select>
                 </div>
 
                 {/* Buttons */}
                 <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>
-                  <Button type="button" variant="ghost" onClick={() => setShowCreateModal(false)} style={{ flex: 1 }}>
+                  <Button type="button" variant="ghost" onClick={() => { setShowCreateModal(false); resetForm(); }} style={{ flex: 1 }}>
                     Cancelar
                   </Button>
-                  <Button type="button" variant="primary" onClick={() => setShowCreateModal(false)} style={{ flex: 1 }}>
+                  <Button type="button" variant="primary" onClick={handleCreateAutomation} style={{ flex: 1 }}>
                     Criar Automação
                   </Button>
                 </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal de Confirmação de Exclusão */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowDeleteConfirm(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '400px',
+                background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '20px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                padding: '24px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+                <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
+                  <Trash2 size={24} style={{ color: '#EF4444' }} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Excluir Automação</h2>
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', margin: '4px 0 0' }}>Esta ação não pode ser desfeita</p>
+                </div>
+              </div>
+              <p style={{ fontSize: '14px', color: '#A0A0B0', marginBottom: '24px', lineHeight: '1.6' }}>
+                Tem certeza que deseja excluir esta automação? Ela será removida permanentemente.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <Button variant="secondary" onClick={() => setShowDeleteConfirm(null)}>
+                  Cancelar
+                </Button>
+                <button
+                  onClick={() => handleDeleteAutomation(showDeleteConfirm)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 20px',
+                    borderRadius: '10px',
+                    backgroundColor: '#EF4444',
+                    border: 'none',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Trash2 size={16} />
+                  Excluir
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal de Edição */}
+      <AnimatePresence>
+        {editingAutomation && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setEditingAutomation(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '500px',
+                background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '20px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ padding: '10px', borderRadius: '12px', backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
+                    <Edit size={20} style={{ color: '#3B82F6' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Editar Automação</h2>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Atualize os dados da automação</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEditingAutomation(null)}
+                  style={{ padding: '8px', borderRadius: '8px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                >
+                  <Plus style={{ width: '20px', height: '20px', transform: 'rotate(45deg)' }} />
+                </button>
+              </div>
+
+              {/* Form */}
+              <div style={{ padding: '24px' }}>
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Nome</label>
+                  <input
+                    type="text"
+                    value={editingAutomation.name}
+                    onChange={(e) => setEditingAutomation({ ...editingAutomation, name: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Status</label>
+                  <select
+                    value={editingAutomation.status}
+                    onChange={(e) => setEditingAutomation({ ...editingAutomation, status: e.target.value as 'active' | 'paused' })}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  >
+                    <option value="active" style={{ backgroundColor: '#12121A' }}>Ativo</option>
+                    <option value="paused" style={{ backgroundColor: '#12121A' }}>Pausado</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px' }}>
+                <Button variant="secondary" onClick={() => setEditingAutomation(null)}>
+                  Cancelar
+                </Button>
+                <Button variant="primary" onClick={handleSaveEdit}>
+                  Salvar Alterações
+                </Button>
               </div>
             </motion.div>
           </motion.div>
@@ -539,7 +865,19 @@ export default function AutomationPage() {
   )
 }
 
-function AutomationCard({ automation, index }: { automation: Automation; index: number }) {
+function AutomationCard({
+  automation,
+  index,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+}: {
+  automation: Automation
+  index: number
+  onEdit: (automation: Automation) => void
+  onDelete: (id: string) => void
+  onToggleStatus: (id: string) => void
+}) {
   const [showMenu, setShowMenu] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const colors = automationTypeColors[automation.type]
@@ -655,30 +993,91 @@ function AutomationCard({ automation, index }: { automation: Automation; index: 
                       zIndex: 10,
                     }}
                   >
-                    {[
-                      { icon: Edit, label: 'Editar' },
-                      { icon: automation.status === 'active' ? Pause : Play, label: automation.status === 'active' ? 'Pausar' : 'Ativar' },
-                      { icon: Trash2, label: 'Excluir', danger: true },
-                    ].map((action) => (
-                      <button
-                        key={action.label}
-                        style={{
-                          width: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          padding: '8px 12px',
-                          fontSize: '14px',
-                          background: 'none',
-                          border: 'none',
-                          color: action.danger ? '#EF4444' : '#A0A0B0',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <action.icon size={14} />
-                        {action.label}
-                      </button>
-                    ))}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setShowMenu(false)
+                        onEdit(automation)
+                      }}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 12px',
+                        fontSize: '14px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#FFFFFF',
+                        cursor: 'pointer',
+                        borderRadius: '8px',
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <Edit size={14} style={{ color: '#3B82F6' }} />
+                      Editar
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setShowMenu(false)
+                        onToggleStatus(automation.id)
+                      }}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 12px',
+                        fontSize: '14px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#FFFFFF',
+                        cursor: 'pointer',
+                        borderRadius: '8px',
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      {automation.status === 'active' ? (
+                        <>
+                          <Pause size={14} style={{ color: '#FACC15' }} />
+                          Pausar
+                        </>
+                      ) : (
+                        <>
+                          <Play size={14} style={{ color: '#34D399' }} />
+                          Ativar
+                        </>
+                      )}
+                    </button>
+                    <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.1)', margin: '4px 0' }} />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setShowMenu(false)
+                        onDelete(automation.id)
+                      }}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 12px',
+                        fontSize: '14px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#EF4444',
+                        cursor: 'pointer',
+                        borderRadius: '8px',
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <Trash2 size={14} />
+                      Excluir
+                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>

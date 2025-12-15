@@ -74,25 +74,29 @@ interface DashboardData {
 }
 
 export default function DashboardPage() {
-  const { campaigns } = useApp()
+  const { campaigns, fetchCampaigns } = useApp()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const response = await fetch('/api/dashboard')
-        if (response.ok) {
-          const data = await response.json()
-          setDashboardData(data)
-        }
-      } catch (error) {
-        console.error('Erro ao buscar dashboard:', error)
-      } finally {
-        setIsLoading(false)
+  const fetchDashboard = async () => {
+    try {
+      const response = await fetch('/api/dashboard')
+      if (response.ok) {
+        const data = await response.json()
+        setDashboardData(data)
       }
+    } catch (error) {
+      console.error('Erro ao buscar dashboard:', error)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
+  const handleRefresh = async () => {
+    await Promise.all([fetchDashboard(), fetchCampaigns()])
+  }
+
+  useEffect(() => {
     fetchDashboard()
   }, [])
 
@@ -104,6 +108,7 @@ export default function DashboardPage() {
           subtitle="Visao geral da performance de todas as suas campanhas"
           buttonType="connect"
           createButtonText="Conectar Contas"
+          onRefresh={handleRefresh}
         />
         <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center' }}>
@@ -143,6 +148,7 @@ export default function DashboardPage() {
         subtitle="Visao geral da performance de todas as suas campanhas"
         buttonType="connect"
         createButtonText="Conectar Contas"
+        onRefresh={handleRefresh}
       />
 
       <main style={{ flex: 1, padding: '24px', overflowX: 'hidden' }}>

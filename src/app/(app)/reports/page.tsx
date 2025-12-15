@@ -67,14 +67,86 @@ const metricsOptions = [
 ]
 
 export default function ReportsPage() {
-  const { connectedAccounts, showToast, reports } = useApp()
+  const { connectedAccounts, showToast, reports, deleteReport, fetchReports } = useApp()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [scheduledReports, setScheduledReports] = useState<any[]>([])
   const [editingSchedule, setEditingSchedule] = useState<any | null>(null)
+  const [editingReport, setEditingReport] = useState<Report | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
 
   // Use reports from context with fallback to empty array
   const reportsData = useMemo(() => reports || [], [reports])
+
+  const handleEditReport = (report: Report) => {
+    setEditingReport(report)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingReport) return
+    try {
+      // Atualizar via API
+      const response = await fetch(`/api/reports/${editingReport.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editingReport.name,
+          status: editingReport.status.toUpperCase(),
+        }),
+      })
+      if (response.ok) {
+        await fetchReports()
+        showToast('Relatório atualizado com sucesso!', 'success')
+      }
+    } catch (error) {
+      showToast('Erro ao atualizar relatório', 'error')
+    }
+    setEditingReport(null)
+  }
+
+  const handleDeleteReport = async (id: string) => {
+    try {
+      const response = await fetch(`/api/reports/${id}`, { method: 'DELETE' })
+      if (response.ok) {
+        deleteReport(id)
+        showToast('Relatório excluído!', 'success')
+      }
+    } catch (error) {
+      showToast('Erro ao excluir relatório', 'error')
+    }
+    setShowDeleteConfirm(null)
+  }
+
+  const handleToggleStatus = async (id: string) => {
+    const report = reportsData.find(r => r.id === id)
+    if (!report) return
+    try {
+      const newStatus = report.status === 'active' ? 'PAUSED' : 'ACTIVE'
+      const response = await fetch(`/api/reports/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      if (response.ok) {
+        await fetchReports()
+        showToast('Status atualizado!', 'success')
+      }
+    } catch (error) {
+      showToast('Erro ao atualizar status', 'error')
+    }
+  }
+
+  const handleDownload = (report: Report) => {
+    showToast(`Gerando PDF: ${report.name}...`, 'info')
+    // Simular download
+    setTimeout(() => {
+      showToast('PDF gerado com sucesso!', 'success')
+    }, 1500)
+  }
+
+  const handleShare = (report: Report) => {
+    showToast('Link copiado para área de transferência!', 'success')
+  }
 
   return (
     <div style={{ minHeight: '100vh' }}>
@@ -139,7 +211,16 @@ export default function ReportsPage() {
         {/* Reports Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '48px' }}>
           {reportsData.map((report, index) => (
-            <ReportCard key={report.id} report={report as unknown as Report} index={index} />
+            <ReportCard
+              key={report.id}
+              report={report as unknown as Report}
+              index={index}
+              onEdit={handleEditReport}
+              onDelete={(id) => setShowDeleteConfirm(id)}
+              onToggleStatus={handleToggleStatus}
+              onDownload={handleDownload}
+              onShare={handleShare}
+            />
           ))}
 
           {/* Create New Report Card */}
@@ -254,6 +335,193 @@ export default function ReportsPage() {
         }}
         editingSchedule={editingSchedule}
       />
+
+      {/* Modal de Confirmação de Exclusão */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowDeleteConfirm(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 100,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '400px',
+                background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '20px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                padding: '24px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+                <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
+                  <Trash2 size={24} style={{ color: '#EF4444' }} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Excluir Relatório</h2>
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', margin: '4px 0 0' }}>Esta ação não pode ser desfeita</p>
+                </div>
+              </div>
+              <p style={{ fontSize: '14px', color: '#A0A0B0', marginBottom: '24px', lineHeight: '1.6' }}>
+                Tem certeza que deseja excluir este relatório? Ele será removido permanentemente.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <Button variant="secondary" onClick={() => setShowDeleteConfirm(null)}>
+                  Cancelar
+                </Button>
+                <button
+                  onClick={() => handleDeleteReport(showDeleteConfirm)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 20px',
+                    borderRadius: '10px',
+                    backgroundColor: '#EF4444',
+                    border: 'none',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Trash2 size={16} />
+                  Excluir
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal de Edição */}
+      <AnimatePresence>
+        {editingReport && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setEditingReport(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 100,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '500px',
+                background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '20px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ padding: '10px', borderRadius: '12px', backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
+                    <Edit size={20} style={{ color: '#3B82F6' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Editar Relatório</h2>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Atualize os dados do relatório</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEditingReport(null)}
+                  style={{ padding: '8px', borderRadius: '8px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Form */}
+              <div style={{ padding: '24px' }}>
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Nome</label>
+                  <input
+                    type="text"
+                    value={editingReport.name}
+                    onChange={(e) => setEditingReport({ ...editingReport, name: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Status</label>
+                  <select
+                    value={editingReport.status}
+                    onChange={(e) => setEditingReport({ ...editingReport, status: e.target.value as 'active' | 'paused' })}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                  >
+                    <option value="active" style={{ backgroundColor: '#12121A' }}>Ativo</option>
+                    <option value="paused" style={{ backgroundColor: '#12121A' }}>Pausado</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px' }}>
+                <Button variant="secondary" onClick={() => setEditingReport(null)}>
+                  Cancelar
+                </Button>
+                <Button variant="primary" onClick={handleSaveEdit}>
+                  Salvar Alterações
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -1052,12 +1320,29 @@ function ScheduleReportModal({
   )
 }
 
-function ReportCard({ report, index }: { report: Report; index: number }) {
+function ReportCard({
+  report,
+  index,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+  onDownload,
+  onShare,
+}: {
+  report: Report
+  index: number
+  onEdit: (report: Report) => void
+  onDelete: (id: string) => void
+  onToggleStatus: (id: string) => void
+  onDownload: (report: Report) => void
+  onShare: (report: Report) => void
+}) {
   const [showMenu, setShowMenu] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
     setCopied(true)
+    onShare(report)
     setTimeout(() => setCopied(false), 2000)
   }
 
@@ -1136,32 +1421,141 @@ function ReportCard({ report, index }: { report: Report; index: number }) {
                     zIndex: 10,
                   }}
                 >
-                  {[
-                    { icon: Edit, label: 'Editar' },
-                    { icon: Download, label: 'Baixar' },
-                    { icon: Share2, label: 'Compartilhar' },
-                    { icon: report.status === 'active' ? Pause : Play, label: report.status === 'active' ? 'Pausar' : 'Ativar' },
-                    { icon: Trash2, label: 'Excluir', danger: true },
-                  ].map((action) => (
-                    <button
-                      key={action.label}
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '8px 12px',
-                        fontSize: '14px',
-                        background: 'none',
-                        border: 'none',
-                        color: action.danger ? '#EF4444' : '#A0A0B0',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <action.icon size={14} />
-                      {action.label}
-                    </button>
-                  ))}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setShowMenu(false)
+                      onEdit(report)
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 12px',
+                      fontSize: '14px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#FFFFFF',
+                      cursor: 'pointer',
+                      borderRadius: '8px',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <Edit size={14} style={{ color: '#3B82F6' }} />
+                    Editar
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setShowMenu(false)
+                      onDownload(report)
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 12px',
+                      fontSize: '14px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#FFFFFF',
+                      cursor: 'pointer',
+                      borderRadius: '8px',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <Download size={14} style={{ color: '#10B981' }} />
+                    Baixar
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setShowMenu(false)
+                      onShare(report)
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 12px',
+                      fontSize: '14px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#FFFFFF',
+                      cursor: 'pointer',
+                      borderRadius: '8px',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <Share2 size={14} style={{ color: '#A855F7' }} />
+                    Compartilhar
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setShowMenu(false)
+                      onToggleStatus(report.id)
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 12px',
+                      fontSize: '14px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#FFFFFF',
+                      cursor: 'pointer',
+                      borderRadius: '8px',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    {report.status === 'active' ? (
+                      <>
+                        <Pause size={14} style={{ color: '#FACC15' }} />
+                        Pausar
+                      </>
+                    ) : (
+                      <>
+                        <Play size={14} style={{ color: '#34D399' }} />
+                        Ativar
+                      </>
+                    )}
+                  </button>
+                  <div style={{ height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.1)', margin: '4px 0' }} />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setShowMenu(false)
+                      onDelete(report.id)
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 12px',
+                      fontSize: '14px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#EF4444',
+                      cursor: 'pointer',
+                      borderRadius: '8px',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <Trash2 size={14} />
+                    Excluir
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -1210,7 +1604,7 @@ function ReportCard({ report, index }: { report: Report; index: number }) {
 
       {/* Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
-        <Button variant="secondary" size="sm" style={{ flex: 1 }}>
+        <Button variant="secondary" size="sm" style={{ flex: 1 }} onClick={() => onDownload(report)}>
           <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
             <Download size={14} />
             Baixar

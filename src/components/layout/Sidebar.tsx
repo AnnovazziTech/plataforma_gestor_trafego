@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import { signOut } from 'next-auth/react'
 import {
   LayoutDashboard,
   Megaphone,
@@ -52,7 +53,23 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(true)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+
+  const handleUpgrade = () => {
+    router.push('/settings')
+    // Scroll to billing section after navigation
+    setTimeout(() => {
+      const billingTab = document.querySelector('[data-tab="billing"]')
+      if (billingTab) (billingTab as HTMLElement).click()
+    }, 100)
+  }
+
+  const handleLogout = async () => {
+    setShowLogoutConfirm(false)
+    await signOut({ callbackUrl: '/login' })
+  }
 
   return (
     <aside
@@ -456,6 +473,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                   Recursos avancados de automacao
                 </p>
                 <button
+                  onClick={handleUpgrade}
                   style={{
                     width: '100%',
                     padding: '6px 12px',
@@ -559,6 +577,8 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                   </p>
                 </div>
                 <button
+                  onClick={() => setShowLogoutConfirm(true)}
+                  title="Sair"
                   style={{
                     padding: '6px',
                     borderRadius: '8px',
@@ -575,6 +595,105 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           </div>
         </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowLogoutConfirm(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '400px',
+                backgroundColor: '#12121A',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '16px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                padding: '24px',
+              }}
+            >
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <div
+                  style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                  }}
+                >
+                  <LogOut style={{ width: '24px', height: '24px', color: '#EF4444' }} />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', marginBottom: '8px' }}>
+                  Sair da Conta
+                </h3>
+                <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>
+                  Tem certeza que deseja sair? Você precisará fazer login novamente.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  style={{
+                    flex: 1,
+                    padding: '12px 24px',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    backgroundColor: 'transparent',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    flex: 1,
+                    padding: '12px 24px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    backgroundColor: '#EF4444',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Sair
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </aside>
   )
 }
