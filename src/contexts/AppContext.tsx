@@ -88,6 +88,53 @@ interface Lead {
   createdAt: string
 }
 
+interface Creative {
+  id: string
+  title: string
+  description?: string
+  type: 'IMAGE' | 'VIDEO' | 'CAROUSEL' | 'TEXT'
+  platform?: string
+  thumbnailUrl?: string
+  mediaUrl?: string
+  sourceUrl?: string
+  sourceAdvertiser?: string
+  tags: string[]
+  isFavorite: boolean
+  createdAt: string
+}
+
+interface ArtTemplate {
+  id: string
+  name: string
+  description?: string
+  type: string
+  niche: string
+  thumbnailUrl: string
+  canvaUrl?: string
+  downloads: number
+  rating: number
+  tags: string[]
+  isNew: boolean
+  isPremium: boolean
+  isSaved?: boolean
+}
+
+interface Conversation {
+  id: string
+  platform: 'WHATSAPP' | 'INSTAGRAM' | 'MESSENGER'
+  platformContactId: string
+  contactName: string
+  contactPhone?: string
+  contactEmail?: string
+  lastMessage?: string
+  lastMessageAt?: string
+  unreadCount: number
+  status: string
+  tags: string[]
+  messages?: any[]
+  createdAt: string
+}
+
 interface Toast {
   id: string
   message: string
@@ -147,6 +194,27 @@ interface AppContextType {
   updateLead: (id: string, updates: any) => Promise<void>
   deleteLead: (id: string) => Promise<void>
 
+  // Creatives
+  creatives: Creative[]
+  creativesLoading: boolean
+  creativesStats: { total: number; byType: Record<string, number>; favorites: number }
+  fetchCreatives: (filters?: any) => Promise<void>
+  addCreative: (data: any) => Promise<Creative | null>
+  updateCreative: (id: string, updates: any) => Promise<void>
+  deleteCreative: (id: string) => Promise<void>
+  toggleCreativeFavorite: (id: string) => Promise<void>
+
+  // Art Templates
+  artTemplates: ArtTemplate[]
+  artTemplatesLoading: boolean
+  fetchArtTemplates: (filters?: any) => Promise<void>
+
+  // Conversations (Messages/CRM)
+  conversations: Conversation[]
+  conversationsLoading: boolean
+  fetchConversations: (platform?: string) => Promise<void>
+  sendMessage: (conversationId: string, content: string) => Promise<void>
+
   // Date range
   dateRange: string
   setDateRange: (range: string) => void
@@ -201,6 +269,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const [leads, setLeads] = useState<Lead[]>([])
   const [leadsLoading, setLeadsLoading] = useState(false)
+
+  const [creatives, setCreatives] = useState<Creative[]>([])
+  const [creativesLoading, setCreativesLoading] = useState(false)
+  const [creativesStats, setCreativesStats] = useState<{ total: number; byType: Record<string, number>; favorites: number }>({
+    total: 0,
+    byType: {},
+    favorites: 0,
+  })
+
+  const [artTemplates, setArtTemplates] = useState<ArtTemplate[]>([])
+  const [artTemplatesLoading, setArtTemplatesLoading] = useState(false)
+
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [conversationsLoading, setConversationsLoading] = useState(false)
 
   const [dateRange, setDateRange] = useState('Ultimos 30 dias')
   const [selectedAccount, setSelectedAccount] = useState<string>('all')
@@ -569,6 +651,141 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [api, showToast])
 
+  // === CREATIVES ===
+  const fetchCreatives = useCallback(async (filters?: any) => {
+    if (!isAuthenticated) return
+    setCreativesLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (filters?.type) params.append('type', filters.type)
+      if (filters?.platform) params.append('platform', filters.platform)
+      if (filters?.search) params.append('search', filters.search)
+      if (filters?.favorite) params.append('favorite', 'true')
+
+      const data = await api(`/api/creatives?${params.toString()}`)
+      setCreatives(data.creatives || [])
+      setCreativesStats(data.stats || { total: 0, byType: {}, favorites: 0 })
+    } catch (error: any) {
+      console.error('Erro ao buscar criativos:', error)
+    } finally {
+      setCreativesLoading(false)
+    }
+  }, [api, isAuthenticated])
+
+  const addCreative = useCallback(async (creativeData: any): Promise<Creative | null> => {
+    try {
+      const data = await api('/api/creatives', {
+        method: 'POST',
+        body: JSON.stringify(creativeData),
+      })
+      setCreatives(prev => [data.creative, ...prev])
+      showToast('Criativo salvo com sucesso!', 'success')
+      return data.creative
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao salvar criativo', 'error')
+      return null
+    }
+  }, [api, showToast])
+
+  const updateCreative = useCallback(async (id: string, updates: any) => {
+    try {
+      const data = await api(`/api/creatives/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      })
+      setCreatives(prev => prev.map(c => c.id === id ? data.creative : c))
+      showToast('Criativo atualizado!', 'success')
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao atualizar criativo', 'error')
+    }
+  }, [api, showToast])
+
+  const deleteCreative = useCallback(async (id: string) => {
+    try {
+      await api(`/api/creatives/${id}`, { method: 'DELETE' })
+      setCreatives(prev => prev.filter(c => c.id !== id))
+      showToast('Criativo removido!', 'success')
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao remover criativo', 'error')
+    }
+  }, [api, showToast])
+
+  const toggleCreativeFavorite = useCallback(async (id: string) => {
+    const creative = creatives.find(c => c.id === id)
+    if (!creative) return
+
+    try {
+      await api(`/api/creatives/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isFavorite: !creative.isFavorite }),
+      })
+      setCreatives(prev => prev.map(c => c.id === id ? { ...c, isFavorite: !c.isFavorite } : c))
+      showToast(creative.isFavorite ? 'Removido dos favoritos' : 'Adicionado aos favoritos', 'info')
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao atualizar favorito', 'error')
+    }
+  }, [api, creatives, showToast])
+
+  // === ART TEMPLATES ===
+  const fetchArtTemplates = useCallback(async (filters?: any) => {
+    if (!isAuthenticated) return
+    setArtTemplatesLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (filters?.niche) params.append('niche', filters.niche)
+      if (filters?.type) params.append('type', filters.type)
+      if (filters?.search) params.append('search', filters.search)
+      if (filters?.new) params.append('new', 'true')
+      if (filters?.premium) params.append('premium', 'true')
+
+      const data = await api(`/api/art-templates?${params.toString()}`)
+      setArtTemplates(data.templates || [])
+    } catch (error: any) {
+      console.error('Erro ao buscar templates:', error)
+    } finally {
+      setArtTemplatesLoading(false)
+    }
+  }, [api, isAuthenticated])
+
+  // === CONVERSATIONS ===
+  const fetchConversations = useCallback(async (platform?: string) => {
+    if (!isAuthenticated) return
+    setConversationsLoading(true)
+    try {
+      const params = platform ? `?platform=${platform}` : ''
+      const data = await api(`/api/conversations${params}`)
+      setConversations(data.conversations || [])
+    } catch (error: any) {
+      console.error('Erro ao buscar conversas:', error)
+    } finally {
+      setConversationsLoading(false)
+    }
+  }, [api, isAuthenticated])
+
+  const sendMessage = useCallback(async (conversationId: string, content: string) => {
+    try {
+      const data = await api(`/api/conversations/${conversationId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({ content, type: 'TEXT' }),
+      })
+
+      // Update the conversation with the new message
+      setConversations(prev => prev.map(c => {
+        if (c.id === conversationId) {
+          return {
+            ...c,
+            lastMessage: content,
+            lastMessageAt: new Date().toISOString(),
+            messages: [...(c.messages || []), data.message],
+          }
+        }
+        return c
+      }))
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao enviar mensagem', 'error')
+    }
+  }, [api, showToast])
+
   // === INITIAL DATA LOAD ===
   useEffect(() => {
     if (isAuthenticated) {
@@ -626,6 +843,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addLead,
       updateLead,
       deleteLead,
+      creatives,
+      creativesLoading,
+      creativesStats,
+      fetchCreatives,
+      addCreative,
+      updateCreative,
+      deleteCreative,
+      toggleCreativeFavorite,
+      artTemplates,
+      artTemplatesLoading,
+      fetchArtTemplates,
+      conversations,
+      conversationsLoading,
+      fetchConversations,
+      sendMessage,
       dateRange,
       setDateRange,
       selectedAccount,

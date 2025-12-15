@@ -167,6 +167,9 @@ export default function CampaignsPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
+  // Estado para modal de detalhes da campanha
+  const [detailCampaign, setDetailCampaign] = useState<Campaign | null>(null)
+
   const filteredCampaigns = useMemo(() => {
     return campaigns.filter((campaign) => {
       const matchesSearch = campaign.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -506,6 +509,7 @@ export default function CampaignsPage() {
                       onDuplicate={handleDuplicateCampaign}
                       openMenuId={openMenuId}
                       setOpenMenuId={setOpenMenuId}
+                      onOpenDetail={(c) => setDetailCampaign(c)}
                     />
                   ))}
                 </motion.div>
@@ -528,6 +532,7 @@ export default function CampaignsPage() {
                     onDuplicate={handleDuplicateCampaign}
                     openMenuId={openMenuId}
                     setOpenMenuId={setOpenMenuId}
+                    onOpenDetail={(c) => setDetailCampaign(c)}
                   />
                 </motion.div>
               )}
@@ -556,7 +561,7 @@ export default function CampaignsPage() {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                 <div style={{ padding: '10px', borderRadius: '12px', background: 'linear-gradient(to bottom right, rgba(250, 204, 21, 0.2), rgba(234, 179, 8, 0.2))' }}>
-                  <Bot style={{ width: '20px', height: '20px', color: '#FACC15' }} />
+                  <span style={{ fontSize: '20px' }}>🤖</span>
                 </div>
                 <div>
                   <h3 style={{ fontWeight: 600, color: '#FFFFFF', fontSize: '14px', margin: 0 }}>Devan</h3>
@@ -1158,6 +1163,310 @@ export default function CampaignsPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Modal de Detalhes da Campanha */}
+      <AnimatePresence>
+        {detailCampaign && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setDetailCampaign(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '900px',
+                maxHeight: '90vh',
+                background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '20px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+                    <PlatformIcon platform={detailCampaign.platform} size={28} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>{detailCampaign.name}</h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
+                      <Badge variant={statusColors[detailCampaign.status]}>{statusLabels[detailCampaign.status]}</Badge>
+                      <span style={{ fontSize: '12px', color: '#6B6B7B', textTransform: 'capitalize' }}>{detailCampaign.objective}</span>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleEditCampaign(detailCampaign)
+                      setDetailCampaign(null)
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 16px',
+                      borderRadius: '10px',
+                      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      color: '#3B82F6',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Edit size={16} />
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => setDetailCampaign(null)}
+                    style={{ padding: '10px', borderRadius: '10px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+                {/* Métricas Principais */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '8px' }}>Impressões</p>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{formatCompactNumber(detailCampaign.metrics.impressions)}</p>
+                  </div>
+                  <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: 'rgba(250, 204, 21, 0.1)', border: '1px solid rgba(250, 204, 21, 0.2)' }}>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '8px' }}>Cliques</p>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{formatCompactNumber(detailCampaign.metrics.clicks)}</p>
+                  </div>
+                  <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '8px' }}>Conversões</p>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{detailCampaign.metrics.conversions}</p>
+                  </div>
+                  <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '8px' }}>ROAS</p>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: detailCampaign.metrics.roas >= 3 ? '#34D399' : detailCampaign.metrics.roas >= 2 ? '#FACC15' : '#EF4444', margin: 0 }}>
+                      {detailCampaign.metrics.roas.toFixed(2)}x
+                    </p>
+                  </div>
+                </div>
+
+                {/* Detalhes em Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px' }}>
+                  {/* Informações da Campanha */}
+                  <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Target size={16} style={{ color: '#3B82F6' }} />
+                      Informações da Campanha
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '14px', color: '#6B6B7B' }}>Plataforma</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF', textTransform: 'capitalize' }}>{detailCampaign.platform}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '14px', color: '#6B6B7B' }}>Objetivo</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF', textTransform: 'capitalize' }}>{detailCampaign.objective}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '14px', color: '#6B6B7B' }}>Data de Início</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{new Date(detailCampaign.startDate).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                      {detailCampaign.endDate && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: '14px', color: '#6B6B7B' }}>Data de Término</span>
+                          <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{new Date(detailCampaign.endDate).toLocaleDateString('pt-BR')}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Budget e Gastos */}
+                  <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <DollarSign size={16} style={{ color: '#FACC15' }} />
+                      Budget e Gastos
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '14px', color: '#6B6B7B' }}>Budget Total</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{formatCurrency(detailCampaign.budget)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '14px', color: '#6B6B7B' }}>Valor Gasto</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{formatCurrency(detailCampaign.spent)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '14px', color: '#6B6B7B' }}>Saldo Restante</span>
+                        <span style={{ fontSize: '14px', color: '#34D399' }}>{formatCurrency(detailCampaign.budget - detailCampaign.spent)}</span>
+                      </div>
+                      <div style={{ marginTop: '8px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Progresso</span>
+                          <span style={{ fontSize: '12px', color: '#FFFFFF' }}>{((detailCampaign.spent / detailCampaign.budget) * 100).toFixed(1)}%</span>
+                        </div>
+                        <div style={{ height: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '9999px', overflow: 'hidden' }}>
+                          <div style={{ width: `${(detailCampaign.spent / detailCampaign.budget) * 100}%`, height: '100%', borderRadius: '9999px', background: 'linear-gradient(to right, #3B82F6, #FACC15)' }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Métricas de Performance */}
+                  <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <BarChart3 size={16} style={{ color: '#34D399' }} />
+                      Métricas de Performance
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '14px', color: '#6B6B7B' }}>CTR</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{detailCampaign.metrics.ctr.toFixed(2)}%</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '14px', color: '#6B6B7B' }}>CPC</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{formatCurrency(detailCampaign.metrics.cpc)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '14px', color: '#6B6B7B' }}>CPM</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{formatCurrency(detailCampaign.metrics.cpm)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '14px', color: '#6B6B7B' }}>Alcance</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{formatCompactNumber(detailCampaign.metrics.reach)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Ações Rápidas */}
+                  <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Settings size={16} style={{ color: '#A855F7' }} />
+                      Ações Rápidas
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <button
+                        onClick={() => {
+                          handleToggleStatus(detailCampaign.id)
+                          setDetailCampaign(null)
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          width: '100%',
+                          padding: '12px 16px',
+                          borderRadius: '10px',
+                          backgroundColor: detailCampaign.status === 'active' ? 'rgba(250, 204, 21, 0.1)' : 'rgba(52, 211, 153, 0.1)',
+                          border: `1px solid ${detailCampaign.status === 'active' ? 'rgba(250, 204, 21, 0.3)' : 'rgba(52, 211, 153, 0.3)'}`,
+                          color: detailCampaign.status === 'active' ? '#FACC15' : '#34D399',
+                          fontSize: '14px',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {detailCampaign.status === 'active' ? <Pause size={16} /> : <Play size={16} />}
+                        {detailCampaign.status === 'active' ? 'Pausar Campanha' : 'Ativar Campanha'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleDuplicateCampaign(detailCampaign)
+                          setDetailCampaign(null)
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          width: '100%',
+                          padding: '12px 16px',
+                          borderRadius: '10px',
+                          backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                          border: '1px solid rgba(168, 85, 247, 0.3)',
+                          color: '#A855F7',
+                          fontSize: '14px',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Copy size={16} />
+                        Duplicar Campanha
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleAiAnalysis(detailCampaign.id, detailCampaign.name)
+                          setDetailCampaign(null)
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          width: '100%',
+                          padding: '12px 16px',
+                          borderRadius: '10px',
+                          backgroundColor: 'rgba(250, 204, 21, 0.1)',
+                          border: '1px solid rgba(250, 204, 21, 0.3)',
+                          color: '#FACC15',
+                          fontSize: '14px',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <span style={{ fontSize: '16px' }}>🤖</span>
+                        Análise do Devan
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDeleteConfirm(detailCampaign.id)
+                          setDetailCampaign(null)
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          width: '100%',
+                          padding: '12px 16px',
+                          borderRadius: '10px',
+                          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          color: '#EF4444',
+                          fontSize: '14px',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Trash2 size={16} />
+                        Excluir Campanha
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -1175,6 +1484,7 @@ function CampaignCard({
   onDuplicate,
   openMenuId,
   setOpenMenuId,
+  onOpenDetail,
 }: {
   campaign: Campaign
   index: number
@@ -1188,6 +1498,7 @@ function CampaignCard({
   onDuplicate: (campaign: Campaign) => void
   openMenuId: string | null
   setOpenMenuId: (id: string | null) => void
+  onOpenDetail: (campaign: Campaign) => void
 }) {
   const isMenuOpen = openMenuId === campaign.id
 
@@ -1197,6 +1508,7 @@ function CampaignCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       whileHover={{ y: -4 }}
+      onClick={() => onOpenDetail(campaign)}
       style={{
         position: 'relative',
         padding: '20px',
@@ -1229,7 +1541,7 @@ function CampaignCard({
                 }}
                 title="Perguntar ao Devan"
               >
-                <Bot size={14} style={{ color: '#FACC15' }} />
+                <span style={{ fontSize: '14px' }}>🤖</span>
               </button>
               <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }}>
                 {campaign.name}
@@ -1447,6 +1759,7 @@ function CampaignTable({
   onDuplicate,
   openMenuId,
   setOpenMenuId,
+  onOpenDetail,
 }: {
   campaigns: Campaign[]
   onAiAnalysis: (id: string, name: string) => void
@@ -1458,6 +1771,7 @@ function CampaignTable({
   onDuplicate: (campaign: Campaign) => void
   openMenuId: string | null
   setOpenMenuId: (id: string | null) => void
+  onOpenDetail: (campaign: Campaign) => void
 }) {
   return (
     <div style={{ borderRadius: '16px', background: 'linear-gradient(to bottom right, #12121A, #0D0D14)', border: '1px solid rgba(255, 255, 255, 0.1)', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2)' }}>
@@ -1500,7 +1814,8 @@ function CampaignTable({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.03 }}
-                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}
+                onClick={() => onOpenDetail(campaign)}
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', cursor: 'pointer' }}
               >
                 <td style={{ padding: '16px 24px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1578,7 +1893,7 @@ function CampaignTable({
                       opacity: isAnalyzing === campaign.id ? 0.5 : 1,
                     }}
                   >
-                    <Bot size={16} style={{ color: '#FACC15' }} />
+                    <span style={{ fontSize: '16px' }}>🤖</span>
                   </button>
                 </td>
                 {/* Coluna de Ações */}
