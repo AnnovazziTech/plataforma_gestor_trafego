@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
 import { Card, Button, Badge, StatCard, ROIGrid, DataTable, Column } from '@/components/ui'
@@ -188,49 +188,110 @@ const platformIcons: Record<PlatformType, { icon: string; label: string; color: 
 }
 
 export default function MensagensPage() {
-  const { showToast } = useApp()
+  const {
+    showToast,
+    connectedAccounts: contextAccounts,
+    leads: contextLeads,
+    leadsLoading,
+    fetchLeads,
+    updateLead,
+    conversations,
+    conversationsLoading,
+    fetchConversations,
+    sendMessage: contextSendMessage,
+    setIsConnectAccountsModalOpen,
+  } = useApp()
+
   const [activeTab, setActiveTab] = useState<TabType>('vendas')
   const [activePlatform, setActivePlatform] = useState<PlatformType>('all')
-  const [accounts, setAccounts] = useState<WhatsAppAccount[]>(mockAccounts)
   const [selectedAccount, setSelectedAccount] = useState<string>('all')
-  const [sales] = useState<WhatsAppSale[]>(mockSales)
   const [showConnectModal, setShowConnectModal] = useState(false)
 
   // CRM State
-  const [contacts] = useState<Contact[]>(mockContacts)
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
-  const [messages, setMessages] = useState<Message[]>(mockMessages)
+  const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [searchContact, setSearchContact] = useState('')
 
   // Funil State
-  const [leads, setLeads] = useState<Lead[]>(mockLeads)
   const [draggedLead, setDraggedLead] = useState<Lead | null>(null)
 
-  const connectedAccounts = accounts.filter(a => a.connected)
-  const hasConnectedAccounts = connectedAccounts.length > 0
+  // Fetch data on mount
+  useEffect(() => {
+    fetchLeads()
+    fetchConversations()
+  }, [fetchLeads, fetchConversations])
 
-  const totalSales = sales.filter(s => s.status === 'completed').reduce((acc, s) => acc + s.value, 0)
-  const totalConversions = sales.filter(s => s.status === 'completed').length
-  const pendingSales = sales.filter(s => s.status === 'pending').length
+  // Transform context accounts to local format (filter messaging platforms)
+  const accounts: WhatsAppAccount[] = contextAccounts
+    .filter(a => ['whatsapp', 'facebook_ads'].includes(a.platform))
+    .map(a => ({
+      id: a.id,
+      name: a.name,
+      phone: a.email || '',
+      connected: a.connected || a.status === 'active',
+      lastSync: a.connectedAt,
+    }))
+
+  // Transform context leads to local format
+  const leads: Lead[] = contextLeads.map(l => ({
+    id: l.id,
+    name: l.name,
+    phone: l.phone || '',
+    email: l.email,
+    source: l.source,
+    value: l.value,
+    status: (l.status?.toLowerCase() || 'novo') as LeadStatus,
+    createdAt: l.createdAt,
+    lastInteraction: l.createdAt,
+    notes: l.notes,
+    history: [{ status: (l.status?.toLowerCase() || 'novo') as LeadStatus, date: l.createdAt }],
+  }))
+
+  // Transform conversations to contacts format
+  const contacts: Contact[] = conversations.map(c => ({
+    id: c.id,
+    name: c.contactName,
+    phone: c.contactPhone || '',
+    lastMessage: c.lastMessage || '',
+    lastMessageTime: c.lastMessageAt ? new Date(c.lastMessageAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
+    unreadCount: c.unreadCount,
+    status: 'offline' as const,
+    source: c.tags?.[0] || 'Organico',
+  }))
+
+  // Mock sales data (would come from API in production)
+  const sales: WhatsAppSale[] = leads
+    .filter(l => l.status === 'concluido' && l.value)
+    .map(l => ({
+      id: l.id,
+      clientName: l.name,
+      phone: l.phone,
+      value: l.value || 0,
+      product: 'Produto',
+      source: l.source,
+      date: l.createdAt,
+      status: 'completed' as const,
+    }))
+
+  const whatsappAccounts = accounts.filter(a => a.connected)
+  const hasConnectedAccounts = whatsappAccounts.length > 0 || contextAccounts.length > 0
+
+  const totalSales = sales.reduce((acc, s) => acc + s.value, 0)
+  const totalConversions = sales.length
+  const pendingSales = leads.filter(l => l.status === 'em_andamento').length
   const avgTicket = totalConversions > 0 ? totalSales / totalConversions : 0
 
-  const handleConnect = (accountId: string) => {
-    setAccounts(prev => prev.map(a =>
-      a.id === accountId ? { ...a, connected: true, lastSync: new Date().toISOString() } : a
-    ))
-    showToast('WhatsApp conectado com sucesso!', 'success')
+  const handleConnect = (accountId?: string) => {
+    setIsConnectAccountsModalOpen(true)
     setShowConnectModal(false)
   }
 
   const handleDisconnect = (accountId: string) => {
-    setAccounts(prev => prev.map(a =>
-      a.id === accountId ? { ...a, connected: false } : a
-    ))
-    showToast('WhatsApp desconectado', 'info')
+    showToast('Para desconectar, vá em Configurações > Integrações', 'info')
   }
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedContact) return
 
     const message: Message = {
@@ -241,6 +302,14 @@ export default function MensagensPage() {
       type: 'text'
     }
     setMessages(prev => [...prev, message])
+
+    // Send via API
+    try {
+      await contextSendMessage(selectedContact.id, newMessage)
+    } catch (error) {
+      console.error('Error sending message:', error)
+    }
+
     setNewMessage('')
   }
 
@@ -252,18 +321,17 @@ export default function MensagensPage() {
     e.preventDefault()
   }
 
-  const handleDrop = (newStatus: LeadStatus) => {
+  const handleDrop = async (newStatus: LeadStatus) => {
     if (!draggedLead) return
 
-    setLeads(prev => prev.map(lead => {
-      if (lead.id === draggedLead.id) {
-        const newHistory = [...lead.history, { status: newStatus, date: new Date().toISOString() }]
-        return { ...lead, status: newStatus, lastInteraction: new Date().toISOString(), history: newHistory }
-      }
-      return lead
-    }))
+    // Update via API
+    try {
+      await updateLead(draggedLead.id, { status: newStatus.toUpperCase() })
+      showToast(`Lead movido para ${statusConfig[newStatus].label}`, 'success')
+    } catch (error) {
+      showToast('Erro ao mover lead', 'error')
+    }
 
-    showToast(`Lead movido para ${statusConfig[newStatus].label}`, 'success')
     setDraggedLead(null)
   }
 
@@ -451,7 +519,7 @@ export default function MensagensPage() {
                           }}
                         >
                           <option value="all" style={{ backgroundColor: '#12121A' }}>Todas as Contas</option>
-                          {connectedAccounts.map((account) => (
+                          {accounts.map((account) => (
                             <option key={account.id} value={account.id} style={{ backgroundColor: '#12121A' }}>
                               {account.name} - {account.phone}
                             </option>
@@ -460,7 +528,7 @@ export default function MensagensPage() {
                         <ChevronDown style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#6B6B7B', pointerEvents: 'none' }} />
                       </div>
                       <span style={{ fontSize: '14px', color: '#6B6B7B' }}>
-                        {connectedAccounts.length} conta(s) conectada(s)
+                        {accounts.length} conta(s) conectada(s)
                       </span>
                     </div>
                     <Button variant="secondary" onClick={() => setShowConnectModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -718,7 +786,7 @@ export default function MensagensPage() {
                         }}
                       >
                         <option value="all" style={{ backgroundColor: '#12121A' }}>Selecione o WhatsApp do Cliente</option>
-                        {connectedAccounts.map((account) => (
+                        {accounts.map((account) => (
                           <option key={account.id} value={account.id} style={{ backgroundColor: '#12121A' }}>
                             {account.name} - {account.phone}
                           </option>
