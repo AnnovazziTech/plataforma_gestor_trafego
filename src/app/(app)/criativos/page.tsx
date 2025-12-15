@@ -1,10 +1,40 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
 import { Button, Badge, StatCard } from '@/components/ui'
 import { useApp } from '@/contexts'
+
+// Define local interface for display purposes
+interface LocalCreative {
+  id: string
+  title: string
+  type: 'image' | 'video' | 'carousel'
+  platform: string
+  advertiser: string
+  savedAt: string
+  thumbnail: string
+  likes: number
+  tags: string[]
+  url: string
+  isFavorite: boolean
+}
+
+interface LocalArtTemplate {
+  id: string
+  name: string
+  niche: Niche
+  type: string
+  thumbnail: string
+  canvaUrl: string
+  downloads: number
+  rating: number
+  tags: string[]
+  isNew: boolean
+  isPremium: boolean
+  isSaved?: boolean
+}
 import {
   Palette,
   Search,
@@ -37,128 +67,6 @@ import {
 type TabType = 'biblioteca' | 'artes'
 type Niche = 'all' | 'ecommerce' | 'infoproduto' | 'servicos' | 'restaurante' | 'moda' | 'fitness' | 'educacao' | 'imobiliaria' | 'saude'
 
-interface Creative {
-  id: string
-  title: string
-  type: 'image' | 'video' | 'carousel'
-  platform: 'facebook' | 'instagram' | 'tiktok' | 'google'
-  advertiser: string
-  savedAt: string
-  thumbnail: string
-  likes: number
-  tags: string[]
-  url: string
-}
-
-interface ArtTemplate {
-  id: string
-  name: string
-  niche: Niche
-  type: 'feed' | 'stories' | 'reels' | 'banner' | 'carrossel'
-  thumbnail: string
-  canvaUrl: string
-  downloads: number
-  rating: number
-  tags: string[]
-  isNew?: boolean
-  isPremium?: boolean
-}
-
-const mockCreatives: Creative[] = [
-  {
-    id: '1',
-    title: 'Anuncio de Lancamento - E-commerce',
-    type: 'image',
-    platform: 'facebook',
-    advertiser: 'Loja ABC',
-    savedAt: '2024-02-15',
-    thumbnail: 'https://picsum.photos/seed/1/400/400',
-    likes: 1250,
-    tags: ['e-commerce', 'lancamento', 'promocao'],
-    url: 'https://facebook.com/ads/123'
-  },
-  {
-    id: '2',
-    title: 'Video Produto - Demonstracao',
-    type: 'video',
-    platform: 'instagram',
-    advertiser: 'Tech Solutions',
-    savedAt: '2024-02-14',
-    thumbnail: 'https://picsum.photos/seed/2/400/400',
-    likes: 3420,
-    tags: ['demonstracao', 'produto', 'tech'],
-    url: 'https://instagram.com/ads/456'
-  },
-  {
-    id: '3',
-    title: 'Carrossel Educacional',
-    type: 'carousel',
-    platform: 'instagram',
-    advertiser: 'Curso Online XYZ',
-    savedAt: '2024-02-13',
-    thumbnail: 'https://picsum.photos/seed/3/400/400',
-    likes: 890,
-    tags: ['educacao', 'curso', 'dicas'],
-    url: 'https://instagram.com/ads/789'
-  },
-  {
-    id: '4',
-    title: 'TikTok Viral - Trend',
-    type: 'video',
-    platform: 'tiktok',
-    advertiser: 'Marca XYZ',
-    savedAt: '2024-02-12',
-    thumbnail: 'https://picsum.photos/seed/4/400/400',
-    likes: 15600,
-    tags: ['viral', 'trend', 'jovem'],
-    url: 'https://tiktok.com/ads/101'
-  },
-]
-
-// Mock Data - Templates de Artes
-const mockArtTemplates: ArtTemplate[] = [
-  // E-commerce
-  { id: '1', name: 'Lancamento de Produto - Minimalista', niche: 'ecommerce', type: 'feed', thumbnail: '/arts/ecommerce-1.jpg', canvaUrl: 'https://canva.com/template/1', downloads: 1250, rating: 4.8, tags: ['lancamento', 'produto', 'minimalista'], isNew: true },
-  { id: '2', name: 'Promocao Flash Sale', niche: 'ecommerce', type: 'stories', thumbnail: '/arts/ecommerce-2.jpg', canvaUrl: 'https://canva.com/template/2', downloads: 890, rating: 4.5, tags: ['promocao', 'urgencia', 'sale'] },
-  { id: '3', name: 'Carrossel de Produtos', niche: 'ecommerce', type: 'carrossel', thumbnail: '/arts/ecommerce-3.jpg', canvaUrl: 'https://canva.com/template/3', downloads: 2100, rating: 4.9, tags: ['carrossel', 'catalogo'], isPremium: true },
-
-  // Infoproduto
-  { id: '4', name: 'Webinar Anuncio', niche: 'infoproduto', type: 'feed', thumbnail: '/arts/info-1.jpg', canvaUrl: 'https://canva.com/template/4', downloads: 3200, rating: 4.7, tags: ['webinar', 'curso', 'online'] },
-  { id: '5', name: 'Ebook Download', niche: 'infoproduto', type: 'stories', thumbnail: '/arts/info-2.jpg', canvaUrl: 'https://canva.com/template/5', downloads: 1800, rating: 4.6, tags: ['ebook', 'lead magnet'], isNew: true },
-  { id: '6', name: 'Depoimento Aluno', niche: 'infoproduto', type: 'feed', thumbnail: '/arts/info-3.jpg', canvaUrl: 'https://canva.com/template/6', downloads: 950, rating: 4.4, tags: ['depoimento', 'prova social'] },
-
-  // Servicos
-  { id: '7', name: 'Orcamento Gratis', niche: 'servicos', type: 'feed', thumbnail: '/arts/servico-1.jpg', canvaUrl: 'https://canva.com/template/7', downloads: 1100, rating: 4.5, tags: ['orcamento', 'servico', 'cta'] },
-  { id: '8', name: 'Antes e Depois', niche: 'servicos', type: 'carrossel', thumbnail: '/arts/servico-2.jpg', canvaUrl: 'https://canva.com/template/8', downloads: 1650, rating: 4.8, tags: ['transformacao', 'resultado'], isPremium: true },
-
-  // Restaurante
-  { id: '9', name: 'Prato do Dia', niche: 'restaurante', type: 'feed', thumbnail: '/arts/food-1.jpg', canvaUrl: 'https://canva.com/template/9', downloads: 2800, rating: 4.9, tags: ['comida', 'promocao', 'restaurante'], isNew: true },
-  { id: '10', name: 'Menu Digital Stories', niche: 'restaurante', type: 'stories', thumbnail: '/arts/food-2.jpg', canvaUrl: 'https://canva.com/template/10', downloads: 1400, rating: 4.6, tags: ['cardapio', 'menu'] },
-  { id: '11', name: 'Delivery Promocao', niche: 'restaurante', type: 'feed', thumbnail: '/arts/food-3.jpg', canvaUrl: 'https://canva.com/template/11', downloads: 920, rating: 4.3, tags: ['delivery', 'ifood', 'desconto'] },
-
-  // Moda
-  { id: '12', name: 'Nova Colecao', niche: 'moda', type: 'feed', thumbnail: '/arts/fashion-1.jpg', canvaUrl: 'https://canva.com/template/12', downloads: 3500, rating: 4.8, tags: ['colecao', 'lancamento', 'moda'] },
-  { id: '13', name: 'Lookbook Stories', niche: 'moda', type: 'stories', thumbnail: '/arts/fashion-2.jpg', canvaUrl: 'https://canva.com/template/13', downloads: 1900, rating: 4.7, tags: ['lookbook', 'outfit'], isPremium: true },
-  { id: '14', name: 'Sale Sazonal', niche: 'moda', type: 'feed', thumbnail: '/arts/fashion-3.jpg', canvaUrl: 'https://canva.com/template/14', downloads: 2200, rating: 4.5, tags: ['sale', 'liquidacao'] },
-
-  // Fitness
-  { id: '15', name: 'Treino da Semana', niche: 'fitness', type: 'feed', thumbnail: '/arts/fitness-1.jpg', canvaUrl: 'https://canva.com/template/15', downloads: 1750, rating: 4.6, tags: ['treino', 'academia', 'workout'] },
-  { id: '16', name: 'Transformacao Fisica', niche: 'fitness', type: 'carrossel', thumbnail: '/arts/fitness-2.jpg', canvaUrl: 'https://canva.com/template/16', downloads: 2400, rating: 4.9, tags: ['antes depois', 'resultado'], isNew: true },
-  { id: '17', name: 'Plano de Treino', niche: 'fitness', type: 'stories', thumbnail: '/arts/fitness-3.jpg', canvaUrl: 'https://canva.com/template/17', downloads: 1300, rating: 4.4, tags: ['plano', 'personal'] },
-
-  // Educacao
-  { id: '18', name: 'Matriculas Abertas', niche: 'educacao', type: 'feed', thumbnail: '/arts/edu-1.jpg', canvaUrl: 'https://canva.com/template/18', downloads: 980, rating: 4.5, tags: ['matricula', 'escola', 'curso'] },
-  { id: '19', name: 'Aula Experimental', niche: 'educacao', type: 'stories', thumbnail: '/arts/edu-2.jpg', canvaUrl: 'https://canva.com/template/19', downloads: 750, rating: 4.3, tags: ['aula gratis', 'trial'] },
-
-  // Imobiliaria
-  { id: '20', name: 'Imovel Destaque', niche: 'imobiliaria', type: 'feed', thumbnail: '/arts/imob-1.jpg', canvaUrl: 'https://canva.com/template/20', downloads: 1100, rating: 4.6, tags: ['imovel', 'venda', 'casa'], isPremium: true },
-  { id: '21', name: 'Tour Virtual', niche: 'imobiliaria', type: 'reels', thumbnail: '/arts/imob-2.jpg', canvaUrl: 'https://canva.com/template/21', downloads: 850, rating: 4.4, tags: ['tour', 'video', 'apartamento'] },
-
-  // Saude
-  { id: '22', name: 'Agendamento Online', niche: 'saude', type: 'feed', thumbnail: '/arts/saude-1.jpg', canvaUrl: 'https://canva.com/template/22', downloads: 1450, rating: 4.7, tags: ['consulta', 'medico', 'agendamento'] },
-  { id: '23', name: 'Dicas de Saude', niche: 'saude', type: 'carrossel', thumbnail: '/arts/saude-2.jpg', canvaUrl: 'https://canva.com/template/23', downloads: 2100, rating: 4.8, tags: ['dicas', 'saude', 'bem-estar'], isNew: true },
-]
-
 const nicheLabels: Record<Niche, string> = {
   all: 'Todos os Nichos',
   ecommerce: 'E-commerce',
@@ -186,9 +94,20 @@ const nicheColors: Record<Niche, string> = {
 }
 
 export default function CriativosPage() {
-  const { showToast } = useApp()
+  const {
+    showToast,
+    creatives,
+    creativesLoading,
+    creativesStats,
+    fetchCreatives,
+    deleteCreative,
+    toggleCreativeFavorite,
+    artTemplates,
+    artTemplatesLoading,
+    fetchArtTemplates,
+  } = useApp()
+
   const [activeTab, setActiveTab] = useState<TabType>('biblioteca')
-  const [creatives, setCreatives] = useState<Creative[]>(mockCreatives)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState<string>('all')
@@ -202,7 +121,44 @@ export default function CriativosPage() {
   const [selectedArtType, setSelectedArtType] = useState<string>('all')
   const [showOnlyNew, setShowOnlyNew] = useState(false)
   const [showOnlyPremium, setShowOnlyPremium] = useState(false)
-  const [selectedTemplate, setSelectedTemplate] = useState<ArtTemplate | null>(null)
+  const [selectedTemplate, setSelectedTemplate] = useState<LocalArtTemplate | null>(null)
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchCreatives()
+    fetchArtTemplates()
+  }, [fetchCreatives, fetchArtTemplates])
+
+  // Transform context creatives to local format for display
+  const displayCreatives: LocalCreative[] = creatives.map(c => ({
+    id: c.id,
+    title: c.title,
+    type: c.type.toLowerCase() as 'image' | 'video' | 'carousel',
+    platform: c.platform?.toLowerCase() || 'meta',
+    advertiser: c.sourceAdvertiser || 'Desconhecido',
+    savedAt: c.createdAt,
+    thumbnail: c.thumbnailUrl || '',
+    likes: 0,
+    tags: c.tags || [],
+    url: c.sourceUrl || c.mediaUrl || '',
+    isFavorite: c.isFavorite,
+  }))
+
+  // Transform context templates to local format
+  const displayTemplates: LocalArtTemplate[] = artTemplates.map(t => ({
+    id: t.id,
+    name: t.name,
+    niche: (t.niche?.toLowerCase() || 'all') as Niche,
+    type: t.type?.toLowerCase() || 'feed',
+    thumbnail: t.thumbnailUrl || '',
+    canvaUrl: t.canvaUrl || '',
+    downloads: t.downloads || 0,
+    rating: t.rating || 0,
+    tags: t.tags || [],
+    isNew: t.isNew || false,
+    isPremium: t.isPremium || false,
+    isSaved: t.isSaved,
+  }))
 
   const handleCopy = (id: string, url: string) => {
     navigator.clipboard.writeText(url)
@@ -211,13 +167,20 @@ export default function CriativosPage() {
     setTimeout(() => setCopiedId(null), 2000)
   }
 
-  const handleDownload = (creative: Creative) => {
+  const handleDownload = (creative: LocalCreative) => {
     showToast(`Baixando ${creative.title}...`, 'info')
+    // In a real app, this would trigger an actual download
+    if (creative.url) {
+      window.open(creative.url, '_blank')
+    }
   }
 
-  const handleDelete = (id: string) => {
-    setCreatives(prev => prev.filter(c => c.id !== id))
-    showToast('Criativo removido!', 'success')
+  const handleDelete = async (id: string) => {
+    await deleteCreative(id)
+  }
+
+  const handleToggleFavorite = async (id: string) => {
+    await toggleCreativeFavorite(id)
   }
 
   const handleMinerar = () => {
@@ -225,12 +188,12 @@ export default function CriativosPage() {
     showToast('Abrindo Biblioteca de Anuncios...', 'info')
   }
 
-  const handleUseTemplate = (template: ArtTemplate) => {
+  const handleUseTemplate = (template: LocalArtTemplate) => {
     window.open(template.canvaUrl, '_blank')
     showToast(`Abrindo template "${template.name}" no Canva...`, 'success')
   }
 
-  const filteredCreatives = creatives.filter(c => {
+  const filteredCreatives = displayCreatives.filter(c => {
     const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           c.advertiser.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesType = selectedType === 'all' || c.type === selectedType
@@ -238,7 +201,7 @@ export default function CriativosPage() {
     return matchesSearch && matchesType && matchesPlatform
   })
 
-  const filteredTemplates = mockArtTemplates.filter((template) => {
+  const filteredTemplates = displayTemplates.filter((template) => {
     const matchesSearch = template.name.toLowerCase().includes(artSearchTerm.toLowerCase()) ||
       template.tags.some(tag => tag.toLowerCase().includes(artSearchTerm.toLowerCase()))
     const matchesNiche = selectedNiche === 'all' || template.niche === selectedNiche
@@ -308,28 +271,28 @@ export default function CriativosPage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
                 <StatCard
                   label="Criativos Salvos"
-                  value={creatives.length}
+                  value={creativesStats.total || displayCreatives.length}
                   icon={Bookmark}
                   color="blue"
                   delay={0}
                 />
                 <StatCard
                   label="Imagens"
-                  value={creatives.filter(c => c.type === 'image').length}
+                  value={creativesStats.byType?.IMAGE || displayCreatives.filter(c => c.type === 'image').length}
                   icon={Image}
                   color="yellow"
                   delay={0.1}
                 />
                 <StatCard
                   label="Videos"
-                  value={creatives.filter(c => c.type === 'video').length}
+                  value={creativesStats.byType?.VIDEO || displayCreatives.filter(c => c.type === 'video').length}
                   icon={Video}
                   color="blue"
                   delay={0.2}
                 />
                 <StatCard
                   label="Carrosseis"
-                  value={creatives.filter(c => c.type === 'carousel').length}
+                  value={creativesStats.byType?.CAROUSEL || displayCreatives.filter(c => c.type === 'carousel').length}
                   icon={Copy}
                   color="yellow"
                   delay={0.3}
@@ -843,7 +806,7 @@ export default function CriativosPage() {
                   <div>
                     <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', marginBottom: '4px' }}>Templates de Artes Editaveis</h2>
                     <p style={{ fontSize: '14px', color: '#A0A0B0' }}>
-                      +{mockArtTemplates.length} templates prontos para usar no Canva. Encontre o criativo perfeito para seu nicho!
+                      +{displayTemplates.length} templates prontos para usar no Canva. Encontre o criativo perfeito para seu nicho!
                     </p>
                   </div>
                 </div>
