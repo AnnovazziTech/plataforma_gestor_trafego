@@ -21,6 +21,7 @@ import {
   Target,
   Loader2,
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface DashboardData {
   metrics: {
@@ -74,9 +75,15 @@ interface DashboardData {
 }
 
 export default function DashboardPage() {
-  const { campaigns, fetchCampaigns } = useApp()
+  const router = useRouter()
+  const { campaigns, fetchCampaigns, showToast } = useApp()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+
+  const handleTeamsClick = () => {
+    showToast('Funcionalidade de Equipes em desenvolvimento', 'info')
+    // Future: router.push('/teams') or open modal
+  }
 
   const fetchDashboard = async () => {
     try {
@@ -109,6 +116,8 @@ export default function DashboardPage() {
           buttonType="connect"
           createButtonText="Conectar Contas"
           onRefresh={handleRefresh}
+          showTeamsButton={true}
+          onTeamsClick={handleTeamsClick}
         />
         <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center' }}>
@@ -149,6 +158,8 @@ export default function DashboardPage() {
         buttonType="connect"
         createButtonText="Conectar Contas"
         onRefresh={handleRefresh}
+        showTeamsButton={true}
+        onTeamsClick={handleTeamsClick}
       />
 
       <main style={{ flex: 1, padding: '24px', overflowX: 'hidden' }}>

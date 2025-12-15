@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import NextLink from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { signOut } from 'next-auth/react'
@@ -21,8 +21,14 @@ import {
   Share2,
   MessageCircle,
   Palette,
+  Search,
+  GraduationCap,
+  Link2,
+  Brain,
+  ShoppingBag,
 } from 'lucide-react'
 import { PlatformIcon } from '@/components/ui'
+import { useApp } from '@/contexts'
 import { useState } from 'react'
 
 const menuItems = [
@@ -31,10 +37,15 @@ const menuItems = [
   { icon: BarChart3, label: 'Analytics', href: '/analytics', badge: null },
   { icon: FileText, label: 'Relatorios', href: '/reports', badge: null },
   { icon: Briefcase, label: 'Administracao', href: '/admin', badge: null },
-  { icon: Share2, label: 'Redes Sociais', href: '/social', badge: 'Novo' },
+  { icon: Share2, label: 'Redes Sociais', href: '/social', badge: null },
   { icon: MessageCircle, label: 'Mensagens', href: '/mensagens', badge: null },
   { icon: Palette, label: 'Criativos', href: '/criativos', badge: null },
   { icon: Zap, label: 'Automacao', href: '/automation', badge: null },
+  { icon: Search, label: 'Prospecção', href: '/prospeccao', badge: 'Novo' },
+  { icon: ShoppingBag, label: 'Marketplace', href: '/marketplace', badge: 'Novo' },
+  { icon: GraduationCap, label: 'Cursos', href: '/cursos', badge: 'Novo' },
+  { icon: Link2, label: 'Meu Link', href: '/meu-link', badge: 'Novo' },
+  { icon: Brain, label: 'Meu Pensamento', href: '/meu-pensamento', badge: 'Novo' },
   { icon: Settings, label: 'Configuracoes', href: '/settings', badge: null },
 ]
 
@@ -54,8 +65,17 @@ interface SidebarProps {
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const { setIsConnectAccountsModalOpen, showToast } = useApp()
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(true)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+
+  const handlePlatformClick = (platformId: string, connected: boolean) => {
+    if (connected) {
+      showToast(`${platformId.charAt(0).toUpperCase() + platformId.slice(1)} já está conectado`, 'info')
+    } else {
+      setIsConnectAccountsModalOpen(true)
+    }
+  }
 
   const handleUpgrade = () => {
     router.push('/settings')
@@ -254,7 +274,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           {menuItems.map((item, index) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             return (
-              <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
+              <NextLink key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -340,7 +360,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     </>
                   )}
                 </motion.div>
-              </Link>
+              </NextLink>
             )
           })}
         </div>
@@ -392,6 +412,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 key={platform.id}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => handlePlatformClick(platform.id, platform.connected)}
                 style={{
                   position: 'relative',
                   padding: '8px',
@@ -400,7 +421,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                   opacity: platform.connected ? 1 : 0.5,
                   cursor: 'pointer',
                 }}
-                title={`${platform.id}${platform.connected ? ' (Conectado)' : ' (Desconectado)'}`}
+                title={`${platform.id}${platform.connected ? ' (Conectado)' : ' (Clique para conectar)'}`}
               >
                 <PlatformIcon platform={platform.id} size={16} />
                 {platform.connected && (

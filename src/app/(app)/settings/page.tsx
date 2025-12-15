@@ -1106,7 +1106,10 @@ function SecuritySection({ showToast }: { showToast: (msg: string, type: any) =>
                 {session.current ? (
                   <Badge variant="success">Atual</Badge>
                 ) : (
-                  <button style={{ padding: '6px', borderRadius: '8px', background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}>
+                  <button
+                    onClick={() => showToast('Sessão encerrada com sucesso!', 'success')}
+                    style={{ padding: '6px', borderRadius: '8px', background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}
+                  >
                     <Trash2 size={14} />
                   </button>
                 )}
@@ -1161,7 +1164,7 @@ function BillingSection({ showToast }: { showToast: (msg: string, type: any) => 
             <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: '12px 0 4px' }}>R$ 197/mês</h3>
             <p style={{ fontSize: '14px', color: '#A0A0B0', margin: 0 }}>Renovação em 15/03/2024</p>
           </div>
-          <Button variant="secondary">
+          <Button variant="secondary" onClick={() => showToast('Redirecionando para página de planos...', 'info')}>
             Fazer Upgrade
           </Button>
         </div>
@@ -1200,7 +1203,7 @@ function BillingSection({ showToast }: { showToast: (msg: string, type: any) => 
               <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Expira 12/26</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm">Alterar</Button>
+          <Button variant="ghost" size="sm" onClick={() => showToast('Abrindo modal de pagamento...', 'info')}>Alterar</Button>
         </div>
       </div>
     </motion.div>

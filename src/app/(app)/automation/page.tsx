@@ -24,7 +24,10 @@ import {
   Activity,
   ChevronDown,
   ChevronUp,
+  Copy,
+  Users,
 } from 'lucide-react'
+import { PlatformIcon } from '@/components/ui'
 import { Automation } from '@/types'
 
 const automationTypeLabels: Record<string, string> = {
@@ -64,7 +67,7 @@ const actionIcons: Record<string, ReactNode> = {
 }
 
 export default function AutomationPage() {
-  const { automations, addAutomation, updateAutomation, deleteAutomation, toggleAutomationStatus, showToast } = useApp()
+  const { automations, addAutomation, updateAutomation, deleteAutomation, toggleAutomationStatus, showToast, connectedAccounts } = useApp()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingAutomation, setEditingAutomation] = useState<Automation | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
@@ -80,6 +83,7 @@ export default function AutomationPage() {
     actionType: 'pause' as 'pause' | 'activate' | 'adjust_budget' | 'adjust_bid' | 'notify',
     actionValue: '',
     target: 'campaign' as 'campaign' | 'adset' | 'ad',
+    accountId: 'all' as string,
   })
 
   // Use automations from context with fallback to empty array
@@ -96,7 +100,13 @@ export default function AutomationPage() {
       actionType: 'pause',
       actionValue: '',
       target: 'campaign',
+      accountId: 'all',
     })
+  }
+
+  const handleDuplicateTemplate = (template: { title: string; conditions: string; action: string }) => {
+    handleTemplateClick(template)
+    showToast('Template duplicado! Personalize e salve.', 'success')
   }
 
   const handleCreateAutomation = async () => {
@@ -347,10 +357,42 @@ export default function AutomationPage() {
                     <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Condição:</span>
                     <span style={{ fontSize: '12px', color: '#A0A0B0' }}>{template.conditions}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                     <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Então:</span>
                     <span style={{ fontSize: '12px', color: '#3B82F6' }}>{template.action}</span>
                   </div>
+                  {/* Botão Duplicar */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDuplicateTemplate(template)
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                      border: '1px solid rgba(139, 92, 246, 0.2)',
+                      color: '#A855F7',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(139, 92, 246, 0.2)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(139, 92, 246, 0.1)'
+                    }}
+                  >
+                    <Copy size={14} />
+                    Duplicar Template
+                  </button>
                 </div>
               </motion.div>
             ))}
@@ -466,6 +508,63 @@ export default function AutomationPage() {
                       boxSizing: 'border-box',
                     }}
                   />
+                </div>
+
+                {/* Account Selector */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Selecionar Conta
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <select
+                      value={formData.accountId}
+                      onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
+                      style={{
+                        width: '100%',
+                        height: '48px',
+                        padding: '0 16px',
+                        paddingLeft: '44px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        cursor: 'pointer',
+                        appearance: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    >
+                      <option value="all" style={{ backgroundColor: '#12121A' }}>Todas as Contas</option>
+                      {connectedAccounts.filter(a => a.connected).map((account) => (
+                        <option key={account.id} value={account.id} style={{ backgroundColor: '#12121A' }}>
+                          {account.name} ({account.platform})
+                        </option>
+                      ))}
+                    </select>
+                    <Users
+                      size={18}
+                      style={{
+                        position: 'absolute',
+                        left: '14px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: '#FACC15',
+                        pointerEvents: 'none',
+                      }}
+                    />
+                    <ChevronDown
+                      size={16}
+                      style={{
+                        position: 'absolute',
+                        right: '14px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: '#6B6B7B',
+                        pointerEvents: 'none',
+                      }}
+                    />
+                  </div>
                 </div>
 
                 {/* Type */}

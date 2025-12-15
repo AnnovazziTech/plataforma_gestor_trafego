@@ -178,9 +178,19 @@ const statusConfig: Record<LeadStatus, { label: string; color: string; bgColor: 
   remarketing: { label: 'Remarketing', color: '#A855F7', bgColor: 'rgba(168, 85, 247, 0.1)', icon: RefreshCw },
 }
 
+type PlatformType = 'all' | 'whatsapp' | 'instagram' | 'messenger'
+
+const platformIcons: Record<PlatformType, { icon: string; label: string; color: string }> = {
+  all: { icon: '🌐', label: 'Todas as Contas', color: '#3B82F6' },
+  whatsapp: { icon: '💬', label: 'WhatsApp', color: '#25D366' },
+  instagram: { icon: '📷', label: 'Instagram', color: '#E4405F' },
+  messenger: { icon: '💭', label: 'Messenger', color: '#0084FF' },
+}
+
 export default function MensagensPage() {
   const { showToast } = useApp()
   const [activeTab, setActiveTab] = useState<TabType>('vendas')
+  const [activePlatform, setActivePlatform] = useState<PlatformType>('all')
   const [accounts, setAccounts] = useState<WhatsAppAccount[]>(mockAccounts)
   const [selectedAccount, setSelectedAccount] = useState<string>('all')
   const [sales] = useState<WhatsAppSale[]>(mockSales)
@@ -272,7 +282,7 @@ export default function MensagensPage() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Header
         title="Mensagens"
-        subtitle="Rastreamento de vendas, CRM e funil de conversão via WhatsApp"
+        subtitle="Rastreamento de vendas e métricas via WhatsApp, Instagram ou Messenger"
         showCreateButton={false}
       />
 
@@ -353,30 +363,60 @@ export default function MensagensPage() {
         ) : (
           <>
             {/* Tabs */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', padding: '4px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px', width: 'fit-content' }}>
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '12px 20px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: activeTab === tab.id ? 'linear-gradient(to right, rgba(59, 130, 246, 0.2), rgba(37, 211, 102, 0.2))' : 'transparent',
-                    color: activeTab === tab.id ? '#FFFFFF' : '#6B6B7B',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  <tab.icon size={18} />
-                  {tab.label}
-                </button>
-              ))}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+              {/* Main Tabs */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px', width: 'fit-content' }}>
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '12px 20px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: activeTab === tab.id ? 'linear-gradient(to right, rgba(59, 130, 246, 0.2), rgba(37, 211, 102, 0.2))' : 'transparent',
+                      color: activeTab === tab.id ? '#FFFFFF' : '#6B6B7B',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <tab.icon size={18} />
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Platform Filter */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px' }}>
+                {(Object.keys(platformIcons) as PlatformType[]).map((platform) => (
+                  <button
+                    key={platform}
+                    onClick={() => setActivePlatform(platform)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 14px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      backgroundColor: activePlatform === platform ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                      color: activePlatform === platform ? platformIcons[platform].color : '#6B6B7B',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <span style={{ fontSize: '14px' }}>{platformIcons[platform].icon}</span>
+                    {platformIcons[platform].label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <AnimatePresence mode="wait">

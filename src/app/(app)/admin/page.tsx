@@ -25,6 +25,10 @@ import {
   Wallet,
   PiggyBank,
   Receipt,
+  Play,
+  Pause,
+  Square,
+  UserPlus,
 } from 'lucide-react'
 import {
   AreaChart,
@@ -624,10 +628,70 @@ export default function AdminPage() {
                     <Timer size={32} style={{ color: '#3B82F6' }} />
                   </div>
                 </div>
-                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>
                     Continue assim! Você está {onlineTime > 28800 ? 'acima' : 'abaixo'} da sua meta diária de 8 horas.
                   </p>
+                  {/* Botões do Cronômetro */}
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      onClick={() => showToast('Trabalho iniciado!', 'success')}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        border: '1px solid rgba(16, 185, 129, 0.3)',
+                        color: '#10B981',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Play size={14} />
+                      Iniciar
+                    </button>
+                    <button
+                      onClick={() => showToast('Trabalho pausado', 'info')}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(250, 204, 21, 0.2)',
+                        border: '1px solid rgba(250, 204, 21, 0.3)',
+                        color: '#FACC15',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Pause size={14} />
+                      Pausar
+                    </button>
+                    <button
+                      onClick={() => showToast('Trabalho finalizado!', 'success')}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        color: '#EF4444',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Square size={14} />
+                      Finalizar
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -723,11 +787,11 @@ export default function AdminPage() {
                           <p style={{ fontSize: '18px', fontWeight: 600, color: '#FACC15', margin: 0 }}>R$ {totalSpent.toLocaleString('pt-BR')}</p>
                         </div>
                         <div>
-                          <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '4px' }}>Orçamento Total</p>
+                          <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '4px' }}>Orçamento Disponível</p>
                           <p style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>R$ {totalBudget.toLocaleString('pt-BR')}</p>
                         </div>
                         <div>
-                          <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '4px' }}>Dias Restantes</p>
+                          <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '4px' }}>Finalizará em:</p>
                           <p style={{ fontSize: '18px', fontWeight: 600, color: '#3B82F6', margin: 0 }}>15 dias</p>
                         </div>
                       </div>

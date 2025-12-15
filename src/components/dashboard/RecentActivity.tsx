@@ -1,7 +1,9 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import { Card, CardHeader, CardTitle, CardContent, PlatformIcon } from '@/components/ui'
+import { useApp } from '@/contexts'
 import {
   Play,
   Pause,
@@ -74,6 +76,14 @@ const activities: Activity[] = [
 ]
 
 export function RecentActivity() {
+  const router = useRouter()
+  const { showToast } = useApp()
+
+  const handleViewAll = () => {
+    showToast('Navegando para atividades...', 'info')
+    // Future: router.push('/activities')
+  }
+
   const getActivityIcon = (type: Activity['type']) => {
     const iconStyle = { width: '14px', height: '14px' }
     const icons = {
@@ -119,7 +129,7 @@ export function RecentActivity() {
     <Card>
       <CardHeader>
         <CardTitle>Atividade Recente</CardTitle>
-        <button style={{ fontSize: '12px', color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer' }}>
+        <button onClick={handleViewAll} style={{ fontSize: '12px', color: '#3B82F6', background: 'none', border: 'none', cursor: 'pointer' }}>
           Ver tudo
         </button>
       </CardHeader>
@@ -187,6 +197,7 @@ export function RecentActivity() {
         {/* View All Link */}
         <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
           <button
+            onClick={handleViewAll}
             style={{
               width: '100%',
               padding: '8px',

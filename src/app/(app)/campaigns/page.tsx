@@ -555,12 +555,12 @@ export default function CampaignsPage() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                <div style={{ padding: '10px', borderRadius: '12px', background: 'linear-gradient(to bottom right, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2))' }}>
-                  <Bot style={{ width: '20px', height: '20px', color: '#3B82F6' }} />
+                <div style={{ padding: '10px', borderRadius: '12px', background: 'linear-gradient(to bottom right, rgba(250, 204, 21, 0.2), rgba(234, 179, 8, 0.2))' }}>
+                  <Bot style={{ width: '20px', height: '20px', color: '#FACC15' }} />
                 </div>
                 <div>
-                  <h3 style={{ fontWeight: 600, color: '#FFFFFF', fontSize: '14px', margin: 0 }}>Analise da IA</h3>
-                  <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Insights inteligentes sobre suas campanhas</p>
+                  <h3 style={{ fontWeight: 600, color: '#FFFFFF', fontSize: '14px', margin: 0 }}>Devan</h3>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Seu assistente de IA para campanhas</p>
                 </div>
               </div>
 
@@ -1216,10 +1216,20 @@ function CampaignCard({
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
                 onClick={() => onAiAnalysis(campaign.id, campaign.name)}
-                style={{ fontSize: '18px', background: 'none', border: 'none', cursor: 'pointer', opacity: isAnalyzing ? 0.5 : 1 }}
-                title="Solicitar analise da IA"
+                style={{
+                  padding: '4px',
+                  borderRadius: '6px',
+                  backgroundColor: 'rgba(250, 204, 21, 0.1)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  opacity: isAnalyzing ? 0.5 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                title="Perguntar ao Devan"
               >
-                ✨
+                <Bot size={14} style={{ color: '#FACC15' }} />
               </button>
               <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }}>
                 {campaign.name}
@@ -1479,7 +1489,7 @@ function CampaignTable({
                   </th>
                 )
               })}
-              <th style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>IA</th>
+              <th style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>Devan</th>
               <th style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>Acoes</th>
             </tr>
           </thead>
@@ -1558,6 +1568,7 @@ function CampaignTable({
                   <button
                     onClick={() => onAiAnalysis(campaign.id, campaign.name)}
                     disabled={isAnalyzing === campaign.id}
+                    title="Perguntar ao Devan"
                     style={{
                       padding: '8px',
                       borderRadius: '8px',
@@ -1567,7 +1578,7 @@ function CampaignTable({
                       opacity: isAnalyzing === campaign.id ? 0.5 : 1,
                     }}
                   >
-                    <Sparkles size={16} style={{ color: '#FACC15' }} />
+                    <Bot size={16} style={{ color: '#FACC15' }} />
                   </button>
                 </td>
                 {/* Coluna de Ações */}

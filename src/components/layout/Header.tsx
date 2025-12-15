@@ -9,10 +9,33 @@ import {
   ChevronDown,
   RefreshCw,
   Plus,
-  Link2
+  Link2,
+  Users,
+  Filter,
+  UsersRound
 } from 'lucide-react'
 import { useApp } from '@/contexts'
 import { cn } from '@/lib/utils'
+import { PlatformIcon } from '@/components/ui'
+import { Platform } from '@/types'
+
+// Map account platform names to PlatformIcon-compatible names
+const mapPlatformName = (platform: string): Platform => {
+  const mapping: Record<string, Platform> = {
+    'facebook_ads': 'meta',
+    'google_ads': 'google',
+    'linkedin_ads': 'linkedin',
+    'tiktok_ads': 'tiktok',
+    'whatsapp': 'meta', // WhatsApp is owned by Meta
+    'meta': 'meta',
+    'google': 'google',
+    'tiktok': 'tiktok',
+    'linkedin': 'linkedin',
+    'twitter': 'twitter',
+    'pinterest': 'pinterest',
+  }
+  return mapping[platform] || 'meta'
+}
 
 interface HeaderProps {
   title: string
@@ -22,6 +45,8 @@ interface HeaderProps {
   createButtonText?: string
   buttonType?: 'campaign' | 'connect'
   onRefresh?: () => Promise<void> | void
+  showTeamsButton?: boolean
+  onTeamsClick?: () => void
 }
 
 export function Header({
@@ -32,6 +57,8 @@ export function Header({
   createButtonText = 'Nova Campanha',
   buttonType = 'campaign',
   onRefresh,
+  showTeamsButton = false,
+  onTeamsClick,
 }: HeaderProps) {
   const {
     notifications,
@@ -41,13 +68,19 @@ export function Header({
     setDateRange,
     setIsCreateCampaignModalOpen,
     setIsConnectAccountsModalOpen,
+    connectedAccounts,
+    selectedAccount,
+    setSelectedAccount,
     showToast
   } = useApp()
 
   const [showNotifications, setShowNotifications] = useState(false)
   const [showDatePicker, setShowDatePicker] = useState(false)
+  const [showAccountPicker, setShowAccountPicker] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+
+  const selectedAccountData = connectedAccounts.find(a => a.id === selectedAccount)
 
   const unreadCount = notifications.filter(n => !n.read).length
 
@@ -261,6 +294,138 @@ export function Header({
             </AnimatePresence>
           </div>
 
+          {/* Seletor de Conta */}
+          <div style={{ position: 'relative' }} className="hidden md:block">
+            <button
+              onClick={() => setShowAccountPicker(!showAccountPicker)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                height: '40px',
+                padding: '0 12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '12px',
+                color: '#FFFFFF',
+                cursor: 'pointer',
+                fontSize: '12px',
+              }}
+            >
+              <Filter style={{ width: '16px', height: '16px', color: '#FACC15' }} />
+              {selectedAccount === 'all' ? (
+                <span className="hidden xl:inline">Todas as Contas</span>
+              ) : selectedAccountData ? (
+                <span className="hidden xl:inline" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <PlatformIcon platform={mapPlatformName(selectedAccountData.platform)} size={14} />
+                  {selectedAccountData.name}
+                </span>
+              ) : (
+                <span className="hidden xl:inline">Selecionar</span>
+              )}
+              <ChevronDown
+                style={{
+                  width: '14px',
+                  height: '14px',
+                  color: '#6B6B7B',
+                  transform: showAccountPicker ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s',
+                }}
+              />
+            </button>
+
+            <AnimatePresence>
+              {showAccountPicker && (
+                <>
+                  <div
+                    style={{ position: 'fixed', inset: 0, zIndex: 40 }}
+                    onClick={() => setShowAccountPicker(false)}
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: '100%',
+                      marginTop: '8px',
+                      width: '220px',
+                      backgroundColor: '#12121A',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '12px',
+                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                      overflow: 'hidden',
+                      zIndex: 50,
+                    }}
+                  >
+                    <div style={{ padding: '8px 12px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 600, color: '#6B6B7B', textTransform: 'uppercase' }}>
+                        Filtrar por Conta
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setSelectedAccount('all')
+                        setShowAccountPicker(false)
+                        showToast('Mostrando todas as contas', 'info')
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        color: selectedAccount === 'all' ? '#3B82F6' : '#FFFFFF',
+                        backgroundColor: selectedAccount === 'all' ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
+                    >
+                      <Users size={14} style={{ color: '#6B6B7B' }} />
+                      Todas as Contas
+                    </button>
+                    {connectedAccounts.length > 0 && (
+                      <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                        {connectedAccounts.map((account) => (
+                          <button
+                            key={account.id}
+                            onClick={() => {
+                              setSelectedAccount(account.id)
+                              setShowAccountPicker(false)
+                              showToast(`Filtrando por: ${account.name}`, 'info')
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '10px 16px',
+                              textAlign: 'left',
+                              fontSize: '14px',
+                              color: selectedAccount === account.id ? '#3B82F6' : '#FFFFFF',
+                              backgroundColor: selectedAccount === account.id ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                              border: 'none',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                            }}
+                          >
+                            <PlatformIcon platform={mapPlatformName(account.platform)} size={14} />
+                            <span style={{ flex: 1 }}>{account.name}</span>
+                            {account.status === 'connected' && (
+                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22C55E' }} />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+
           {/* Botão Atualizar */}
           <button
             onClick={handleRefresh}
@@ -450,6 +615,33 @@ export function Header({
               )}
             </AnimatePresence>
           </div>
+
+          {/* Botão Equipes */}
+          {showTeamsButton && (
+            <button
+              onClick={onTeamsClick}
+              className="hidden sm:flex"
+              title="Gerenciar Equipes"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                height: '40px',
+                padding: '0 16px',
+                backgroundColor: 'rgba(250, 204, 21, 0.1)',
+                border: '1px solid rgba(250, 204, 21, 0.3)',
+                borderRadius: '12px',
+                color: '#FACC15',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <UsersRound style={{ width: '16px', height: '16px' }} />
+              <span className="hidden lg:inline">Equipes</span>
+            </button>
+          )}
 
           {/* Botão Principal */}
           {showCreateButton && (

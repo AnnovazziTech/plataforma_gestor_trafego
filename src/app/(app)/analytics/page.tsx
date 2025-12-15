@@ -37,7 +37,11 @@ import {
   Eye,
   MousePointer,
   Loader2,
+  Calendar,
+  ChevronDown,
+  BarChart3,
 } from 'lucide-react'
+import { useApp } from '@/contexts'
 
 const COLORS = ['#3B82F6', '#60A5FA', '#FACC15', '#FDE047', '#1D4ED8', '#EAB308']
 
@@ -84,9 +88,24 @@ interface AnalyticsData {
 }
 
 export default function AnalyticsPage() {
+  const { showToast, setIsConnectAccountsModalOpen } = useApp()
   const [selectedMetric, setSelectedMetric] = useState<'impressions' | 'clicks' | 'conversions'>('impressions')
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+
+  // Filtros de período para os gráficos
+  const [performancePeriod, setPerformancePeriod] = useState('30')
+  const [hourlyPeriod, setHourlyPeriod] = useState('7')
+  const [showPerformancePeriod, setShowPerformancePeriod] = useState(false)
+  const [showHourlyPeriod, setShowHourlyPeriod] = useState(false)
+
+  const periodOptions = [
+    { value: '7', label: 'Últimos 7 dias' },
+    { value: '14', label: 'Últimos 14 dias' },
+    { value: '30', label: 'Últimos 30 dias' },
+    { value: '60', label: 'Últimos 60 dias' },
+    { value: '90', label: 'Últimos 90 dias' },
+  ]
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -171,12 +190,20 @@ export default function AnalyticsPage() {
     }))
   }, [platformMetrics])
 
+  const handleAddMetrics = () => {
+    setIsConnectAccountsModalOpen(true)
+    showToast('Conecte suas contas para adicionar métricas', 'info')
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen">
         <Header
           title="Analytics"
           subtitle="Análise detalhada do desempenho das suas campanhas"
+          buttonType="connect"
+          createButtonText="Adicionar Métricas"
+          onCreateClick={handleAddMetrics}
         />
         <div className="flex items-center justify-center h-[60vh]">
           <Loader2 className="w-8 h-8 animate-spin text-[#3B82F6]" />
@@ -190,6 +217,9 @@ export default function AnalyticsPage() {
       <Header
         title="Analytics"
         subtitle="Análise detalhada do desempenho das suas campanhas"
+        buttonType="connect"
+        createButtonText="Adicionar Métricas"
+        onCreateClick={handleAddMetrics}
       />
 
       <main className="p-8">
@@ -233,20 +263,59 @@ export default function AnalyticsPage() {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Performance ao Longo do Tempo</CardTitle>
-            <div className="flex items-center gap-2">
-              {['impressions', 'clicks', 'conversions'].map((metric) => (
+            <div className="flex items-center gap-4">
+              {/* Filtro de Período */}
+              <div className="relative">
                 <button
-                  key={metric}
-                  onClick={() => setSelectedMetric(metric as any)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
-                    selectedMetric === metric
-                      ? 'bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]'
-                      : 'text-[#6B6B7B] hover:text-white border border-transparent'
-                  }`}
+                  onClick={() => setShowPerformancePeriod(!showPerformancePeriod)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all"
                 >
-                  {metric === 'impressions' ? 'Impressões' : metric === 'clicks' ? 'Cliques' : 'Conversões'}
+                  <Calendar size={14} className="text-[#FACC15]" />
+                  {periodOptions.find(p => p.value === performancePeriod)?.label}
+                  <ChevronDown size={14} className={`text-[#6B6B7B] transition-transform ${showPerformancePeriod ? 'rotate-180' : ''}`} />
                 </button>
-              ))}
+                {showPerformancePeriod && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowPerformancePeriod(false)} />
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-[#12121A] border border-white/10 rounded-xl shadow-xl z-50 overflow-hidden">
+                      {periodOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            setPerformancePeriod(option.value)
+                            setShowPerformancePeriod(false)
+                            showToast(`Período alterado: ${option.label}`, 'info')
+                          }}
+                          className={`w-full px-4 py-2.5 text-left text-sm ${
+                            performancePeriod === option.value
+                              ? 'bg-[#3B82F6]/10 text-[#3B82F6]'
+                              : 'text-white hover:bg-white/5'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Filtro de Métricas */}
+              <div className="flex items-center gap-2">
+                {['impressions', 'clicks', 'conversions'].map((metric) => (
+                  <button
+                    key={metric}
+                    onClick={() => setSelectedMetric(metric as any)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
+                      selectedMetric === metric
+                        ? 'bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]'
+                        : 'text-[#6B6B7B] hover:text-white border border-transparent'
+                    }`}
+                  >
+                    {metric === 'impressions' ? 'Impressões' : metric === 'clicks' ? 'Cliques' : 'Conversões'}
+                  </button>
+                ))}
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -455,6 +524,41 @@ export default function AnalyticsPage() {
               <Clock size={18} className="text-[#3B82F6]" />
               Performance por Hora do Dia
             </CardTitle>
+            {/* Filtro de Período para Hourly */}
+            <div className="relative">
+              <button
+                onClick={() => setShowHourlyPeriod(!showHourlyPeriod)}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all"
+              >
+                <Calendar size={14} className="text-[#FACC15]" />
+                {periodOptions.find(p => p.value === hourlyPeriod)?.label}
+                <ChevronDown size={14} className={`text-[#6B6B7B] transition-transform ${showHourlyPeriod ? 'rotate-180' : ''}`} />
+              </button>
+              {showHourlyPeriod && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowHourlyPeriod(false)} />
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-[#12121A] border border-white/10 rounded-xl shadow-xl z-50 overflow-hidden">
+                    {periodOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => {
+                          setHourlyPeriod(option.value)
+                          setShowHourlyPeriod(false)
+                          showToast(`Período alterado: ${option.label}`, 'info')
+                        }}
+                        className={`w-full px-4 py-2.5 text-left text-sm ${
+                          hourlyPeriod === option.value
+                            ? 'bg-[#3B82F6]/10 text-[#3B82F6]'
+                            : 'text-white hover:bg-white/5'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-72">
@@ -492,7 +596,7 @@ export default function AnalyticsPage() {
                   <PolarGrid stroke="rgba(255,255,255,0.1)" />
                   <PolarAngleAxis dataKey="platform" tick={{ fill: '#A0A0B0', fontSize: 12 }} />
                   <PolarRadiusAxis tick={{ fill: '#6B6B7B', fontSize: 10 }} />
-                  <Radar name="ROAS" dataKey="roas" stroke="#FACC15" fill="#FACC15" fillOpacity={0.3} />
+                  <Radar name="Conversões" dataKey="conversions" stroke="#FACC15" fill="#FACC15" fillOpacity={0.3} />
                   <Radar name="Campanhas" dataKey="campaigns" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.3} />
                   <Legend />
                   <Tooltip

@@ -27,6 +27,12 @@ import {
   Upload,
   Layout,
   Film,
+  MessageCircle,
+  Bot,
+  ExternalLink,
+  GitCompare,
+  ChevronDown,
+  TrendingUp,
 } from 'lucide-react'
 
 interface ScheduledPost {
@@ -56,7 +62,7 @@ const socialMetrics = {
 
 export default function SocialPage() {
   const { showToast } = useApp()
-  const [activeTab, setActiveTab] = useState<'site' | 'social' | 'post' | 'schedule'>('site')
+  const [activeTab, setActiveTab] = useState<'site' | 'social' | 'post' | 'schedule' | 'comments'>('site')
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>(mockPosts)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [siteUrl, setSiteUrl] = useState('')
@@ -92,6 +98,7 @@ export default function SocialPage() {
     { id: 'social', label: 'Análise de Redes', icon: Share2 },
     { id: 'post', label: 'Análise de Post', icon: Image },
     { id: 'schedule', label: 'Agendamento', icon: Calendar },
+    { id: 'comments', label: 'Comentários', icon: MessageCircle },
   ]
 
   const platformIcons: Record<string, any> = {
@@ -525,6 +532,63 @@ export default function SocialPage() {
                     <p style={{ fontSize: '12px', color: '#4B4B5B' }}>Crie sua primeira programação de post</p>
                   </div>
                 )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Tab: Comentários */}
+          {activeTab === 'comments' && (
+            <motion.div
+              key="comments"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <div style={{
+                padding: '32px',
+                borderRadius: '20px',
+                background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                  <div style={{
+                    padding: '12px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(to bottom right, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2))',
+                  }}>
+                    <MessageCircle style={{ width: '24px', height: '24px', color: '#3B82F6' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Gerenciar Comentários</h2>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Responda comentários de todas as suas redes sociais</p>
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                  <div style={{
+                    width: '80px',
+                    height: '80px',
+                    margin: '0 auto 20px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <MessageCircle style={{ width: '40px', height: '40px', color: '#6B6B7B' }} />
+                  </div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', marginBottom: '8px' }}>Central de Comentários</h3>
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '24px' }}>
+                    Conecte suas redes sociais para gerenciar todos os comentários em um só lugar
+                  </p>
+                  <Button
+                    variant="primary"
+                    onClick={() => showToast('Funcionalidade em desenvolvimento', 'info')}
+                  >
+                    <Plus style={{ width: '16px', height: '16px' }} />
+                    Conectar Redes Sociais
+                  </Button>
+                </div>
               </div>
             </motion.div>
           )}
