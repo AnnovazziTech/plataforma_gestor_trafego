@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useSession, signOut } from 'next-auth/react'
 import { Header } from '@/components/layout'
 import { Button, Badge, PlatformIcon } from '@/components/ui'
 import { useApp } from '@/contexts'
-import { currentUser } from '@/data/mock-data'
 import {
   User,
   Bell,
@@ -37,10 +37,18 @@ import { Platform } from '@/types'
 type TabType = 'profile' | 'notifications' | 'connections' | 'security' | 'billing' | 'preferences'
 
 export default function SettingsPage() {
+  const { data: session } = useSession()
   const { showToast, connectedAccounts, connectAccount, disconnectAccount } = useApp()
   const [activeTab, setActiveTab] = useState<TabType>('profile')
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+
+  // User data from session with fallback
+  const currentUser = {
+    name: session?.user?.name || 'Usuário',
+    email: session?.user?.email || 'usuario@email.com',
+    image: (session?.user as any)?.avatar || (session?.user as any)?.image || null,
+  }
 
   const tabs = [
     { id: 'profile', label: 'Perfil', icon: User },
@@ -169,6 +177,7 @@ export default function SettingsPage() {
                   showToast={showToast}
                   profilePhoto={profilePhoto}
                   setProfilePhoto={setProfilePhoto}
+                  currentUser={currentUser}
                 />
               )}
               {activeTab === 'connections' && (
@@ -266,9 +275,10 @@ export default function SettingsPage() {
                   Cancelar
                 </Button>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     setShowLogoutModal(false)
                     showToast('Você foi desconectado!', 'success')
+                    await signOut({ callbackUrl: '/login' })
                   }}
                   style={{
                     flex: 1,
@@ -297,10 +307,12 @@ function ProfileSection({
   showToast,
   profilePhoto,
   setProfilePhoto,
+  currentUser,
 }: {
   showToast: (msg: string, type: any) => void
   profilePhoto: string | null
   setProfilePhoto: (photo: string | null) => void
+  currentUser: { name: string; email: string; image: string | null }
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState({

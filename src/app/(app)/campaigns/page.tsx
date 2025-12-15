@@ -1,10 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
 import { Card, CardContent, Button, Badge, PlatformIcon, StatCard } from '@/components/ui'
-import { campaigns } from '@/data/mock-data'
 import { formatCurrency, formatCompactNumber } from '@/lib/utils'
 import { Campaign, Platform, CampaignStatus } from '@/types'
 import { useApp } from '@/contexts'
@@ -136,7 +135,7 @@ const generateWeeklyData = (campaign: Campaign) => {
 }
 
 export default function CampaignsPage() {
-  const { connectedAccounts, selectedAccount, setSelectedAccount, showToast } = useApp()
+  const { connectedAccounts, selectedAccount, setSelectedAccount, showToast, campaigns } = useApp()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | 'all'>('all')
@@ -153,12 +152,14 @@ export default function CampaignsPage() {
   const [campaignForComparison, setCampaignForComparison] = useState<Campaign | null>(null)
   const [weeklyData, setWeeklyData] = useState<any[]>([])
 
-  const filteredCampaigns = campaigns.filter((campaign) => {
-    const matchesSearch = campaign.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesPlatform = selectedPlatform === 'all' || campaign.platform === selectedPlatform
-    const matchesStatus = selectedStatus === 'all' || campaign.status === selectedStatus
-    return matchesSearch && matchesPlatform && matchesStatus
-  })
+  const filteredCampaigns = useMemo(() => {
+    return campaigns.filter((campaign) => {
+      const matchesSearch = campaign.name.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesPlatform = selectedPlatform === 'all' || campaign.platform === selectedPlatform
+      const matchesStatus = selectedStatus === 'all' || campaign.status === selectedStatus
+      return matchesSearch && matchesPlatform && matchesStatus
+    })
+  }, [campaigns, searchTerm, selectedPlatform, selectedStatus])
 
   const platforms: Platform[] = ['meta', 'google', 'tiktok', 'linkedin', 'twitter']
   const statuses: CampaignStatus[] = ['active', 'paused', 'ended', 'draft', 'error']
@@ -169,8 +170,8 @@ export default function CampaignsPage() {
     // Encontrar a campanha e gerar dados de comparação
     const campaign = campaigns.find(c => c.id === campaignId)
     if (campaign) {
-      setCampaignForComparison(campaign)
-      setWeeklyData(generateWeeklyData(campaign))
+      setCampaignForComparison(campaign as Campaign)
+      setWeeklyData(generateWeeklyData(campaign as Campaign))
     }
 
     setTimeout(() => {
@@ -437,7 +438,7 @@ export default function CampaignsPage() {
                   {filteredCampaigns.map((campaign, index) => (
                     <CampaignCard
                       key={campaign.id}
-                      campaign={campaign}
+                      campaign={campaign as Campaign}
                       index={index}
                       onAiAnalysis={handleAiAnalysis}
                       isAnalyzing={isAnalyzing === campaign.id}
@@ -455,7 +456,7 @@ export default function CampaignsPage() {
                   style={{ maxHeight: '600px', overflowY: 'auto' }}
                 >
                   <CampaignTable
-                    campaigns={filteredCampaigns}
+                    campaigns={filteredCampaigns as Campaign[]}
                     onAiAnalysis={handleAiAnalysis}
                     isAnalyzing={isAnalyzing}
                     visibleMetrics={visibleMetrics}

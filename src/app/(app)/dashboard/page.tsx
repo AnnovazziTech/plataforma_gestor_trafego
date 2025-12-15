@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Header } from '@/components/layout'
 import { MetricCard } from '@/components/ui'
 import {
@@ -9,7 +10,8 @@ import {
   CampaignPerformance,
 } from '@/components/charts'
 import { TopCampaigns, RecentActivity } from '@/components/dashboard'
-import { dashboardMetrics } from '@/data/mock-data'
+import { useApp } from '@/contexts'
+import { Campaign } from '@/types'
 import {
   DollarSign,
   Eye,
@@ -17,9 +19,123 @@ import {
   ShoppingCart,
   TrendingUp,
   Target,
+  Loader2,
 } from 'lucide-react'
 
+interface DashboardData {
+  metrics: {
+    totalSpent: number
+    totalBudget: number
+    totalImpressions: number
+    totalClicks: number
+    totalConversions: number
+    totalRevenue: number
+    avgCtr: number
+    avgCpc: number
+    avgRoas: number
+    activeCampaigns: number
+  }
+  previousPeriod: {
+    totalSpent: number
+    totalImpressions: number
+    totalClicks: number
+    totalConversions: number
+    totalRevenue: number
+  }
+  platformMetrics: Array<{
+    platform: string
+    spent: number
+    impressions: number
+    clicks: number
+    conversions: number
+    roas: number
+    campaigns: number
+  }>
+  timeSeriesData: Array<{
+    date: string
+    impressions: number
+    clicks: number
+    conversions: number
+    spent: number
+    revenue: number
+  }>
+  conversionFunnel: Array<{
+    stage: string
+    value: number
+    percentage: number
+  }>
+  campaignPerformance: Array<{
+    name: string
+    spent: number
+    conversions: number
+    roas: number
+    ctr: number
+  }>
+}
+
 export default function DashboardPage() {
+  const { campaigns } = useApp()
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const response = await fetch('/api/dashboard')
+        if (response.ok) {
+          const data = await response.json()
+          setDashboardData(data)
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dashboard:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchDashboard()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Header
+          title="Dashboard"
+          subtitle="Visao geral da performance de todas as suas campanhas"
+          buttonType="connect"
+          createButtonText="Conectar Contas"
+        />
+        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
+            <Loader2 size={48} style={{ color: '#3B82F6', animation: 'spin 1s linear infinite' }} />
+            <p style={{ color: '#6B6B7B', marginTop: '16px' }}>Carregando dados...</p>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  const metrics = dashboardData?.metrics || {
+    totalSpent: 0,
+    totalBudget: 0,
+    totalImpressions: 0,
+    totalClicks: 0,
+    totalConversions: 0,
+    totalRevenue: 0,
+    avgCtr: 0,
+    avgCpc: 0,
+    avgRoas: 0,
+    activeCampaigns: 0,
+  }
+
+  const previousPeriod = dashboardData?.previousPeriod || {
+    totalSpent: 0,
+    totalImpressions: 0,
+    totalClicks: 0,
+    totalConversions: 0,
+    totalRevenue: 0,
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header
@@ -41,8 +157,8 @@ export default function DashboardPage() {
         >
           <MetricCard
             title="Total Investido"
-            value={dashboardMetrics.totalSpent}
-            previousValue={dashboardMetrics.previousPeriod.totalSpent}
+            value={metrics.totalSpent}
+            previousValue={previousPeriod.totalSpent}
             format="currency"
             icon={<DollarSign size={20} />}
             color="blue"
@@ -50,8 +166,8 @@ export default function DashboardPage() {
           />
           <MetricCard
             title="Impressoes"
-            value={dashboardMetrics.totalImpressions}
-            previousValue={dashboardMetrics.previousPeriod.totalImpressions}
+            value={metrics.totalImpressions}
+            previousValue={previousPeriod.totalImpressions}
             format="compact"
             icon={<Eye size={20} />}
             color="yellow"
@@ -59,8 +175,8 @@ export default function DashboardPage() {
           />
           <MetricCard
             title="Cliques"
-            value={dashboardMetrics.totalClicks}
-            previousValue={dashboardMetrics.previousPeriod.totalClicks}
+            value={metrics.totalClicks}
+            previousValue={previousPeriod.totalClicks}
             format="compact"
             icon={<MousePointer size={20} />}
             color="blue"
@@ -68,8 +184,8 @@ export default function DashboardPage() {
           />
           <MetricCard
             title="Conversoes"
-            value={dashboardMetrics.totalConversions}
-            previousValue={dashboardMetrics.previousPeriod.totalConversions}
+            value={metrics.totalConversions}
+            previousValue={previousPeriod.totalConversions}
             format="number"
             icon={<ShoppingCart size={20} />}
             color="yellow"
@@ -77,8 +193,8 @@ export default function DashboardPage() {
           />
           <MetricCard
             title="Receita Total"
-            value={dashboardMetrics.totalRevenue}
-            previousValue={dashboardMetrics.previousPeriod.totalRevenue}
+            value={metrics.totalRevenue}
+            previousValue={previousPeriod.totalRevenue}
             format="currency"
             icon={<TrendingUp size={20} />}
             color="blue"
@@ -86,7 +202,7 @@ export default function DashboardPage() {
           />
           <MetricCard
             title="ROAS Medio"
-            value={dashboardMetrics.avgRoas}
+            value={metrics.avgRoas}
             format="number"
             icon={<Target size={20} />}
             color="yellow"
@@ -104,10 +220,10 @@ export default function DashboardPage() {
           }}
         >
           <div>
-            <PerformanceChart />
+            <PerformanceChart data={dashboardData?.timeSeriesData || []} />
           </div>
           <div>
-            <PlatformDistribution />
+            <PlatformDistribution data={dashboardData?.platformMetrics || []} />
           </div>
         </div>
 
@@ -120,8 +236,8 @@ export default function DashboardPage() {
             marginBottom: '16px',
           }}
         >
-          <ConversionFunnel />
-          <CampaignPerformance />
+          <ConversionFunnel data={dashboardData?.conversionFunnel || []} />
+          <CampaignPerformance data={dashboardData?.campaignPerformance || []} />
         </div>
 
         {/* Bottom Row */}
@@ -132,7 +248,7 @@ export default function DashboardPage() {
             gap: '16px',
           }}
         >
-          <TopCampaigns />
+          <TopCampaigns campaigns={campaigns as Campaign[]} />
           <RecentActivity />
         </div>
       </main>

@@ -2,15 +2,35 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Megaphone } from 'lucide-react'
+import { X, Megaphone, Loader2 } from 'lucide-react'
 import { Button, PlatformIcon } from '@/components/ui'
 import { useApp } from '@/contexts'
-import { Platform, CampaignStatus, CampaignObjective } from '@/types'
+
+type Platform = 'meta' | 'google' | 'tiktok' | 'linkedin' | 'twitter' | 'pinterest'
+type Objective = 'awareness' | 'traffic' | 'engagement' | 'leads' | 'sales' | 'app_installs'
 
 const platforms: Platform[] = ['meta', 'google', 'tiktok', 'linkedin', 'twitter', 'pinterest']
-const objectives: CampaignObjective[] = ['awareness', 'traffic', 'engagement', 'leads', 'sales', 'app_installs']
+const objectives: Objective[] = ['awareness', 'traffic', 'engagement', 'leads', 'sales', 'app_installs']
 
-const objectiveLabels: Record<CampaignObjective, string> = {
+const platformToApi: Record<Platform, string> = {
+  meta: 'META',
+  google: 'GOOGLE',
+  tiktok: 'TIKTOK',
+  linkedin: 'LINKEDIN',
+  twitter: 'TWITTER',
+  pinterest: 'TWITTER', // Pinterest usa mesma API por enquanto
+}
+
+const objectiveToApi: Record<Objective, string> = {
+  awareness: 'AWARENESS',
+  traffic: 'TRAFFIC',
+  engagement: 'ENGAGEMENT',
+  leads: 'LEADS',
+  sales: 'SALES',
+  app_installs: 'APP_INSTALLS',
+}
+
+const objectiveLabels: Record<Objective, string> = {
   awareness: 'Reconhecimento',
   traffic: 'Trafego',
   engagement: 'Engajamento',
@@ -20,14 +40,15 @@ const objectiveLabels: Record<CampaignObjective, string> = {
 }
 
 export function CreateCampaignModal() {
-  const { isCreateCampaignModalOpen, setIsCreateCampaignModalOpen, addCampaign, showToast } = useApp()
+  const { isCreateCampaignModalOpen, setIsCreateCampaignModalOpen, addCampaign, showToast, connectedAccounts } = useApp()
 
   const [name, setName] = useState('')
   const [platform, setPlatform] = useState<Platform>('meta')
-  const [objective, setObjective] = useState<CampaignObjective>('sales')
+  const [objective, setObjective] = useState<Objective>('sales')
   const [budget, setBudget] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!name.trim()) {
@@ -40,39 +61,30 @@ export function CreateCampaignModal() {
       return
     }
 
-    const now = new Date().toISOString()
-    const newCampaign = {
-      id: Math.random().toString(36).substring(7),
-      name: name.trim(),
-      platform,
-      status: 'draft' as CampaignStatus,
-      objective,
-      budget: parseFloat(budget),
-      spent: 0,
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: undefined,
-      metrics: {
-        impressions: 0,
-        reach: 0,
-        clicks: 0,
-        ctr: 0,
-        cpc: 0,
-        cpm: 0,
-        conversions: 0,
-        conversionRate: 0,
-        costPerConversion: 0,
-        roas: 0,
-        frequency: 0,
-        engagement: 0,
-      },
-      adSets: [],
-      createdAt: now,
-      updatedAt: now,
-    }
+    setIsLoading(true)
 
-    addCampaign(newCampaign)
-    setIsCreateCampaignModalOpen(false)
-    resetForm()
+    try {
+      // Preparar dados para a API
+      const campaignData = {
+        name: name.trim(),
+        platform: platformToApi[platform],
+        objective: objectiveToApi[objective],
+        budget: parseFloat(budget),
+        budgetType: 'DAILY',
+      }
+
+      // Chamar API via contexto
+      const result = await addCampaign(campaignData)
+
+      if (result) {
+        setIsCreateCampaignModalOpen(false)
+        resetForm()
+      }
+    } catch (error) {
+      console.error('Erro ao criar campanha:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const resetForm = () => {
@@ -83,8 +95,10 @@ export function CreateCampaignModal() {
   }
 
   const handleClose = () => {
-    setIsCreateCampaignModalOpen(false)
-    resetForm()
+    if (!isLoading) {
+      setIsCreateCampaignModalOpen(false)
+      resetForm()
+    }
   }
 
   return (
@@ -156,13 +170,15 @@ export function CreateCampaignModal() {
               </div>
               <button
                 onClick={handleClose}
+                disabled={isLoading}
                 style={{
                   padding: '8px',
                   borderRadius: '8px',
                   background: 'none',
                   border: 'none',
                   color: '#6B6B7B',
-                  cursor: 'pointer',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  opacity: isLoading ? 0.5 : 1,
                 }}
               >
                 <X style={{ width: '20px', height: '20px' }} />
@@ -172,13 +188,14 @@ export function CreateCampaignModal() {
             <form onSubmit={handleSubmit} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
-                  Nome da Campanha
+                  Nome da Campanha *
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ex: Black Friday 2024"
+                  disabled={isLoading}
                   style={{
                     width: '100%',
                     height: '48px',
@@ -190,6 +207,7 @@ export function CreateCampaignModal() {
                     fontSize: '14px',
                     outline: 'none',
                     boxSizing: 'border-box',
+                    opacity: isLoading ? 0.5 : 1,
                   }}
                 />
               </div>
@@ -204,15 +222,17 @@ export function CreateCampaignModal() {
                       key={p}
                       type="button"
                       onClick={() => setPlatform(p)}
+                      disabled={isLoading}
                       style={{
                         padding: '12px',
                         borderRadius: '12px',
                         border: platform === p ? '1px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
                         backgroundColor: platform === p ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                        cursor: 'pointer',
+                        cursor: isLoading ? 'not-allowed' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
+                        opacity: isLoading ? 0.5 : 1,
                       }}
                     >
                       <PlatformIcon platform={p} size={24} />
@@ -231,6 +251,7 @@ export function CreateCampaignModal() {
                       key={obj}
                       type="button"
                       onClick={() => setObjective(obj)}
+                      disabled={isLoading}
                       style={{
                         padding: '10px 12px',
                         borderRadius: '12px',
@@ -239,8 +260,9 @@ export function CreateCampaignModal() {
                         border: objective === obj ? '1px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
                         backgroundColor: objective === obj ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.05)',
                         color: objective === obj ? '#3B82F6' : '#FFFFFF',
-                        cursor: 'pointer',
+                        cursor: isLoading ? 'not-allowed' : 'pointer',
                         whiteSpace: 'nowrap',
+                        opacity: isLoading ? 0.5 : 1,
                       }}
                     >
                       {objectiveLabels[obj]}
@@ -251,7 +273,7 @@ export function CreateCampaignModal() {
 
               <div>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
-                  Orcamento Diario (R$)
+                  Orcamento Diario (R$) *
                 </label>
                 <input
                   type="number"
@@ -260,6 +282,7 @@ export function CreateCampaignModal() {
                   placeholder="0.00"
                   min="0"
                   step="0.01"
+                  disabled={isLoading}
                   style={{
                     width: '100%',
                     height: '48px',
@@ -271,16 +294,24 @@ export function CreateCampaignModal() {
                     fontSize: '14px',
                     outline: 'none',
                     boxSizing: 'border-box',
+                    opacity: isLoading ? 0.5 : 1,
                   }}
                 />
               </div>
 
               <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>
-                <Button type="button" variant="ghost" onClick={handleClose} style={{ flex: 1 }}>
+                <Button type="button" variant="ghost" onClick={handleClose} style={{ flex: 1 }} disabled={isLoading}>
                   Cancelar
                 </Button>
-                <Button type="submit" variant="primary" style={{ flex: 1 }}>
-                  Criar Campanha
+                <Button type="submit" variant="primary" style={{ flex: 1 }} disabled={isLoading}>
+                  {isLoading ? (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Loader2 style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }} />
+                      Criando...
+                    </span>
+                  ) : (
+                    'Criar Campanha'
+                  )}
                 </Button>
               </div>
             </form>

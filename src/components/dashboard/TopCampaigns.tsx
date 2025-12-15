@@ -1,16 +1,23 @@
 'use client'
 
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardHeader, CardTitle, CardContent, Badge, PlatformIcon } from '@/components/ui'
-import { campaigns } from '@/data/mock-data'
 import { formatCurrency, formatCompactNumber } from '@/lib/utils'
 import { TrendingUp, TrendingDown, MoreVertical } from 'lucide-react'
+import { Campaign } from '@/types'
 
-export function TopCampaigns() {
-  const topCampaigns = campaigns
-    .filter(c => c.status === 'active')
-    .sort((a, b) => b.metrics.roas - a.metrics.roas)
-    .slice(0, 5)
+interface TopCampaignsProps {
+  campaigns: Campaign[]
+}
+
+export function TopCampaigns({ campaigns }: TopCampaignsProps) {
+  const topCampaigns = useMemo(() => {
+    return campaigns
+      .filter(c => c.status === 'active')
+      .sort((a, b) => (b.metrics?.roas || 0) - (a.metrics?.roas || 0))
+      .slice(0, 5)
+  }, [campaigns])
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, 'success' | 'warning' | 'error' | 'info' | 'default'> = {

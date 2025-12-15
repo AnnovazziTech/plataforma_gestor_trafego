@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, ReactNode } from 'react'
+import { useState, ReactNode, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
 import { Button, Badge, StatCard } from '@/components/ui'
-import { automations } from '@/data/mock-data'
+import { useApp } from '@/contexts'
 import {
   Zap,
   Plus,
@@ -64,10 +64,14 @@ const actionIcons: Record<string, ReactNode> = {
 }
 
 export default function AutomationPage() {
+  const { automations } = useApp()
   const [showCreateModal, setShowCreateModal] = useState(false)
 
-  const totalTriggers = automations.reduce((acc, a) => acc + a.triggerCount, 0)
-  const activeAutomations = automations.filter(a => a.status === 'active').length
+  // Use automations from context with fallback to empty array
+  const automationsData = useMemo(() => automations || [], [automations])
+
+  const totalTriggers = useMemo(() => automationsData.reduce((acc, a) => acc + (a.triggerCount || 0), 0), [automationsData])
+  const activeAutomations = useMemo(() => automationsData.filter(a => a.status === 'active').length, [automationsData])
 
   return (
     <div style={{ minHeight: '100vh' }}>
@@ -122,8 +126,8 @@ export default function AutomationPage() {
 
         {/* Automations List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '48px' }}>
-          {automations.map((automation, index) => (
-            <AutomationCard key={automation.id} automation={automation} index={index} />
+          {automationsData.map((automation, index) => (
+            <AutomationCard key={automation.id} automation={automation as Automation} index={index} />
           ))}
         </div>
 

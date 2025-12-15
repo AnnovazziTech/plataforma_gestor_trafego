@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
   BarChart,
@@ -12,22 +12,47 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
-import { campaignComparison } from '@/data/mock-data'
 import { formatCurrency, formatCompactNumber } from '@/lib/utils'
 import { DollarSign, Target, TrendingUp, TrendingDown, Award, BarChart3 } from 'lucide-react'
 
-export function CampaignPerformance() {
+interface CampaignData {
+  name: string
+  spent: number
+  conversions: number
+  roas: number
+  ctr: number
+}
+
+interface CampaignPerformanceProps {
+  data: CampaignData[]
+}
+
+export function CampaignPerformance({ data }: CampaignPerformanceProps) {
   const [hoveredBar, setHoveredBar] = useState<string | null>(null)
 
+  const campaignData = data.length > 0 ? data : []
+
   // Calculate summary stats
-  const totalSpent = campaignComparison.reduce((acc, c) => acc + c.spent, 0)
-  const totalConversions = campaignComparison.reduce((acc, c) => acc + c.conversions, 0)
-  const avgRoas = campaignComparison.reduce((acc, c) => acc + c.roas, 0) / campaignComparison.length
-  const bestCampaign = [...campaignComparison].sort((a, b) => b.roas - a.roas)[0]
+  const { totalSpent, totalConversions, avgRoas, bestCampaign } = useMemo(() => {
+    if (campaignData.length === 0) {
+      return {
+        totalSpent: 0,
+        totalConversions: 0,
+        avgRoas: 0,
+        bestCampaign: { name: '-', roas: 0, spent: 0, conversions: 0, ctr: 0 }
+      }
+    }
+    return {
+      totalSpent: campaignData.reduce((acc, c) => acc + (c.spent || 0), 0),
+      totalConversions: campaignData.reduce((acc, c) => acc + (c.conversions || 0), 0),
+      avgRoas: campaignData.reduce((acc, c) => acc + (c.roas || 0), 0) / campaignData.length,
+      bestCampaign: [...campaignData].sort((a, b) => (b.roas || 0) - (a.roas || 0))[0]
+    }
+  }, [campaignData])
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload) return null
-    const campaign = campaignComparison.find(c => c.name === label)
+    const campaign = campaignData.find(c => c.name === label)
 
     return (
       <motion.div
@@ -223,7 +248,7 @@ export function CampaignPerformance() {
         <div style={{ height: '256px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              data={campaignComparison}
+              data={campaignData}
               layout="vertical"
               margin={{ left: 0, right: 20, top: 5, bottom: 5 }}
               onMouseMove={(state) => {
@@ -290,8 +315,8 @@ export function CampaignPerformance() {
               </span>
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
-            {campaignComparison.map((campaign, index) => {
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(campaignData.length, 5)}, 1fr)`, gap: '8px' }}>
+            {campaignData.slice(0, 5).map((campaign, index) => {
               const isHovered = hoveredBar === campaign.name
               return (
                 <motion.div
@@ -312,19 +337,19 @@ export function CampaignPerformance() {
                   onMouseEnter={() => setHoveredBar(campaign.name)}
                   onMouseLeave={() => setHoveredBar(null)}
                 >
-                  {campaign.roas === bestCampaign.roas && (
+                  {campaign.roas === bestCampaign?.roas && (
                     <div style={{ position: 'absolute', top: '-4px', right: '-4px' }}>
                       <Award size={14} style={{ color: '#FACC15' }} />
                     </div>
                   )}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginBottom: '4px' }}>
-                    {campaign.roas >= avgRoas ? (
+                    {(campaign.roas || 0) >= avgRoas ? (
                       <TrendingUp size={12} style={{ color: '#34D399' }} />
                     ) : (
                       <TrendingDown size={12} style={{ color: '#F87171' }} />
                     )}
-                    <p style={{ fontSize: '18px', fontWeight: 700, color: getTextColor(campaign.roas), margin: 0 }}>
-                      {campaign.roas.toFixed(1)}x
+                    <p style={{ fontSize: '18px', fontWeight: 700, color: getTextColor(campaign.roas || 0), margin: 0 }}>
+                      {(campaign.roas || 0).toFixed(1)}x
                     </p>
                   </div>
                   <p
@@ -338,7 +363,7 @@ export function CampaignPerformance() {
                     }}
                     title={campaign.name}
                   >
-                    {campaign.name.split(' ')[0]}
+                    {campaign.name?.split(' ')[0] || '-'}
                   </p>
                 </motion.div>
               )

@@ -12,11 +12,23 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
-import { timeSeriesData } from '@/data/mock-data'
 import { formatCurrency, formatCompactNumber } from '@/lib/utils'
 import { TrendingUp, TrendingDown, Activity, Eye, MousePointer, DollarSign } from 'lucide-react'
 
 type MetricKey = 'impressions' | 'clicks' | 'conversions' | 'spent' | 'revenue'
+
+interface TimeSeriesItem {
+  date: string
+  impressions: number
+  clicks: number
+  conversions: number
+  spent: number
+  revenue: number
+}
+
+interface PerformanceChartProps {
+  data: TimeSeriesItem[]
+}
 
 const metrics: { key: MetricKey; label: string; color: string; icon: any }[] = [
   { key: 'impressions', label: 'Impressoes', color: '#3B82F6', icon: Eye },
@@ -26,7 +38,7 @@ const metrics: { key: MetricKey; label: string; color: string; icon: any }[] = [
   { key: 'revenue', label: 'Receita', color: '#FDE047', icon: DollarSign },
 ]
 
-export function PerformanceChart() {
+export function PerformanceChart({ data }: PerformanceChartProps) {
   const [activeMetrics, setActiveMetrics] = useState<MetricKey[]>(['impressions', 'clicks', 'conversions'])
 
   const toggleMetric = (key: MetricKey) => {
@@ -43,16 +55,22 @@ export function PerformanceChart() {
 
   // Calculate metric stats
   const metricStats = useMemo(() => {
+    if (!data || data.length === 0) {
+      return metrics.reduce((acc, metric) => {
+        acc[metric.key] = { current: 0, change: 0, avg: 0 }
+        return acc
+      }, {} as Record<MetricKey, { current: number; change: number; avg: number }>)
+    }
     return metrics.reduce((acc, metric) => {
-      const values = timeSeriesData.map(d => d[metric.key])
-      const current = values[values.length - 1]
-      const previous = values[values.length - 2]
+      const values = data.map(d => d[metric.key] || 0)
+      const current = values[values.length - 1] || 0
+      const previous = values[values.length - 2] || 0
       const change = previous ? ((current - previous) / previous) * 100 : 0
-      const avg = values.reduce((a, b) => a + b, 0) / values.length
+      const avg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0
       acc[metric.key] = { current, change, avg }
       return acc
     }, {} as Record<MetricKey, { current: number; change: number; avg: number }>)
-  }, [])
+  }, [data])
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload) return null
@@ -222,7 +240,7 @@ export function PerformanceChart() {
 
         <div style={{ height: '288px' }}>
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={timeSeriesData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 {metrics.map((metric) => (
                   <linearGradient key={metric.key} id={`gradient-${metric.key}`} x1="0" y1="0" x2="0" y2="1">

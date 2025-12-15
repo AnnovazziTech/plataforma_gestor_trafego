@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Link2, Check, ExternalLink, Trash2 } from 'lucide-react'
+import { X, Link2, Check, ExternalLink, Trash2, Loader2, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { useApp } from '@/contexts'
 
@@ -70,7 +71,13 @@ export function ConnectAccountsModal() {
     connectedAccounts,
     connectAccount,
     disconnectAccount,
+    syncCampaigns,
+    integrationsLoading,
+    fetchIntegrations,
   } = useApp()
+
+  const [loadingPlatform, setLoadingPlatform] = useState<string | null>(null)
+  const [syncingId, setSyncingId] = useState<string | null>(null)
 
   const isConnected = (platformId: string) => {
     return connectedAccounts.some(acc => acc.platform === platformId && acc.connected)
@@ -80,15 +87,36 @@ export function ConnectAccountsModal() {
     return connectedAccounts.find(acc => acc.platform === platformId && acc.connected)
   }
 
-  const handleConnect = (platformId: typeof platforms[number]['id']) => {
+  const handleConnect = async (platformId: typeof platforms[number]['id']) => {
     if (isConnected(platformId)) {
+      // Se ja conectado, desconecta
       const account = getConnectedAccount(platformId)
       if (account) {
-        disconnectAccount(account.id)
+        setLoadingPlatform(platformId)
+        await disconnectAccount(account.id)
+        setLoadingPlatform(null)
       }
     } else {
-      connectAccount(platformId)
+      // Conectar - redireciona para OAuth
+      setLoadingPlatform(platformId)
+      const authUrl = await connectAccount(platformId)
+
+      if (authUrl) {
+        // Redirecionar para autenticacao OAuth
+        window.location.href = authUrl
+      }
+      setLoadingPlatform(null)
     }
+  }
+
+  const handleSync = async (accountId: string) => {
+    setSyncingId(accountId)
+    await syncCampaigns(accountId)
+    setSyncingId(null)
+  }
+
+  const handleRefresh = async () => {
+    await fetchIntegrations()
   }
 
   return (
@@ -152,19 +180,36 @@ export function ConnectAccountsModal() {
                   <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Conecte suas plataformas de anuncios para importar dados</p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsConnectAccountsModalOpen(false)}
-                style={{
-                  padding: '8px',
-                  borderRadius: '8px',
-                  background: 'none',
-                  border: 'none',
-                  color: '#6B6B7B',
-                  cursor: 'pointer',
-                }}
-              >
-                <X size={20} />
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  onClick={handleRefresh}
+                  disabled={integrationsLoading}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '8px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#6B6B7B',
+                    cursor: integrationsLoading ? 'not-allowed' : 'pointer',
+                  }}
+                  title="Atualizar"
+                >
+                  <RefreshCw size={18} style={{ animation: integrationsLoading ? 'spin 1s linear infinite' : 'none' }} />
+                </button>
+                <button
+                  onClick={() => setIsConnectAccountsModalOpen(false)}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '8px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#6B6B7B',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Content */}
@@ -181,6 +226,8 @@ export function ConnectAccountsModal() {
               {platforms.map((platform) => {
                 const connected = isConnected(platform.id)
                 const account = getConnectedAccount(platform.id)
+                const isLoadingThis = loadingPlatform === platform.id
+                const isSyncingThis = syncingId === account?.id
 
                 return (
                   <motion.div
@@ -240,18 +287,36 @@ export function ConnectAccountsModal() {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {connected && account && platform.id !== 'whatsapp' && (
+                        <button
+                          onClick={() => handleSync(account.id)}
+                          disabled={isSyncingThis}
+                          style={{
+                            padding: '8px',
+                            borderRadius: '8px',
+                            background: 'none',
+                            border: 'none',
+                            color: '#3B82F6',
+                            cursor: isSyncingThis ? 'not-allowed' : 'pointer',
+                          }}
+                          title="Sincronizar campanhas"
+                        >
+                          <RefreshCw size={16} style={{ animation: isSyncingThis ? 'spin 1s linear infinite' : 'none' }} />
+                        </button>
+                      )}
                       {connected && (
                         <button
                           onClick={() => {
                             if (account) disconnectAccount(account.id)
                           }}
+                          disabled={isLoadingThis}
                           style={{
                             padding: '8px',
                             borderRadius: '8px',
                             background: 'none',
                             border: 'none',
                             color: '#F87171',
-                            cursor: 'pointer',
+                            cursor: isLoadingThis ? 'not-allowed' : 'pointer',
                           }}
                           title="Desconectar"
                         >
@@ -262,9 +327,12 @@ export function ConnectAccountsModal() {
                         variant={connected ? 'ghost' : 'primary'}
                         size="sm"
                         onClick={() => handleConnect(platform.id)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                        disabled={isLoadingThis}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '100px' }}
                       >
-                        {connected ? (
+                        {isLoadingThis ? (
+                          <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                        ) : connected ? (
                           <>
                             <ExternalLink size={14} />
                             Gerenciar

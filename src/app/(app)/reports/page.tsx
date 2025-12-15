@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, ReactNode } from 'react'
+import { useState, ReactNode, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, PlatformIcon, StatCard } from '@/components/ui'
-import { reports } from '@/data/mock-data'
 import { useApp } from '@/contexts'
 import {
   FileText,
@@ -68,11 +67,14 @@ const metricsOptions = [
 ]
 
 export default function ReportsPage() {
-  const { connectedAccounts, showToast } = useApp()
+  const { connectedAccounts, showToast, reports } = useApp()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [scheduledReports, setScheduledReports] = useState<any[]>([])
   const [editingSchedule, setEditingSchedule] = useState<any | null>(null)
+
+  // Use reports from context with fallback to empty array
+  const reportsData = useMemo(() => reports || [], [reports])
 
   return (
     <div style={{ minHeight: '100vh' }}>
@@ -87,7 +89,7 @@ export default function ReportsPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
           <StatCard
             label="Relatórios Ativos"
-            value={reports.filter(r => r.status === 'active').length}
+            value={reportsData.filter(r => r.status === 'active').length}
             icon={FileText}
             color="blue"
             delay={0}
@@ -136,15 +138,15 @@ export default function ReportsPage() {
 
         {/* Reports Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '48px' }}>
-          {reports.map((report, index) => (
-            <ReportCard key={report.id} report={report} index={index} />
+          {reportsData.map((report, index) => (
+            <ReportCard key={report.id} report={report as unknown as Report} index={index} />
           ))}
 
           {/* Create New Report Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: reports.length * 0.1 }}
+            transition={{ delay: reportsData.length * 0.1 }}
             onClick={() => setShowCreateModal(true)}
             style={{
               padding: '24px',

@@ -1,10 +1,20 @@
 'use client'
 
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
-import { conversionFunnel } from '@/data/mock-data'
 import { formatCompactNumber } from '@/lib/utils'
 import { Target, DollarSign, Percent, ChevronDown, ArrowDownRight } from 'lucide-react'
+
+interface FunnelStage {
+  stage: string
+  value: number
+  percentage: number
+}
+
+interface ConversionFunnelProps {
+  data: FunnelStage[]
+}
 
 const stageIcons = [
   { icon: Target, color: '#3B82F6' },
@@ -14,8 +24,13 @@ const stageIcons = [
   { icon: Target, color: '#FDE047' },
 ]
 
-export function ConversionFunnel() {
-  const maxValue = conversionFunnel[0].value
+export function ConversionFunnel({ data }: ConversionFunnelProps) {
+  const funnelData = data.length > 0 ? data : [
+    { stage: 'Impressões', value: 0, percentage: 100 },
+    { stage: 'Cliques', value: 0, percentage: 0 },
+    { stage: 'Conversões', value: 0, percentage: 0 },
+  ]
+  const maxValue = funnelData[0]?.value || 1
 
   return (
     <Card variant="gradient" accentColor="yellow" showAccentLine>
@@ -56,9 +71,9 @@ export function ConversionFunnel() {
       </CardHeader>
       <CardContent>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {conversionFunnel.map((stage, index) => {
-            const widthPercentage = (stage.value / maxValue) * 100
-            const dropOff = index > 0 ? ((1 - stage.value / conversionFunnel[index - 1].value) * 100) : 0
+          {funnelData.map((stage, index) => {
+            const widthPercentage = maxValue > 0 ? (stage.value / maxValue) * 100 : 0
+            const dropOff = index > 0 && funnelData[index - 1].value > 0 ? ((1 - stage.value / funnelData[index - 1].value) * 100) : 0
             const stageConfig = stageIcons[index] || stageIcons[0]
 
             return (
@@ -207,7 +222,9 @@ export function ConversionFunnel() {
                 <Percent size={14} style={{ color: 'rgba(59, 130, 246, 0.5)' }} />
               </div>
               <p style={{ fontSize: '24px', fontWeight: 700, color: '#3B82F6', marginBottom: '4px', margin: 0 }}>
-                {((conversionFunnel[conversionFunnel.length - 1].value / conversionFunnel[1].value) * 100).toFixed(2)}%
+                {funnelData.length > 1 && funnelData[1].value > 0
+                  ? ((funnelData[funnelData.length - 1].value / funnelData[1].value) * 100).toFixed(2)
+                  : '0.00'}%
               </p>
               <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Taxa de Conversao</p>
             </motion.div>
@@ -228,7 +245,7 @@ export function ConversionFunnel() {
                 <Target size={14} style={{ color: 'rgba(96, 165, 250, 0.5)' }} />
               </div>
               <p style={{ fontSize: '24px', fontWeight: 700, color: '#60A5FA', marginBottom: '4px', margin: 0 }}>
-                {formatCompactNumber(conversionFunnel[conversionFunnel.length - 1].value)}
+                {formatCompactNumber(funnelData[funnelData.length - 1]?.value || 0)}
               </p>
               <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Conversoes Totais</p>
             </motion.div>

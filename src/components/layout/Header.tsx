@@ -398,7 +398,7 @@ export function Header({
                                   marginTop: '8px',
                                   flexShrink: 0,
                                   backgroundColor:
-                                    notification.type === 'alert' ? '#EF4444' :
+                                    notification.type === 'error' ? '#EF4444' :
                                     notification.type === 'success' ? '#3B82F6' :
                                     notification.type === 'warning' ? '#FACC15' : '#60A5FA',
                                 }}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   PieChart,
@@ -10,25 +10,53 @@ import {
   Tooltip,
 } from 'recharts'
 import { Card, CardHeader, CardTitle, CardContent, PlatformIcon } from '@/components/ui'
-import { platformMetrics } from '@/data/mock-data'
 import { formatCurrency } from '@/lib/utils'
 import { Platform } from '@/types'
 import { TrendingUp, Target, DollarSign } from 'lucide-react'
 
-const platformColors: Record<Platform, string> = {
-  meta: '#0081FB',
-  google: '#4285F4',
-  tiktok: '#00F2EA',
-  linkedin: '#0A66C2',
-  twitter: '#1DA1F2',
-  pinterest: '#E60023',
+interface PlatformMetric {
+  platform: string
+  spent: number
+  impressions: number
+  clicks: number
+  conversions: number
+  roas: number
+  campaigns: number
+  [key: string]: string | number
 }
 
-export function PlatformDistribution() {
+interface PlatformDistributionProps {
+  data: PlatformMetric[]
+}
+
+const platformColors: Record<string, string> = {
+  meta: '#0081FB',
+  META: '#0081FB',
+  google: '#4285F4',
+  GOOGLE: '#4285F4',
+  tiktok: '#00F2EA',
+  TIKTOK: '#00F2EA',
+  linkedin: '#0A66C2',
+  LINKEDIN: '#0A66C2',
+  twitter: '#1DA1F2',
+  TWITTER: '#1DA1F2',
+  pinterest: '#E60023',
+  PINTEREST: '#E60023',
+}
+
+export function PlatformDistribution({ data }: PlatformDistributionProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
-  const totalSpent = platformMetrics.reduce((acc, p) => acc + p.spent, 0)
-  const totalCampaigns = platformMetrics.reduce((acc, p) => acc + p.campaigns, 0)
-  const avgRoas = platformMetrics.reduce((acc, p) => acc + p.roas, 0) / platformMetrics.length
+
+  const { totalSpent, totalCampaigns, avgRoas } = useMemo(() => {
+    if (!data || data.length === 0) {
+      return { totalSpent: 0, totalCampaigns: 0, avgRoas: 0 }
+    }
+    return {
+      totalSpent: data.reduce((acc, p) => acc + (p.spent || 0), 0),
+      totalCampaigns: data.reduce((acc, p) => acc + (p.campaigns || 0), 0),
+      avgRoas: data.length > 0 ? data.reduce((acc, p) => acc + (p.roas || 0), 0) / data.length : 0
+    }
+  }, [data])
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload?.[0]) return null
@@ -141,7 +169,7 @@ export function PlatformDistribution() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={platformMetrics}
+                  data={data}
                   cx="50%"
                   cy="50%"
                   innerRadius={50}
@@ -149,7 +177,7 @@ export function PlatformDistribution() {
                   paddingAngle={3}
                   dataKey="spent"
                 >
-                  {platformMetrics.map((entry, index) => (
+                  {data.map((entry, index) => (
                     <Cell
                       key={entry.platform}
                       fill={platformColors[entry.platform]}
@@ -177,7 +205,7 @@ export function PlatformDistribution() {
               }}
             >
               <AnimatePresence mode="wait">
-                {activeIndex !== null ? (
+                {activeIndex !== null && data[activeIndex] ? (
                   <motion.div
                     key={activeIndex}
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -185,7 +213,7 @@ export function PlatformDistribution() {
                     exit={{ opacity: 0, scale: 0.8 }}
                     style={{ textAlign: 'center' }}
                   >
-                    <PlatformIcon platform={platformMetrics[activeIndex].platform} size={24} />
+                    <PlatformIcon platform={data[activeIndex].platform.toLowerCase() as Platform} size={24} />
                     <span
                       style={{
                         display: 'block',
@@ -196,7 +224,7 @@ export function PlatformDistribution() {
                         marginTop: '4px',
                       }}
                     >
-                      {platformMetrics[activeIndex].platform}
+                      {data[activeIndex].platform.toLowerCase()}
                     </span>
                   </motion.div>
                 ) : (
@@ -218,9 +246,10 @@ export function PlatformDistribution() {
 
         {/* Legend - compact list */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {platformMetrics.map((platform, index) => {
-            const percentage = (platform.spent / totalSpent) * 100
+          {data.map((platform, index) => {
+            const percentage = totalSpent > 0 ? (platform.spent / totalSpent) * 100 : 0
             const isActive = activeIndex === index
+            const platformKey = platform.platform.toLowerCase()
 
             return (
               <motion.div
@@ -242,7 +271,7 @@ export function PlatformDistribution() {
                   transition: 'all 0.2s ease',
                 }}
               >
-                <PlatformIcon platform={platform.platform} size={18} />
+                <PlatformIcon platform={platformKey as Platform} size={18} />
                 <span
                   style={{
                     fontSize: '14px',
@@ -254,7 +283,7 @@ export function PlatformDistribution() {
                     transition: 'color 0.2s ease',
                   }}
                 >
-                  {platform.platform}
+                  {platformKey}
                 </span>
                 <div
                   style={{
@@ -273,8 +302,8 @@ export function PlatformDistribution() {
                     style={{
                       height: '100%',
                       borderRadius: '9999px',
-                      backgroundColor: platformColors[platform.platform],
-                      boxShadow: isActive ? `0 0 10px ${platformColors[platform.platform]}50` : 'none',
+                      backgroundColor: platformColors[platform.platform] || '#3B82F6',
+                      boxShadow: isActive ? `0 0 10px ${platformColors[platform.platform] || '#3B82F6'}50` : 'none',
                       transition: 'box-shadow 0.2s ease',
                     }}
                   />
@@ -292,7 +321,7 @@ export function PlatformDistribution() {
                     color: platform.roas >= 3 ? '#3B82F6' : platform.roas >= 2 ? '#FACC15' : '#F87171',
                   }}
                 >
-                  {platform.roas.toFixed(1)}x
+                  {(platform.roas || 0).toFixed(1)}x
                 </span>
               </motion.div>
             )
