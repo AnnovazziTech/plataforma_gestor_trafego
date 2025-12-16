@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { Card, CardHeader, CardTitle, CardContent, PlatformIcon } from '@/components/ui'
@@ -12,6 +13,7 @@ import {
   AlertTriangle,
   CheckCircle,
   Edit,
+  Loader2,
 } from 'lucide-react'
 import { Platform } from '@/types'
 
@@ -24,14 +26,15 @@ interface Activity {
   timestamp: string
 }
 
-const activities: Activity[] = [
+// Dados de fallback caso a API nao retorne dados
+const fallbackActivities: Activity[] = [
   {
     id: '1',
     type: 'milestone_reached',
     title: 'Meta de conversoes atingida',
     description: 'Campanha "Remarketing" alcancou 1000 conversoes',
     platform: 'meta',
-    timestamp: '2024-11-20T16:00:00Z',
+    timestamp: new Date(Date.now() - 3600000).toISOString(), // 1h atras
   },
   {
     id: '2',
@@ -39,49 +42,49 @@ const activities: Activity[] = [
     title: 'Budget aumentado automaticamente',
     description: 'Black Friday 2024 - Budget aumentado em 20%',
     platform: 'meta',
-    timestamp: '2024-11-20T14:30:00Z',
+    timestamp: new Date(Date.now() - 7200000).toISOString(), // 2h atras
   },
   {
     id: '3',
-    type: 'alert',
-    title: 'CPA acima do limite',
-    description: 'Campanha "Google Search" com CPA de R$52,30',
-    platform: 'google',
-    timestamp: '2024-11-20T12:15:00Z',
-  },
-  {
-    id: '4',
     type: 'campaign_started',
     title: 'Campanha iniciada',
     description: 'TikTok - Gen Z Campaign esta ativa',
     platform: 'tiktok',
-    timestamp: '2024-11-20T10:00:00Z',
-  },
-  {
-    id: '5',
-    type: 'campaign_paused',
-    title: 'Campanha pausada',
-    description: 'Instagram Stories - Produto finalizado',
-    platform: 'meta',
-    timestamp: '2024-11-19T23:59:00Z',
-  },
-  {
-    id: '6',
-    type: 'campaign_created',
-    title: 'Nova campanha criada',
-    description: 'LinkedIn - B2B Lead Gen configurada',
-    platform: 'linkedin',
-    timestamp: '2024-11-19T14:00:00Z',
+    timestamp: new Date(Date.now() - 14400000).toISOString(), // 4h atras
   },
 ]
 
 export function RecentActivity() {
   const router = useRouter()
   const { showToast } = useApp()
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchActivities()
+  }, [])
+
+  const fetchActivities = async () => {
+    try {
+      const response = await fetch('/api/activities')
+      if (response.ok) {
+        const data = await response.json()
+        // Se a API retornar array vazio, usar fallback
+        setActivities(data.length > 0 ? data : fallbackActivities)
+      } else {
+        // Usar fallback em caso de erro
+        setActivities(fallbackActivities)
+      }
+    } catch (error) {
+      console.error('Erro ao buscar atividades:', error)
+      setActivities(fallbackActivities)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleViewAll = () => {
-    showToast('Navegando para atividades...', 'info')
-    // Future: router.push('/activities')
+    router.push('/campaigns')
   }
 
   const getActivityIcon = (type: Activity['type']) => {
@@ -119,10 +122,26 @@ export function RecentActivity() {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
+    if (diffMins < 1) return 'Agora'
     if (diffMins < 60) return `${diffMins}m atras`
     if (diffHours < 24) return `${diffHours}h atras`
     if (diffDays < 7) return `${diffDays}d atras`
     return date.toLocaleDateString('pt-BR')
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Atividade Recente</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+            <Loader2 size={24} style={{ color: '#3B82F6', animation: 'spin 1s linear infinite' }} />
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -135,63 +154,69 @@ export function RecentActivity() {
       </CardHeader>
       <CardContent>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {activities.map((activity, index) => {
-            const colors = getActivityColor(activity.type)
-            return (
-              <motion.div
-                key={activity.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '16px',
-                  padding: '16px',
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                }}
-              >
-                <div
+          {activities.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 0' }}>
+              <p style={{ color: '#6B6B7B', margin: 0 }}>Nenhuma atividade recente</p>
+            </div>
+          ) : (
+            activities.map((activity, index) => {
+              const colors = getActivityColor(activity.type)
+              return (
+                <motion.div
+                  key={activity.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
                   style={{
-                    padding: '10px',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '16px',
+                    padding: '16px',
                     borderRadius: '12px',
-                    border: `1px solid ${colors.border}`,
-                    backgroundColor: colors.bg,
-                    flexShrink: 0,
+                    cursor: 'pointer',
                   }}
                 >
-                  {getActivityIcon(activity.type)}
-                </div>
-                <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                    <p style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-                      {activity.title}
-                    </p>
-                    {activity.platform && (
-                      <PlatformIcon platform={activity.platform} size={16} />
-                    )}
+                  <div
+                    style={{
+                      padding: '10px',
+                      borderRadius: '12px',
+                      border: `1px solid ${colors.border}`,
+                      backgroundColor: colors.bg,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {getActivityIcon(activity.type)}
                   </div>
-                  <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {activity.description}
-                  </p>
-                </div>
-                <span
-                  style={{
-                    fontSize: '12px',
-                    color: '#6B6B7B',
-                    whiteSpace: 'nowrap',
-                    flexShrink: 0,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    padding: '4px 8px',
-                    borderRadius: '8px',
-                  }}
-                >
-                  {formatTimestamp(activity.timestamp)}
-                </span>
-              </motion.div>
-            )
-          })}
+                  <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                      <p style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                        {activity.title}
+                      </p>
+                      {activity.platform && (
+                        <PlatformIcon platform={activity.platform} size={16} />
+                      )}
+                    </div>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {activity.description}
+                    </p>
+                  </div>
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      color: '#6B6B7B',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0,
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      padding: '4px 8px',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    {formatTimestamp(activity.timestamp)}
+                  </span>
+                </motion.div>
+              )
+            })
+          )}
         </div>
 
         {/* View All Link */}

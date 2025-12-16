@@ -16,6 +16,7 @@ interface Campaign {
   startDate: string | null
   endDate: string | null
   metrics: any
+  integrationId?: string
   integration?: any
   leadsCount?: number
   lastSyncAt?: string
@@ -26,18 +27,20 @@ interface Campaign {
 
 interface Report {
   id: string
-  name?: string
-  type?: string
-  action: string
-  data: any
-  status?: string
-  frequency?: string
-  dateRange?: { start: string; end: string }
-  platforms?: string[]
-  recipients?: string[]
+  name: string
+  type: 'performance' | 'audience' | 'creative' | 'custom'
+  frequency: 'once' | 'daily' | 'weekly' | 'monthly' | 'custom'
+  status: 'active' | 'paused' | 'archived'
+  platforms: string[]
+  metrics: string[]
+  dateRange: { start: string; end: string }
+  recipients: string[]
+  sendMethod?: string
   lastGenerated?: string
+  generatedCount?: number
+  reportData?: any
   createdAt: string
-  userEmail?: string
+  updatedAt?: string
 }
 
 interface Automation {
@@ -159,7 +162,7 @@ interface AppContextType {
   reportsLoading: boolean
   fetchReports: () => Promise<void>
   generateReport: (data: any) => Promise<any>
-  deleteReport: (id: string) => void
+  deleteReport: (id: string) => Promise<void>
 
   // Automations
   automations: Automation[]
@@ -321,19 +324,67 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return response.json()
   }, [])
 
+  // Helper para converter dateRange string para parametros de data
+  const getDateParams = useCallback((rangeString: string) => {
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const end = new Date(today)
+    end.setHours(23, 59, 59, 999)
+    let start = new Date(today)
+
+    switch (rangeString) {
+      case 'Hoje': break
+      case 'Ontem':
+        start.setDate(start.getDate() - 1)
+        end.setDate(end.getDate() - 1)
+        break
+      case 'Ultimos 7 dias':
+      case 'Últimos 7 dias':
+        start.setDate(start.getDate() - 7)
+        break
+      case 'Ultimos 30 dias':
+      case 'Últimos 30 dias':
+        start.setDate(start.getDate() - 30)
+        break
+      case 'Este mes':
+      case 'Este mês':
+        start = new Date(now.getFullYear(), now.getMonth(), 1)
+        break
+      case 'Mes passado':
+      case 'Mês passado':
+        start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        end.setDate(0)
+        break
+      case 'Ultimos 90 dias':
+      case 'Últimos 90 dias':
+        start.setDate(start.getDate() - 90)
+        break
+      case 'Este ano':
+        start = new Date(now.getFullYear(), 0, 1)
+        break
+      default:
+        start.setDate(start.getDate() - 30)
+    }
+
+    const formatDate = (d: Date) => d.toISOString().split('T')[0]
+    return `startDate=${formatDate(start)}&endDate=${formatDate(end)}`
+  }, [])
+
   // === CAMPAIGNS ===
   const fetchCampaigns = useCallback(async () => {
     if (!isAuthenticated) return
     setCampaignsLoading(true)
     try {
-      const data = await api('/api/campaigns')
+      // Campanhas não são filtradas por data, apenas por conta
+      const accountParam = selectedAccount !== 'all' ? `?accountId=${selectedAccount}` : ''
+      const data = await api(`/api/campaigns${accountParam}`)
       setCampaigns(data.campaigns || [])
     } catch (error: any) {
       console.error('Erro ao buscar campanhas:', error)
     } finally {
       setCampaignsLoading(false)
     }
-  }, [api, isAuthenticated])
+  }, [api, isAuthenticated, selectedAccount])
 
   const addCampaign = useCallback(async (campaignData: any): Promise<Campaign | null> => {
     try {
@@ -433,10 +484,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [api, fetchReports, showToast])
 
-  const deleteReport = useCallback((id: string) => {
-    setReports(prev => prev.filter(r => r.id !== id))
-    showToast('Relatorio removido!', 'info')
-  }, [showToast])
+  const deleteReport = useCallback(async (id: string) => {
+    try {
+      await api(`/api/reports/${id}`, { method: 'DELETE' })
+      setReports(prev => prev.filter(r => r.id !== id))
+      showToast('Relatorio removido!', 'info')
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao remover relatorio', 'error')
+    }
+  }, [api, showToast])
 
   // === AUTOMATIONS ===
   const fetchAutomations = useCallback(async () => {

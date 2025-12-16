@@ -27,6 +27,7 @@ import {
   PolarRadiusAxis,
 } from 'recharts'
 import { formatCurrency, formatCompactNumber } from '@/lib/utils'
+import { getDateRangeParams } from '@/lib/utils/date-range'
 import {
   Users,
   Smartphone,
@@ -88,42 +89,36 @@ interface AnalyticsData {
 }
 
 export default function AnalyticsPage() {
-  const { showToast, setIsConnectAccountsModalOpen } = useApp()
+  const { showToast, setIsConnectAccountsModalOpen, dateRange, selectedAccount } = useApp()
   const [selectedMetric, setSelectedMetric] = useState<'impressions' | 'clicks' | 'conversions'>('impressions')
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Filtros de período para os gráficos
-  const [performancePeriod, setPerformancePeriod] = useState('30')
-  const [hourlyPeriod, setHourlyPeriod] = useState('7')
+  // Filtros de período para os gráficos (agora usamos o dateRange global)
   const [showPerformancePeriod, setShowPerformancePeriod] = useState(false)
   const [showHourlyPeriod, setShowHourlyPeriod] = useState(false)
 
-  const periodOptions = [
-    { value: '7', label: 'Últimos 7 dias' },
-    { value: '14', label: 'Últimos 14 dias' },
-    { value: '30', label: 'Últimos 30 dias' },
-    { value: '60', label: 'Últimos 60 dias' },
-    { value: '90', label: 'Últimos 90 dias' },
-  ]
-
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        const response = await fetch('/api/analytics?period=30')
-        if (response.ok) {
-          const data = await response.json()
-          setAnalyticsData(data)
-        }
-      } catch (error) {
-        console.error('Erro ao buscar analytics:', error)
-      } finally {
-        setIsLoading(false)
+  const fetchAnalytics = async () => {
+    setIsLoading(true)
+    try {
+      const dateParams = getDateRangeParams(dateRange)
+      const accountParam = selectedAccount !== 'all' ? `&accountId=${selectedAccount}` : ''
+      const response = await fetch(`/api/analytics?${dateParams}${accountParam}`)
+      if (response.ok) {
+        const data = await response.json()
+        setAnalyticsData(data)
       }
+    } catch (error) {
+      console.error('Erro ao buscar analytics:', error)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
+  // Refetch quando dateRange ou selectedAccount mudar
+  useEffect(() => {
     fetchAnalytics()
-  }, [])
+  }, [dateRange, selectedAccount])
 
   const deviceIcons: Record<string, ReactNode> = {
     mobile: <Smartphone size={16} />,
@@ -264,40 +259,10 @@ export default function AnalyticsPage() {
           <CardHeader>
             <CardTitle>Performance ao Longo do Tempo</CardTitle>
             <div className="flex items-center gap-4">
-              {/* Filtro de Período */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowPerformancePeriod(!showPerformancePeriod)}
-                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all"
-                >
-                  <Calendar size={14} className="text-[#FACC15]" />
-                  {periodOptions.find(p => p.value === performancePeriod)?.label}
-                  <ChevronDown size={14} className={`text-[#6B6B7B] transition-transform ${showPerformancePeriod ? 'rotate-180' : ''}`} />
-                </button>
-                {showPerformancePeriod && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowPerformancePeriod(false)} />
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-[#12121A] border border-white/10 rounded-xl shadow-xl z-50 overflow-hidden">
-                      {periodOptions.map((option) => (
-                        <button
-                          key={option.value}
-                          onClick={() => {
-                            setPerformancePeriod(option.value)
-                            setShowPerformancePeriod(false)
-                            showToast(`Período alterado: ${option.label}`, 'info')
-                          }}
-                          className={`w-full px-4 py-2.5 text-left text-sm ${
-                            performancePeriod === option.value
-                              ? 'bg-[#3B82F6]/10 text-[#3B82F6]'
-                              : 'text-white hover:bg-white/5'
-                          }`}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
+              {/* Indicador do período atual */}
+              <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-white/5 border border-white/10 text-[#6B6B7B]">
+                <Calendar size={14} className="text-[#FACC15]" />
+                {dateRange}
               </div>
 
               {/* Filtro de Métricas */}
@@ -524,40 +489,10 @@ export default function AnalyticsPage() {
               <Clock size={18} className="text-[#3B82F6]" />
               Performance por Hora do Dia
             </CardTitle>
-            {/* Filtro de Período para Hourly */}
-            <div className="relative">
-              <button
-                onClick={() => setShowHourlyPeriod(!showHourlyPeriod)}
-                className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all"
-              >
-                <Calendar size={14} className="text-[#FACC15]" />
-                {periodOptions.find(p => p.value === hourlyPeriod)?.label}
-                <ChevronDown size={14} className={`text-[#6B6B7B] transition-transform ${showHourlyPeriod ? 'rotate-180' : ''}`} />
-              </button>
-              {showHourlyPeriod && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowHourlyPeriod(false)} />
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-[#12121A] border border-white/10 rounded-xl shadow-xl z-50 overflow-hidden">
-                    {periodOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => {
-                          setHourlyPeriod(option.value)
-                          setShowHourlyPeriod(false)
-                          showToast(`Período alterado: ${option.label}`, 'info')
-                        }}
-                        className={`w-full px-4 py-2.5 text-left text-sm ${
-                          hourlyPeriod === option.value
-                            ? 'bg-[#3B82F6]/10 text-[#3B82F6]'
-                            : 'text-white hover:bg-white/5'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+            {/* Indicador do período atual */}
+            <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-white/5 border border-white/10 text-[#6B6B7B]">
+              <Calendar size={14} className="text-[#FACC15]" />
+              {dateRange}
             </div>
           </CardHeader>
           <CardContent>

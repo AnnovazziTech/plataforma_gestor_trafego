@@ -61,7 +61,7 @@ const socialMetrics = {
 }
 
 export default function SocialPage() {
-  const { showToast } = useApp()
+  const { showToast, setIsConnectAccountsModalOpen } = useApp()
   const [activeTab, setActiveTab] = useState<'site' | 'social' | 'post' | 'schedule' | 'comments'>('site')
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>(mockPosts)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
@@ -583,7 +583,7 @@ export default function SocialPage() {
                   </p>
                   <Button
                     variant="primary"
-                    onClick={() => showToast('Funcionalidade em desenvolvimento', 'info')}
+                    onClick={() => setIsConnectAccountsModalOpen(true)}
                   >
                     <Plus style={{ width: '16px', height: '16px' }} />
                     Conectar Redes Sociais

@@ -9,12 +9,25 @@ import { withAuth } from '@/lib/api/middleware'
 export const GET = withAuth(async (req, ctx) => {
   try {
     const { searchParams } = new URL(req.url)
-    const period = searchParams.get('period') || '30'
+    const startDateParam = searchParams.get('startDate')
+    const endDateParam = searchParams.get('endDate')
+    const accountId = searchParams.get('accountId')
     const platform = searchParams.get('platform')
-    const periodDays = parseInt(period)
+    const period = searchParams.get('period') || '30'
 
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - periodDays)
+    let startDate: Date
+    let endDate: Date
+
+    if (startDateParam && endDateParam) {
+      startDate = new Date(startDateParam)
+      endDate = new Date(endDateParam)
+      endDate.setHours(23, 59, 59, 999)
+    } else {
+      const periodDays = parseInt(period)
+      startDate = new Date()
+      startDate.setDate(startDate.getDate() - periodDays)
+      endDate = new Date()
+    }
 
     // Filtros base
     const campaignWhere: any = {
@@ -26,12 +39,16 @@ export const GET = withAuth(async (req, ctx) => {
       campaignWhere.platform = platform
     }
 
+    if (accountId) {
+      campaignWhere.integrationId = accountId
+    }
+
     // Buscar dados de serie temporal
     const timeSeriesData = await prisma.campaignDailyMetrics.groupBy({
       by: ['date'],
       where: {
         campaign: campaignWhere,
-        date: { gte: startDate },
+        date: { gte: startDate, lte: endDate },
       },
       _sum: {
         impressions: true,
@@ -56,14 +73,11 @@ export const GET = withAuth(async (req, ctx) => {
     // Calcular metricas agregadas por plataforma
     const platformDetails = await Promise.all(
       platformMetrics.map(async (p) => {
+        const platformFilter = { ...campaignWhere, platform: p.platform }
         const metrics = await prisma.campaignDailyMetrics.aggregate({
           where: {
-            campaign: {
-              organizationId: ctx.organizationId,
-              platform: p.platform,
-              isActive: true,
-            },
-            date: { gte: startDate },
+            campaign: platformFilter,
+            date: { gte: startDate, lte: endDate },
           },
           _sum: {
             impressions: true,

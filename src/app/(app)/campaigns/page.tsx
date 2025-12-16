@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
 import { Card, CardContent, Button, Badge, PlatformIcon, StatCard } from '@/components/ui'
@@ -135,6 +136,7 @@ const generateWeeklyData = (campaign: Campaign) => {
 }
 
 export default function CampaignsPage() {
+  const searchParams = useSearchParams()
   const {
     connectedAccounts,
     selectedAccount,
@@ -147,7 +149,7 @@ export default function CampaignsPage() {
     addCampaign,
   } = useApp()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | 'all'>('all')
   const [selectedStatus, setSelectedStatus] = useState<CampaignStatus | 'all'>('all')
   const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null)
@@ -170,17 +172,24 @@ export default function CampaignsPage() {
   // Estado para modal de detalhes da campanha
   const [detailCampaign, setDetailCampaign] = useState<Campaign | null>(null)
 
+  // Atualiza o termo de busca quando a URL muda
+  useEffect(() => {
+    const searchFromUrl = searchParams.get('search')
+    if (searchFromUrl) {
+      setSearchTerm(searchFromUrl)
+    }
+  }, [searchParams])
+
   const filteredCampaigns = useMemo(() => {
     return campaigns.filter((campaign) => {
       const matchesSearch = campaign.name.toLowerCase().includes(searchTerm.toLowerCase())
       const matchesPlatform = selectedPlatform === 'all' || campaign.platform === selectedPlatform
       const matchesStatus = selectedStatus === 'all' || campaign.status === selectedStatus
-      // Filtro por conta conectada
-      const matchesAccount = selectedAccount === 'all' ||
-        connectedAccounts.find(a => a.id === selectedAccount)?.platform === campaign.platform
+      // Filtro por conta conectada - usar integrationId diretamente
+      const matchesAccount = selectedAccount === 'all' || campaign.integrationId === selectedAccount
       return matchesSearch && matchesPlatform && matchesStatus && matchesAccount
     })
-  }, [campaigns, searchTerm, selectedPlatform, selectedStatus, selectedAccount, connectedAccounts])
+  }, [campaigns, searchTerm, selectedPlatform, selectedStatus, selectedAccount])
 
   const platforms: Platform[] = ['meta', 'google', 'tiktok', 'linkedin', 'twitter']
   const statuses: CampaignStatus[] = ['active', 'paused', 'ended', 'draft', 'error']
@@ -219,10 +228,10 @@ export default function CampaignsPage() {
   }
 
   const getMetricValue = (campaign: Campaign, metricKey: string): string | number => {
-    const metrics = campaign.metrics as any
+    const metrics = (campaign.metrics || {}) as any
     switch(metricKey) {
       case 'spent':
-        return formatCurrency(campaign.spent)
+        return formatCurrency(campaign.spent || 0)
       case 'impressions':
       case 'reach':
       case 'clicks':
@@ -474,7 +483,7 @@ export default function CampaignsPage() {
           />
           <StatCard
             label="ROAS Medio"
-            value={`${(campaigns.reduce((acc, c) => acc + c.metrics.roas, 0) / campaigns.length).toFixed(2)}x`}
+            value={`${(campaigns.reduce((acc, c) => acc + (c.metrics?.roas || 0), 0) / Math.max(campaigns.length, 1)).toFixed(2)}x`}
             icon={TrendingUp}
             color="yellow"
             delay={0.3}
@@ -1709,7 +1718,7 @@ function CampaignCard({
           return (
             <div key={metricKey} style={{ padding: '12px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', textAlign: 'center' }}>
               <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px', margin: 0 }}>{metric?.label || metricKey}</p>
-              <p style={{ fontSize: '14px', fontWeight: 600, color: metricKey === 'roas' && campaign.metrics.roas >= 3 ? '#3B82F6' : '#FFFFFF', margin: 0 }}>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: metricKey === 'roas' && (campaign.metrics?.roas || 0) >= 3 ? '#3B82F6' : '#FFFFFF', margin: 0 }}>
                 {getMetricValue(campaign, metricKey)}
               </p>
             </div>

@@ -957,6 +957,52 @@ function NotificationsSection({ showToast }: { showToast: (msg: string, type: an
 
 function SecuritySection({ showToast }: { showToast: (msg: string, type: any) => void }) {
   const [showPassword, setShowPassword] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showToast('Preencha todos os campos de senha', 'error')
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      showToast('As senhas nao conferem', 'error')
+      return
+    }
+
+    if (newPassword.length < 6) {
+      showToast('A nova senha deve ter pelo menos 6 caracteres', 'error')
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/user/password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        showToast(data.error || 'Erro ao alterar senha', 'error')
+        return
+      }
+
+      showToast('Senha alterada com sucesso!', 'success')
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (error) {
+      showToast('Erro ao alterar senha', 'error')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <motion.div
@@ -996,6 +1042,9 @@ function SecuritySection({ showToast }: { showToast: (msg: string, type: any) =>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  disabled={isLoading}
                   style={{
                     width: '100%',
                     height: '44px',
@@ -1032,6 +1081,9 @@ function SecuritySection({ showToast }: { showToast: (msg: string, type: any) =>
                 <input
                   type="password"
                   placeholder="••••••••"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  disabled={isLoading}
                   style={{
                     width: '100%',
                     height: '44px',
@@ -1051,6 +1103,9 @@ function SecuritySection({ showToast }: { showToast: (msg: string, type: any) =>
                 <input
                   type="password"
                   placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isLoading}
                   style={{
                     width: '100%',
                     height: '44px',
@@ -1067,8 +1122,8 @@ function SecuritySection({ showToast }: { showToast: (msg: string, type: any) =>
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button variant="primary" size="sm" onClick={() => showToast('Senha alterada com sucesso!', 'success')}>
-                Alterar Senha
+              <Button variant="primary" size="sm" onClick={handleChangePassword} disabled={isLoading}>
+                {isLoading ? 'Alterando...' : 'Alterar Senha'}
               </Button>
             </div>
           </div>
@@ -1164,7 +1219,7 @@ function BillingSection({ showToast }: { showToast: (msg: string, type: any) => 
             <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: '12px 0 4px' }}>R$ 197/mês</h3>
             <p style={{ fontSize: '14px', color: '#A0A0B0', margin: 0 }}>Renovação em 15/03/2024</p>
           </div>
-          <Button variant="secondary" onClick={() => showToast('Redirecionando para página de planos...', 'info')}>
+          <Button variant="secondary" onClick={() => window.open('mailto:suporte@trafficpro.com.br?subject=Upgrade de Plano', '_blank')}>
             Fazer Upgrade
           </Button>
         </div>
@@ -1203,7 +1258,7 @@ function BillingSection({ showToast }: { showToast: (msg: string, type: any) => 
               <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Expira 12/26</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => showToast('Abrindo modal de pagamento...', 'info')}>Alterar</Button>
+          <Button variant="ghost" size="sm" onClick={() => window.open('mailto:suporte@trafficpro.com.br?subject=Alteração de Método de Pagamento', '_blank')}>Alterar</Button>
         </div>
       </div>
     </motion.div>

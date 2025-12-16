@@ -24,6 +24,12 @@ export interface Campaign {
   adSets: AdSet[]
   createdAt: string
   updatedAt: string
+  integrationId?: string
+  integration?: {
+    id: string
+    name: string
+    platform: string
+  }
 }
 
 export interface CampaignMetrics {
@@ -138,16 +144,51 @@ export interface Report {
   id: string
   name: string
   type: 'performance' | 'audience' | 'creative' | 'custom'
-  frequency: 'daily' | 'weekly' | 'monthly' | 'custom'
+  frequency: 'daily' | 'weekly' | 'monthly' | 'once' | 'custom'
   recipients: string[]
-  platforms: Platform[]
+  platforms: string[]
   metrics: string[]
   dateRange: {
     start: string
     end: string
   }
   lastGenerated?: string
-  status: 'active' | 'paused'
+  generatedCount?: number
+  status: 'active' | 'paused' | 'archived'
+  sendMethod?: string
+  reportData?: {
+    aggregatedMetrics?: {
+      impressions?: number
+      clicks?: number
+      ctr?: number
+      cpc?: number
+      conversions?: number
+      spent?: number
+      roas?: number
+      cpa?: number
+      reach?: number
+      leads?: number
+    }
+    dailyData?: Array<{
+      date: string
+      impressions: number
+      clicks: number
+      conversions: number
+      spent: number
+    }>
+    campaignData?: Array<{
+      name: string
+      status: string
+      impressions: number
+      clicks: number
+      conversions: number
+      spent: number
+    }>
+    totalCampaigns?: number
+    generatedAt?: string
+  }
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface Automation {

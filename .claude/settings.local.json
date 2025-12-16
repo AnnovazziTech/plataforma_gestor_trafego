@@ -8,7 +8,8 @@
       "Bash(git push)",
       "Bash(find:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Remove mock data e conecta todas as páginas às APIs reais\n\n- Atualiza Dashboard para buscar dados de /api/dashboard\n- Atualiza Analytics para buscar dados de /api/analytics\n- Atualiza Campaigns para usar context (useApp)\n- Atualiza Reports para usar context (useApp)\n- Atualiza Automation para usar context (useApp)\n- Atualiza Settings para usar sessão NextAuth\n- Atualiza componentes de gráficos para receber dados via props\n- Atualiza TopCampaigns para receber campanhas via props\n- Adiciona novas APIs: analytics, dashboard, notifications, reports, etc.\n- Adiciona Providers wrapper com SessionProvider\n- Reescreve AppContext com funções de API completas\n- Corrige tipos TypeScript para compatibilidade\n- Remove todas as importações de mock-data\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(unzip:*)"
+      "Bash(unzip:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

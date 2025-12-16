@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search,
@@ -74,7 +75,9 @@ export function Header({
     showToast
   } = useApp()
 
+  const router = useRouter()
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showAllNotifications, setShowAllNotifications] = useState(false)
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [showAccountPicker, setShowAccountPicker] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -112,7 +115,7 @@ export function Header({
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      showToast('Buscando por: ' + searchQuery, 'info')
+      router.push(`/campaigns?search=${encodeURIComponent(searchQuery.trim())}`)
     }
   }
 
@@ -547,13 +550,13 @@ export function Header({
                         Marcar lidas
                       </button>
                     </div>
-                    <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
+                    <div style={{ maxHeight: showAllNotifications ? '500px' : '320px', overflowY: 'auto' }}>
                       {notifications.length === 0 ? (
                         <div style={{ padding: '24px', textAlign: 'center', fontSize: '14px', color: '#6B6B7B' }}>
                           Nenhuma notificação
                         </div>
                       ) : (
-                        notifications.slice(0, 5).map((notification) => (
+                        (showAllNotifications ? notifications : notifications.slice(0, 5)).map((notification) => (
                           <div
                             key={notification.id}
                             onClick={() => markNotificationAsRead(notification.id)}
@@ -591,25 +594,24 @@ export function Header({
                         ))
                       )}
                     </div>
-                    <div style={{ padding: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
-                      <button
-                        onClick={() => {
-                          setShowNotifications(false)
-                          showToast('Em desenvolvimento', 'info')
-                        }}
-                        style={{
-                          width: '100%',
-                          textAlign: 'center',
-                          fontSize: '14px',
-                          color: '#3B82F6',
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Ver todas
-                      </button>
-                    </div>
+                    {notifications.length > 5 && (
+                      <div style={{ padding: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+                        <button
+                          onClick={() => setShowAllNotifications(!showAllNotifications)}
+                          style={{
+                            width: '100%',
+                            textAlign: 'center',
+                            fontSize: '14px',
+                            color: '#3B82F6',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {showAllNotifications ? 'Ver menos' : `Ver todas (${notifications.length})`}
+                        </button>
+                      </div>
+                    )}
                   </motion.div>
                 </>
               )}

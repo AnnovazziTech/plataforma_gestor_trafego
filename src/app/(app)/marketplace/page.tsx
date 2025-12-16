@@ -1,0 +1,443 @@
+'use client'
+
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Header } from '@/components/layout'
+import { Button, Badge } from '@/components/ui'
+import { useApp } from '@/contexts'
+import {
+  Search,
+  Filter,
+  ShoppingCart,
+  Star,
+  Download,
+  ExternalLink,
+  Heart,
+  Tag,
+  Zap,
+  FileText,
+  Image,
+  Video,
+  Code,
+  Palette,
+  BarChart3,
+  Bot,
+  Megaphone,
+  Users,
+  CheckCircle,
+} from 'lucide-react'
+
+interface Product {
+  id: string
+  name: string
+  description: string
+  category: string
+  price: number
+  originalPrice?: number
+  rating: number
+  reviews: number
+  downloads: number
+  icon: string
+  features: string[]
+  isFeatured: boolean
+  isNew: boolean
+  isPurchased: boolean
+}
+
+const mockProducts: Product[] = [
+  {
+    id: '1',
+    name: 'Pack de Copys para Facebook Ads',
+    description: '100+ modelos de copy prontos para usar em suas campanhas de Facebook e Instagram Ads',
+    category: 'Copys',
+    price: 47,
+    originalPrice: 97,
+    rating: 4.9,
+    reviews: 234,
+    downloads: 1520,
+    icon: 'FileText',
+    features: ['100+ copys prontas', 'Segmentadas por nicho', 'Atualizacoes gratuitas', 'Suporte por email'],
+    isFeatured: true,
+    isNew: false,
+    isPurchased: false,
+  },
+  {
+    id: '2',
+    name: 'Templates Canva - Criativos Premium',
+    description: 'Pack com 50 templates editaveis no Canva para criar anuncios de alta conversao',
+    category: 'Templates',
+    price: 67,
+    originalPrice: 127,
+    rating: 4.8,
+    reviews: 189,
+    downloads: 890,
+    icon: 'Palette',
+    features: ['50 templates editaveis', 'Videos e imagens', 'Formatos Instagram/Facebook', 'Feed e Stories'],
+    isFeatured: true,
+    isNew: true,
+    isPurchased: false,
+  },
+  {
+    id: '3',
+    name: 'Planilha de Gestao de Clientes',
+    description: 'Planilha completa para gerenciar clientes, campanhas, resultados e comissoes',
+    category: 'Planilhas',
+    price: 37,
+    rating: 4.7,
+    reviews: 156,
+    downloads: 2340,
+    icon: 'BarChart3',
+    features: ['Dashboard automatico', 'Controle de clientes', 'Relatorio de resultados', 'Calculadora de comissao'],
+    isFeatured: false,
+    isNew: false,
+    isPurchased: true,
+  },
+  {
+    id: '4',
+    name: 'Scripts de Vendas para Gestores',
+    description: 'Scripts testados para fechar mais clientes como gestor de trafego',
+    category: 'Scripts',
+    price: 57,
+    originalPrice: 97,
+    rating: 4.9,
+    reviews: 312,
+    downloads: 1890,
+    icon: 'Megaphone',
+    features: ['20+ scripts de venda', 'Objecoes respondidas', 'Templates de proposta', 'Follow-up automatico'],
+    isFeatured: true,
+    isNew: false,
+    isPurchased: false,
+  },
+  {
+    id: '5',
+    name: 'Automacao de Relatorios',
+    description: 'Template de relatorio automatizado com integracao Google Sheets + Looker Studio',
+    category: 'Automacao',
+    price: 87,
+    rating: 4.6,
+    reviews: 89,
+    downloads: 456,
+    icon: 'Bot',
+    features: ['Relatorio automatico', 'Integracao Meta Ads', 'Integracao Google Ads', 'Graficos prontos'],
+    isFeatured: false,
+    isNew: true,
+    isPurchased: false,
+  },
+  {
+    id: '6',
+    name: 'Pack de Videos para Ads',
+    description: '30 videos em formato vertical prontos para usar como criativos',
+    category: 'Videos',
+    price: 97,
+    originalPrice: 197,
+    rating: 4.8,
+    reviews: 145,
+    downloads: 670,
+    icon: 'Video',
+    features: ['30 videos editaveis', 'Formato 9:16', 'Legendas incluidas', 'Nichos variados'],
+    isFeatured: false,
+    isNew: false,
+    isPurchased: false,
+  },
+]
+
+const categories = ['Todos', 'Copys', 'Templates', 'Planilhas', 'Scripts', 'Automacao', 'Videos']
+
+const iconMap: Record<string, any> = {
+  FileText,
+  Palette,
+  BarChart3,
+  Megaphone,
+  Bot,
+  Video,
+  Image,
+  Code,
+}
+
+export default function MarketplacePage() {
+  const { showToast } = useApp()
+  const [products, setProducts] = useState<Product[]>(mockProducts)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('Todos')
+  const [sortBy, setSortBy] = useState<'popular' | 'recent' | 'price'>('popular')
+  const [favorites, setFavorites] = useState<string[]>([])
+
+  const filteredProducts = products
+    .filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           p.description.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesCategory = selectedCategory === 'Todos' || p.category === selectedCategory
+      return matchesSearch && matchesCategory
+    })
+    .sort((a, b) => {
+      if (sortBy === 'popular') return b.downloads - a.downloads
+      if (sortBy === 'price') return a.price - b.price
+      return 0
+    })
+
+  const toggleFavorite = (id: string) => {
+    setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id])
+  }
+
+  const handlePurchase = (product: Product) => {
+    if (product.isPurchased) {
+      showToast('Acessando produto...', 'info')
+      return
+    }
+    showToast('Redirecionando para pagamento...', 'info')
+    // Aqui integraria com Stripe/Hotmart/etc
+  }
+
+  const featuredProducts = products.filter(p => p.isFeatured)
+
+  return (
+    <div style={{ minHeight: '100vh' }}>
+      <Header
+        title="Marketplace"
+        subtitle="Recursos e ferramentas para gestores de trafego"
+        showCreateButton={false}
+      />
+
+      <main style={{ padding: '24px 32px', paddingBottom: '80px' }}>
+        {/* Featured Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            padding: '32px',
+            borderRadius: '20px',
+            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2))',
+            border: '1px solid rgba(59, 130, 246, 0.3)',
+            marginBottom: '32px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <Badge variant="info" style={{ marginBottom: '12px' }}>Destaque</Badge>
+              <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: '0 0 8px' }}>
+                Pack Completo do Gestor de Trafego
+              </h2>
+              <p style={{ fontSize: '16px', color: '#A0A0B0', margin: '0 0 16px', maxWidth: '500px' }}>
+                Todos os recursos que voce precisa em um unico pack: copys, templates, planilhas e scripts
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <span style={{ fontSize: '32px', fontWeight: 700, color: '#FFFFFF' }}>R$ 197</span>
+                <span style={{ fontSize: '18px', color: '#6B6B7B', textDecoration: 'line-through' }}>R$ 497</span>
+                <Badge variant="success">60% OFF</Badge>
+              </div>
+            </div>
+            <Button variant="primary" style={{ padding: '16px 32px', fontSize: '16px' }}>
+              <ShoppingCart size={20} style={{ marginRight: '8px' }} />
+              Comprar Agora
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Filters */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ position: 'relative', width: '300px' }}>
+              <Search style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', color: '#6B6B7B' }} />
+              <input
+                type="text"
+                placeholder="Buscar produtos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  height: '44px',
+                  paddingLeft: '48px',
+                  paddingRight: '16px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: '#FFFFFF',
+                  fontSize: '14px',
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    border: 'none',
+                    backgroundColor: selectedCategory === cat ? '#3B82F6' : 'rgba(255, 255, 255, 0.05)',
+                    color: selectedCategory === cat ? '#FFFFFF' : '#A0A0B0',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            style={{
+              height: '44px',
+              padding: '0 16px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: '#FFFFFF',
+              fontSize: '14px',
+              outline: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="popular" style={{ backgroundColor: '#12121A' }}>Mais Populares</option>
+            <option value="recent" style={{ backgroundColor: '#12121A' }}>Mais Recentes</option>
+            <option value="price" style={{ backgroundColor: '#12121A' }}>Menor Preco</option>
+          </select>
+        </div>
+
+        {/* Products Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+          {filteredProducts.map((product, index) => {
+            const IconComponent = iconMap[product.icon] || FileText
+            const isFavorite = favorites.includes(product.id)
+
+            return (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                style={{
+                  borderRadius: '16px',
+                  backgroundColor: 'rgba(18, 18, 26, 0.8)',
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* Product Header */}
+                <div style={{ padding: '20px', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <div style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2))',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <IconComponent size={24} style={{ color: '#3B82F6' }} />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {product.isNew && <Badge variant="info">Novo</Badge>}
+                      {product.isPurchased && <Badge variant="success">Comprado</Badge>}
+                      <button
+                        onClick={() => toggleFavorite(product.id)}
+                        style={{ padding: '6px', background: 'none', border: 'none', cursor: 'pointer' }}
+                      >
+                        <Heart size={18} style={{ color: isFavorite ? '#EF4444' : '#6B6B7B', fill: isFavorite ? '#EF4444' : 'none' }} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', margin: '0 0 8px' }}>
+                    {product.name}
+                  </h3>
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0, lineHeight: 1.5 }}>
+                    {product.description}
+                  </p>
+                </div>
+
+                {/* Features */}
+                <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {product.features.slice(0, 3).map((feature, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '4px 8px',
+                          borderRadius: '6px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          fontSize: '12px',
+                          color: '#A0A0B0',
+                        }}
+                      >
+                        <CheckCircle size={12} style={{ color: '#10B981' }} />
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Stats & Price */}
+                <div style={{ padding: '16px 20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: '#FACC15' }}>
+                        <Star size={14} fill="#FACC15" />
+                        {product.rating}
+                      </span>
+                      <span style={{ fontSize: '13px', color: '#6B6B7B' }}>
+                        {product.reviews} avaliacoes
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: '#6B6B7B' }}>
+                        <Download size={14} />
+                        {product.downloads}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                      <span style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF' }}>R$ {product.price}</span>
+                      {product.originalPrice && (
+                        <span style={{ fontSize: '14px', color: '#6B6B7B', textDecoration: 'line-through' }}>
+                          R$ {product.originalPrice}
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      variant={product.isPurchased ? 'secondary' : 'primary'}
+                      size="sm"
+                      onClick={() => handlePurchase(product)}
+                    >
+                      {product.isPurchased ? (
+                        <>
+                          <ExternalLink size={14} style={{ marginRight: '6px' }} />
+                          Acessar
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingCart size={14} style={{ marginRight: '6px' }} />
+                          Comprar
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+
+        {filteredProducts.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <ShoppingCart size={48} style={{ color: '#6B6B7B', marginBottom: '16px' }} />
+            <p style={{ fontSize: '16px', color: '#6B6B7B' }}>Nenhum produto encontrado</p>
+            <p style={{ fontSize: '14px', color: '#4B4B5B' }}>Tente ajustar os filtros de busca</p>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}

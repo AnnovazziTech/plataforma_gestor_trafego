@@ -306,6 +306,32 @@ async function main() {
     },
   })
 
+  // Integracao LinkedIn (mock)
+  const linkedinIntegration = await prisma.integration.upsert({
+    where: {
+      organizationId_platform_platformAccountId: {
+        organizationId: organization.id,
+        platform: 'LINKEDIN',
+        platformAccountId: 'linkedin-demo-001',
+      },
+    },
+    update: {
+      status: 'CONNECTED',
+      lastSyncAt: new Date(),
+    },
+    create: {
+      organizationId: organization.id,
+      platform: 'LINKEDIN',
+      name: 'LinkedIn Ads Demo',
+      accessToken: 'mock-linkedin-token',
+      platformAccountId: 'linkedin-demo-001',
+      platformAccountName: 'LinkedIn Business Demo',
+      status: 'CONNECTED',
+      lastSyncAt: new Date(),
+      isActive: true,
+    },
+  })
+
   console.log('Integracoes criadas!')
 
   // ==========================================
@@ -314,17 +340,32 @@ async function main() {
   console.log('Criando campanhas...')
 
   const campaignsData = [
-    // Meta Ads
+    // ===== META ADS =====
+    // Campanha ATIVA - criada HOJE
+    {
+      name: 'Meta - Lancamento Produto Novo',
+      platform: 'META' as const,
+      objective: 'CONVERSIONS' as const,
+      status: 'ACTIVE' as const,
+      budget: 3500,
+      spent: 245.80,
+      integrationId: metaIntegration.id,
+      startDate: daysAgo(0),
+      createdAt: daysAgo(0),
+    },
+    // Campanha ATIVA - criada nos ultimos 7 dias
     {
       name: 'Black Friday 2024 - Leads',
       platform: 'META' as const,
       objective: 'LEADS' as const,
       status: 'ACTIVE' as const,
       budget: 5000,
-      spent: 3847.32,
+      spent: 1847.32,
       integrationId: metaIntegration.id,
-      startDate: daysAgo(30),
+      startDate: daysAgo(5),
+      createdAt: daysAgo(5),
     },
+    // Campanha PAUSADA - criada nos ultimos 30 dias
     {
       name: 'Remarketing - Carrinho Abandonado',
       platform: 'META' as const,
@@ -333,19 +374,60 @@ async function main() {
       budget: 3000,
       spent: 1234.56,
       integrationId: metaIntegration.id,
-      startDate: daysAgo(45),
+      startDate: daysAgo(25),
+      createdAt: daysAgo(25),
     },
-    // Google Ads
+    // Campanha ATIVA - criada nos ultimos 90 dias
+    {
+      name: 'Meta - Lookalike Compradores',
+      platform: 'META' as const,
+      objective: 'CONVERSIONS' as const,
+      status: 'ACTIVE' as const,
+      budget: 4500,
+      spent: 3890.45,
+      integrationId: metaIntegration.id,
+      startDate: daysAgo(60),
+      createdAt: daysAgo(60),
+    },
+
+    // ===== GOOGLE ADS =====
+    // Campanha ATIVA - criada ONTEM
+    {
+      name: 'Google - Display Remarketing',
+      platform: 'GOOGLE' as const,
+      objective: 'AWARENESS' as const,
+      status: 'ACTIVE' as const,
+      budget: 1500,
+      spent: 89.90,
+      integrationId: googleIntegration.id,
+      startDate: daysAgo(1),
+      createdAt: daysAgo(1),
+    },
+    // Campanha ATIVA - criada nos ultimos 7 dias
     {
       name: 'Google Search - Marca',
       platform: 'GOOGLE' as const,
       objective: 'TRAFFIC' as const,
       status: 'ACTIVE' as const,
       budget: 2500,
-      spent: 1987.45,
+      spent: 987.45,
       integrationId: googleIntegration.id,
-      startDate: daysAgo(60),
+      startDate: daysAgo(6),
+      createdAt: daysAgo(6),
     },
+    // Campanha PAUSADA - criada nos ultimos 30 dias
+    {
+      name: 'Google Shopping - Eletronicos',
+      platform: 'GOOGLE' as const,
+      objective: 'SALES' as const,
+      status: 'PAUSED' as const,
+      budget: 6000,
+      spent: 4567.89,
+      integrationId: googleIntegration.id,
+      startDate: daysAgo(20),
+      createdAt: daysAgo(20),
+    },
+    // Campanha FINALIZADA - criada nos ultimos 90 dias
     {
       name: 'Performance Max - E-commerce',
       platform: 'GOOGLE' as const,
@@ -354,34 +436,116 @@ async function main() {
       budget: 8000,
       spent: 7892.10,
       integrationId: googleIntegration.id,
-      startDate: daysAgo(90),
-      endDate: daysAgo(5),
+      startDate: daysAgo(75),
+      endDate: daysAgo(10),
+      createdAt: daysAgo(75),
     },
-    // TikTok Ads
+
+    // ===== TIKTOK ADS =====
+    // Campanha ATIVA - criada HOJE
+    {
+      name: 'TikTok - Trend Challenge',
+      platform: 'TIKTOK' as const,
+      objective: 'VIDEO_VIEWS' as const,
+      status: 'ACTIVE' as const,
+      budget: 2000,
+      spent: 156.78,
+      integrationId: tiktokIntegration.id,
+      startDate: daysAgo(0),
+      createdAt: daysAgo(0),
+    },
+    // Campanha ATIVA - criada nos ultimos 7 dias
     {
       name: 'TikTok - Awareness Gen Z',
       platform: 'TIKTOK' as const,
       objective: 'AWARENESS' as const,
       status: 'ACTIVE' as const,
       budget: 4000,
-      spent: 2156.78,
+      spent: 1456.78,
       integrationId: tiktokIntegration.id,
-      startDate: daysAgo(20),
+      startDate: daysAgo(3),
+      createdAt: daysAgo(3),
     },
+    // Campanha RASCUNHO - criada nos ultimos 30 dias
     {
-      name: 'TikTok - Video Views Challenge',
+      name: 'TikTok - Influencer Collab',
       platform: 'TIKTOK' as const,
-      objective: 'VIDEO_VIEWS' as const,
+      objective: 'ENGAGEMENT' as const,
       status: 'DRAFT' as const,
-      budget: 2000,
+      budget: 5000,
       spent: 0,
       integrationId: tiktokIntegration.id,
       startDate: null,
+      createdAt: daysAgo(15),
+    },
+    // Campanha PAUSADA - criada nos ultimos 90 dias
+    {
+      name: 'TikTok - Promocao Verao',
+      platform: 'TIKTOK' as const,
+      objective: 'CONVERSIONS' as const,
+      status: 'PAUSED' as const,
+      budget: 3500,
+      spent: 2890.45,
+      integrationId: tiktokIntegration.id,
+      startDate: daysAgo(45),
+      createdAt: daysAgo(45),
+    },
+
+    // ===== LINKEDIN ADS =====
+    // Campanha ATIVA - criada ONTEM
+    {
+      name: 'LinkedIn - B2B Lead Gen',
+      platform: 'LINKEDIN' as const,
+      objective: 'LEADS' as const,
+      status: 'ACTIVE' as const,
+      budget: 3000,
+      spent: 245.90,
+      integrationId: linkedinIntegration.id,
+      startDate: daysAgo(1),
+      createdAt: daysAgo(1),
+    },
+    // Campanha ATIVA - criada nos ultimos 7 dias
+    {
+      name: 'LinkedIn - Awareness Corporativo',
+      platform: 'LINKEDIN' as const,
+      objective: 'AWARENESS' as const,
+      status: 'ACTIVE' as const,
+      budget: 2500,
+      spent: 678.45,
+      integrationId: linkedinIntegration.id,
+      startDate: daysAgo(4),
+      createdAt: daysAgo(4),
+    },
+    // Campanha PAUSADA - criada nos ultimos 30 dias
+    {
+      name: 'LinkedIn - Sponsored Content',
+      platform: 'LINKEDIN' as const,
+      objective: 'ENGAGEMENT' as const,
+      status: 'PAUSED' as const,
+      budget: 4000,
+      spent: 2345.67,
+      integrationId: linkedinIntegration.id,
+      startDate: daysAgo(18),
+      createdAt: daysAgo(18),
+    },
+    // Campanha FINALIZADA - criada nos ultimos 90 dias
+    {
+      name: 'LinkedIn - Webinar Promo Q3',
+      platform: 'LINKEDIN' as const,
+      objective: 'CONVERSIONS' as const,
+      status: 'ENDED' as const,
+      budget: 5000,
+      spent: 4890.00,
+      integrationId: linkedinIntegration.id,
+      startDate: daysAgo(80),
+      endDate: daysAgo(50),
+      createdAt: daysAgo(80),
     },
   ]
 
   const campaigns = []
   for (const campaignData of campaignsData) {
+    const { createdAt, ...rest } = campaignData
     const campaign = await prisma.campaign.upsert({
       where: {
         organizationId_platformCampaignId: {
@@ -390,18 +554,20 @@ async function main() {
         },
       },
       update: {
-        ...campaignData,
+        ...rest,
         lastSyncAt: new Date(),
+        updatedAt: new Date(),
       },
       create: {
         organizationId: organization.id,
         platformCampaignId: `platform-${campaignData.name.toLowerCase().replace(/\s+/g, '-')}`,
-        ...campaignData,
+        ...rest,
         budgetType: 'DAILY',
         lastSyncAt: new Date(),
+        createdAt: createdAt || new Date(),
       },
     })
-    campaigns.push(campaign)
+    campaigns.push({ ...campaign, originalCreatedAt: createdAt })
   }
   console.log(`${campaigns.length} campanhas criadas!`)
 
@@ -411,6 +577,17 @@ async function main() {
   console.log('Criando metricas de campanha...')
 
   for (const campaign of campaigns) {
+    // Calcular quantos dias de metricas criar baseado na data de criacao
+    const campaignCreatedAt = campaign.originalCreatedAt || new Date()
+    const daysSinceCreation = Math.floor((new Date().getTime() - campaignCreatedAt.getTime()) / (1000 * 60 * 60 * 24))
+    const daysToCreate = Math.min(daysSinceCreation + 1, 90) // Maximo 90 dias
+
+    // Nao criar metricas para campanhas em DRAFT
+    if (campaign.status === 'DRAFT') {
+      console.log(`  Pulando metricas para campanha DRAFT: ${campaign.name}`)
+      continue
+    }
+
     const baseImpressions = randomBetween(50000, 500000)
     const baseClicks = Math.floor(baseImpressions * (randomBetween(200, 500) / 10000))
     const baseConversions = Math.floor(baseClicks * (randomBetween(100, 300) / 10000))
@@ -420,7 +597,7 @@ async function main() {
       where: {
         campaignId_periodStart_periodEnd: {
           campaignId: campaign.id,
-          periodStart: daysAgo(30),
+          periodStart: daysAgo(90),
           periodEnd: new Date(),
         },
       },
@@ -431,10 +608,10 @@ async function main() {
         reach: Math.floor(baseImpressions * 0.7),
         clicks: baseClicks,
         ctr: Number(((baseClicks / baseImpressions) * 100).toFixed(2)),
-        cpc: Number((campaign.spent / baseClicks).toFixed(2)),
-        cpm: Number(((campaign.spent / baseImpressions) * 1000).toFixed(2)),
+        cpc: Number((campaign.spent / Math.max(baseClicks, 1)).toFixed(2)),
+        cpm: Number(((campaign.spent / Math.max(baseImpressions, 1)) * 1000).toFixed(2)),
         conversions: baseConversions,
-        conversionRate: Number(((baseConversions / baseClicks) * 100).toFixed(2)),
+        conversionRate: Number(((baseConversions / Math.max(baseClicks, 1)) * 100).toFixed(2)),
         costPerConversion: Number((campaign.spent / Math.max(baseConversions, 1)).toFixed(2)),
         spent: campaign.spent,
         roas: Number((randomBetween(200, 450) / 100).toFixed(2)),
@@ -445,18 +622,22 @@ async function main() {
         comments: randomBetween(50, 500),
         shares: randomBetween(100, 1000),
         saves: randomBetween(50, 300),
-        periodStart: daysAgo(30),
+        periodStart: daysAgo(90),
         periodEnd: new Date(),
       },
     })
 
-    // Metricas diarias (30 dias)
-    for (let i = 29; i >= 0; i--) {
+    // Metricas diarias (baseado nos dias desde criacao, max 90)
+    console.log(`  Criando ${daysToCreate} dias de metricas para: ${campaign.name}`)
+    for (let i = daysToCreate - 1; i >= 0; i--) {
       const date = daysAgo(i)
-      const dailyImpressions = randomBetween(1000, 20000)
+
+      // Variar impressoes baseado no dia (mais recente = mais impressoes)
+      const recencyFactor = 1 - (i / daysToCreate) * 0.3 // Mais recente = mais dados
+      const dailyImpressions = Math.floor(randomBetween(1000, 20000) * recencyFactor)
       const dailyClicks = Math.floor(dailyImpressions * (randomBetween(200, 500) / 10000))
       const dailyConversions = Math.floor(dailyClicks * (randomBetween(100, 300) / 10000))
-      const dailySpent = Number((campaign.spent / 30 * (0.8 + Math.random() * 0.4)).toFixed(2))
+      const dailySpent = Number((campaign.spent / Math.max(daysToCreate, 1) * (0.8 + Math.random() * 0.4)).toFixed(2))
 
       await prisma.campaignDailyMetrics.upsert({
         where: {
@@ -472,9 +653,9 @@ async function main() {
           impressions: dailyImpressions,
           reach: Math.floor(dailyImpressions * 0.7),
           clicks: dailyClicks,
-          ctr: Number(((dailyClicks / dailyImpressions) * 100).toFixed(2)),
+          ctr: Number(((dailyClicks / Math.max(dailyImpressions, 1)) * 100).toFixed(2)),
           cpc: Number((dailySpent / Math.max(dailyClicks, 1)).toFixed(2)),
-          cpm: Number(((dailySpent / dailyImpressions) * 1000).toFixed(2)),
+          cpm: Number(((dailySpent / Math.max(dailyImpressions, 1)) * 1000).toFixed(2)),
           conversions: dailyConversions,
           spent: dailySpent,
           roas: Number((randomBetween(200, 450) / 100).toFixed(2)),
@@ -680,6 +861,167 @@ async function main() {
     }
   }
   console.log('Templates de arte criados!')
+
+  // ==========================================
+  // 11. CRIAR RELATORIOS DE MODELO
+  // ==========================================
+  console.log('Criando relatorios de modelo...')
+
+  const reportsData = [
+    {
+      name: 'Relatorio Performance Mensal - Meta Ads',
+      type: 'PERFORMANCE' as const,
+      frequency: 'MONTHLY' as const,
+      status: 'ACTIVE' as const,
+      platforms: ['META'] as const[],
+      metrics: ['impressions', 'clicks', 'ctr', 'conversions', 'spent', 'roas'],
+      dateRangeStart: daysAgo(30),
+      dateRangeEnd: new Date(),
+      recipients: ['gestor@empresa.com'],
+      sendMethod: 'EMAIL' as const,
+      lastGenerated: daysAgo(1),
+      generatedCount: 12,
+    },
+    {
+      name: 'Relatorio Semanal Google Ads',
+      type: 'PERFORMANCE' as const,
+      frequency: 'WEEKLY' as const,
+      status: 'ACTIVE' as const,
+      platforms: ['GOOGLE'] as const[],
+      metrics: ['impressions', 'clicks', 'cpc', 'conversions', 'spent'],
+      dateRangeStart: daysAgo(7),
+      dateRangeEnd: new Date(),
+      recipients: ['marketing@empresa.com', 'vendas@empresa.com'],
+      sendMethod: 'EMAIL' as const,
+      lastGenerated: daysAgo(2),
+      generatedCount: 8,
+    },
+    {
+      name: 'Analise de Audiencia - TikTok',
+      type: 'AUDIENCE' as const,
+      frequency: 'MONTHLY' as const,
+      status: 'ACTIVE' as const,
+      platforms: ['TIKTOK'] as const[],
+      metrics: ['impressions', 'reach', 'videoViews', 'engagement'],
+      dateRangeStart: daysAgo(30),
+      dateRangeEnd: new Date(),
+      recipients: ['social@empresa.com'],
+      sendMethod: 'DOWNLOAD' as const,
+      lastGenerated: daysAgo(5),
+      generatedCount: 3,
+    },
+    {
+      name: 'Performance Criativos - Multi-Plataforma',
+      type: 'CREATIVE' as const,
+      frequency: 'WEEKLY' as const,
+      status: 'PAUSED' as const,
+      platforms: ['META', 'GOOGLE', 'TIKTOK'] as const[],
+      metrics: ['impressions', 'clicks', 'ctr', 'conversions'],
+      dateRangeStart: daysAgo(14),
+      dateRangeEnd: daysAgo(7),
+      recipients: ['criativo@empresa.com'],
+      sendMethod: 'EMAIL' as const,
+      lastGenerated: daysAgo(10),
+      generatedCount: 15,
+    },
+    {
+      name: 'Relatorio Executivo Consolidado',
+      type: 'CUSTOM' as const,
+      frequency: 'MONTHLY' as const,
+      status: 'ACTIVE' as const,
+      platforms: ['META', 'GOOGLE', 'TIKTOK', 'LINKEDIN'] as const[],
+      metrics: ['impressions', 'clicks', 'conversions', 'spent', 'roas', 'cpa'],
+      dateRangeStart: daysAgo(30),
+      dateRangeEnd: new Date(),
+      recipients: ['ceo@empresa.com', 'cfo@empresa.com'],
+      sendMethod: 'EMAIL' as const,
+      lastGenerated: daysAgo(3),
+      generatedCount: 6,
+    },
+    {
+      name: 'Relatorio Diario - Meta Ads',
+      type: 'PERFORMANCE' as const,
+      frequency: 'DAILY' as const,
+      status: 'ACTIVE' as const,
+      platforms: ['META'] as const[],
+      metrics: ['impressions', 'clicks', 'spent', 'conversions'],
+      dateRangeStart: daysAgo(1),
+      dateRangeEnd: new Date(),
+      recipients: ['trafego@empresa.com'],
+      sendMethod: 'WHATSAPP' as const,
+      lastGenerated: daysAgo(0),
+      generatedCount: 45,
+    },
+    {
+      name: 'Analise LinkedIn B2B',
+      type: 'AUDIENCE' as const,
+      frequency: 'MONTHLY' as const,
+      status: 'ACTIVE' as const,
+      platforms: ['LINKEDIN'] as const[],
+      metrics: ['impressions', 'clicks', 'leads', 'cpl'],
+      dateRangeStart: daysAgo(30),
+      dateRangeEnd: new Date(),
+      recipients: ['b2b@empresa.com'],
+      sendMethod: 'EMAIL' as const,
+      lastGenerated: daysAgo(8),
+      generatedCount: 4,
+    },
+    {
+      name: 'Relatorio de Campanha Especifica',
+      type: 'PERFORMANCE' as const,
+      frequency: 'ONCE' as const,
+      status: 'ARCHIVED' as const,
+      platforms: ['META'] as const[],
+      metrics: ['impressions', 'clicks', 'conversions', 'roas'],
+      dateRangeStart: daysAgo(60),
+      dateRangeEnd: daysAgo(30),
+      recipients: ['relatorios@empresa.com'],
+      sendMethod: 'DOWNLOAD' as const,
+      lastGenerated: daysAgo(30),
+      generatedCount: 1,
+    },
+  ]
+
+  for (const reportData of reportsData) {
+    // Verificar se ja existe um relatorio com esse nome para a organizacao
+    const existing = await prisma.report.findFirst({
+      where: {
+        organizationId: organization.id,
+        name: reportData.name,
+      },
+    })
+
+    if (!existing) {
+      await prisma.report.create({
+        data: {
+          organizationId: organization.id,
+          name: reportData.name,
+          type: reportData.type,
+          frequency: reportData.frequency,
+          status: reportData.status,
+          platforms: reportData.platforms,
+          metrics: reportData.metrics,
+          dateRangeStart: reportData.dateRangeStart,
+          dateRangeEnd: reportData.dateRangeEnd,
+          recipients: reportData.recipients,
+          sendMethod: reportData.sendMethod,
+          lastGenerated: reportData.lastGenerated,
+          generatedCount: reportData.generatedCount,
+          reportData: {
+            aggregatedMetrics: {
+              impressions: randomBetween(100000, 500000),
+              clicks: randomBetween(5000, 25000),
+              conversions: randomBetween(100, 1000),
+              spent: randomBetween(1000, 10000),
+              roas: Number((randomBetween(200, 450) / 100).toFixed(2)),
+            },
+          },
+          isActive: true,
+        },
+      })
+    }
+  }
+  console.log(`${reportsData.length} relatorios de modelo criados!`)
 
   // ==========================================
   // RESUMO FINAL

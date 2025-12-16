@@ -22,6 +22,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { getDateRangeParams } from '@/lib/utils/date-range'
 
 interface DashboardData {
   metrics: {
@@ -76,18 +77,19 @@ interface DashboardData {
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { campaigns, fetchCampaigns, showToast } = useApp()
+  const { campaigns, fetchCampaigns, showToast, dateRange, selectedAccount } = useApp()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   const handleTeamsClick = () => {
-    showToast('Funcionalidade de Equipes em desenvolvimento', 'info')
-    // Future: router.push('/teams') or open modal
+    router.push('/settings?tab=team')
   }
 
   const fetchDashboard = async () => {
     try {
-      const response = await fetch('/api/dashboard')
+      const dateParams = getDateRangeParams(dateRange)
+      const accountParam = selectedAccount !== 'all' ? `&accountId=${selectedAccount}` : ''
+      const response = await fetch(`/api/dashboard?${dateParams}${accountParam}`)
       if (response.ok) {
         const data = await response.json()
         setDashboardData(data)
@@ -100,12 +102,14 @@ export default function DashboardPage() {
   }
 
   const handleRefresh = async () => {
+    setIsLoading(true)
     await Promise.all([fetchDashboard(), fetchCampaigns()])
   }
 
+  // Refetch quando dateRange ou selectedAccount mudar
   useEffect(() => {
     fetchDashboard()
-  }, [])
+  }, [dateRange, selectedAccount])
 
   if (isLoading) {
     return (

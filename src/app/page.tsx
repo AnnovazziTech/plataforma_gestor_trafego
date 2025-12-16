@@ -2,19 +2,21 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { motion } from 'framer-motion'
-import { Zap } from 'lucide-react'
+import { Zap, Loader2 } from 'lucide-react'
 
 export default function Home() {
   const router = useRouter()
+  const { status } = useSession()
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (status === 'authenticated') {
       router.push('/dashboard')
-    }, 2000)
-
-    return () => clearTimeout(timer)
-  }, [router])
+    } else if (status === 'unauthenticated') {
+      router.push('/login')
+    }
+  }, [status, router])
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0F] bg-grid-pattern">
@@ -64,7 +66,9 @@ export default function Home() {
           transition={{ delay: 0.2 }}
           className="text-5xl font-bold mb-4"
         >
-          <span className="gradient-text">TrafficPro</span>
+          <span className="bg-gradient-to-r from-[#00F5FF] via-[#BF00FF] to-[#FF00E5] bg-clip-text text-transparent">
+            TrafficPro
+          </span>
         </motion.h1>
 
         <motion.p
@@ -82,24 +86,10 @@ export default function Home() {
           transition={{ delay: 0.5 }}
           className="flex flex-col items-center gap-4"
         >
-          <div className="flex items-center gap-2">
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1, repeat: Infinity, delay: 0 }}
-              className="w-2 h-2 rounded-full bg-[#00F5FF]"
-            />
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
-              className="w-2 h-2 rounded-full bg-[#BF00FF]"
-            />
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
-              className="w-2 h-2 rounded-full bg-[#FF00E5]"
-            />
-          </div>
-          <p className="text-sm text-[#6B6B7B]">Carregando dashboard...</p>
+          <Loader2 className="w-8 h-8 text-[#00F5FF] animate-spin" />
+          <p className="text-sm text-[#6B6B7B]">
+            {status === 'loading' ? 'Verificando sessao...' : 'Redirecionando...'}
+          </p>
         </motion.div>
       </motion.div>
 

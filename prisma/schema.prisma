@@ -1,6 +1,3 @@
-// Schema Prisma - TrafficPro SaaS Multi-Tenant
-// Banco de dados: PostgreSQL (Supabase)
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -10,190 +7,128 @@ datasource db {
   provider = "postgresql"
 }
 
-// ==========================================
-// PLANOS E ASSINATURAS
-// ==========================================
-
 model Plan {
-  id          String   @id @default(cuid())
-  name        String   // Starter, Pro, Enterprise
-  slug        String   @unique // starter, pro, enterprise
-  description String?
-
-  // Precos
-  priceMonthly  Float
-  priceYearly   Float
-  currency      String  @default("BRL")
-
-  // Limites
-  maxUsers           Int     @default(1)
-  maxCampaigns       Int     @default(10)
-  maxLeads           Int     @default(500)
-  maxIntegrations    Int     @default(2)
-  maxCreatives       Int     @default(100)
-  maxWhatsappNumbers Int     @default(1)
-
-  // Features
-  hasAiAnalysis      Boolean @default(false)
-  hasAdvancedReports Boolean @default(false)
-  hasAutomation      Boolean @default(false)
-  hasApiAccess       Boolean @default(false)
-  hasPrioritySupport Boolean @default(false)
-  hasWhiteLabel      Boolean @default(false)
-
-  // Meta
-  isActive    Boolean  @default(true)
-  isFeatured  Boolean  @default(false)
-  sortOrder   Int      @default(0)
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relacoes
-  organizations Organization[]
+  id                 String         @id @default(cuid())
+  name               String
+  slug               String         @unique
+  description        String?
+  priceMonthly       Float
+  priceYearly        Float
+  currency           String         @default("BRL")
+  maxUsers           Int            @default(1)
+  maxCampaigns       Int            @default(10)
+  maxLeads           Int            @default(500)
+  maxIntegrations    Int            @default(2)
+  maxCreatives       Int            @default(100)
+  maxWhatsappNumbers Int            @default(1)
+  hasAiAnalysis      Boolean        @default(false)
+  hasAdvancedReports Boolean        @default(false)
+  hasAutomation      Boolean        @default(false)
+  hasApiAccess       Boolean        @default(false)
+  hasPrioritySupport Boolean        @default(false)
+  hasWhiteLabel      Boolean        @default(false)
+  isActive           Boolean        @default(true)
+  isFeatured         Boolean        @default(false)
+  sortOrder          Int            @default(0)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  organizations      Organization[]
 
   @@map("plans")
 }
 
-// ==========================================
-// ORGANIZACOES (MULTI-TENANT)
-// ==========================================
-
 model Organization {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique // URL amigavel
-  logo        String?
-  website     String?
-
-  // Plano e Assinatura
-  planId              String
-  plan                Plan     @relation(fields: [planId], references: [id])
-  subscriptionStatus  SubscriptionStatus @default(TRIALING)
-  trialEndsAt         DateTime?
-  subscriptionEndsAt  DateTime?
-  stripeCustomerId    String?  @unique
+  id                   String               @id @default(cuid())
+  name                 String
+  slug                 String               @unique
+  logo                 String?
+  website              String?
+  planId               String
+  subscriptionStatus   SubscriptionStatus   @default(TRIALING)
+  trialEndsAt          DateTime?
+  subscriptionEndsAt   DateTime?
+  stripeCustomerId     String?              @unique
   stripeSubscriptionId String?
-
-  // Configuracoes
-  timezone    String   @default("America/Sao_Paulo")
-  language    String   @default("pt-BR")
-
-  // Meta
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relacoes
-  members       OrganizationMember[]
-  integrations  Integration[]
-  campaigns     Campaign[]
-  leads         Lead[]
-  conversations Conversation[]
-  creatives     Creative[]
-  artTemplates  ArtTemplateSaved[]
-  webhooks      Webhook[]
-  apiKeys       ApiKey[]
-  auditLogs     AuditLog[]
+  timezone             String               @default("America/Sao_Paulo")
+  language             String               @default("pt-BR")
+  isActive             Boolean              @default(true)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  apiKeys              ApiKey[]
+  artTemplates         ArtTemplateSaved[]
+  auditLogs            AuditLog[]
+  campaigns            Campaign[]
+  conversations        Conversation[]
+  creatives            Creative[]
+  integrations         Integration[]
+  leads                Lead[]
+  members              OrganizationMember[]
+  plan                 Plan                 @relation(fields: [planId], references: [id])
+  reports              Report[]
+  webhooks             Webhook[]
 
   @@map("organizations")
 }
 
-enum SubscriptionStatus {
-  TRIALING
-  ACTIVE
-  PAST_DUE
-  CANCELED
-  UNPAID
-  INCOMPLETE
-}
-
-// ==========================================
-// USUARIOS E MEMBROS
-// ==========================================
-
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
+  id            String               @id @default(cuid())
+  email         String               @unique
   emailVerified DateTime?
   passwordHash  String?
-
-  // Perfil
   name          String?
   avatar        String?
   phone         String?
-
-  // Meta
-  isActive      Boolean   @default(true)
+  isActive      Boolean              @default(true)
   lastLoginAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  // Relacoes
-  memberships   OrganizationMember[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
   accounts      Account[]
+  memberships   OrganizationMember[]
   sessions      Session[]
 
   @@map("users")
 }
 
 model OrganizationMember {
-  id             String   @id @default(cuid())
-
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  role           MemberRole @default(MEMBER)
-
-  // Permissoes granulares
-  canManageCampaigns    Boolean @default(true)
-  canManageLeads        Boolean @default(true)
-  canManageIntegrations Boolean @default(false)
-  canManageBilling      Boolean @default(false)
-  canManageMembers      Boolean @default(false)
-  canViewReports        Boolean @default(true)
-
-  // Meta
-  invitedAt     DateTime @default(now())
-  acceptedAt    DateTime?
-  isActive      Boolean  @default(true)
+  id                    String       @id @default(cuid())
+  organizationId        String
+  userId                String
+  role                  MemberRole   @default(MEMBER)
+  canManageCampaigns    Boolean      @default(true)
+  canManageLeads        Boolean      @default(true)
+  canManageIntegrations Boolean      @default(false)
+  canManageBilling      Boolean      @default(false)
+  canManageMembers      Boolean      @default(false)
+  canViewReports        Boolean      @default(true)
+  invitedAt             DateTime     @default(now())
+  acceptedAt            DateTime?
+  isActive              Boolean      @default(true)
+  organization          Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, userId])
   @@map("organization_members")
 }
 
-enum MemberRole {
-  OWNER
-  ADMIN
-  MEMBER
-  VIEWER
-}
-
-// NextAuth - Accounts (OAuth)
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
 }
 
-// NextAuth - Sessions
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -213,49 +148,387 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-// ==========================================
-// INTEGRACOES (TOKENS CRIPTOGRAFADOS)
-// ==========================================
-
 model Integration {
-  id             String   @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  platform       IntegrationPlatform
-  name           String   // Nome amigavel dado pelo usuario
-
-  // Credenciais (CRIPTOGRAFADAS)
-  accessToken    String   @db.Text // Criptografado AES-256
-  refreshToken   String?  @db.Text // Criptografado AES-256
-  tokenExpiresAt DateTime?
-
-  // IDs da plataforma
-  platformAccountId   String?  // ID da conta na plataforma
-  platformAccountName String?  // Nome da conta na plataforma
-
-  // WhatsApp especifico
+  id                  String              @id @default(cuid())
+  organizationId      String
+  platform            IntegrationPlatform
+  name                String
+  accessToken         String
+  refreshToken        String?
+  tokenExpiresAt      DateTime?
+  platformAccountId   String?
+  platformAccountName String?
   whatsappPhoneNumber String?
   whatsappPhoneId     String?
-
-  // Status
-  status         IntegrationStatus @default(PENDING)
-  lastSyncAt     DateTime?
-  lastErrorAt    DateTime?
-  lastError      String?
-
-  // Meta
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  // Relacoes
-  campaigns      Campaign[]
-  adAccounts     AdAccount[]
-  conversations  Conversation[]
+  status              IntegrationStatus   @default(PENDING)
+  lastSyncAt          DateTime?
+  lastErrorAt         DateTime?
+  lastError           String?
+  isActive            Boolean             @default(true)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  adAccounts          AdAccount[]
+  campaigns           Campaign[]
+  conversations       Conversation[]
+  organization        Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, platform, platformAccountId])
   @@map("integrations")
+}
+
+model AdAccount {
+  id                  String      @id @default(cuid())
+  integrationId       String
+  platformAdAccountId String
+  name                String
+  currency            String      @default("BRL")
+  timezone            String?
+  isActive            Boolean     @default(true)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  integration         Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  campaigns           Campaign[]
+
+  @@unique([integrationId, platformAdAccountId])
+  @@map("ad_accounts")
+}
+
+model Campaign {
+  id                 String                 @id @default(cuid())
+  organizationId     String
+  integrationId      String?
+  adAccountId        String?
+  platformCampaignId String?
+  name               String
+  objective          CampaignObjective
+  status             CampaignStatus         @default(DRAFT)
+  platform           IntegrationPlatform
+  budget             Float
+  budgetType         BudgetType             @default(DAILY)
+  spent              Float                  @default(0)
+  startDate          DateTime?
+  endDate            DateTime?
+  isActive           Boolean                @default(true)
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  lastSyncAt         DateTime?
+  dailyMetrics       CampaignDailyMetrics[]
+  metrics            CampaignMetrics[]
+  adAccount          AdAccount?             @relation(fields: [adAccountId], references: [id])
+  integration        Integration?           @relation(fields: [integrationId], references: [id])
+  organization       Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leads              Lead[]
+
+  @@unique([organizationId, platformCampaignId])
+  @@index([organizationId, status])
+  @@index([organizationId, platform])
+  @@map("campaigns")
+}
+
+model CampaignMetrics {
+  id                  String   @id @default(cuid())
+  campaignId          String
+  impressions         Int      @default(0)
+  reach               Int      @default(0)
+  clicks              Int      @default(0)
+  ctr                 Float    @default(0)
+  cpc                 Float    @default(0)
+  cpm                 Float    @default(0)
+  conversions         Int      @default(0)
+  conversionRate      Float    @default(0)
+  costPerConversion   Float    @default(0)
+  spent               Float    @default(0)
+  roas                Float    @default(0)
+  frequency           Float    @default(0)
+  videoViews          Int      @default(0)
+  videoViewsP25       Int      @default(0)
+  videoViewsP50       Int      @default(0)
+  videoViewsP75       Int      @default(0)
+  videoViewsP100      Int      @default(0)
+  videoCompletionRate Float    @default(0)
+  likes               Int      @default(0)
+  comments            Int      @default(0)
+  shares              Int      @default(0)
+  saves               Int      @default(0)
+  periodStart         DateTime
+  periodEnd           DateTime
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  campaign            Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, periodStart, periodEnd])
+  @@map("campaign_metrics")
+}
+
+model CampaignDailyMetrics {
+  id          String   @id @default(cuid())
+  campaignId  String
+  date        DateTime @db.Date
+  impressions Int      @default(0)
+  reach       Int      @default(0)
+  clicks      Int      @default(0)
+  ctr         Float    @default(0)
+  cpc         Float    @default(0)
+  cpm         Float    @default(0)
+  conversions Int      @default(0)
+  spent       Float    @default(0)
+  roas        Float    @default(0)
+  createdAt   DateTime @default(now())
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, date])
+  @@index([campaignId, date])
+  @@map("campaign_daily_metrics")
+}
+
+model Lead {
+  id             String         @id @default(cuid())
+  organizationId String
+  campaignId     String?
+  name           String
+  email          String?
+  phone          String?
+  source         LeadSource
+  sourceDetails  String?
+  utmSource      String?
+  utmMedium      String?
+  utmCampaign    String?
+  utmContent     String?
+  utmTerm        String?
+  status         LeadStatus     @default(NEW)
+  value          Float?
+  assignedToId   String?
+  notes          String?
+  customFields   Json?
+  convertedAt    DateTime?
+  lostAt         DateTime?
+  lostReason     String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  conversations  Conversation[]
+  history        LeadHistory[]
+  campaign       Campaign?      @relation(fields: [campaignId], references: [id])
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([organizationId, source])
+  @@index([phone])
+  @@index([email])
+  @@map("leads")
+}
+
+model LeadHistory {
+  id          String      @id @default(cuid())
+  leadId      String
+  fromStatus  LeadStatus?
+  toStatus    LeadStatus
+  note        String?
+  changedById String?
+  createdAt   DateTime    @default(now())
+  lead        Lead        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, createdAt])
+  @@map("lead_history")
+}
+
+model Conversation {
+  id                     String             @id @default(cuid())
+  organizationId         String
+  integrationId          String
+  leadId                 String?
+  platformConversationId String?
+  contactName            String
+  contactPhone           String
+  contactAvatar          String?
+  status                 ConversationStatus @default(OPEN)
+  unreadCount            Int                @default(0)
+  lastMessageAt          DateTime?
+  lastMessagePreview     String?
+  assignedToId           String?
+  isActive               Boolean            @default(true)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  integration            Integration        @relation(fields: [integrationId], references: [id])
+  lead                   Lead?              @relation(fields: [leadId], references: [id])
+  organization           Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  messages               Message[]
+
+  @@unique([organizationId, integrationId, contactPhone])
+  @@index([organizationId, status])
+  @@map("conversations")
+}
+
+model Message {
+  id                String           @id @default(cuid())
+  conversationId    String
+  platformMessageId String?
+  content           String
+  type              MessageType      @default(TEXT)
+  mediaUrl          String?
+  direction         MessageDirection
+  status            MessageStatus    @default(SENT)
+  senderName        String?
+  senderId          String?
+  createdAt         DateTime         @default(now())
+  conversation      Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+model Creative {
+  id               String               @id @default(cuid())
+  organizationId   String
+  title            String
+  description      String?
+  type             CreativeType
+  platform         IntegrationPlatform?
+  thumbnailUrl     String?
+  mediaUrl         String?
+  sourceUrl        String?
+  sourceAdvertiser String?
+  likes            Int?
+  comments         Int?
+  shares           Int?
+  tags             String[]
+  folderId         String?
+  isFavorite       Boolean              @default(false)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  organization     Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, type])
+  @@map("creatives")
+}
+
+model ArtTemplateSaved {
+  id             String       @id @default(cuid())
+  organizationId String
+  templateId     String
+  customName     String?
+  customizations Json?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, templateId])
+  @@map("art_templates_saved")
+}
+
+model ArtTemplate {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  niche        String
+  type         String
+  canvaUrl     String
+  thumbnailUrl String?
+  downloads    Int      @default(0)
+  rating       Float    @default(0)
+  ratingCount  Int      @default(0)
+  tags         String[]
+  isNew        Boolean  @default(false)
+  isPremium    Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([niche])
+  @@index([type])
+  @@map("art_templates")
+}
+
+model Webhook {
+  id              String       @id @default(cuid())
+  organizationId  String
+  url             String
+  events          String[]
+  secret          String
+  isActive        Boolean      @default(true)
+  lastTriggeredAt DateTime?
+  failureCount    Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("webhooks")
+}
+
+model ApiKey {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  keyHash        String       @unique
+  keyPrefix      String
+  permissions    String[]
+  lastUsedAt     DateTime?
+  expiresAt      DateTime?
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+model AuditLog {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String?
+  userEmail      String?
+  action         String
+  entity         String?
+  entityId       String?
+  oldData        Json?
+  newData        Json?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, action])
+  @@map("audit_logs")
+}
+
+model Report {
+  id             String              @id @default(cuid())
+  organizationId String
+  name           String
+  type           ReportType          @default(PERFORMANCE)
+  frequency      ReportFrequency     @default(ONCE)
+  status         ReportStatus        @default(ACTIVE)
+  platforms      IntegrationPlatform[]
+  metrics        String[]
+  dateRangeStart DateTime
+  dateRangeEnd   DateTime
+  recipients     String[]
+  sendMethod     SendMethod?
+  lastGenerated  DateTime?
+  generatedCount Int                 @default(0)
+  reportData     Json?
+  isActive       Boolean             @default(true)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([organizationId, type])
+  @@map("reports")
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  INCOMPLETE
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
 }
 
 enum IntegrationPlatform {
@@ -273,76 +546,6 @@ enum IntegrationStatus {
   ERROR
   EXPIRED
   DISCONNECTED
-}
-
-model AdAccount {
-  id             String   @id @default(cuid())
-  integrationId  String
-  integration    Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
-
-  platformAdAccountId String
-  name                String
-  currency            String  @default("BRL")
-  timezone            String?
-
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  campaigns      Campaign[]
-
-  @@unique([integrationId, platformAdAccountId])
-  @@map("ad_accounts")
-}
-
-// ==========================================
-// CAMPANHAS
-// ==========================================
-
-model Campaign {
-  id             String   @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  integrationId  String?
-  integration    Integration? @relation(fields: [integrationId], references: [id])
-
-  adAccountId    String?
-  adAccount      AdAccount? @relation(fields: [adAccountId], references: [id])
-
-  // Identificadores da plataforma
-  platformCampaignId String?
-
-  // Dados basicos
-  name           String
-  objective      CampaignObjective
-  status         CampaignStatus @default(DRAFT)
-  platform       IntegrationPlatform
-
-  // Orcamento
-  budget         Float
-  budgetType     BudgetType @default(DAILY)
-  spent          Float      @default(0)
-
-  // Datas
-  startDate      DateTime?
-  endDate        DateTime?
-
-  // Meta
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  lastSyncAt     DateTime?
-
-  // Relacoes
-  metrics        CampaignMetrics[]
-  dailyMetrics   CampaignDailyMetrics[]
-  leads          Lead[]
-
-  @@unique([organizationId, platformCampaignId])
-  @@index([organizationId, status])
-  @@index([organizationId, platform])
-  @@map("campaigns")
 }
 
 enum CampaignObjective {
@@ -372,130 +575,6 @@ enum BudgetType {
   LIFETIME
 }
 
-model CampaignMetrics {
-  id          String   @id @default(cuid())
-  campaignId  String
-  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-
-  // Metricas agregadas (totais)
-  impressions     Int      @default(0)
-  reach           Int      @default(0)
-  clicks          Int      @default(0)
-  ctr             Float    @default(0)
-  cpc             Float    @default(0)
-  cpm             Float    @default(0)
-  conversions     Int      @default(0)
-  conversionRate  Float    @default(0)
-  costPerConversion Float  @default(0)
-  spent           Float    @default(0)
-  roas            Float    @default(0)
-  frequency       Float    @default(0)
-
-  // Video
-  videoViews          Int    @default(0)
-  videoViewsP25       Int    @default(0)
-  videoViewsP50       Int    @default(0)
-  videoViewsP75       Int    @default(0)
-  videoViewsP100      Int    @default(0)
-  videoCompletionRate Float  @default(0)
-
-  // Engajamento
-  likes       Int @default(0)
-  comments    Int @default(0)
-  shares      Int @default(0)
-  saves       Int @default(0)
-
-  // Periodo
-  periodStart DateTime
-  periodEnd   DateTime
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@unique([campaignId, periodStart, periodEnd])
-  @@map("campaign_metrics")
-}
-
-model CampaignDailyMetrics {
-  id          String   @id @default(cuid())
-  campaignId  String
-  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-
-  date        DateTime @db.Date
-
-  impressions     Int      @default(0)
-  reach           Int      @default(0)
-  clicks          Int      @default(0)
-  ctr             Float    @default(0)
-  cpc             Float    @default(0)
-  cpm             Float    @default(0)
-  conversions     Int      @default(0)
-  spent           Float    @default(0)
-  roas            Float    @default(0)
-
-  createdAt   DateTime @default(now())
-
-  @@unique([campaignId, date])
-  @@index([campaignId, date])
-  @@map("campaign_daily_metrics")
-}
-
-// ==========================================
-// CRM - LEADS E FUNIL
-// ==========================================
-
-model Lead {
-  id             String   @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  campaignId     String?
-  campaign       Campaign? @relation(fields: [campaignId], references: [id])
-
-  // Dados do lead
-  name           String
-  email          String?
-  phone          String?
-
-  // Origem
-  source         LeadSource
-  sourceDetails  String?  // Ex: nome da campanha, formulario
-  utmSource      String?
-  utmMedium      String?
-  utmCampaign    String?
-  utmContent     String?
-  utmTerm        String?
-
-  // Funil
-  status         LeadStatus @default(NEW)
-  value          Float?     // Valor potencial do negocio
-
-  // Atribuicao
-  assignedToId   String?    // ID do membro responsavel
-
-  // Notas e dados extras
-  notes          String?    @db.Text
-  customFields   Json?      // Campos personalizados
-
-  // Meta
-  convertedAt    DateTime?
-  lostAt         DateTime?
-  lostReason     String?
-
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  // Relacoes
-  history        LeadHistory[]
-  conversations  Conversation[]
-
-  @@index([organizationId, status])
-  @@index([organizationId, source])
-  @@index([phone])
-  @@index([email])
-  @@map("leads")
-}
-
 enum LeadSource {
   META_ADS
   GOOGLE_ADS
@@ -510,77 +589,14 @@ enum LeadSource {
 }
 
 enum LeadStatus {
-  NEW           // Novo lead
-  CONTACTED     // Em andamento - Primeiro contato feito
-  QUALIFIED     // Em andamento - Lead qualificado
-  PROPOSAL      // Em andamento - Proposta enviada
-  NEGOTIATION   // Em andamento - Em negociacao
-  WON           // Concluido - Venda realizada
-  LOST          // Descartado - Perdido
-  REMARKETING   // Remarketing - Retomou contato
-}
-
-model LeadHistory {
-  id          String     @id @default(cuid())
-  leadId      String
-  lead        Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
-
-  fromStatus  LeadStatus?
-  toStatus    LeadStatus
-  note        String?
-  changedById String?    // ID do usuario que fez a mudanca
-
-  createdAt   DateTime   @default(now())
-
-  @@index([leadId, createdAt])
-  @@map("lead_history")
-}
-
-// ==========================================
-// CRM - CONVERSAS (WHATSAPP)
-// ==========================================
-
-model Conversation {
-  id             String   @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  integrationId  String
-  integration    Integration @relation(fields: [integrationId], references: [id])
-
-  leadId         String?
-  lead           Lead?    @relation(fields: [leadId], references: [id])
-
-  // Identificador externo
-  platformConversationId String?
-
-  // Contato
-  contactName    String
-  contactPhone   String
-  contactAvatar  String?
-
-  // Status
-  status         ConversationStatus @default(OPEN)
-  unreadCount    Int      @default(0)
-
-  // Ultima mensagem
-  lastMessageAt     DateTime?
-  lastMessagePreview String?
-
-  // Atribuicao
-  assignedToId   String?
-
-  // Meta
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  // Relacoes
-  messages       Message[]
-
-  @@unique([organizationId, integrationId, contactPhone])
-  @@index([organizationId, status])
-  @@map("conversations")
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+  REMARKETING
 }
 
 enum ConversationStatus {
@@ -588,35 +604,6 @@ enum ConversationStatus {
   PENDING
   RESOLVED
   ARCHIVED
-}
-
-model Message {
-  id             String   @id @default(cuid())
-  conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  // Identificador externo
-  platformMessageId String?
-
-  // Conteudo
-  content        String   @db.Text
-  type           MessageType @default(TEXT)
-  mediaUrl       String?
-
-  // Direcao
-  direction      MessageDirection
-
-  // Status (para mensagens enviadas)
-  status         MessageStatus @default(SENT)
-
-  // Sender
-  senderName     String?
-  senderId       String?  // ID do membro que enviou (se direction = OUTBOUND)
-
-  createdAt      DateTime @default(now())
-
-  @@index([conversationId, createdAt])
-  @@map("messages")
 }
 
 enum MessageType {
@@ -632,8 +619,8 @@ enum MessageType {
 }
 
 enum MessageDirection {
-  INBOUND   // Recebida do cliente
-  OUTBOUND  // Enviada para o cliente
+  INBOUND
+  OUTBOUND
 }
 
 enum MessageStatus {
@@ -644,49 +631,6 @@ enum MessageStatus {
   FAILED
 }
 
-// ==========================================
-// CRIATIVOS
-// ==========================================
-
-model Creative {
-  id             String   @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  // Dados basicos
-  title          String
-  description    String?
-
-  // Tipo
-  type           CreativeType
-  platform       IntegrationPlatform?
-
-  // Arquivos
-  thumbnailUrl   String?
-  mediaUrl       String?
-
-  // Origem (se minerado)
-  sourceUrl      String?
-  sourceAdvertiser String?
-
-  // Engajamento (se minerado)
-  likes          Int?
-  comments       Int?
-  shares         Int?
-
-  // Tags e organizacao
-  tags           String[]
-  folderId       String?
-
-  // Meta
-  isFavorite     Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  @@index([organizationId, type])
-  @@map("creatives")
-}
-
 enum CreativeType {
   IMAGE
   VIDEO
@@ -694,129 +638,29 @@ enum CreativeType {
   TEXT
 }
 
-model ArtTemplateSaved {
-  id             String   @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  // Template original
-  templateId     String   // ID do template global
-
-  // Customizacoes
-  customName     String?
-  customizations Json?
-
-  createdAt      DateTime @default(now())
-
-  @@unique([organizationId, templateId])
-  @@map("art_templates_saved")
+enum ReportType {
+  PERFORMANCE
+  AUDIENCE
+  CREATIVE
+  CUSTOM
 }
 
-// ==========================================
-// TEMPLATES DE ARTES (GLOBAL - NAO POR ORG)
-// ==========================================
-
-model ArtTemplate {
-  id          String   @id @default(cuid())
-
-  name        String
-  description String?
-  niche       String   // ecommerce, infoproduto, etc
-  type        String   // feed, stories, reels, etc
-
-  // Canva
-  canvaUrl    String
-  thumbnailUrl String?
-
-  // Stats
-  downloads   Int      @default(0)
-  rating      Float    @default(0)
-  ratingCount Int      @default(0)
-
-  // Tags
-  tags        String[]
-
-  // Flags
-  isNew       Boolean  @default(false)
-  isPremium   Boolean  @default(false)
-  isActive    Boolean  @default(true)
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([niche])
-  @@index([type])
-  @@map("art_templates")
+enum ReportFrequency {
+  ONCE
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
 }
 
-// ==========================================
-// WEBHOOKS E API KEYS
-// ==========================================
-
-model Webhook {
-  id             String   @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  url            String
-  events         String[] // lead.created, campaign.updated, etc
-  secret         String   // Para validacao HMAC
-
-  isActive       Boolean  @default(true)
-  lastTriggeredAt DateTime?
-  failureCount   Int      @default(0)
-
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  @@map("webhooks")
+enum ReportStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
 }
 
-model ApiKey {
-  id             String   @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  name           String
-  keyHash        String   @unique // Hash da chave (a chave real so e mostrada 1 vez)
-  keyPrefix      String   // Primeiros caracteres para identificacao
-
-  permissions    String[] // read:campaigns, write:leads, etc
-
-  lastUsedAt     DateTime?
-  expiresAt      DateTime?
-  isActive       Boolean  @default(true)
-
-  createdAt      DateTime @default(now())
-
-  @@map("api_keys")
-}
-
-// ==========================================
-// AUDITORIA
-// ==========================================
-
-model AuditLog {
-  id             String   @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  userId         String?
-  userEmail      String?
-
-  action         String   // user.login, campaign.created, lead.status_changed
-  entity         String?  // campaign, lead, integration
-  entityId       String?
-
-  oldData        Json?
-  newData        Json?
-
-  ipAddress      String?
-  userAgent      String?
-
-  createdAt      DateTime @default(now())
-
-  @@index([organizationId, createdAt])
-  @@index([organizationId, action])
-  @@map("audit_logs")
+enum SendMethod {
+  EMAIL
+  WHATSAPP
+  DOWNLOAD
 }

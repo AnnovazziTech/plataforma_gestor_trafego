@@ -31,6 +31,7 @@ import {
   MessageCircle,
 } from 'lucide-react'
 import { Report, Platform } from '@/types'
+import { generateReportPDF, generateQuickReportPDF } from '@/lib/pdf/generate-report'
 
 const reportTypeLabels: Record<string, string> = {
   performance: 'Performance',
@@ -74,6 +75,11 @@ export default function ReportsPage() {
   const [editingSchedule, setEditingSchedule] = useState<any | null>(null)
   const [editingReport, setEditingReport] = useState<Report | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+
+  // Carregar relatórios ao montar o componente
+  useEffect(() => {
+    fetchReports()
+  }, [fetchReports])
 
   // Use reports from context with fallback to empty array
   const reportsData = useMemo(() => reports || [], [reports])
@@ -138,10 +144,13 @@ export default function ReportsPage() {
 
   const handleDownload = (report: Report) => {
     showToast(`Gerando PDF: ${report.name}...`, 'info')
-    // Simular download
-    setTimeout(() => {
+    try {
+      generateReportPDF(report)
       showToast('PDF gerado com sucesso!', 'success')
-    }, 1500)
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error)
+      showToast('Erro ao gerar PDF', 'error')
+    }
   }
 
   const handleShare = (report: Report) => {
@@ -527,7 +536,7 @@ export default function ReportsPage() {
 }
 
 function CreateReportModal({ isOpen, onClose, connectedAccounts }: { isOpen: boolean; onClose: () => void; connectedAccounts: any[] }) {
-  const { showToast } = useApp()
+  const { showToast, generateReport, fetchReports } = useApp()
   const [formData, setFormData] = useState({
     account: '',
     platform: '',
@@ -536,6 +545,7 @@ function CreateReportModal({ isOpen, onClose, connectedAccounts }: { isOpen: boo
     name: '',
     metrics: [] as string[],
   })
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleMetricToggle = (metricId: string) => {
     setFormData(prev => ({
@@ -546,8 +556,8 @@ function CreateReportModal({ isOpen, onClose, connectedAccounts }: { isOpen: boo
     }))
   }
 
-  const handleExport = (type: 'email' | 'whatsapp' | 'download') => {
-    if (!formData.name || !formData.account || !formData.platform || !formData.startDate || !formData.endDate) {
+  const handleExport = async (type: 'email' | 'whatsapp' | 'download') => {
+    if (!formData.name || !formData.platform || !formData.startDate || !formData.endDate) {
       showToast('Preencha todos os campos obrigatórios', 'error')
       return
     }
@@ -556,13 +566,65 @@ function CreateReportModal({ isOpen, onClose, connectedAccounts }: { isOpen: boo
       return
     }
 
-    const messages = {
-      email: 'Relatório enviado por e-mail!',
-      whatsapp: 'Relatório enviado por WhatsApp!',
-      download: 'Relatório baixado com sucesso!'
+    setIsLoading(true)
+
+    try {
+      // Salvar relatório no banco de dados
+      const platformMap: Record<string, string> = {
+        'meta': 'META',
+        'google': 'GOOGLE',
+        'tiktok': 'TIKTOK',
+        'linkedin': 'LINKEDIN',
+      }
+
+      const reportData = {
+        name: formData.name,
+        type: 'PERFORMANCE',
+        frequency: 'ONCE',
+        platforms: [platformMap[formData.platform] || formData.platform.toUpperCase()],
+        metrics: formData.metrics,
+        dateRange: {
+          start: formData.startDate,
+          end: formData.endDate,
+        },
+        sendMethod: type.toUpperCase(),
+      }
+
+      const result = await generateReport(reportData)
+
+      if (result) {
+        if (type === 'download') {
+          try {
+            // Passar os dados reais do relatório para o PDF
+            generateQuickReportPDF(
+              formData.name,
+              formData.platform,
+              formData.startDate,
+              formData.endDate,
+              formData.metrics,
+              result.reportData // Dados reais do banco
+            )
+            showToast('Relatório salvo e PDF gerado!', 'success')
+          } catch (error) {
+            console.error('Erro ao gerar PDF:', error)
+            showToast('Relatório salvo, mas erro ao gerar PDF', 'warning')
+          }
+        } else if (type === 'email') {
+          showToast('Relatório salvo e enviado por e-mail!', 'success')
+        } else if (type === 'whatsapp') {
+          showToast('Relatório salvo e enviado por WhatsApp!', 'success')
+        }
+
+        // Recarregar lista de relatórios
+        await fetchReports()
+        onClose()
+      }
+    } catch (error) {
+      console.error('Erro ao criar relatório:', error)
+      showToast('Erro ao criar relatório', 'error')
+    } finally {
+      setIsLoading(false)
     }
-    showToast(messages[type], 'success')
-    onClose()
   }
 
   return (

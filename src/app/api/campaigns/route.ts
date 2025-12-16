@@ -13,6 +13,9 @@ export const GET = withAuth(async (req, ctx) => {
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
     const platform = searchParams.get('platform')
+    const accountId = searchParams.get('accountId')
+    const startDateParam = searchParams.get('startDate')
+    const endDateParam = searchParams.get('endDate')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
     const skip = (page - 1) * limit
@@ -31,6 +34,14 @@ export const GET = withAuth(async (req, ctx) => {
       where.platform = platform
     }
 
+    if (accountId) {
+      where.integrationId = accountId
+    }
+
+    // Nota: O filtro de data NÃO deve ocultar campanhas
+    // Campanhas sempre devem ser visíveis, apenas as métricas são filtradas por data
+    // Os parâmetros startDate/endDate são usados apenas para filtrar métricas no Dashboard/Analytics
+
     // Buscar campanhas com metricas
     const [campaigns, total] = await Promise.all([
       prisma.campaign.findMany({
@@ -38,6 +49,7 @@ export const GET = withAuth(async (req, ctx) => {
         include: {
           integration: {
             select: {
+              id: true,
               name: true,
               platform: true,
             },
@@ -61,14 +73,15 @@ export const GET = withAuth(async (req, ctx) => {
     const formattedCampaigns = campaigns.map((campaign) => ({
       id: campaign.id,
       name: campaign.name,
-      platform: campaign.platform,
-      status: campaign.status,
-      objective: campaign.objective,
+      platform: campaign.platform.toLowerCase(),
+      status: campaign.status.toLowerCase(),
+      objective: campaign.objective.toLowerCase(),
       budget: campaign.budget,
       budgetType: campaign.budgetType,
       spent: campaign.spent,
       startDate: campaign.startDate,
       endDate: campaign.endDate,
+      integrationId: campaign.integrationId,
       integration: campaign.integration,
       metrics: campaign.metrics[0] || null,
       leadsCount: campaign._count.leads,

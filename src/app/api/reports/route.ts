@@ -10,17 +10,16 @@ import { withAuth, createAuditLog } from '@/lib/api/middleware'
 // Schema para criar relatorio
 const createReportSchema = z.object({
   name: z.string().min(1, 'Nome obrigatorio'),
-  type: z.enum(['performance', 'audience', 'creative', 'custom']).default('performance'),
-  platform: z.enum(['META', 'GOOGLE', 'TIKTOK', 'LINKEDIN', 'TWITTER']).optional(),
-  integrationId: z.string().optional(),
+  type: z.enum(['PERFORMANCE', 'AUDIENCE', 'CREATIVE', 'CUSTOM']).default('PERFORMANCE'),
+  frequency: z.enum(['ONCE', 'DAILY', 'WEEKLY', 'MONTHLY', 'CUSTOM']).default('ONCE'),
+  platforms: z.array(z.enum(['META', 'GOOGLE', 'TIKTOK', 'LINKEDIN', 'TWITTER', 'WHATSAPP'])).min(1, 'Selecione pelo menos uma plataforma'),
   metrics: z.array(z.string()).min(1, 'Selecione pelo menos uma metrica'),
   dateRange: z.object({
     start: z.string(),
     end: z.string(),
   }),
-  frequency: z.enum(['once', 'daily', 'weekly', 'monthly']).default('once'),
-  recipients: z.array(z.string()).optional(),
-  sendMethod: z.enum(['email', 'whatsapp', 'download']).optional(),
+  recipients: z.array(z.string()).optional().default([]),
+  sendMethod: z.enum(['EMAIL', 'WHATSAPP', 'DOWNLOAD']).optional(),
 })
 
 // GET - Listar relatorios
@@ -29,51 +28,74 @@ export const GET = withAuth(async (req, ctx) => {
     const { searchParams } = new URL(req.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
+    const status = searchParams.get('status')
+    const type = searchParams.get('type')
     const skip = (page - 1) * limit
 
-    // Buscar relatorios do audit log (tipo report.generated)
+    // Construir filtros
+    const where: any = {
+      organizationId: ctx.organizationId,
+      isActive: true,
+    }
+
+    if (status) {
+      where.status = status.toUpperCase()
+    }
+
+    if (type) {
+      where.type = type.toUpperCase()
+    }
+
+    // Buscar relatorios
     const [reports, total] = await Promise.all([
-      prisma.auditLog.findMany({
-        where: {
-          organizationId: ctx.organizationId,
-          action: { startsWith: 'report.' },
-        },
+      prisma.report.findMany({
+        where,
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
-      prisma.auditLog.count({
-        where: {
-          organizationId: ctx.organizationId,
-          action: { startsWith: 'report.' },
-        },
-      }),
+      prisma.report.count({ where }),
     ])
 
     // Buscar estatisticas
-    const stats = await prisma.auditLog.groupBy({
-      by: ['action'],
+    const stats = await prisma.report.groupBy({
+      by: ['status'],
       where: {
         organizationId: ctx.organizationId,
-        action: { startsWith: 'report.' },
-        createdAt: {
-          gte: new Date(new Date().setDate(new Date().getDate() - 30)),
-        },
+        isActive: true,
       },
       _count: true,
     })
 
+    // Formatar para o frontend
+    const formattedReports = reports.map((r) => ({
+      id: r.id,
+      name: r.name,
+      type: r.type.toLowerCase(),
+      frequency: r.frequency.toLowerCase(),
+      status: r.status.toLowerCase(),
+      platforms: r.platforms.map(p => p.toLowerCase()),
+      metrics: r.metrics,
+      dateRange: {
+        start: r.dateRangeStart.toISOString(),
+        end: r.dateRangeEnd.toISOString(),
+      },
+      recipients: r.recipients,
+      sendMethod: r.sendMethod?.toLowerCase(),
+      lastGenerated: r.lastGenerated?.toISOString(),
+      generatedCount: r.generatedCount,
+      reportData: r.reportData,
+      createdAt: r.createdAt.toISOString(),
+      updatedAt: r.updatedAt.toISOString(),
+    }))
+
     return NextResponse.json({
-      reports: reports.map((r) => ({
-        id: r.id,
-        action: r.action,
-        data: r.newData,
-        createdAt: r.createdAt,
-        userEmail: r.userEmail,
-      })),
+      reports: formattedReports,
       stats: {
-        generatedThisMonth: stats.reduce((acc, s) => acc + s._count, 0),
-        byType: stats,
+        total,
+        active: stats.find(s => s.status === 'ACTIVE')?._count || 0,
+        paused: stats.find(s => s.status === 'PAUSED')?._count || 0,
+        byStatus: stats,
       },
       pagination: {
         page,
@@ -91,7 +113,7 @@ export const GET = withAuth(async (req, ctx) => {
   }
 }, { requiredPermissions: ['canViewReports'] })
 
-// POST - Criar/Gerar relatorio
+// POST - Criar relatorio
 export const POST = withAuth(async (req, ctx) => {
   try {
     const body = await req.json()
@@ -100,18 +122,31 @@ export const POST = withAuth(async (req, ctx) => {
     const startDate = new Date(data.dateRange.start)
     const endDate = new Date(data.dateRange.end)
 
-    // Construir filtros de campanha
+    // Criar o relatorio no banco
+    const report = await prisma.report.create({
+      data: {
+        organizationId: ctx.organizationId,
+        name: data.name,
+        type: data.type as any,
+        frequency: data.frequency as any,
+        status: 'ACTIVE',
+        platforms: data.platforms as any[],
+        metrics: data.metrics,
+        dateRangeStart: startDate,
+        dateRangeEnd: endDate,
+        recipients: data.recipients || [],
+        sendMethod: data.sendMethod as any,
+      },
+    })
+
+    // Gerar dados do relatorio baseado nas campanhas
     const campaignWhere: any = {
       organizationId: ctx.organizationId,
       isActive: true,
     }
 
-    if (data.platform) {
-      campaignWhere.platform = data.platform
-    }
-
-    if (data.integrationId) {
-      campaignWhere.integrationId = data.integrationId
+    if (data.platforms.length > 0) {
+      campaignWhere.platform = { in: data.platforms }
     }
 
     // Buscar dados das campanhas
@@ -126,12 +161,6 @@ export const POST = withAuth(async (req, ctx) => {
             },
           },
           orderBy: { date: 'asc' },
-        },
-        metrics: {
-          where: {
-            periodStart: { gte: startDate },
-            periodEnd: { lte: endDate },
-          },
         },
         integration: {
           select: {
@@ -225,35 +254,62 @@ export const POST = withAuth(async (req, ctx) => {
     dailyData.sort((a, b) => a.date.localeCompare(b.date))
 
     const reportData = {
-      name: data.name,
-      type: data.type,
-      platform: data.platform,
-      dateRange: data.dateRange,
-      metrics: data.metrics,
-      generatedAt: new Date().toISOString(),
       aggregatedMetrics,
       dailyData,
       campaignData,
       totalCampaigns: campaigns.length,
+      generatedAt: new Date().toISOString(),
     }
+
+    // Atualizar o relatorio com os dados gerados
+    await prisma.report.update({
+      where: { id: report.id },
+      data: {
+        reportData,
+        lastGenerated: new Date(),
+        generatedCount: { increment: 1 },
+      },
+    })
 
     // Registrar no audit log
     await createAuditLog({
       organizationId: ctx.organizationId,
       userId: ctx.userId,
       userEmail: ctx.email,
-      action: 'report.generated',
+      action: 'report.created',
       entity: 'report',
-      newData: reportData,
+      entityId: report.id,
+      newData: { name: report.name, type: report.type },
       request: req,
     })
 
+    // Formatar resposta
+    const formattedReport = {
+      id: report.id,
+      name: report.name,
+      type: report.type.toLowerCase(),
+      frequency: report.frequency.toLowerCase(),
+      status: report.status.toLowerCase(),
+      platforms: report.platforms.map(p => p.toLowerCase()),
+      metrics: report.metrics,
+      dateRange: {
+        start: report.dateRangeStart.toISOString(),
+        end: report.dateRangeEnd.toISOString(),
+      },
+      recipients: report.recipients,
+      sendMethod: report.sendMethod?.toLowerCase(),
+      lastGenerated: new Date().toISOString(),
+      generatedCount: 1,
+      createdAt: report.createdAt.toISOString(),
+      reportData,
+    }
+
     return NextResponse.json({
       success: true,
-      report: reportData,
+      report: formattedReport,
     })
   } catch (error) {
-    console.error('Erro ao gerar relatorio:', error)
+    console.error('Erro ao criar relatorio:', error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -263,7 +319,7 @@ export const POST = withAuth(async (req, ctx) => {
     }
 
     return NextResponse.json(
-      { error: 'Erro ao gerar relatorio' },
+      { error: 'Erro ao criar relatorio' },
       { status: 500 }
     )
   }
