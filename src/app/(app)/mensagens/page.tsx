@@ -264,8 +264,27 @@ export default function MensagensPage() {
     source: c.tags?.[0] || 'Organico',
   }))
 
-  // Sales data from won leads
-  const sales: WhatsAppSale[] = leads
+  // Função para mapear source para plataforma
+  const getPlatformFromSource = (source: string): PlatformType => {
+    const sourceUpper = source?.toUpperCase() || ''
+    if (sourceUpper.includes('WHATSAPP')) return 'whatsapp'
+    if (sourceUpper.includes('META') || sourceUpper.includes('FACEBOOK') || sourceUpper.includes('INSTAGRAM')) return 'instagram'
+    if (sourceUpper.includes('MESSENGER')) return 'messenger'
+    // Para outras fontes (GOOGLE, TIKTOK, ORGANIC, etc), consideramos como WhatsApp (canal principal)
+    return 'whatsapp'
+  }
+
+  // Filtrar dados por plataforma selecionada
+  const filteredLeads = activePlatform === 'all'
+    ? leads
+    : leads.filter(l => getPlatformFromSource(l.source) === activePlatform)
+
+  const filteredContacts = activePlatform === 'all'
+    ? contacts
+    : contacts.filter(c => getPlatformFromSource(c.source) === activePlatform)
+
+  // Sales data from won leads (filtrados por plataforma)
+  const sales: WhatsAppSale[] = filteredLeads
     .filter(l => l.status === 'WON' && l.value)
     .map(l => ({
       id: l.id,
@@ -285,7 +304,7 @@ export default function MensagensPage() {
   const totalSales = sales.reduce((acc, s) => acc + s.value, 0)
   const totalConversions = sales.length
   // Em andamento = CONTACTED, QUALIFIED, PROPOSAL, NEGOTIATION
-  const pendingSales = leads.filter(l => ['CONTACTED', 'QUALIFIED', 'PROPOSAL', 'NEGOTIATION'].includes(l.status)).length
+  const pendingSales = filteredLeads.filter(l => ['CONTACTED', 'QUALIFIED', 'PROPOSAL', 'NEGOTIATION'].includes(l.status)).length
   const avgTicket = totalConversions > 0 ? totalSales / totalConversions : 0
 
   const handleConnect = (accountId?: string) => {
@@ -341,7 +360,8 @@ export default function MensagensPage() {
     setDraggedLead(null)
   }
 
-  const filteredContacts = contacts.filter(c =>
+  // Aplicar filtro de busca sobre contacts já filtrados por plataforma
+  const searchedContacts = filteredContacts.filter(c =>
     c.name.toLowerCase().includes(searchContact.toLowerCase()) ||
     c.phone.includes(searchContact)
   )
@@ -846,7 +866,7 @@ export default function MensagensPage() {
 
                       {/* Lista */}
                       <div style={{ flex: 1, overflowY: 'auto' }}>
-                        {filteredContacts.map((contact) => (
+                        {searchedContacts.map((contact) => (
                           <div
                             key={contact.id}
                             onClick={() => setSelectedContact(contact)}
@@ -1084,8 +1104,8 @@ export default function MensagensPage() {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px', overflowX: 'auto' }}>
                     {(Object.keys(statusConfig) as LeadStatus[]).map((status, idx) => {
                       const config = statusConfig[status]
-                      const count = leads.filter(l => l.status === status).length
-                      const totalValue = leads.filter(l => l.status === status).reduce((acc, l) => acc + (l.value || 0), 0)
+                      const count = filteredLeads.filter(l => l.status === status).length
+                      const totalValue = filteredLeads.filter(l => l.status === status).reduce((acc, l) => acc + (l.value || 0), 0)
                       return (
                         <motion.div
                           key={status}
@@ -1116,7 +1136,7 @@ export default function MensagensPage() {
                   <div style={{ display: 'flex', gap: '16px', minHeight: '500px', overflowX: 'auto', paddingBottom: '16px' }}>
                     {(Object.keys(statusConfig) as LeadStatus[]).map((status) => {
                       const config = statusConfig[status]
-                      const columnLeads = leads.filter(l => l.status === status)
+                      const columnLeads = filteredLeads.filter(l => l.status === status)
                       return (
                         <div
                           key={status}
