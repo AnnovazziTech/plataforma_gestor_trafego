@@ -171,16 +171,64 @@ export default function SocialPage() {
   const [analyzing, setAnalyzing] = useState(false)
   const [editingPost, setEditingPost] = useState<ScheduledPost | null>(null)
 
+  // Analysis results
+  const [siteAnalysis, setSiteAnalysis] = useState<{
+    url: string
+    traffic: string
+    timeOnSite: string
+    bounceRate: string
+    pagesPerSession: string
+    sources: { source: string; value: number; color: string }[]
+  } | null>(null)
+
+  const [socialAnalysis, setSocialAnalysis] = useState<{
+    handle: string
+    platforms: { platform: string; followers: string; engagement: string; growth: string }[]
+  } | null>(null)
+
+  const [postAnalysis, setPostAnalysis] = useState<{
+    url: string
+    likes: number
+    comments: number
+    shares: number
+    reach: number
+    engagement: string
+    sentiment: string
+  } | null>(null)
+
   const handleAnalyzeSite = () => {
     if (!siteUrl) {
       showToast('Digite uma URL para analisar', 'error')
       return
     }
     setAnalyzing(true)
+    setSiteAnalysis(null)
+
+    // Simulate analysis with random data
     setTimeout(() => {
+      const traffic = Math.floor(Math.random() * 500 + 50)
+      const bounce = Math.floor(Math.random() * 40 + 25)
+      const sources = [
+        { source: 'Busca Orgânica', value: Math.floor(Math.random() * 30 + 30), color: '#3B82F6' },
+        { source: 'Redes Sociais', value: Math.floor(Math.random() * 20 + 15), color: '#FACC15' },
+        { source: 'Direto', value: Math.floor(Math.random() * 20 + 10), color: '#8B5CF6' },
+        { source: 'Referência', value: Math.floor(Math.random() * 15 + 5), color: '#22C55E' },
+      ]
+      // Normalize to 100%
+      const total = sources.reduce((acc, s) => acc + s.value, 0)
+      sources.forEach(s => s.value = Math.round((s.value / total) * 100))
+
+      setSiteAnalysis({
+        url: siteUrl,
+        traffic: `${traffic}K`,
+        timeOnSite: `${Math.floor(Math.random() * 4 + 1)}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
+        bounceRate: `${bounce}%`,
+        pagesPerSession: (Math.random() * 4 + 1).toFixed(1),
+        sources,
+      })
       setAnalyzing(false)
       showToast('Análise concluída!', 'success')
-    }, 3000)
+    }, 2500)
   }
 
   const handleAnalyzeSocial = () => {
@@ -189,10 +237,21 @@ export default function SocialPage() {
       return
     }
     setAnalyzing(true)
+    setSocialAnalysis(null)
+
     setTimeout(() => {
+      setSocialAnalysis({
+        handle: socialHandle,
+        platforms: [
+          { platform: 'Instagram', followers: `${Math.floor(Math.random() * 100 + 10)}K`, engagement: `${(Math.random() * 5 + 2).toFixed(1)}%`, growth: `+${(Math.random() * 10 + 1).toFixed(1)}%` },
+          { platform: 'Facebook', followers: `${Math.floor(Math.random() * 80 + 5)}K`, engagement: `${(Math.random() * 4 + 1).toFixed(1)}%`, growth: `+${(Math.random() * 8 + 0.5).toFixed(1)}%` },
+          { platform: 'LinkedIn', followers: `${Math.floor(Math.random() * 50 + 5)}K`, engagement: `${(Math.random() * 6 + 2).toFixed(1)}%`, growth: `+${(Math.random() * 12 + 2).toFixed(1)}%` },
+          { platform: 'Twitter', followers: `${Math.floor(Math.random() * 40 + 3)}K`, engagement: `${(Math.random() * 3 + 1).toFixed(1)}%`, growth: `+${(Math.random() * 6 + 0.5).toFixed(1)}%` },
+        ],
+      })
       setAnalyzing(false)
       showToast('Análise concluída!', 'success')
-    }, 3000)
+    }, 2500)
   }
 
   const handleAnalyzePost = () => {
@@ -201,10 +260,26 @@ export default function SocialPage() {
       return
     }
     setAnalyzing(true)
+    setPostAnalysis(null)
+
     setTimeout(() => {
+      const likes = Math.floor(Math.random() * 10000 + 500)
+      const comments = Math.floor(Math.random() * 500 + 50)
+      const shares = Math.floor(Math.random() * 300 + 20)
+      const reach = Math.floor(Math.random() * 50000 + 5000)
+
+      setPostAnalysis({
+        url: postUrl,
+        likes,
+        comments,
+        shares,
+        reach,
+        engagement: `${((likes + comments + shares) / reach * 100).toFixed(2)}%`,
+        sentiment: Math.random() > 0.3 ? 'Positivo' : Math.random() > 0.5 ? 'Neutro' : 'Negativo',
+      })
       setAnalyzing(false)
       showToast('Análise do post concluída!', 'success')
-    }, 3000)
+    }, 2500)
   }
 
   const handleEditPost = (post: ScheduledPost) => {
@@ -407,42 +482,82 @@ export default function SocialPage() {
                 </div>
 
                 {/* Resultado da Análise */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
-                  {[
-                    { label: 'Tráfego Mensal', value: '125K', trend: '+12%' },
-                    { label: 'Tempo no Site', value: '2:45', trend: '+5%' },
-                    { label: 'Taxa de Rejeição', value: '42%', trend: '-8%' },
-                    { label: 'Páginas/Sessão', value: '3.2', trend: '+15%' },
-                  ].map((metric, idx) => (
-                    <div key={idx} style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                      <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px' }}>{metric.label}</p>
-                      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-                        <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{metric.value}</p>
-                        <span style={{ fontSize: '12px', fontWeight: 500, color: metric.trend.startsWith('+') ? '#10B981' : '#EF4444' }}>
-                          {metric.trend}
-                        </span>
+                {!siteAnalysis && !analyzing && (
+                  <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                    <div style={{
+                      width: '64px',
+                      height: '64px',
+                      margin: '0 auto 16px',
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <Globe style={{ width: '32px', height: '32px', color: '#6B6B7B' }} />
+                    </div>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px' }}>Nenhuma análise realizada</p>
+                    <p style={{ fontSize: '12px', color: '#4B4B5B' }}>Digite a URL de um site e clique em Analisar</p>
+                  </div>
+                )}
+
+                {analyzing && activeTab === 'site' && (
+                  <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                    <div style={{
+                      width: '48px',
+                      height: '48px',
+                      margin: '0 auto 16px',
+                      border: '3px solid rgba(59, 130, 246, 0.2)',
+                      borderTopColor: '#3B82F6',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                    }} />
+                    <p style={{ fontSize: '14px', color: '#FFFFFF', marginBottom: '4px' }}>Analisando {siteUrl}...</p>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B' }}>Coletando dados de tráfego e performance</p>
+                  </div>
+                )}
+
+                {siteAnalysis && !analyzing && (
+                  <>
+                    <div style={{ marginBottom: '16px', padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                      <p style={{ fontSize: '12px', color: '#3B82F6', margin: 0 }}>Resultados para: <strong>{siteAnalysis.url}</strong></p>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                      {[
+                        { label: 'Tráfego Mensal', value: siteAnalysis.traffic, trend: `+${Math.floor(Math.random() * 20 + 5)}%` },
+                        { label: 'Tempo no Site', value: siteAnalysis.timeOnSite, trend: `+${Math.floor(Math.random() * 15 + 2)}%` },
+                        { label: 'Taxa de Rejeição', value: siteAnalysis.bounceRate, trend: `-${Math.floor(Math.random() * 10 + 3)}%` },
+                        { label: 'Páginas/Sessão', value: siteAnalysis.pagesPerSession, trend: `+${Math.floor(Math.random() * 20 + 5)}%` },
+                      ].map((metric, idx) => (
+                        <div key={idx} style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                          <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px' }}>{metric.label}</p>
+                          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                            <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{metric.value}</p>
+                            <span style={{ fontSize: '12px', fontWeight: 500, color: metric.trend.startsWith('+') ? '#10B981' : '#EF4444' }}>
+                              {metric.trend}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                      <h4 style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>Fontes de Tráfego</h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {siteAnalysis.sources.map((item) => (
+                          <div key={item.source} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: item.color }} />
+                            <span style={{ fontSize: '14px', color: '#A0A0B0', flex: 1 }}>{item.source}</span>
+                            <div style={{ flex: 2, height: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                              <div style={{ width: `${item.value}%`, height: '100%', backgroundColor: item.color, borderRadius: '4px' }} />
+                            </div>
+                            <span style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', minWidth: '40px', textAlign: 'right' }}>{item.value}%</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
-                </div>
-
-                <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                  <h4 style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>Fontes de Tráfego</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {[
-                      { source: 'Busca Orgânica', value: 45, color: '#3B82F6' },
-                      { source: 'Redes Sociais', value: 25, color: '#FACC15' },
-                      { source: 'Direto', value: 20, color: '#8B5CF6' },
-                      { source: 'Referência', value: 10, color: '#22C55E' },
-                    ].map((item) => (
-                      <div key={item.source} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: item.color }} />
-                        <span style={{ fontSize: '14px', color: '#A0A0B0', flex: 1 }}>{item.source}</span>
-                        <span style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF' }}>{item.value}%</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
             </motion.div>
           )}
@@ -500,42 +615,100 @@ export default function SocialPage() {
                   </Button>
                 </div>
 
-                {/* Métricas por Plataforma */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-                  {[
-                    { platform: 'Instagram', icon: Instagram, followers: '45K', engagement: '5.2%', color: '#E4405F' },
-                    { platform: 'Facebook', icon: Facebook, followers: '32K', engagement: '3.8%', color: '#1877F2' },
-                    { platform: 'LinkedIn', icon: Linkedin, followers: '28K', engagement: '4.5%', color: '#0A66C2' },
-                    { platform: 'Twitter', icon: Twitter, followers: '20K', engagement: '2.9%', color: '#1DA1F2' },
-                  ].map((item) => (
-                    <div
-                      key={item.platform}
-                      style={{
-                        padding: '16px',
-                        borderRadius: '12px',
-                        border: `1px solid ${item.color}30`,
-                        backgroundColor: `${item.color}10`,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                        <item.icon size={20} style={{ color: item.color }} />
-                        <span style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF' }}>{item.platform}</span>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Seguidores</span>
-                          <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF' }}>{item.followers}</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Engajamento</span>
-                          <span style={{ fontSize: '14px', fontWeight: 600, color: item.color }}>{item.engagement}</span>
-                        </div>
-                      </div>
+                {/* Resultado da Análise */}
+                {!socialAnalysis && !analyzing && (
+                  <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                    <div style={{
+                      width: '64px',
+                      height: '64px',
+                      margin: '0 auto 16px',
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <Share2 style={{ width: '32px', height: '32px', color: '#6B6B7B' }} />
                     </div>
-                  ))}
-                </div>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px' }}>Nenhuma análise realizada</p>
+                    <p style={{ fontSize: '12px', color: '#4B4B5B' }}>Digite um @ de usuário e clique em Analisar</p>
+                  </div>
+                )}
+
+                {analyzing && activeTab === 'social' && (
+                  <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                    <div style={{
+                      width: '48px',
+                      height: '48px',
+                      margin: '0 auto 16px',
+                      border: '3px solid rgba(250, 204, 21, 0.2)',
+                      borderTopColor: '#FACC15',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                    }} />
+                    <p style={{ fontSize: '14px', color: '#FFFFFF', marginBottom: '4px' }}>Analisando {socialHandle}...</p>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B' }}>Coletando dados de redes sociais</p>
+                  </div>
+                )}
+
+                {socialAnalysis && !analyzing && (
+                  <>
+                    <div style={{ marginBottom: '16px', padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(250, 204, 21, 0.1)', border: '1px solid rgba(250, 204, 21, 0.2)' }}>
+                      <p style={{ fontSize: '12px', color: '#FACC15', margin: 0 }}>Resultados para: <strong>{socialAnalysis.handle}</strong></p>
+                    </div>
+
+                    {/* Métricas por Plataforma */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+                      {socialAnalysis.platforms.map((item) => {
+                        const platformIcons: Record<string, any> = {
+                          Instagram: Instagram,
+                          Facebook: Facebook,
+                          LinkedIn: Linkedin,
+                          Twitter: Twitter,
+                        }
+                        const platformColors: Record<string, string> = {
+                          Instagram: '#E4405F',
+                          Facebook: '#1877F2',
+                          LinkedIn: '#0A66C2',
+                          Twitter: '#1DA1F2',
+                        }
+                        const Icon = platformIcons[item.platform]
+                        const color = platformColors[item.platform]
+                        return (
+                          <div
+                            key={item.platform}
+                            style={{
+                              padding: '16px',
+                              borderRadius: '12px',
+                              border: `1px solid ${color}30`,
+                              backgroundColor: `${color}10`,
+                              transition: 'all 0.2s',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                              <Icon size={20} style={{ color: color }} />
+                              <span style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF' }}>{item.platform}</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Seguidores</span>
+                                <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF' }}>{item.followers}</span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Engajamento</span>
+                                <span style={{ fontSize: '14px', fontWeight: 600, color: color }}>{item.engagement}</span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Crescimento</span>
+                                <span style={{ fontSize: '14px', fontWeight: 600, color: '#10B981' }}>{item.growth}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </>
+                )}
               </div>
             </motion.div>
           )}
@@ -563,51 +736,127 @@ export default function SocialPage() {
                   </div>
                 </div>
 
-                <div style={{ textAlign: 'center', padding: '48px 0' }}>
-                  <div style={{
-                    width: '80px',
-                    height: '80px',
-                    margin: '0 auto 16px',
-                    borderRadius: '16px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                    <Upload size={32} style={{ color: '#6B6B7B' }} />
-                  </div>
-                  <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px' }}>Cole o link do post ou faça upload da imagem</p>
-                  <p style={{ fontSize: '12px', color: '#4B4B5B', marginBottom: '24px' }}>Suportamos Instagram, Facebook, LinkedIn e Twitter</p>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-                    <input
-                      type="text"
-                      value={postUrl}
-                      onChange={(e) => setPostUrl(e.target.value)}
-                      placeholder="Cole o link do post aqui..."
-                      style={{
-                        width: '384px',
-                        height: '44px',
-                        padding: '0 16px',
-                        borderRadius: '12px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        fontSize: '14px',
-                        color: '#FFFFFF',
-                        outline: 'none',
-                      }}
-                    />
-                    <Button variant="primary" onClick={handleAnalyzePost}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {analyzing ? (
-                          <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255, 255, 255, 0.3)', borderTopColor: '#FFFFFF', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-                        ) : (
-                          <BarChart3 size={16} />
-                        )}
-                        Analisar
-                      </span>
-                    </Button>
-                  </div>
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+                  <input
+                    type="text"
+                    value={postUrl}
+                    onChange={(e) => setPostUrl(e.target.value)}
+                    placeholder="Cole o link do post aqui..."
+                    style={{
+                      flex: 1,
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      fontSize: '14px',
+                      color: '#FFFFFF',
+                      outline: 'none',
+                    }}
+                  />
+                  <Button variant="primary" onClick={handleAnalyzePost}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {analyzing ? (
+                        <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255, 255, 255, 0.3)', borderTopColor: '#FFFFFF', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                      ) : (
+                        <BarChart3 size={16} />
+                      )}
+                      Analisar
+                    </span>
+                  </Button>
                 </div>
+
+                {/* Resultado da Análise */}
+                {!postAnalysis && !analyzing && (
+                  <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                    <div style={{
+                      width: '64px',
+                      height: '64px',
+                      margin: '0 auto 16px',
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <Image style={{ width: '32px', height: '32px', color: '#6B6B7B' }} />
+                    </div>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px' }}>Nenhuma análise realizada</p>
+                    <p style={{ fontSize: '12px', color: '#4B4B5B' }}>Cole o link de um post e clique em Analisar</p>
+                  </div>
+                )}
+
+                {analyzing && activeTab === 'post' && (
+                  <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                    <div style={{
+                      width: '48px',
+                      height: '48px',
+                      margin: '0 auto 16px',
+                      border: '3px solid rgba(139, 92, 246, 0.2)',
+                      borderTopColor: '#8B5CF6',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                    }} />
+                    <p style={{ fontSize: '14px', color: '#FFFFFF', marginBottom: '4px' }}>Analisando post...</p>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B' }}>Coletando métricas de engajamento</p>
+                  </div>
+                )}
+
+                {postAnalysis && !analyzing && (
+                  <>
+                    <div style={{ marginBottom: '16px', padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                      <p style={{ fontSize: '12px', color: '#8B5CF6', margin: 0, wordBreak: 'break-all' }}>Analisando: <strong>{postAnalysis.url}</strong></p>
+                    </div>
+
+                    {/* Métricas do Post */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                      {[
+                        { label: 'Curtidas', value: postAnalysis.likes.toLocaleString('pt-BR'), icon: Heart, color: '#EF4444' },
+                        { label: 'Comentários', value: postAnalysis.comments.toLocaleString('pt-BR'), icon: MessageCircle, color: '#3B82F6' },
+                        { label: 'Compartilhamentos', value: postAnalysis.shares.toLocaleString('pt-BR'), icon: Share2, color: '#10B981' },
+                      ].map((metric, idx) => (
+                        <div key={idx} style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                            <metric.icon size={16} style={{ color: metric.color }} />
+                            <span style={{ fontSize: '12px', color: '#6B6B7B' }}>{metric.label}</span>
+                          </div>
+                          <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{metric.value}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                      <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <Eye size={16} style={{ color: '#FACC15' }} />
+                          <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Alcance</span>
+                        </div>
+                        <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{postAnalysis.reach.toLocaleString('pt-BR')}</p>
+                      </div>
+                      <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <TrendingUp size={16} style={{ color: '#8B5CF6' }} />
+                          <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Engajamento</span>
+                        </div>
+                        <p style={{ fontSize: '24px', fontWeight: 700, color: '#8B5CF6', margin: 0 }}>{postAnalysis.engagement}</p>
+                      </div>
+                      <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <MessageCircle size={16} style={{ color: postAnalysis.sentiment === 'Positivo' ? '#10B981' : postAnalysis.sentiment === 'Negativo' ? '#EF4444' : '#FACC15' }} />
+                          <span style={{ fontSize: '12px', color: '#6B6B7B' }}>Sentimento</span>
+                        </div>
+                        <p style={{
+                          fontSize: '24px',
+                          fontWeight: 700,
+                          color: postAnalysis.sentiment === 'Positivo' ? '#10B981' : postAnalysis.sentiment === 'Negativo' ? '#EF4444' : '#FACC15',
+                          margin: 0
+                        }}>
+                          {postAnalysis.sentiment}
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </motion.div>
           )}
