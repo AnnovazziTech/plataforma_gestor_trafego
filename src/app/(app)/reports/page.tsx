@@ -1647,7 +1647,7 @@ function ReportCard({
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
         {report.platforms.map((platform) => (
           <div key={platform} style={{ padding: '6px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
-            <PlatformIcon platform={platform} size={14} />
+            <PlatformIcon platform={platform as Platform} size={14} />
           </div>
         ))}
       </div>
