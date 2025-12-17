@@ -20,7 +20,7 @@ const updateReportSchema = z.object({
 // GET - Buscar relatorio por ID
 export const GET = withAuth(async (req, ctx) => {
   try {
-    const id = ctx.params?.id as string
+    const id = req.url.split('/reports/')[1]?.split('?')[0]
 
     if (!id) {
       return NextResponse.json(
@@ -79,7 +79,7 @@ export const GET = withAuth(async (req, ctx) => {
 // PATCH - Atualizar relatorio
 export const PATCH = withAuth(async (req, ctx) => {
   try {
-    const id = ctx.params?.id as string
+    const id = req.url.split('/reports/')[1]?.split('?')[0]
 
     if (!id) {
       return NextResponse.json(
@@ -179,7 +179,7 @@ export const PATCH = withAuth(async (req, ctx) => {
 // DELETE - Remover relatorio (soft delete)
 export const DELETE = withAuth(async (req, ctx) => {
   try {
-    const id = ctx.params?.id as string
+    const id = req.url.split('/reports/')[1]?.split('?')[0]
 
     if (!id) {
       return NextResponse.json(
