@@ -1184,7 +1184,7 @@ export default function CampaignsPage() {
             style={{
               position: 'fixed',
               inset: 0,
-              zIndex: 50,
+              zIndex: 9999,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -1264,20 +1264,20 @@ export default function CampaignsPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
                   <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
                     <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '8px' }}>Impressões</p>
-                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{formatCompactNumber(detailCampaign.metrics.impressions)}</p>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{formatCompactNumber(detailCampaign.metrics?.impressions ?? 0)}</p>
                   </div>
                   <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: 'rgba(250, 204, 21, 0.1)', border: '1px solid rgba(250, 204, 21, 0.2)' }}>
                     <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '8px' }}>Cliques</p>
-                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{formatCompactNumber(detailCampaign.metrics.clicks)}</p>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{formatCompactNumber(detailCampaign.metrics?.clicks ?? 0)}</p>
                   </div>
                   <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
                     <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '8px' }}>Conversões</p>
-                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{detailCampaign.metrics.conversions}</p>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{detailCampaign.metrics?.conversions ?? 0}</p>
                   </div>
                   <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
                     <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '8px' }}>ROAS</p>
-                    <p style={{ fontSize: '24px', fontWeight: 700, color: detailCampaign.metrics.roas >= 3 ? '#34D399' : detailCampaign.metrics.roas >= 2 ? '#FACC15' : '#EF4444', margin: 0 }}>
-                      {detailCampaign.metrics.roas.toFixed(2)}x
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: (detailCampaign.metrics?.roas ?? 0) >= 3 ? '#34D399' : (detailCampaign.metrics?.roas ?? 0) >= 2 ? '#FACC15' : '#EF4444', margin: 0 }}>
+                      {(detailCampaign.metrics?.roas ?? 0).toFixed(2)}x
                     </p>
                   </div>
                 </div>
@@ -1352,19 +1352,19 @@ export default function CampaignsPage() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ fontSize: '14px', color: '#6B6B7B' }}>CTR</span>
-                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{detailCampaign.metrics.ctr.toFixed(2)}%</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{(detailCampaign.metrics?.ctr ?? 0).toFixed(2)}%</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ fontSize: '14px', color: '#6B6B7B' }}>CPC</span>
-                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{formatCurrency(detailCampaign.metrics.cpc)}</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{formatCurrency(detailCampaign.metrics?.cpc ?? 0)}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ fontSize: '14px', color: '#6B6B7B' }}>CPM</span>
-                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{formatCurrency(detailCampaign.metrics.cpm)}</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{formatCurrency(detailCampaign.metrics?.cpm ?? 0)}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ fontSize: '14px', color: '#6B6B7B' }}>Alcance</span>
-                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{formatCompactNumber(detailCampaign.metrics.reach)}</span>
+                        <span style={{ fontSize: '14px', color: '#FFFFFF' }}>{formatCompactNumber(detailCampaign.metrics?.reach ?? 0)}</span>
                       </div>
                     </div>
                   </div>
