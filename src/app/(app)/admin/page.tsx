@@ -237,6 +237,14 @@ export default function AdminPage() {
     reminder: true,
   })
 
+  // New expense form state
+  const [newExpense, setNewExpense] = useState({
+    description: '',
+    amount: '',
+    category: 'marketing',
+    date: new Date().toISOString().split('T')[0],
+  })
+
   // Simular tempo online
   useEffect(() => {
     const interval = setInterval(() => {
@@ -447,6 +455,30 @@ export default function AdminPage() {
     setShowAppointmentModal(false)
     setNewAppointment({ title: '', date: '', time: '', reminder: true })
     showToast('Compromisso agendado com sucesso!', 'success')
+  }
+
+  const handleAddExpense = () => {
+    if (!newExpense.description.trim()) {
+      showToast('Por favor, informe a descrição da despesa', 'error')
+      return
+    }
+    if (!newExpense.amount || parseFloat(newExpense.amount) <= 0) {
+      showToast('Por favor, informe um valor válido', 'error')
+      return
+    }
+
+    const expense: Expense = {
+      id: Date.now().toString(),
+      description: newExpense.description,
+      amount: parseFloat(newExpense.amount),
+      category: newExpense.category,
+      date: newExpense.date,
+    }
+
+    setExpenses(prev => [...prev, expense])
+    setShowExpenseModal(false)
+    setNewExpense({ description: '', amount: '', category: 'marketing', date: new Date().toISOString().split('T')[0] })
+    showToast('Despesa adicionada com sucesso!', 'success')
   }
 
   const handleEditClient = (client: Client) => {
@@ -1484,6 +1516,203 @@ export default function AdminPage() {
                   </Button>
                   <Button type="button" variant="primary" onClick={handleAddClient} style={{ flex: 1 }}>
                     {editingClient ? 'Salvar Alterações' : 'Adicionar Cliente'}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Nova Despesa */}
+      <AnimatePresence>
+        {showExpenseModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowExpenseModal(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '480px',
+                maxHeight: 'calc(100vh - 40px)',
+                overflow: 'auto',
+                backgroundColor: '#12121A',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '16px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              }}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '20px',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(to bottom right, #F59E0B, #D97706)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <Wallet style={{ width: '20px', height: '20px', color: '#FFFFFF' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>Nova Despesa</h2>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Registre uma nova despesa</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowExpenseModal(false)}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '8px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#6B6B7B',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <X style={{ width: '20px', height: '20px' }} />
+                </button>
+              </div>
+
+              <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Descrição *
+                  </label>
+                  <input
+                    type="text"
+                    value={newExpense.description}
+                    onChange={(e) => setNewExpense(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Ex: Anúncios Meta Ads"
+                    style={{
+                      width: '100%',
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                      Valor (R$) *
+                    </label>
+                    <input
+                      type="number"
+                      value={newExpense.amount}
+                      onChange={(e) => setNewExpense(prev => ({ ...prev, amount: e.target.value }))}
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                      style={{
+                        width: '100%',
+                        height: '48px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                      Data
+                    </label>
+                    <input
+                      type="date"
+                      value={newExpense.date}
+                      onChange={(e) => setNewExpense(prev => ({ ...prev, date: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        height: '48px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Categoria
+                  </label>
+                  <select
+                    value={newExpense.category}
+                    onChange={(e) => setNewExpense(prev => ({ ...prev, category: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <option value="marketing">Marketing</option>
+                    <option value="software">Software/Ferramentas</option>
+                    <option value="equipe">Equipe</option>
+                    <option value="escritorio">Escritório</option>
+                    <option value="impostos">Impostos</option>
+                    <option value="outros">Outros</option>
+                  </select>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>
+                  <Button type="button" variant="ghost" onClick={() => setShowExpenseModal(false)} style={{ flex: 1 }}>
+                    Cancelar
+                  </Button>
+                  <Button type="button" variant="primary" onClick={handleAddExpense} style={{ flex: 1 }}>
+                    Adicionar Despesa
                   </Button>
                 </div>
               </div>
