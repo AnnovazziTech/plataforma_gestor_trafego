@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, ReactNode, useMemo } from 'react'
+import { useState, ReactNode, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
 import { Button, Badge, StatCard } from '@/components/ui'
@@ -66,11 +66,48 @@ const actionIcons: Record<string, ReactNode> = {
   notify: <Bell size={14} />,
 }
 
+// Mapeamento de operadores página -> API
+const operatorToApi: Record<string, string> = {
+  gt: 'greater_than',
+  lt: 'less_than',
+  eq: 'equal',
+  gte: 'greater_equal',
+  lte: 'less_equal',
+}
+
+// Mapeamento de operadores API -> página
+const operatorFromApi: Record<string, string> = {
+  greater_than: 'gt',
+  less_than: 'lt',
+  equal: 'eq',
+  greater_equal: 'gte',
+  less_equal: 'lte',
+}
+
+// Mapeamento de timeframe página -> API
+const timeframeToApi: Record<string, string> = {
+  hour: 'last_hour',
+  day: 'last_day',
+  week: 'last_week',
+}
+
+// Mapeamento de target página -> API
+const targetToApi: Record<string, string> = {
+  campaign: 'campaign',
+  adset: 'ad_set',
+  ad: 'ad',
+}
+
 export default function AutomationPage() {
-  const { automations, addAutomation, updateAutomation, deleteAutomation, toggleAutomationStatus, showToast, connectedAccounts } = useApp()
+  const { automations, automationsLoading, fetchAutomations, addAutomation, updateAutomation, deleteAutomation, toggleAutomationStatus, showToast, connectedAccounts } = useApp()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingAutomation, setEditingAutomation] = useState<Automation | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+
+  // Buscar automações ao montar o componente
+  useEffect(() => {
+    fetchAutomations()
+  }, [fetchAutomations])
 
   // Form state for creating automation
   const [formData, setFormData] = useState({
@@ -114,24 +151,28 @@ export default function AutomationPage() {
       showToast('Preencha todos os campos obrigatórios', 'error')
       return
     }
-    await addAutomation({
-      name: formData.name,
-      type: formData.type.toUpperCase(),
-      status: 'ACTIVE',
-      conditions: [{
-        metric: formData.conditionMetric.toUpperCase(),
-        operator: formData.conditionOperator.toUpperCase(),
-        value: parseFloat(formData.conditionValue),
-        timeframe: formData.timeframe.toUpperCase(),
-      }],
-      actions: [{
-        type: formData.actionType.toUpperCase(),
-        value: formData.actionValue ? parseFloat(formData.actionValue) : null,
-        target: formData.target.toUpperCase(),
-      }],
-    })
-    setShowCreateModal(false)
-    resetForm()
+
+    try {
+      await addAutomation({
+        name: formData.name,
+        type: formData.type,
+        status: 'active',
+        condition: {
+          metric: formData.conditionMetric,
+          operator: operatorToApi[formData.conditionOperator] || 'greater_than',
+          value: parseFloat(formData.conditionValue),
+        },
+        period: timeframeToApi[formData.timeframe] || 'last_day',
+        action: formData.actionType,
+        actionValue: formData.actionValue ? parseFloat(formData.actionValue) : undefined,
+        applyTo: targetToApi[formData.target] || 'campaign',
+      })
+      setShowCreateModal(false)
+      resetForm()
+      fetchAutomations() // Recarregar lista
+    } catch (error) {
+      // Erro já tratado no context
+    }
   }
 
   const handleEditAutomation = (automation: Automation) => {
@@ -140,20 +181,34 @@ export default function AutomationPage() {
 
   const handleSaveEdit = async () => {
     if (!editingAutomation) return
-    await updateAutomation(editingAutomation.id, {
-      name: editingAutomation.name,
-      status: editingAutomation.status.toUpperCase(),
-    })
-    setEditingAutomation(null)
+    try {
+      await updateAutomation(editingAutomation.id, {
+        name: editingAutomation.name,
+        status: editingAutomation.status,
+      })
+      setEditingAutomation(null)
+      fetchAutomations() // Recarregar lista
+    } catch (error) {
+      // Erro já tratado no context
+    }
   }
 
   const handleDeleteAutomation = async (id: string) => {
-    await deleteAutomation(id)
-    setShowDeleteConfirm(null)
+    try {
+      await deleteAutomation(id)
+      setShowDeleteConfirm(null)
+      fetchAutomations() // Recarregar lista
+    } catch (error) {
+      // Erro já tratado no context
+    }
   }
 
   const handleToggleStatus = async (id: string) => {
-    await toggleAutomationStatus(id)
+    try {
+      await toggleAutomationStatus(id)
+    } catch (error) {
+      // Erro já tratado no context
+    }
   }
 
   const handleTemplateClick = (template: { title: string; conditions: string; action: string }) => {
@@ -252,16 +307,68 @@ export default function AutomationPage() {
 
         {/* Automations List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '48px' }}>
-          {automationsData.map((automation, index) => (
-            <AutomationCard
-              key={automation.id}
-              automation={automation as Automation}
-              index={index}
-              onEdit={handleEditAutomation}
-              onDelete={(id) => setShowDeleteConfirm(id)}
-              onToggleStatus={handleToggleStatus}
-            />
-          ))}
+          {automationsLoading ? (
+            <div style={{ textAlign: 'center', padding: '48px 0' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                margin: '0 auto 16px',
+                border: '3px solid rgba(59, 130, 246, 0.2)',
+                borderTopColor: '#3B82F6',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+              }} />
+              <p style={{ fontSize: '14px', color: '#6B6B7B' }}>Carregando automações...</p>
+            </div>
+          ) : automationsData.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                textAlign: 'center',
+                padding: '64px 24px',
+                borderRadius: '16px',
+                backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                border: '1px dashed rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              <div style={{
+                width: '64px',
+                height: '64px',
+                margin: '0 auto 16px',
+                borderRadius: '16px',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <Zap size={32} style={{ color: '#3B82F6' }} />
+              </div>
+              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', marginBottom: '8px' }}>
+                Nenhuma automação criada
+              </h3>
+              <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '24px', maxWidth: '400px', margin: '0 auto 24px' }}>
+                Crie regras automáticas para otimizar suas campanhas. Pause anúncios com CPA alto, escale campanhas com bom ROAS e muito mais.
+              </p>
+              <Button variant="primary" onClick={() => setShowCreateModal(true)}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Plus size={18} />
+                  Criar Primeira Automação
+                </span>
+              </Button>
+            </motion.div>
+          ) : (
+            automationsData.map((automation, index) => (
+              <AutomationCard
+                key={automation.id}
+                automation={automation as Automation}
+                index={index}
+                onEdit={handleEditAutomation}
+                onDelete={(id) => setShowDeleteConfirm(id)}
+                onToggleStatus={handleToggleStatus}
+              />
+            ))
+          )}
         </div>
 
         {/* Quick Templates */}
@@ -1204,7 +1311,15 @@ function AutomationCard({
                   Condições
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {automation.conditions.map((condition, i) => (
+                  {/* Suporta formato antigo (conditions array) e novo (condition objeto) */}
+                  {(automation.conditions?.length > 0 ? automation.conditions :
+                    (automation as any).condition ? [{
+                      metric: (automation as any).condition.metric,
+                      operator: operatorFromApi[(automation as any).condition.operator] || (automation as any).condition.operator,
+                      value: (automation as any).condition.value,
+                      timeframe: ((automation as any).period || 'last_day').replace('last_', '')
+                    }] : []
+                  ).map((condition: any, i: number) => (
                     <div key={i} style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -1215,7 +1330,7 @@ function AutomationCard({
                     }}>
                       <Target size={14} style={{ color: '#3B82F6' }} />
                       <span style={{ fontSize: '14px', color: '#FFFFFF' }}>
-                        {condition.metric} {operatorLabels[condition.operator]} {condition.value}
+                        {condition.metric?.toUpperCase()} {operatorLabels[condition.operator] || condition.operator} {condition.value}
                       </span>
                       <span style={{ fontSize: '12px', color: '#6B6B7B' }}>
                         (por {condition.timeframe === 'hour' ? 'hora' : condition.timeframe === 'day' ? 'dia' : 'semana'})
@@ -1231,7 +1346,14 @@ function AutomationCard({
                   Ações
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {automation.actions.map((action, i) => (
+                  {/* Suporta formato antigo (actions array) e novo (action string) */}
+                  {(automation.actions?.length > 0 ? automation.actions :
+                    (automation as any).action ? [{
+                      type: (automation as any).action,
+                      value: (automation as any).actionValue,
+                      target: ((automation as any).applyTo || 'campaign').replace('ad_set', 'adset')
+                    }] : []
+                  ).map((action: any, i: number) => (
                     <div key={i} style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -1247,15 +1369,15 @@ function AutomationCard({
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         color: '#10B981',
                       }}>
-                        {actionIcons[action.type]}
+                        {actionIcons[action.type] || <Zap size={14} />}
                       </div>
                       <span style={{ fontSize: '14px', color: '#FFFFFF' }}>
-                        {actionLabels[action.type]}
+                        {actionLabels[action.type] || action.type}
                         {action.value && ` em ${action.value}%`}
                       </span>
                       <ArrowRight size={14} style={{ color: '#6B6B7B' }} />
                       <span style={{ fontSize: '12px', color: '#6B6B7B' }}>
-                        {action.target === 'campaign' ? 'Campanha' : action.target === 'adset' ? 'Conjunto' : 'Anúncio'}
+                        {action.target === 'campaign' ? 'Campanha' : action.target === 'adset' || action.target === 'ad_set' ? 'Conjunto' : 'Anúncio'}
                       </span>
                     </div>
                   ))}
