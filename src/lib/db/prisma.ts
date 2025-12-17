@@ -1,5 +1,5 @@
-// Prisma Client Singleton
-// Evita multiplas instancias em desenvolvimento (hot reload)
+// Prisma Client Singleton for Prisma 7
+// Usa pg adapter para conexao com PostgreSQL
 
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
@@ -10,23 +10,24 @@ const globalForPrisma = globalThis as unknown as {
   pool: Pool | undefined
 }
 
-// Criar pool se nao existir
-const pool = globalForPrisma.pool ?? new Pool({
-  connectionString: process.env.DATABASE_URL,
-})
+function createPrismaClient() {
+  // Usar DATABASE_URL para conexao via pooler
+  const connectionString = process.env.DATABASE_URL
 
-// Criar adapter
-const adapter = new PrismaPg(pool)
+  if (!connectionString) {
+    throw new Error('DATABASE_URL nao configurado')
+  }
 
-// Criar PrismaClient com adapter
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  adapter,
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-})
+  const pool = new Pool({ connectionString })
+  const adapter = new PrismaPg(pool)
+
+  return new PrismaClient({ adapter })
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
-  globalForPrisma.pool = pool
 }
 
 export default prisma
