@@ -242,3 +242,51 @@ export interface Notification {
   createdAt: string
   actionUrl?: string
 }
+
+// Orçamentos / Quotes
+export type QuoteStatus = 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected' | 'expired'
+
+export interface QuoteService {
+  id: string
+  name: string
+  description: string
+  quantity: number
+  unitPrice: number
+  total: number
+}
+
+export interface QuoteClient {
+  name: string
+  email: string
+  phone?: string
+  company?: string
+  document?: string // CPF/CNPJ
+}
+
+export interface Quote {
+  id: string
+  number: string // Ex: ORC-2024-001
+  client: QuoteClient
+  services: QuoteService[]
+  subtotal: number
+  discount: number
+  discountType: 'percent' | 'fixed'
+  total: number
+  validUntil: string
+  notes?: string
+  paymentTerms?: string
+  status: QuoteStatus
+  createdAt: string
+  updatedAt: string
+  sentAt?: string
+  viewedAt?: string
+  respondedAt?: string
+}
+
+export interface ServiceTemplate {
+  id: string
+  name: string
+  description: string
+  defaultPrice: number
+  category: string
+}

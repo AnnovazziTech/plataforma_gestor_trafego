@@ -6,7 +6,7 @@ import { getToken } from 'next-auth/jwt'
 import prisma from '@/lib/db/prisma'
 import { hashApiKey } from '@/lib/crypto/encryption'
 
-interface AuthContext {
+export interface AuthContext {
   userId: string
   email: string
   organizationId: string

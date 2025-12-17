@@ -65,6 +65,7 @@ model Organization {
   members              OrganizationMember[]
   plan                 Plan                 @relation(fields: [planId], references: [id])
   reports              Report[]
+  scheduledPosts       ScheduledPost[]
   webhooks             Webhook[]
 
   @@map("organizations")
@@ -663,4 +664,56 @@ enum SendMethod {
   EMAIL
   WHATSAPP
   DOWNLOAD
+}
+
+// Scheduled Posts
+model ScheduledPost {
+  id             String              @id @default(cuid())
+  organizationId String
+  name           String
+  platform       SocialPlatform
+  scheduledDate  DateTime
+  scheduledTime  String              // HH:mm format
+  format         PostFormat          @default(FEED)
+  text           String?
+  mediaUrl       String?
+  mediaType      MediaType?
+  status         ScheduledPostStatus @default(SCHEDULED)
+  publishedAt    DateTime?
+  errorMessage   String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([organizationId, scheduledDate])
+  @@map("scheduled_posts")
+}
+
+enum SocialPlatform {
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  TWITTER
+  TIKTOK
+}
+
+enum PostFormat {
+  FEED
+  STORY
+  REELS
+  CAROUSEL
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum ScheduledPostStatus {
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  CANCELLED
 }

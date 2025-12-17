@@ -1,14 +1,6 @@
-import jsPDF from 'jspdf'
-import 'jspdf-autotable'
+import { jsPDF } from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import { Report } from '@/types'
-
-// Extend jsPDF type to include autoTable
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF
-    lastAutoTable: { finalY: number }
-  }
-}
 
 const typeLabels: Record<string, string> = {
   performance: 'Relatório de Performance',
@@ -171,7 +163,7 @@ export function generateReportPDF(report: Report): void {
     ]
   }
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 135,
     head: [metricsData[0]],
     body: metricsData.slice(1),
@@ -194,7 +186,7 @@ export function generateReportPDF(report: Report): void {
   })
 
   // Campaign Performance Section (if available)
-  const finalY = doc.lastAutoTable.finalY + 20
+  const finalY = (doc as any).lastAutoTable.finalY + 20
   const campaignData = report.reportData?.campaignData
 
   if (campaignData && campaignData.length > 0) {
@@ -214,7 +206,7 @@ export function generateReportPDF(report: Report): void {
       ])
     ]
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: finalY + 5,
       head: [campaignTableData[0]],
       body: campaignTableData.slice(1),
@@ -324,7 +316,7 @@ export function generateQuickReportPDF(
     ])
   }
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 120,
     head: [['Métrica', 'Valor']],
     body: selectedMetricsData,
@@ -349,7 +341,7 @@ export function generateQuickReportPDF(
   // Campaign data if available
   const campaignData = reportData?.campaignData
   if (campaignData && campaignData.length > 0) {
-    const finalY = doc.lastAutoTable.finalY + 20
+    const finalY = (doc as any).lastAutoTable.finalY + 20
 
     doc.setFontSize(14)
     doc.setTextColor(255, 255, 255)
@@ -366,7 +358,7 @@ export function generateQuickReportPDF(
       ])
     ]
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: finalY + 5,
       head: [campaignTableData[0]],
       body: campaignTableData.slice(1),

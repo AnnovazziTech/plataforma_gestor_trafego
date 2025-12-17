@@ -29,7 +29,17 @@ import {
   Pause,
   Square,
   UserPlus,
+  Send,
+  Eye,
+  Download,
+  Copy,
+  MessageCircle,
+  DollarSign,
+  Percent,
+  Building2,
 } from 'lucide-react'
+import { Quote, QuoteService, QuoteStatus, ServiceTemplate } from '@/types'
+import { generateQuotePDF } from '@/lib/pdf/generate-quote'
 import {
   AreaChart,
   Area,
@@ -89,6 +99,75 @@ const mockExpenses: Expense[] = [
   { id: '3', description: 'Curso de Tráfego', amount: 1997, category: 'Educação', date: '2024-01-05' },
 ]
 
+const serviceTemplates: ServiceTemplate[] = [
+  { id: '1', name: 'Gestão de Tráfego - Meta Ads', description: 'Gerenciamento completo de campanhas no Facebook e Instagram', defaultPrice: 1500, category: 'Gestão' },
+  { id: '2', name: 'Gestão de Tráfego - Google Ads', description: 'Gerenciamento completo de campanhas no Google', defaultPrice: 1500, category: 'Gestão' },
+  { id: '3', name: 'Criação de Criativos', description: 'Design de peças publicitárias para campanhas', defaultPrice: 500, category: 'Criativo' },
+  { id: '4', name: 'Consultoria de Marketing', description: 'Análise estratégica e planejamento de marketing digital', defaultPrice: 800, category: 'Consultoria' },
+  { id: '5', name: 'Relatório de Performance', description: 'Relatório detalhado mensal de resultados', defaultPrice: 300, category: 'Relatório' },
+  { id: '6', name: 'Setup de Pixel/Conversões', description: 'Configuração completa de rastreamento', defaultPrice: 400, category: 'Técnico' },
+]
+
+const mockQuotes: Quote[] = [
+  {
+    id: '1',
+    number: 'ORC-2024-001',
+    client: { name: 'Empresa ABC', email: 'contato@abc.com', phone: '(11) 99999-1234', company: 'ABC Ltda' },
+    services: [
+      { id: '1', name: 'Gestão de Tráfego - Meta Ads', description: 'Gestão mensal', quantity: 1, unitPrice: 1500, total: 1500 },
+      { id: '2', name: 'Criação de Criativos', description: '10 peças', quantity: 10, unitPrice: 50, total: 500 },
+    ],
+    subtotal: 2000,
+    discount: 10,
+    discountType: 'percent',
+    total: 1800,
+    validUntil: '2024-02-15',
+    notes: 'Proposta válida por 15 dias',
+    paymentTerms: 'Pagamento à vista ou parcelado em 3x',
+    status: 'sent',
+    createdAt: '2024-01-15T10:00:00Z',
+    updatedAt: '2024-01-15T10:00:00Z',
+    sentAt: '2024-01-15T14:00:00Z',
+  },
+  {
+    id: '2',
+    number: 'ORC-2024-002',
+    client: { name: 'Loja XYZ', email: 'loja@xyz.com', phone: '(11) 98888-5678', company: 'XYZ Comércio' },
+    services: [
+      { id: '1', name: 'Gestão de Tráfego - Google Ads', description: 'Gestão mensal', quantity: 1, unitPrice: 1500, total: 1500 },
+    ],
+    subtotal: 1500,
+    discount: 0,
+    discountType: 'fixed',
+    total: 1500,
+    validUntil: '2024-02-20',
+    status: 'accepted',
+    createdAt: '2024-01-20T09:00:00Z',
+    updatedAt: '2024-01-22T11:00:00Z',
+    sentAt: '2024-01-20T10:00:00Z',
+    viewedAt: '2024-01-21T08:00:00Z',
+    respondedAt: '2024-01-22T11:00:00Z',
+  },
+  {
+    id: '3',
+    number: 'ORC-2024-003',
+    client: { name: 'Tech Solutions', email: 'tech@solutions.com', phone: '(11) 97777-9012' },
+    services: [
+      { id: '1', name: 'Gestão de Tráfego - Meta Ads', description: 'Gestão mensal', quantity: 1, unitPrice: 1500, total: 1500 },
+      { id: '2', name: 'Gestão de Tráfego - Google Ads', description: 'Gestão mensal', quantity: 1, unitPrice: 1500, total: 1500 },
+      { id: '3', name: 'Consultoria de Marketing', description: 'Sessão inicial', quantity: 2, unitPrice: 800, total: 1600 },
+    ],
+    subtotal: 4600,
+    discount: 500,
+    discountType: 'fixed',
+    total: 4100,
+    validUntil: '2024-01-25',
+    status: 'draft',
+    createdAt: '2024-01-25T14:00:00Z',
+    updatedAt: '2024-01-25T14:00:00Z',
+  },
+]
+
 const revenueData = [
   { month: 'Jan', receita: 15000, despesas: 3500 },
   { month: 'Fev', receita: 18000, despesas: 4200 },
@@ -127,6 +206,15 @@ export default function AdminPage() {
   const [showClientModal, setShowClientModal] = useState(false)
   const [showExpenseModal, setShowExpenseModal] = useState(false)
   const [showAppointmentModal, setShowAppointmentModal] = useState(false)
+  const [showQuoteModal, setShowQuoteModal] = useState(false)
+  const [quotes, setQuotes] = useState<Quote[]>(mockQuotes)
+  const [editingQuote, setEditingQuote] = useState<Quote | null>(null)
+  const [selectedClient, setSelectedClient] = useState<string>('')
+  const [quoteServices, setQuoteServices] = useState<QuoteService[]>([])
+  const [quoteDiscount, setQuoteDiscount] = useState({ value: 0, type: 'percent' as 'percent' | 'fixed' })
+  const [quoteNotes, setQuoteNotes] = useState('')
+  const [quotePaymentTerms, setQuotePaymentTerms] = useState('')
+  const [quoteValidDays, setQuoteValidDays] = useState(15)
   const [onlineTime, setOnlineTime] = useState(0)
 
   // New client form state
@@ -138,6 +226,14 @@ export default function AdminPage() {
     contractEnd: '',
     contractValue: '',
     notes: '',
+  })
+
+  // New appointment form state
+  const [newAppointment, setNewAppointment] = useState({
+    title: '',
+    date: '',
+    time: '',
+    reminder: true,
   })
 
   // Simular tempo online
@@ -166,6 +262,191 @@ export default function AdminPage() {
     { id: 'productivity', label: 'Produtividade', icon: Timer },
     { id: 'budget', label: 'Orçamentos', icon: Target },
   ]
+
+  // Quote helper functions
+  const getQuoteStatusLabel = (status: QuoteStatus) => {
+    const labels: Record<QuoteStatus, string> = {
+      draft: 'Rascunho',
+      sent: 'Enviado',
+      viewed: 'Visualizado',
+      accepted: 'Aceito',
+      rejected: 'Rejeitado',
+      expired: 'Expirado',
+    }
+    return labels[status]
+  }
+
+  const getQuoteStatusVariant = (status: QuoteStatus): 'default' | 'warning' | 'success' | 'error' => {
+    const variants: Record<QuoteStatus, 'default' | 'warning' | 'success' | 'error'> = {
+      draft: 'default',
+      sent: 'warning',
+      viewed: 'warning',
+      accepted: 'success',
+      rejected: 'error',
+      expired: 'default',
+    }
+    return variants[status]
+  }
+
+  const generateQuoteNumber = () => {
+    const year = new Date().getFullYear()
+    const count = quotes.filter(q => q.number.includes(year.toString())).length + 1
+    return `ORC-${year}-${count.toString().padStart(3, '0')}`
+  }
+
+  const calculateQuoteTotal = () => {
+    const subtotal = quoteServices.reduce((acc, s) => acc + s.total, 0)
+    let discount = 0
+    if (quoteDiscount.type === 'percent') {
+      discount = subtotal * (quoteDiscount.value / 100)
+    } else {
+      discount = quoteDiscount.value
+    }
+    return { subtotal, discount, total: subtotal - discount }
+  }
+
+  const addServiceToQuote = (template: ServiceTemplate) => {
+    const newService: QuoteService = {
+      id: Date.now().toString(),
+      name: template.name,
+      description: template.description,
+      quantity: 1,
+      unitPrice: template.defaultPrice,
+      total: template.defaultPrice,
+    }
+    setQuoteServices(prev => [...prev, newService])
+  }
+
+  const updateServiceQuantity = (serviceId: string, quantity: number) => {
+    setQuoteServices(prev => prev.map(s =>
+      s.id === serviceId
+        ? { ...s, quantity, total: s.unitPrice * quantity }
+        : s
+    ))
+  }
+
+  const updateServicePrice = (serviceId: string, unitPrice: number) => {
+    setQuoteServices(prev => prev.map(s =>
+      s.id === serviceId
+        ? { ...s, unitPrice, total: unitPrice * s.quantity }
+        : s
+    ))
+  }
+
+  const removeServiceFromQuote = (serviceId: string) => {
+    setQuoteServices(prev => prev.filter(s => s.id !== serviceId))
+  }
+
+  const resetQuoteForm = () => {
+    setSelectedClient('')
+    setQuoteServices([])
+    setQuoteDiscount({ value: 0, type: 'percent' })
+    setQuoteNotes('')
+    setQuotePaymentTerms('')
+    setQuoteValidDays(15)
+    setEditingQuote(null)
+  }
+
+  const handleCreateQuote = () => {
+    if (!selectedClient) {
+      showToast('Selecione um cliente', 'error')
+      return
+    }
+    if (quoteServices.length === 0) {
+      showToast('Adicione pelo menos um serviço', 'error')
+      return
+    }
+
+    const client = clients.find(c => c.id === selectedClient)
+    if (!client) return
+
+    const { subtotal, discount, total } = calculateQuoteTotal()
+    const validUntil = new Date()
+    validUntil.setDate(validUntil.getDate() + quoteValidDays)
+
+    const newQuote: Quote = {
+      id: Date.now().toString(),
+      number: generateQuoteNumber(),
+      client: {
+        name: client.name,
+        email: client.email,
+        phone: client.phone,
+        company: client.name,
+      },
+      services: quoteServices,
+      subtotal,
+      discount: quoteDiscount.value,
+      discountType: quoteDiscount.type,
+      total,
+      validUntil: validUntil.toISOString().split('T')[0],
+      notes: quoteNotes || undefined,
+      paymentTerms: quotePaymentTerms || undefined,
+      status: 'draft',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    setQuotes(prev => [newQuote, ...prev])
+    setShowQuoteModal(false)
+    resetQuoteForm()
+    showToast('Orçamento criado com sucesso!', 'success')
+  }
+
+  const handleSendQuote = (quote: Quote, method: 'email' | 'whatsapp') => {
+    // Update quote status to sent
+    setQuotes(prev => prev.map(q =>
+      q.id === quote.id
+        ? { ...q, status: 'sent' as QuoteStatus, sentAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+        : q
+    ))
+
+    if (method === 'email') {
+      // Open email client
+      const subject = encodeURIComponent(`Orçamento ${quote.number} - ${quote.client.name}`)
+      const body = encodeURIComponent(`Olá ${quote.client.name},\n\nSegue em anexo o orçamento solicitado.\n\nValor Total: R$ ${quote.total.toLocaleString('pt-BR')}\nValidade: ${new Date(quote.validUntil).toLocaleDateString('pt-BR')}\n\nAtenciosamente.`)
+      window.open(`mailto:${quote.client.email}?subject=${subject}&body=${body}`)
+      showToast('Email preparado para envio!', 'success')
+    } else {
+      // Open WhatsApp
+      const phone = quote.client.phone?.replace(/\D/g, '')
+      const message = encodeURIComponent(`Olá ${quote.client.name}! Segue o orçamento ${quote.number} no valor de R$ ${quote.total.toLocaleString('pt-BR')}. Válido até ${new Date(quote.validUntil).toLocaleDateString('pt-BR')}.`)
+      window.open(`https://wa.me/55${phone}?text=${message}`)
+      showToast('WhatsApp aberto!', 'success')
+    }
+  }
+
+  const handleDeleteQuote = (quoteId: string) => {
+    setQuotes(prev => prev.filter(q => q.id !== quoteId))
+    showToast('Orçamento removido', 'info')
+  }
+
+  const handleAddAppointment = () => {
+    if (!newAppointment.title.trim()) {
+      showToast('Por favor, informe o título do compromisso', 'error')
+      return
+    }
+    if (!newAppointment.date) {
+      showToast('Por favor, selecione a data', 'error')
+      return
+    }
+    if (!newAppointment.time) {
+      showToast('Por favor, informe o horário', 'error')
+      return
+    }
+
+    const appointment: Appointment = {
+      id: Date.now().toString(),
+      title: newAppointment.title,
+      date: newAppointment.date,
+      time: newAppointment.time,
+      reminder: newAppointment.reminder,
+    }
+
+    setAppointments(prev => [...prev, appointment])
+    setShowAppointmentModal(false)
+    setNewAppointment({ title: '', date: '', time: '', reminder: true })
+    showToast('Compromisso agendado com sucesso!', 'success')
+  }
 
   const handleAddClient = () => {
     if (!newClient.name.trim()) {
@@ -743,82 +1024,144 @@ export default function AdminPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
+              {/* Stats Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(18, 18, 26, 0.8)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '8px' }}>Total de Orçamentos</p>
+                  <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{quotes.length}</p>
+                </div>
+                <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(18, 18, 26, 0.8)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '8px' }}>Aceitos</p>
+                  <p style={{ fontSize: '24px', fontWeight: 700, color: '#10B981', margin: 0 }}>{quotes.filter(q => q.status === 'accepted').length}</p>
+                </div>
+                <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(18, 18, 26, 0.8)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '8px' }}>Pendentes</p>
+                  <p style={{ fontSize: '24px', fontWeight: 700, color: '#FACC15', margin: 0 }}>{quotes.filter(q => ['sent', 'viewed', 'draft'].includes(q.status)).length}</p>
+                </div>
+                <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(18, 18, 26, 0.8)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                  <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '8px' }}>Valor Total Aceito</p>
+                  <p style={{ fontSize: '24px', fontWeight: 700, color: '#3B82F6', margin: 0 }}>R$ {quotes.filter(q => q.status === 'accepted').reduce((acc, q) => acc + q.total, 0).toLocaleString('pt-BR')}</p>
+                </div>
+              </div>
+
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Controle de Orçamento dos Clientes</h2>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Meus Orçamentos</h2>
+                <Button variant="primary" onClick={() => { resetQuoteForm(); setShowQuoteModal(true); }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Plus size={16} />
+                    Novo Orçamento
+                  </span>
+                </Button>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {connectedAccounts.filter(a => a.connected).map((account, idx) => {
-                  const dailyBudget = 150 + idx * 50
-                  const totalSpent = dailyBudget * 15
-                  const totalBudget = dailyBudget * 30
-                  const progress = (totalSpent / totalBudget) * 100
-
-                  return (
-                    <div
-                      key={account.id}
-                      style={{
-                        padding: '20px',
-                        borderRadius: '16px',
-                        backgroundColor: 'rgba(18, 18, 26, 0.8)',
-                        border: '1px solid rgba(255, 255, 255, 0.05)',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
-                            <Target size={18} style={{ color: '#3B82F6' }} />
+                {quotes.map((quote, index) => (
+                  <motion.div
+                    key={quote.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    style={{
+                      padding: '20px',
+                      borderRadius: '16px',
+                      backgroundColor: 'rgba(18, 18, 26, 0.8)',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div style={{
+                          width: '48px',
+                          height: '48px',
+                          borderRadius: '12px',
+                          background: 'linear-gradient(to bottom right, #FACC15, #EAB308)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}>
+                          <FileText size={20} style={{ color: '#12121A' }} />
+                        </div>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>{quote.number}</h3>
+                            <Badge variant={getQuoteStatusVariant(quote.status)}>{getQuoteStatusLabel(quote.status)}</Badge>
                           </div>
-                          <div>
-                            <h3 style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', margin: 0 }}>{account.name}</h3>
-                            <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Conectado em {account.connectedAt}</p>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#6B6B7B' }}>
+                              <Building2 size={12} />
+                              {quote.client.name}
+                            </span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#6B6B7B' }}>
+                              <Mail size={12} />
+                              {quote.client.email}
+                            </span>
                           </div>
-                        </div>
-                        <Badge variant="success">Ativo</Badge>
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '16px' }}>
-                        <div>
-                          <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '4px' }}>Orçamento Diário</p>
-                          <p style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>R$ {dailyBudget}</p>
-                        </div>
-                        <div>
-                          <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '4px' }}>Gasto Total</p>
-                          <p style={{ fontSize: '18px', fontWeight: 600, color: '#FACC15', margin: 0 }}>R$ {totalSpent.toLocaleString('pt-BR')}</p>
-                        </div>
-                        <div>
-                          <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '4px' }}>Orçamento Disponível</p>
-                          <p style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>R$ {totalBudget.toLocaleString('pt-BR')}</p>
-                        </div>
-                        <div>
-                          <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '4px' }}>Finalizará em:</p>
-                          <p style={{ fontSize: '18px', fontWeight: 600, color: '#3B82F6', margin: 0 }}>15 dias</p>
                         </div>
                       </div>
-
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', marginBottom: '8px' }}>
-                          <span style={{ color: '#6B6B7B' }}>Progresso do Orçamento</span>
-                          <span style={{ color: '#FFFFFF' }}>{progress.toFixed(0)}%</span>
-                        </div>
-                        <div style={{ height: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '9999px', overflow: 'hidden' }}>
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${progress}%` }}
-                            transition={{ duration: 1 }}
-                            style={{
-                              height: '100%',
-                              borderRadius: '9999px',
-                              backgroundColor: progress > 80 ? '#EF4444' : progress > 50 ? '#FACC15' : '#3B82F6',
-                            }}
-                          />
-                        </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <p style={{ fontSize: '20px', fontWeight: 700, color: '#3B82F6', margin: 0 }}>R$ {quote.total.toLocaleString('pt-BR')}</p>
+                        <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Válido até {new Date(quote.validUntil).toLocaleDateString('pt-BR')}</p>
                       </div>
                     </div>
-                  )
-                })}
 
-                {connectedAccounts.filter(a => a.connected).length === 0 && (
+                    {/* Services summary */}
+                    <div style={{ padding: '12px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.03)', marginBottom: '16px' }}>
+                      <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0, marginBottom: '8px' }}>Serviços incluídos:</p>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {quote.services.map((service, idx) => (
+                          <span key={idx} style={{ padding: '4px 8px', borderRadius: '6px', backgroundColor: 'rgba(59, 130, 246, 0.1)', fontSize: '11px', color: '#3B82F6' }}>
+                            {service.name} {service.quantity > 1 ? `x${service.quantity}` : ''}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '12px', color: '#6B6B7B' }}>
+                          Criado em {new Date(quote.createdAt).toLocaleDateString('pt-BR')}
+                        </span>
+                        {quote.sentAt && (
+                          <span style={{ fontSize: '12px', color: '#6B6B7B' }}>
+                            | Enviado em {new Date(quote.sentAt).toLocaleDateString('pt-BR')}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                          onClick={() => { generateQuotePDF(quote); showToast('PDF gerado com sucesso!', 'success'); }}
+                          style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '8px 12px', borderRadius: '8px', backgroundColor: 'rgba(59, 130, 246, 0.1)', border: 'none', color: '#3B82F6', fontSize: '12px', cursor: 'pointer' }}
+                        >
+                          <Download size={14} />
+                          PDF
+                        </button>
+                        <button
+                          onClick={() => handleSendQuote(quote, 'email')}
+                          style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '8px 12px', borderRadius: '8px', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: 'none', color: '#10B981', fontSize: '12px', cursor: 'pointer' }}
+                        >
+                          <Mail size={14} />
+                          Email
+                        </button>
+                        <button
+                          onClick={() => handleSendQuote(quote, 'whatsapp')}
+                          style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '8px 12px', borderRadius: '8px', backgroundColor: 'rgba(37, 211, 102, 0.1)', border: 'none', color: '#25D366', fontSize: '12px', cursor: 'pointer' }}
+                        >
+                          <MessageCircle size={14} />
+                          WhatsApp
+                        </button>
+                        <button
+                          onClick={() => handleDeleteQuote(quote.id)}
+                          style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#EF4444', cursor: 'pointer' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+
+                {quotes.length === 0 && (
                   <div style={{ textAlign: 'center', padding: '48px 0' }}>
                     <div style={{
                       width: '64px',
@@ -830,10 +1173,10 @@ export default function AdminPage() {
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}>
-                      <Target size={32} style={{ color: '#6B6B7B' }} />
+                      <FileText size={32} style={{ color: '#6B6B7B' }} />
                     </div>
-                    <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px' }}>Nenhuma conta conectada</p>
-                    <p style={{ fontSize: '12px', color: '#4B4B5B' }}>Conecte suas contas de anúncios para ver o controle de orçamento</p>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px' }}>Nenhum orçamento criado</p>
+                    <p style={{ fontSize: '12px', color: '#4B4B5B' }}>Crie seu primeiro orçamento clicando no botão acima</p>
                   </div>
                 )}
               </div>
@@ -1096,6 +1439,570 @@ export default function AdminPage() {
                   </Button>
                   <Button type="button" variant="primary" onClick={handleAddClient} style={{ flex: 1 }}>
                     Adicionar Cliente
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Novo Compromisso */}
+      <AnimatePresence>
+        {showAppointmentModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowAppointmentModal(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '448px',
+                maxHeight: 'calc(100vh - 40px)',
+                overflow: 'auto',
+                backgroundColor: '#12121A',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '16px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              }}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '20px',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(to bottom right, #FACC15, #EAB308)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <Calendar style={{ width: '20px', height: '20px', color: '#12121A' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>Novo Compromisso</h2>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Agende um novo compromisso</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowAppointmentModal(false)}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '8px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#6B6B7B',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <X style={{ width: '20px', height: '20px' }} />
+                </button>
+              </div>
+
+              <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Título do Compromisso *
+                  </label>
+                  <input
+                    type="text"
+                    value={newAppointment.title}
+                    onChange={(e) => setNewAppointment(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="Ex: Reunião com Cliente ABC"
+                    style={{
+                      width: '100%',
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                      Data *
+                    </label>
+                    <input
+                      type="date"
+                      value={newAppointment.date}
+                      onChange={(e) => setNewAppointment(prev => ({ ...prev, date: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        height: '48px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                      Horário *
+                    </label>
+                    <input
+                      type="time"
+                      value={newAppointment.time}
+                      onChange={(e) => setNewAppointment(prev => ({ ...prev, time: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        height: '48px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+                  <input
+                    type="checkbox"
+                    id="reminder"
+                    checked={newAppointment.reminder}
+                    onChange={(e) => setNewAppointment(prev => ({ ...prev, reminder: e.target.checked }))}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                  />
+                  <label htmlFor="reminder" style={{ fontSize: '14px', color: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Bell size={16} style={{ color: '#FACC15' }} />
+                    Ativar lembrete
+                  </label>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>
+                  <Button type="button" variant="ghost" onClick={() => setShowAppointmentModal(false)} style={{ flex: 1 }}>
+                    Cancelar
+                  </Button>
+                  <Button type="button" variant="primary" onClick={handleAddAppointment} style={{ flex: 1 }}>
+                    Agendar
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Novo Orçamento */}
+      <AnimatePresence>
+        {showQuoteModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowQuoteModal(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '800px',
+                maxHeight: 'calc(100vh - 40px)',
+                overflow: 'auto',
+                backgroundColor: '#12121A',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '16px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              }}
+            >
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '20px',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(to bottom right, #FACC15, #EAB308)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <FileText style={{ width: '20px', height: '20px', color: '#12121A' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>Novo Orçamento</h2>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Crie um orçamento para seu cliente</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowQuoteModal(false)}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '8px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#6B6B7B',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <X style={{ width: '20px', height: '20px' }} />
+                </button>
+              </div>
+
+              <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* Client Selection */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Selecionar Cliente *
+                  </label>
+                  <select
+                    value={selectedClient}
+                    onChange={(e) => setSelectedClient(e.target.value)}
+                    style={{
+                      width: '100%',
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <option value="">Selecione um cliente...</option>
+                    {clients.map(client => (
+                      <option key={client.id} value={client.id}>{client.name} - {client.email}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Services Section */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Adicionar Serviços
+                  </label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                    {serviceTemplates.map(template => (
+                      <button
+                        key={template.id}
+                        onClick={() => addServiceToQuote(template)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                          border: '1px solid rgba(59, 130, 246, 0.3)',
+                          color: '#3B82F6',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Plus size={14} />
+                        {template.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Selected Services */}
+                  {quoteServices.length > 0 && (
+                    <div style={{ border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', overflow: 'hidden' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+                            <th style={{ textAlign: 'left', padding: '12px', fontSize: '12px', color: '#6B6B7B', fontWeight: 500 }}>Serviço</th>
+                            <th style={{ textAlign: 'center', padding: '12px', fontSize: '12px', color: '#6B6B7B', fontWeight: 500, width: '80px' }}>Qtd</th>
+                            <th style={{ textAlign: 'right', padding: '12px', fontSize: '12px', color: '#6B6B7B', fontWeight: 500, width: '120px' }}>Preço Unit.</th>
+                            <th style={{ textAlign: 'right', padding: '12px', fontSize: '12px', color: '#6B6B7B', fontWeight: 500, width: '120px' }}>Total</th>
+                            <th style={{ padding: '12px', width: '40px' }}></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {quoteServices.map(service => (
+                            <tr key={service.id} style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                              <td style={{ padding: '12px' }}>
+                                <p style={{ fontSize: '14px', color: '#FFFFFF', margin: 0 }}>{service.name}</p>
+                                <p style={{ fontSize: '11px', color: '#6B6B7B', margin: 0 }}>{service.description}</p>
+                              </td>
+                              <td style={{ padding: '12px', textAlign: 'center' }}>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={service.quantity}
+                                  onChange={(e) => updateServiceQuantity(service.id, parseInt(e.target.value) || 1)}
+                                  style={{
+                                    width: '60px',
+                                    height: '32px',
+                                    padding: '0 8px',
+                                    borderRadius: '6px',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    color: '#FFFFFF',
+                                    fontSize: '14px',
+                                    textAlign: 'center',
+                                    outline: 'none',
+                                  }}
+                                />
+                              </td>
+                              <td style={{ padding: '12px', textAlign: 'right' }}>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  value={service.unitPrice}
+                                  onChange={(e) => updateServicePrice(service.id, parseFloat(e.target.value) || 0)}
+                                  style={{
+                                    width: '100px',
+                                    height: '32px',
+                                    padding: '0 8px',
+                                    borderRadius: '6px',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    color: '#FFFFFF',
+                                    fontSize: '14px',
+                                    textAlign: 'right',
+                                    outline: 'none',
+                                  }}
+                                />
+                              </td>
+                              <td style={{ padding: '12px', textAlign: 'right' }}>
+                                <span style={{ fontSize: '14px', fontWeight: 600, color: '#3B82F6' }}>R$ {service.total.toLocaleString('pt-BR')}</span>
+                              </td>
+                              <td style={{ padding: '12px', textAlign: 'center' }}>
+                                <button
+                                  onClick={() => removeServiceFromQuote(service.id)}
+                                  style={{
+                                    padding: '6px',
+                                    borderRadius: '6px',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                    border: 'none',
+                                    color: '#EF4444',
+                                    cursor: 'pointer',
+                                  }}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* Discount */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                      Desconto
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={quoteDiscount.value}
+                      onChange={(e) => setQuoteDiscount(prev => ({ ...prev, value: parseFloat(e.target.value) || 0 }))}
+                      style={{
+                        width: '100%',
+                        height: '48px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                      Tipo de Desconto
+                    </label>
+                    <select
+                      value={quoteDiscount.type}
+                      onChange={(e) => setQuoteDiscount(prev => ({ ...prev, type: e.target.value as 'percent' | 'fixed' }))}
+                      style={{
+                        width: '100%',
+                        height: '48px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <option value="percent">Porcentagem (%)</option>
+                      <option value="fixed">Valor Fixo (R$)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                      Validade (dias)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={quoteValidDays}
+                      onChange={(e) => setQuoteValidDays(parseInt(e.target.value) || 15)}
+                      style={{
+                        width: '100%',
+                        height: '48px',
+                        padding: '0 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Notes and Payment Terms */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                      Observações
+                    </label>
+                    <textarea
+                      value={quoteNotes}
+                      onChange={(e) => setQuoteNotes(e.target.value)}
+                      placeholder="Observações adicionais..."
+                      rows={3}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                        resize: 'none',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                      Condições de Pagamento
+                    </label>
+                    <textarea
+                      value={quotePaymentTerms}
+                      onChange={(e) => setQuotePaymentTerms(e.target.value)}
+                      placeholder="Ex: Pagamento à vista ou parcelado em 3x"
+                      rows={3}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                        resize: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Total Summary */}
+                {quoteServices.length > 0 && (
+                  <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '14px', color: '#A0A0B0' }}>Subtotal:</span>
+                      <span style={{ fontSize: '14px', color: '#FFFFFF' }}>R$ {calculateQuoteTotal().subtotal.toLocaleString('pt-BR')}</span>
+                    </div>
+                    {quoteDiscount.value > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '14px', color: '#A0A0B0' }}>Desconto ({quoteDiscount.type === 'percent' ? `${quoteDiscount.value}%` : `R$ ${quoteDiscount.value}`}):</span>
+                        <span style={{ fontSize: '14px', color: '#EF4444' }}>- R$ {calculateQuoteTotal().discount.toLocaleString('pt-BR')}</span>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                      <span style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF' }}>Total:</span>
+                      <span style={{ fontSize: '20px', fontWeight: 700, color: '#3B82F6' }}>R$ {calculateQuoteTotal().total.toLocaleString('pt-BR')}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>
+                  <Button type="button" variant="ghost" onClick={() => setShowQuoteModal(false)} style={{ flex: 1 }}>
+                    Cancelar
+                  </Button>
+                  <Button type="button" variant="primary" onClick={handleCreateQuote} style={{ flex: 1 }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <FileText size={16} />
+                      Criar Orçamento
+                    </span>
                   </Button>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
 import { Button, Badge, StatCard } from '@/components/ui'
@@ -47,11 +47,7 @@ interface ScheduledPost {
   status: 'scheduled' | 'published' | 'failed'
 }
 
-const mockPosts: ScheduledPost[] = [
-  { id: '1', name: 'Lançamento Produto', platform: 'instagram', date: '2024-02-20', time: '10:00', format: 'feed', text: 'Novidade chegando!', status: 'scheduled' },
-  { id: '2', name: 'Dica do Dia', platform: 'facebook', date: '2024-02-21', time: '14:30', format: 'feed', text: 'Dica importante para seu negócio...', status: 'scheduled' },
-  { id: '3', name: 'Bastidores', platform: 'instagram', date: '2024-02-19', time: '18:00', format: 'story', text: 'Por trás das câmeras', status: 'published' },
-]
+// Posts are now fetched from API
 
 const socialMetrics = {
   totalFollowers: 125000,
@@ -63,8 +59,112 @@ const socialMetrics = {
 export default function SocialPage() {
   const { showToast, setIsConnectAccountsModalOpen } = useApp()
   const [activeTab, setActiveTab] = useState<'site' | 'social' | 'post' | 'schedule' | 'comments'>('site')
-  const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>(mockPosts)
+  const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([])
   const [showScheduleModal, setShowScheduleModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [postStats, setPostStats] = useState({ total: 0, scheduled: 0, published: 0, failed: 0 })
+
+  // Form state
+  const [newPost, setNewPost] = useState({
+    name: '',
+    platform: 'instagram' as 'instagram' | 'facebook' | 'linkedin' | 'twitter',
+    date: '',
+    time: '',
+    format: 'feed' as 'feed' | 'story' | 'reels',
+    text: '',
+  })
+
+  // Fetch scheduled posts from API
+  const fetchPosts = useCallback(async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/scheduled-posts')
+      if (response.ok) {
+        const data = await response.json()
+        setScheduledPosts(data.posts || [])
+        setPostStats(data.stats || { total: 0, scheduled: 0, published: 0, failed: 0 })
+      }
+    } catch (error) {
+      console.error('Erro ao buscar posts:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchPosts()
+  }, [fetchPosts])
+
+  // Create new scheduled post
+  const handleCreatePost = async () => {
+    if (!newPost.name.trim()) {
+      showToast('Digite o nome da programação', 'error')
+      return
+    }
+    if (!newPost.date) {
+      showToast('Selecione uma data', 'error')
+      return
+    }
+    if (!newPost.time) {
+      showToast('Selecione um horário', 'error')
+      return
+    }
+
+    try {
+      setSaving(true)
+      const response = await fetch('/api/scheduled-posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newPost.name,
+          platform: newPost.platform.toUpperCase(),
+          date: newPost.date,
+          time: newPost.time,
+          format: newPost.format.toUpperCase(),
+          text: newPost.text,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setScheduledPosts(prev => [data.post, ...prev])
+        setShowScheduleModal(false)
+        setNewPost({ name: '', platform: 'instagram', date: '', time: '', format: 'feed', text: '' })
+        showToast('Post agendado com sucesso!', 'success')
+        fetchPosts() // Refresh to get updated stats
+      } else {
+        const error = await response.json()
+        showToast(error.error || 'Erro ao agendar post', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao criar post:', error)
+      showToast('Erro ao agendar post', 'error')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Delete scheduled post
+  const handleDeletePost = async (postId: string) => {
+    try {
+      const response = await fetch(`/api/scheduled-posts/${postId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        setScheduledPosts(prev => prev.filter(p => p.id !== postId))
+        showToast('Post removido com sucesso', 'success')
+        fetchPosts() // Refresh stats
+      } else {
+        const error = await response.json()
+        showToast(error.error || 'Erro ao remover post', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao deletar post:', error)
+      showToast('Erro ao remover post', 'error')
+    }
+  }
   const [siteUrl, setSiteUrl] = useState('')
   const [socialHandle, setSocialHandle] = useState('')
   const [analyzing, setAnalyzing] = useState(false)
@@ -142,7 +242,7 @@ export default function SocialPage() {
           />
           <StatCard
             label="Posts Agendados"
-            value={scheduledPosts.filter(p => p.status === 'scheduled').length}
+            value={postStats.scheduled}
             icon={Calendar}
             color="yellow"
             delay={0.3}
@@ -505,7 +605,10 @@ export default function SocialPage() {
                           <button style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
                             <Edit size={14} />
                           </button>
-                          <button style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
+                          <button
+                            onClick={() => handleDeletePost(post.id)}
+                            style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                          >
                             <Trash2 size={14} />
                           </button>
                         </div>
@@ -661,6 +764,8 @@ export default function SocialPage() {
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Nome da Programação</label>
                   <input
                     type="text"
+                    value={newPost.name}
+                    onChange={(e) => setNewPost(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="Ex: Post de Lançamento"
                     style={{
                       width: '100%',
@@ -682,14 +787,23 @@ export default function SocialPage() {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
                     {['instagram', 'facebook', 'linkedin', 'twitter'].map((platform) => {
                       const Icon = platformIcons[platform]
+                      const isSelected = newPost.platform === platform
+                      const platformColors: Record<string, string> = {
+                        instagram: '#E4405F',
+                        facebook: '#1877F2',
+                        linkedin: '#0A66C2',
+                        twitter: '#1DA1F2',
+                      }
                       return (
                         <button
                           key={platform}
+                          type="button"
+                          onClick={() => setNewPost(prev => ({ ...prev, platform: platform as any }))}
                           style={{
                             padding: '12px',
                             borderRadius: '12px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            backgroundColor: isSelected ? `${platformColors[platform]}20` : 'rgba(255, 255, 255, 0.05)',
+                            border: isSelected ? `1px solid ${platformColors[platform]}` : '1px solid rgba(255, 255, 255, 0.1)',
                             cursor: 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
@@ -697,8 +811,8 @@ export default function SocialPage() {
                             gap: '4px',
                           }}
                         >
-                          <Icon size={20} style={{ color: '#6B6B7B' }} />
-                          <span style={{ fontSize: '12px', color: '#6B6B7B', textTransform: 'capitalize' }}>{platform}</span>
+                          <Icon size={20} style={{ color: isSelected ? platformColors[platform] : '#6B6B7B' }} />
+                          <span style={{ fontSize: '12px', color: isSelected ? platformColors[platform] : '#6B6B7B', textTransform: 'capitalize' }}>{platform}</span>
                         </button>
                       )
                     })}
@@ -710,6 +824,9 @@ export default function SocialPage() {
                     <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Data</label>
                     <input
                       type="date"
+                      value={newPost.date}
+                      onChange={(e) => setNewPost(prev => ({ ...prev, date: e.target.value }))}
+                      min={new Date().toISOString().split('T')[0]}
                       style={{
                         width: '100%',
                         height: '44px',
@@ -728,6 +845,8 @@ export default function SocialPage() {
                     <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Horário</label>
                     <input
                       type="time"
+                      value={newPost.time}
+                      onChange={(e) => setNewPost(prev => ({ ...prev, time: e.target.value }))}
                       style={{
                         width: '100%',
                         height: '44px',
@@ -751,25 +870,30 @@ export default function SocialPage() {
                       { id: 'feed', label: 'Feed', icon: Layout },
                       { id: 'story', label: 'Story', icon: Image },
                       { id: 'reels', label: 'Reels', icon: Film },
-                    ].map((format) => (
-                      <button
-                        key={format.id}
-                        style={{
-                          padding: '12px',
-                          borderRadius: '12px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '8px',
-                        }}
-                      >
-                        <format.icon size={16} style={{ color: '#6B6B7B' }} />
-                        <span style={{ fontSize: '14px', color: '#6B6B7B' }}>{format.label}</span>
-                      </button>
-                    ))}
+                    ].map((format) => {
+                      const isSelected = newPost.format === format.id
+                      return (
+                        <button
+                          key={format.id}
+                          type="button"
+                          onClick={() => setNewPost(prev => ({ ...prev, format: format.id as any }))}
+                          style={{
+                            padding: '12px',
+                            borderRadius: '12px',
+                            backgroundColor: isSelected ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                            border: isSelected ? '1px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                          }}
+                        >
+                          <format.icon size={16} style={{ color: isSelected ? '#3B82F6' : '#6B6B7B' }} />
+                          <span style={{ fontSize: '14px', color: isSelected ? '#3B82F6' : '#6B6B7B' }}>{format.label}</span>
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
 
@@ -791,6 +915,8 @@ export default function SocialPage() {
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Texto do Post</label>
                   <textarea
                     rows={3}
+                    value={newPost.text}
+                    onChange={(e) => setNewPost(prev => ({ ...prev, text: e.target.value }))}
                     placeholder="Digite o texto da sua postagem..."
                     style={{
                       width: '100%',
@@ -817,13 +943,14 @@ export default function SocialPage() {
                 borderTop: '1px solid rgba(255, 255, 255, 0.1)',
               }}>
                 <Button variant="ghost" onClick={() => setShowScheduleModal(false)}>Cancelar</Button>
-                <Button variant="primary" onClick={() => {
-                  showToast('Post agendado com sucesso!', 'success')
-                  setShowScheduleModal(false)
-                }}>
+                <Button variant="primary" onClick={handleCreatePost} disabled={saving}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Calendar size={16} />
-                    Agendar
+                    {saving ? (
+                      <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255, 255, 255, 0.3)', borderTopColor: '#FFFFFF', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                    ) : (
+                      <Calendar size={16} />
+                    )}
+                    {saving ? 'Agendando...' : 'Agendar'}
                   </span>
                 </Button>
               </div>
