@@ -167,7 +167,9 @@ export default function SocialPage() {
   }
   const [siteUrl, setSiteUrl] = useState('')
   const [socialHandle, setSocialHandle] = useState('')
+  const [postUrl, setPostUrl] = useState('')
   const [analyzing, setAnalyzing] = useState(false)
+  const [editingPost, setEditingPost] = useState<ScheduledPost | null>(null)
 
   const handleAnalyzeSite = () => {
     if (!siteUrl) {
@@ -191,6 +193,79 @@ export default function SocialPage() {
       setAnalyzing(false)
       showToast('Análise concluída!', 'success')
     }, 3000)
+  }
+
+  const handleAnalyzePost = () => {
+    if (!postUrl) {
+      showToast('Cole o link do post para analisar', 'error')
+      return
+    }
+    setAnalyzing(true)
+    setTimeout(() => {
+      setAnalyzing(false)
+      showToast('Análise do post concluída!', 'success')
+    }, 3000)
+  }
+
+  const handleEditPost = (post: ScheduledPost) => {
+    setEditingPost(post)
+    setNewPost({
+      name: post.name,
+      platform: post.platform,
+      date: post.date,
+      time: post.time,
+      format: post.format,
+      text: post.text || '',
+    })
+    setShowScheduleModal(true)
+  }
+
+  const handleUpdatePost = async () => {
+    if (!editingPost) return
+    if (!newPost.name.trim()) {
+      showToast('Digite o nome da programação', 'error')
+      return
+    }
+    if (!newPost.date) {
+      showToast('Selecione uma data', 'error')
+      return
+    }
+    if (!newPost.time) {
+      showToast('Selecione um horário', 'error')
+      return
+    }
+
+    try {
+      setSaving(true)
+      const response = await fetch(`/api/scheduled-posts/${editingPost.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newPost.name,
+          platform: newPost.platform.toUpperCase(),
+          date: newPost.date,
+          time: newPost.time,
+          format: newPost.format.toUpperCase(),
+          text: newPost.text,
+        }),
+      })
+
+      if (response.ok) {
+        setShowScheduleModal(false)
+        setEditingPost(null)
+        setNewPost({ name: '', platform: 'instagram', date: '', time: '', format: 'feed', text: '' })
+        showToast('Post atualizado com sucesso!', 'success')
+        fetchPosts()
+      } else {
+        const error = await response.json()
+        showToast(error.error || 'Erro ao atualizar post', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar post:', error)
+      showToast('Erro ao atualizar post', 'error')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const tabs = [
@@ -506,6 +581,8 @@ export default function SocialPage() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
                     <input
                       type="text"
+                      value={postUrl}
+                      onChange={(e) => setPostUrl(e.target.value)}
                       placeholder="Cole o link do post aqui..."
                       style={{
                         width: '384px',
@@ -519,9 +596,13 @@ export default function SocialPage() {
                         outline: 'none',
                       }}
                     />
-                    <Button variant="primary">
+                    <Button variant="primary" onClick={handleAnalyzePost}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <BarChart3 size={16} />
+                        {analyzing ? (
+                          <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255, 255, 255, 0.3)', borderTopColor: '#FFFFFF', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                        ) : (
+                          <BarChart3 size={16} />
+                        )}
                         Analisar
                       </span>
                     </Button>
@@ -540,7 +621,7 @@ export default function SocialPage() {
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Agendamento de Posts</h2>
-                <Button variant="primary" onClick={() => setShowScheduleModal(true)}>
+                <Button variant="primary" onClick={() => { setEditingPost(null); setNewPost({ name: '', platform: 'instagram', date: '', time: '', format: 'feed', text: '' }); setShowScheduleModal(true); }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Plus size={16} />
                     Nova Programação
@@ -602,7 +683,10 @@ export default function SocialPage() {
                           <Badge variant={post.status === 'scheduled' ? 'warning' : post.status === 'published' ? 'success' : 'error'}>
                             {post.status === 'scheduled' ? 'Agendado' : post.status === 'published' ? 'Publicado' : 'Falhou'}
                           </Badge>
-                          <button style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
+                          <button
+                            onClick={() => handleEditPost(post)}
+                            style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                          >
                             <Edit size={14} />
                           </button>
                           <button
@@ -705,7 +789,7 @@ export default function SocialPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowScheduleModal(false)}
+            onClick={() => { setShowScheduleModal(false); setEditingPost(null); }}
             style={{
               position: 'fixed',
               inset: 0,
@@ -747,12 +831,16 @@ export default function SocialPage() {
                     <Calendar style={{ width: '20px', height: '20px', color: '#3B82F6' }} />
                   </div>
                   <div>
-                    <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Agendar Post</h2>
-                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Programe suas postagens</p>
+                    <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>
+                      {editingPost ? 'Editar Post' : 'Agendar Post'}
+                    </h2>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>
+                      {editingPost ? 'Atualize os dados do post' : 'Programe suas postagens'}
+                    </p>
                   </div>
                 </div>
                 <button
-                  onClick={() => setShowScheduleModal(false)}
+                  onClick={() => { setShowScheduleModal(false); setEditingPost(null); }}
                   style={{ padding: '8px', borderRadius: '8px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
                 >
                   <X size={20} />
@@ -942,15 +1030,15 @@ export default function SocialPage() {
                 padding: '24px',
                 borderTop: '1px solid rgba(255, 255, 255, 0.1)',
               }}>
-                <Button variant="ghost" onClick={() => setShowScheduleModal(false)}>Cancelar</Button>
-                <Button variant="primary" onClick={handleCreatePost} disabled={saving}>
+                <Button variant="ghost" onClick={() => { setShowScheduleModal(false); setEditingPost(null); }}>Cancelar</Button>
+                <Button variant="primary" onClick={editingPost ? handleUpdatePost : handleCreatePost} disabled={saving}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {saving ? (
                       <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255, 255, 255, 0.3)', borderTopColor: '#FFFFFF', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
                     ) : (
                       <Calendar size={16} />
                     )}
-                    {saving ? 'Agendando...' : 'Agendar'}
+                    {saving ? (editingPost ? 'Salvando...' : 'Agendando...') : (editingPost ? 'Salvar Alterações' : 'Agendar')}
                   </span>
                 </Button>
               </div>
