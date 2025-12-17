@@ -209,6 +209,7 @@ export default function AdminPage() {
   const [showQuoteModal, setShowQuoteModal] = useState(false)
   const [quotes, setQuotes] = useState<Quote[]>(mockQuotes)
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null)
+  const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [selectedClient, setSelectedClient] = useState<string>('')
   const [quoteServices, setQuoteServices] = useState<QuoteService[]>([])
   const [quoteDiscount, setQuoteDiscount] = useState({ value: 0, type: 'percent' as 'percent' | 'fixed' })
@@ -448,6 +449,20 @@ export default function AdminPage() {
     showToast('Compromisso agendado com sucesso!', 'success')
   }
 
+  const handleEditClient = (client: Client) => {
+    setEditingClient(client)
+    setNewClient({
+      name: client.name,
+      email: client.email,
+      phone: client.phone,
+      contractStart: client.contractStart,
+      contractEnd: client.contractEnd || '',
+      contractValue: client.contractValue.toString(),
+      notes: client.notes || '',
+    })
+    setShowClientModal(true)
+  }
+
   const handleAddClient = () => {
     if (!newClient.name.trim()) {
       showToast('Por favor, informe o nome do cliente', 'error')
@@ -458,22 +473,45 @@ export default function AdminPage() {
       return
     }
 
-    const client: Client = {
-      id: Date.now().toString(),
-      name: newClient.name,
-      email: newClient.email,
-      phone: newClient.phone,
-      contractStart: newClient.contractStart || new Date().toISOString().split('T')[0],
-      contractEnd: newClient.contractEnd || '',
-      contractValue: parseFloat(newClient.contractValue) || 0,
-      notes: newClient.notes,
-      status: 'pending',
-    }
+    if (editingClient) {
+      // Atualizar cliente existente
+      setClients(prev => prev.map(c =>
+        c.id === editingClient.id
+          ? {
+              ...c,
+              name: newClient.name,
+              email: newClient.email,
+              phone: newClient.phone,
+              contractStart: newClient.contractStart || c.contractStart,
+              contractEnd: newClient.contractEnd || '',
+              contractValue: parseFloat(newClient.contractValue) || 0,
+              notes: newClient.notes,
+            }
+          : c
+      ))
+      setShowClientModal(false)
+      setEditingClient(null)
+      setNewClient({ name: '', email: '', phone: '', contractStart: '', contractEnd: '', contractValue: '', notes: '' })
+      showToast('Cliente atualizado com sucesso!', 'success')
+    } else {
+      // Criar novo cliente
+      const client: Client = {
+        id: Date.now().toString(),
+        name: newClient.name,
+        email: newClient.email,
+        phone: newClient.phone,
+        contractStart: newClient.contractStart || new Date().toISOString().split('T')[0],
+        contractEnd: newClient.contractEnd || '',
+        contractValue: parseFloat(newClient.contractValue) || 0,
+        notes: newClient.notes,
+        status: 'pending',
+      }
 
-    setClients(prev => [...prev, client])
-    setShowClientModal(false)
-    setNewClient({ name: '', email: '', phone: '', contractStart: '', contractEnd: '', contractValue: '', notes: '' })
-    showToast('Cliente adicionado com sucesso!', 'success')
+      setClients(prev => [...prev, client])
+      setShowClientModal(false)
+      setNewClient({ name: '', email: '', phone: '', contractStart: '', contractEnd: '', contractValue: '', notes: '' })
+      showToast('Cliente adicionado com sucesso!', 'success')
+    }
   }
 
   return (
@@ -556,7 +594,7 @@ export default function AdminPage() {
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Meus Clientes</h2>
-                <Button variant="primary" onClick={() => setShowClientModal(true)}>
+                <Button variant="primary" onClick={() => { setEditingClient(null); setNewClient({ name: '', email: '', phone: '', contractStart: '', contractEnd: '', contractValue: '', notes: '' }); setShowClientModal(true); }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Plus size={16} />
                     Novo Cliente
@@ -613,7 +651,10 @@ export default function AdminPage() {
                           {client.status === 'active' ? 'Ativo' : client.status === 'pending' ? 'Pendente' : 'Inativo'}
                         </Badge>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <button style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
+                          <button
+                            onClick={() => handleEditClient(client)}
+                            style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                          >
                             <Edit size={14} />
                           </button>
                           <button
@@ -1185,14 +1226,14 @@ export default function AdminPage() {
         </AnimatePresence>
       </main>
 
-      {/* Modal Novo Cliente */}
+      {/* Modal Novo/Editar Cliente */}
       <AnimatePresence>
         {showClientModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowClientModal(false)}
+            onClick={() => { setShowClientModal(false); setEditingClient(null); setNewClient({ name: '', email: '', phone: '', contractStart: '', contractEnd: '', contractValue: '', notes: '' }); }}
             style={{
               position: 'fixed',
               top: 0,
@@ -1244,12 +1285,16 @@ export default function AdminPage() {
                     <Users style={{ width: '20px', height: '20px', color: '#FFFFFF' }} />
                   </div>
                   <div>
-                    <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>Novo Cliente</h2>
-                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Adicione um novo cliente</p>
+                    <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
+                      {editingClient ? 'Editar Cliente' : 'Novo Cliente'}
+                    </h2>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>
+                      {editingClient ? 'Atualize os dados do cliente' : 'Adicione um novo cliente'}
+                    </p>
                   </div>
                 </div>
                 <button
-                  onClick={() => setShowClientModal(false)}
+                  onClick={() => { setShowClientModal(false); setEditingClient(null); setNewClient({ name: '', email: '', phone: '', contractStart: '', contractEnd: '', contractValue: '', notes: '' }); }}
                   style={{
                     padding: '8px',
                     borderRadius: '8px',
@@ -1434,11 +1479,11 @@ export default function AdminPage() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>
-                  <Button type="button" variant="ghost" onClick={() => setShowClientModal(false)} style={{ flex: 1 }}>
+                  <Button type="button" variant="ghost" onClick={() => { setShowClientModal(false); setEditingClient(null); setNewClient({ name: '', email: '', phone: '', contractStart: '', contractEnd: '', contractValue: '', notes: '' }); }} style={{ flex: 1 }}>
                     Cancelar
                   </Button>
                   <Button type="button" variant="primary" onClick={handleAddClient} style={{ flex: 1 }}>
-                    Adicionar Cliente
+                    {editingClient ? 'Salvar Alterações' : 'Adicionar Cliente'}
                   </Button>
                 </div>
               </div>
