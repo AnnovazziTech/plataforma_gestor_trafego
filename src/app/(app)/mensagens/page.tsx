@@ -57,7 +57,8 @@ import {
 
 // Types
 type TabType = 'vendas' | 'crm' | 'funil'
-type LeadStatus = 'novo' | 'em_andamento' | 'concluido' | 'descartado' | 'remarketing'
+// Status compatíveis com a API
+type LeadStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'PROPOSAL' | 'NEGOTIATION' | 'WON' | 'LOST' | 'REMARKETING'
 
 interface WhatsAppAccount {
   id: string
@@ -160,22 +161,25 @@ const mockMessages: Message[] = [
 ]
 
 const mockLeads: Lead[] = [
-  { id: '1', name: 'Lucas Ferreira', phone: '(11) 99999-0001', email: 'lucas@email.com', source: 'Meta Ads', value: 500, status: 'novo', createdAt: '2024-02-15 08:00', lastInteraction: '2024-02-15 08:00', history: [{ status: 'novo', date: '2024-02-15 08:00' }] },
-  { id: '2', name: 'Juliana Lima', phone: '(11) 99999-0002', source: 'Google Ads', value: 1200, status: 'novo', createdAt: '2024-02-15 09:30', lastInteraction: '2024-02-15 09:30', history: [{ status: 'novo', date: '2024-02-15 09:30' }] },
-  { id: '3', name: 'Roberto Alves', phone: '(11) 99999-0003', email: 'roberto@email.com', source: 'TikTok Ads', value: 350, status: 'em_andamento', createdAt: '2024-02-14 14:00', lastInteraction: '2024-02-15 10:00', history: [{ status: 'novo', date: '2024-02-14 14:00' }, { status: 'em_andamento', date: '2024-02-15 10:00' }] },
-  { id: '4', name: 'Fernanda Costa', phone: '(11) 99999-0004', source: 'Meta Ads', value: 800, status: 'em_andamento', createdAt: '2024-02-13 16:00', lastInteraction: '2024-02-15 11:30', history: [{ status: 'novo', date: '2024-02-13 16:00' }, { status: 'em_andamento', date: '2024-02-14 09:00' }] },
-  { id: '5', name: 'Marcelo Santos', phone: '(11) 99999-0005', email: 'marcelo@email.com', source: 'Google Ads', value: 2500, status: 'concluido', createdAt: '2024-02-10 10:00', lastInteraction: '2024-02-14 15:00', history: [{ status: 'novo', date: '2024-02-10 10:00' }, { status: 'em_andamento', date: '2024-02-11 14:00' }, { status: 'concluido', date: '2024-02-14 15:00' }] },
-  { id: '6', name: 'Patricia Souza', phone: '(11) 99999-0006', source: 'Organico', value: 450, status: 'concluido', createdAt: '2024-02-08 11:00', lastInteraction: '2024-02-12 16:00', history: [{ status: 'novo', date: '2024-02-08 11:00' }, { status: 'em_andamento', date: '2024-02-09 10:00' }, { status: 'concluido', date: '2024-02-12 16:00' }] },
-  { id: '7', name: 'André Oliveira', phone: '(11) 99999-0007', source: 'Meta Ads', status: 'descartado', createdAt: '2024-02-05 09:00', lastInteraction: '2024-02-07 14:00', notes: 'Sem interesse no momento', history: [{ status: 'novo', date: '2024-02-05 09:00' }, { status: 'em_andamento', date: '2024-02-06 11:00' }, { status: 'descartado', date: '2024-02-07 14:00' }] },
-  { id: '8', name: 'Camila Ribeiro', phone: '(11) 99999-0008', email: 'camila@email.com', source: 'Google Ads', value: 600, status: 'remarketing', createdAt: '2024-02-01 13:00', lastInteraction: '2024-02-15 09:00', notes: 'Voltou a demonstrar interesse', history: [{ status: 'novo', date: '2024-02-01 13:00' }, { status: 'em_andamento', date: '2024-02-02 10:00' }, { status: 'descartado', date: '2024-02-05 16:00' }, { status: 'remarketing', date: '2024-02-15 09:00' }] },
+  { id: '1', name: 'Lucas Ferreira', phone: '(11) 99999-0001', email: 'lucas@email.com', source: 'Meta Ads', value: 500, status: 'NEW', createdAt: '2024-02-15 08:00', lastInteraction: '2024-02-15 08:00', history: [{ status: 'NEW', date: '2024-02-15 08:00' }] },
+  { id: '2', name: 'Juliana Lima', phone: '(11) 99999-0002', source: 'Google Ads', value: 1200, status: 'NEW', createdAt: '2024-02-15 09:30', lastInteraction: '2024-02-15 09:30', history: [{ status: 'NEW', date: '2024-02-15 09:30' }] },
+  { id: '3', name: 'Roberto Alves', phone: '(11) 99999-0003', email: 'roberto@email.com', source: 'TikTok Ads', value: 350, status: 'CONTACTED', createdAt: '2024-02-14 14:00', lastInteraction: '2024-02-15 10:00', history: [{ status: 'NEW', date: '2024-02-14 14:00' }, { status: 'CONTACTED', date: '2024-02-15 10:00' }] },
+  { id: '4', name: 'Fernanda Costa', phone: '(11) 99999-0004', source: 'Meta Ads', value: 800, status: 'QUALIFIED', createdAt: '2024-02-13 16:00', lastInteraction: '2024-02-15 11:30', history: [{ status: 'NEW', date: '2024-02-13 16:00' }, { status: 'QUALIFIED', date: '2024-02-14 09:00' }] },
+  { id: '5', name: 'Marcelo Santos', phone: '(11) 99999-0005', email: 'marcelo@email.com', source: 'Google Ads', value: 2500, status: 'WON', createdAt: '2024-02-10 10:00', lastInteraction: '2024-02-14 15:00', history: [{ status: 'NEW', date: '2024-02-10 10:00' }, { status: 'CONTACTED', date: '2024-02-11 14:00' }, { status: 'WON', date: '2024-02-14 15:00' }] },
+  { id: '6', name: 'Patricia Souza', phone: '(11) 99999-0006', source: 'Organico', value: 450, status: 'WON', createdAt: '2024-02-08 11:00', lastInteraction: '2024-02-12 16:00', history: [{ status: 'NEW', date: '2024-02-08 11:00' }, { status: 'CONTACTED', date: '2024-02-09 10:00' }, { status: 'WON', date: '2024-02-12 16:00' }] },
+  { id: '7', name: 'André Oliveira', phone: '(11) 99999-0007', source: 'Meta Ads', status: 'LOST', createdAt: '2024-02-05 09:00', lastInteraction: '2024-02-07 14:00', notes: 'Sem interesse no momento', history: [{ status: 'NEW', date: '2024-02-05 09:00' }, { status: 'CONTACTED', date: '2024-02-06 11:00' }, { status: 'LOST', date: '2024-02-07 14:00' }] },
+  { id: '8', name: 'Camila Ribeiro', phone: '(11) 99999-0008', email: 'camila@email.com', source: 'Google Ads', value: 600, status: 'REMARKETING', createdAt: '2024-02-01 13:00', lastInteraction: '2024-02-15 09:00', notes: 'Voltou a demonstrar interesse', history: [{ status: 'NEW', date: '2024-02-01 13:00' }, { status: 'CONTACTED', date: '2024-02-02 10:00' }, { status: 'LOST', date: '2024-02-05 16:00' }, { status: 'REMARKETING', date: '2024-02-15 09:00' }] },
 ]
 
 const statusConfig: Record<LeadStatus, { label: string; color: string; bgColor: string; icon: any }> = {
-  novo: { label: 'Novo Lead', color: '#3B82F6', bgColor: 'rgba(59, 130, 246, 0.1)', icon: UserPlus },
-  em_andamento: { label: 'Em Andamento', color: '#FACC15', bgColor: 'rgba(250, 204, 21, 0.1)', icon: Clock },
-  concluido: { label: 'Concluído', color: '#34D399', bgColor: 'rgba(52, 211, 153, 0.1)', icon: UserCheck },
-  descartado: { label: 'Descartado', color: '#EF4444', bgColor: 'rgba(239, 68, 68, 0.1)', icon: UserX },
-  remarketing: { label: 'Remarketing', color: '#A855F7', bgColor: 'rgba(168, 85, 247, 0.1)', icon: RefreshCw },
+  NEW: { label: 'Novo Lead', color: '#3B82F6', bgColor: 'rgba(59, 130, 246, 0.1)', icon: UserPlus },
+  CONTACTED: { label: 'Contatado', color: '#FACC15', bgColor: 'rgba(250, 204, 21, 0.1)', icon: Clock },
+  QUALIFIED: { label: 'Qualificado', color: '#22C55E', bgColor: 'rgba(34, 197, 94, 0.1)', icon: UserCheck },
+  PROPOSAL: { label: 'Proposta', color: '#F97316', bgColor: 'rgba(249, 115, 22, 0.1)', icon: Target },
+  NEGOTIATION: { label: 'Negociação', color: '#EC4899', bgColor: 'rgba(236, 72, 153, 0.1)', icon: MessageSquare },
+  WON: { label: 'Ganho', color: '#34D399', bgColor: 'rgba(52, 211, 153, 0.1)', icon: UserCheck },
+  LOST: { label: 'Perdido', color: '#EF4444', bgColor: 'rgba(239, 68, 68, 0.1)', icon: UserX },
+  REMARKETING: { label: 'Remarketing', color: '#A855F7', bgColor: 'rgba(168, 85, 247, 0.1)', icon: RefreshCw },
 }
 
 type PlatformType = 'all' | 'whatsapp' | 'instagram' | 'messenger'
@@ -241,11 +245,11 @@ export default function MensagensPage() {
     email: l.email,
     source: l.source,
     value: l.value,
-    status: (l.status?.toLowerCase() || 'novo') as LeadStatus,
+    status: (l.status || 'NEW') as LeadStatus,
     createdAt: l.createdAt,
     lastInteraction: l.createdAt,
     notes: l.notes,
-    history: [{ status: (l.status?.toLowerCase() || 'novo') as LeadStatus, date: l.createdAt }],
+    history: [{ status: (l.status || 'NEW') as LeadStatus, date: l.createdAt }],
   }))
 
   // Transform conversations to contacts format
@@ -260,9 +264,9 @@ export default function MensagensPage() {
     source: c.tags?.[0] || 'Organico',
   }))
 
-  // Mock sales data (would come from API in production)
+  // Sales data from won leads
   const sales: WhatsAppSale[] = leads
-    .filter(l => l.status === 'concluido' && l.value)
+    .filter(l => l.status === 'WON' && l.value)
     .map(l => ({
       id: l.id,
       clientName: l.name,
@@ -275,11 +279,13 @@ export default function MensagensPage() {
     }))
 
   const whatsappAccounts = accounts.filter(a => a.connected)
-  const hasConnectedAccounts = whatsappAccounts.length > 0 || contextAccounts.length > 0
+  // Show data if there are leads OR connected accounts
+  const hasConnectedAccounts = whatsappAccounts.length > 0 || contextAccounts.length > 0 || contextLeads.length > 0
 
   const totalSales = sales.reduce((acc, s) => acc + s.value, 0)
   const totalConversions = sales.length
-  const pendingSales = leads.filter(l => l.status === 'em_andamento').length
+  // Em andamento = CONTACTED, QUALIFIED, PROPOSAL, NEGOTIATION
+  const pendingSales = leads.filter(l => ['CONTACTED', 'QUALIFIED', 'PROPOSAL', 'NEGOTIATION'].includes(l.status)).length
   const avgTicket = totalConversions > 0 ? totalSales / totalConversions : 0
 
   const handleConnect = (accountId?: string) => {
@@ -1075,7 +1081,7 @@ export default function MensagensPage() {
                   exit={{ opacity: 0, y: -10 }}
                 >
                   {/* Stats do Funil */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px', overflowX: 'auto' }}>
                     {(Object.keys(statusConfig) as LeadStatus[]).map((status, idx) => {
                       const config = statusConfig[status]
                       const count = leads.filter(l => l.status === status).length
@@ -1107,7 +1113,7 @@ export default function MensagensPage() {
                   </div>
 
                   {/* Kanban */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', minHeight: '500px' }}>
+                  <div style={{ display: 'flex', gap: '16px', minHeight: '500px', overflowX: 'auto', paddingBottom: '16px' }}>
                     {(Object.keys(statusConfig) as LeadStatus[]).map((status) => {
                       const config = statusConfig[status]
                       const columnLeads = leads.filter(l => l.status === status)
@@ -1123,6 +1129,8 @@ export default function MensagensPage() {
                             border: '1px solid rgba(255, 255, 255, 0.05)',
                             display: 'flex',
                             flexDirection: 'column',
+                            minWidth: '220px',
+                            flex: '1',
                           }}
                         >
                           {/* Header */}
