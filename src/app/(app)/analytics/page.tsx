@@ -162,17 +162,8 @@ export default function AnalyticsPage() {
     }))
   }, [analyticsData])
 
-  // Dados de localização (estimados baseados nos dados disponíveis)
-  const audienceByLocation = useMemo(() => {
-    const locations = [
-      { segment: 'São Paulo', value: 2500000, percentage: 30.4 },
-      { segment: 'Rio de Janeiro', value: 1800000, percentage: 21.9 },
-      { segment: 'Minas Gerais', value: 1200000, percentage: 14.6 },
-      { segment: 'Bahia', value: 800000, percentage: 9.7 },
-      { segment: 'Paraná', value: 650000, percentage: 7.9 },
-    ]
-    return locations
-  }, [])
+  // Dados de localização - requer integracao com APIs de plataformas
+  const audienceByLocation: { segment: string; value: number; percentage: number }[] = []
 
   const radarData = useMemo(() => {
     return platformMetrics.map(p => ({
@@ -336,28 +327,36 @@ export default function AnalyticsPage() {
               <CardTitle>Distribuição por Idade</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={audienceByAge} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
-                    <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#6B6B7B', fontSize: 11 }} />
-                    <YAxis type="category" dataKey="segment" axisLine={false} tickLine={false} tick={{ fill: '#A0A0B0', fontSize: 11 }} width={50} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#1A1A25',
-                        border: '1px solid rgba(59, 130, 246, 0.2)',
-                        borderRadius: '12px',
-                      }}
-                      formatter={(value: number) => [formatCompactNumber(value), 'Usuários']}
-                    />
-                    <Bar dataKey="value" fill="#3B82F6" radius={[0, 4, 4, 0]} barSize={20}>
-                      {audienceByAge.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              {audienceByAge.length > 0 ? (
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={audienceByAge} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
+                      <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#6B6B7B', fontSize: 11 }} />
+                      <YAxis type="category" dataKey="segment" axisLine={false} tickLine={false} tick={{ fill: '#A0A0B0', fontSize: 11 }} width={50} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#1A1A25',
+                          border: '1px solid rgba(59, 130, 246, 0.2)',
+                          borderRadius: '12px',
+                        }}
+                        formatter={(value: number) => [formatCompactNumber(value), 'Usuários']}
+                      />
+                      <Bar dataKey="value" fill="#3B82F6" radius={[0, 4, 4, 0]} barSize={20}>
+                        {audienceByAge.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <BarChart3 size={32} className="text-[#3B3B4B] mb-3" />
+                  <p className="text-sm text-[#6B6B7B]">Dados demográficos não disponíveis</p>
+                  <p className="text-xs text-[#4B4B5B] mt-1">Sincronize suas campanhas para ver estes dados</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -367,43 +366,51 @@ export default function AnalyticsPage() {
               <CardTitle>Distribuição por Gênero</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-center gap-8">
-                <div className="w-48 h-48">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={audienceByGender}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={70}
-                        paddingAngle={3}
-                        dataKey="value"
-                      >
-                        {audienceByGender.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#1A1A25',
-                          border: '1px solid rgba(59, 130, 246, 0.2)',
-                          borderRadius: '12px',
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
+              {audienceByGender.length > 0 ? (
+                <div className="flex items-center justify-center gap-8">
+                  <div className="w-48 h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={audienceByGender}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={50}
+                          outerRadius={70}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          {audienceByGender.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#1A1A25',
+                            border: '1px solid rgba(59, 130, 246, 0.2)',
+                            borderRadius: '12px',
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="space-y-3">
+                    {audienceByGender.map((item, index) => (
+                      <div key={item.segment} className="flex items-center gap-3">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index] }} />
+                        <span className="text-sm text-[#A0A0B0]">{item.segment}</span>
+                        <span className="text-sm font-medium text-white">{item.percentage.toFixed(1)}%</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  {audienceByGender.map((item, index) => (
-                    <div key={item.segment} className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index] }} />
-                      <span className="text-sm text-[#A0A0B0]">{item.segment}</span>
-                      <span className="text-sm font-medium text-white">{item.percentage.toFixed(1)}%</span>
-                    </div>
-                  ))}
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <Users size={32} className="text-[#3B3B4B] mb-3" />
+                  <p className="text-sm text-[#6B6B7B]">Dados de gênero não disponíveis</p>
+                  <p className="text-xs text-[#4B4B5B] mt-1">Sincronize suas campanhas para ver estes dados</p>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -416,37 +423,45 @@ export default function AnalyticsPage() {
               <CardTitle>Dispositivos</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {audienceByDevice.map((device, index) => (
-                  <motion.div
-                    key={device.segment}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex items-center gap-4"
-                  >
-                    <div className="p-3 rounded-xl bg-white/5 text-[#3B82F6]">
-                      {deviceIcons[device.segment]}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm text-white">{device.segment}</span>
-                        <span className="text-sm text-[#6B6B7B]">{device.percentage.toFixed(1)}%</span>
+              {audienceByDevice.length > 0 ? (
+                <div className="space-y-4">
+                  {audienceByDevice.map((device, index) => (
+                    <motion.div
+                      key={device.segment}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="flex items-center gap-4"
+                    >
+                      <div className="p-3 rounded-xl bg-white/5 text-[#3B82F6]">
+                        {deviceIcons[device.segment]}
                       </div>
-                      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${device.percentage}%` }}
-                          transition={{ duration: 1, delay: index * 0.1 }}
-                          className="h-full rounded-full"
-                          style={{ backgroundColor: COLORS[index] }}
-                        />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm text-white">{device.segment}</span>
+                          <span className="text-sm text-[#6B6B7B]">{device.percentage.toFixed(1)}%</span>
+                        </div>
+                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${device.percentage}%` }}
+                            transition={{ duration: 1, delay: index * 0.1 }}
+                            className="h-full rounded-full"
+                            style={{ backgroundColor: COLORS[index] }}
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <span className="text-sm font-medium text-white">{formatCompactNumber(device.value)}</span>
-                  </motion.div>
-                ))}
-              </div>
+                      <span className="text-sm font-medium text-white">{formatCompactNumber(device.value)}</span>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Smartphone size={32} className="text-[#3B3B4B] mb-3" />
+                  <p className="text-sm text-[#6B6B7B]">Dados de dispositivos não disponíveis</p>
+                  <p className="text-xs text-[#4B4B5B] mt-1">Sincronize suas campanhas para ver estes dados</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -456,28 +471,36 @@ export default function AnalyticsPage() {
               <CardTitle>Principais Localidades</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {audienceByLocation.map((location, index) => (
-                  <motion.div
-                    key={location.segment}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-                  >
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-[#3B82F6]/20 to-[#60A5FA]/20 text-xs font-bold text-white">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-white">{location.segment}</p>
-                      <p className="text-xs text-[#6B6B7B]">{formatCompactNumber(location.value)} usuários</p>
-                    </div>
-                    <span className="text-sm font-medium" style={{ color: COLORS[index % COLORS.length] }}>
-                      {location.percentage.toFixed(1)}%
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
+              {audienceByLocation.length > 0 ? (
+                <div className="space-y-3">
+                  {audienceByLocation.map((location, index) => (
+                    <motion.div
+                      key={location.segment}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                    >
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-[#3B82F6]/20 to-[#60A5FA]/20 text-xs font-bold text-white">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-white">{location.segment}</p>
+                        <p className="text-xs text-[#6B6B7B]">{formatCompactNumber(location.value)} usuários</p>
+                      </div>
+                      <span className="text-sm font-medium" style={{ color: COLORS[index % COLORS.length] }}>
+                        {location.percentage.toFixed(1)}%
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Users size={32} className="text-[#3B3B4B] mb-3" />
+                  <p className="text-sm text-[#6B6B7B]">Dados de localização não disponíveis</p>
+                  <p className="text-xs text-[#4B4B5B] mt-1">Sincronize suas campanhas para ver estes dados</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -496,26 +519,34 @@ export default function AnalyticsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={hourlyPerformance}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{ fill: '#6B6B7B', fontSize: 10 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B6B7B', fontSize: 11 }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#1A1A25',
-                      border: '1px solid rgba(59, 130, 246, 0.2)',
-                      borderRadius: '12px',
-                    }}
-                  />
-                  <Legend />
-                  <Line type="monotone" dataKey="impressions" stroke="#3B82F6" strokeWidth={2} dot={false} name="Impressões" />
-                  <Line type="monotone" dataKey="clicks" stroke="#60A5FA" strokeWidth={2} dot={false} name="Cliques" />
-                  <Line type="monotone" dataKey="conversions" stroke="#FACC15" strokeWidth={2} dot={false} name="Conversões" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            {hourlyPerformance.length > 0 ? (
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={hourlyPerformance}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{ fill: '#6B6B7B', fontSize: 10 }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B6B7B', fontSize: 11 }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1A1A25',
+                        border: '1px solid rgba(59, 130, 246, 0.2)',
+                        borderRadius: '12px',
+                      }}
+                    />
+                    <Legend />
+                    <Line type="monotone" dataKey="impressions" stroke="#3B82F6" strokeWidth={2} dot={false} name="Impressões" />
+                    <Line type="monotone" dataKey="clicks" stroke="#60A5FA" strokeWidth={2} dot={false} name="Cliques" />
+                    <Line type="monotone" dataKey="conversions" stroke="#FACC15" strokeWidth={2} dot={false} name="Conversões" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <Clock size={32} className="text-[#3B3B4B] mb-3" />
+                <p className="text-sm text-[#6B6B7B]">Dados por hora não disponíveis</p>
+                <p className="text-xs text-[#4B4B5B] mt-1">Sincronize suas campanhas para ver a performance por hora</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

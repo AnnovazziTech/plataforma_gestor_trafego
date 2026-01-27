@@ -57,61 +57,7 @@ interface Prospect {
   lastContact?: string
 }
 
-const mockProspects: Prospect[] = [
-  {
-    id: '1',
-    companyName: 'Tech Solutions LTDA',
-    website: 'www.techsolutions.com.br',
-    industry: 'Tecnologia',
-    size: '50-100 funcionarios',
-    location: 'Sao Paulo, SP',
-    contactName: 'Carlos Silva',
-    contactEmail: 'carlos@techsolutions.com.br',
-    contactPhone: '(11) 99999-1234',
-    socialMedia: { instagram: '@techsolutions', linkedin: 'tech-solutions-br' },
-    status: 'new',
-    score: 85,
-    notes: 'Empresa em crescimento, precisa de marketing digital',
-    isFavorite: true,
-    createdAt: '2024-01-15',
-  },
-  {
-    id: '2',
-    companyName: 'Moda Express',
-    website: 'www.modaexpress.com.br',
-    industry: 'E-commerce',
-    size: '10-50 funcionarios',
-    location: 'Rio de Janeiro, RJ',
-    contactName: 'Ana Paula',
-    contactEmail: 'ana@modaexpress.com.br',
-    contactPhone: '(21) 98888-5678',
-    socialMedia: { instagram: '@modaexpress', facebook: 'modaexpressbr' },
-    status: 'contacted',
-    score: 72,
-    notes: 'Interessada em campanhas no Instagram',
-    isFavorite: false,
-    createdAt: '2024-01-10',
-    lastContact: '2024-01-18',
-  },
-  {
-    id: '3',
-    companyName: 'Restaurante Sabor & Arte',
-    website: 'www.saborearte.com.br',
-    industry: 'Alimentacao',
-    size: '1-10 funcionarios',
-    location: 'Belo Horizonte, MG',
-    contactName: 'Roberto Santos',
-    contactEmail: 'contato@saborearte.com.br',
-    contactPhone: '(31) 97777-9012',
-    socialMedia: { instagram: '@saborearte' },
-    status: 'qualified',
-    score: 90,
-    notes: 'Pronto para fechar, quer comecar com R$ 3.000/mes',
-    isFavorite: true,
-    createdAt: '2024-01-05',
-    lastContact: '2024-01-20',
-  },
-]
+// Dados serao carregados do banco de dados via API
 
 const statusConfig = {
   new: { label: 'Novo', color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.1)' },
@@ -126,7 +72,7 @@ const industries = ['Todas', 'Tecnologia', 'E-commerce', 'Alimentacao', 'Saude',
 
 export default function ProspeccaoPage() {
   const { showToast } = useApp()
-  const [prospects, setProspects] = useState<Prospect[]>(mockProspects)
+  const [prospects, setProspects] = useState<Prospect[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedIndustry, setSelectedIndustry] = useState('Todas')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')

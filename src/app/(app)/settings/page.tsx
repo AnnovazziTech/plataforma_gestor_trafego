@@ -43,10 +43,10 @@ export default function SettingsPage() {
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
 
-  // User data from session with fallback
+  // User data from session
   const currentUser = {
-    name: session?.user?.name || 'Usuário',
-    email: session?.user?.email || 'usuario@email.com',
+    name: session?.user?.name || '',
+    email: session?.user?.email || '',
     image: (session?.user as any)?.avatar || (session?.user as any)?.image || null,
   }
 

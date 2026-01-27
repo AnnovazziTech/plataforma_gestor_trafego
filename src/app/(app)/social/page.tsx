@@ -49,13 +49,6 @@ interface ScheduledPost {
 
 // Posts are now fetched from API
 
-const socialMetrics = {
-  totalFollowers: 125000,
-  engagement: 4.8,
-  reach: 450000,
-  posts: 156,
-}
-
 export default function SocialPage() {
   const { showToast, setIsConnectAccountsModalOpen } = useApp()
   const [activeTab, setActiveTab] = useState<'site' | 'social' | 'post' | 'schedule' | 'comments'>('site')
@@ -201,34 +194,8 @@ export default function SocialPage() {
       showToast('Digite uma URL para analisar', 'error')
       return
     }
-    setAnalyzing(true)
-    setSiteAnalysis(null)
-
-    // Simulate analysis with random data
-    setTimeout(() => {
-      const traffic = Math.floor(Math.random() * 500 + 50)
-      const bounce = Math.floor(Math.random() * 40 + 25)
-      const sources = [
-        { source: 'Busca Orgânica', value: Math.floor(Math.random() * 30 + 30), color: '#3B82F6' },
-        { source: 'Redes Sociais', value: Math.floor(Math.random() * 20 + 15), color: '#FACC15' },
-        { source: 'Direto', value: Math.floor(Math.random() * 20 + 10), color: '#8B5CF6' },
-        { source: 'Referência', value: Math.floor(Math.random() * 15 + 5), color: '#22C55E' },
-      ]
-      // Normalize to 100%
-      const total = sources.reduce((acc, s) => acc + s.value, 0)
-      sources.forEach(s => s.value = Math.round((s.value / total) * 100))
-
-      setSiteAnalysis({
-        url: siteUrl,
-        traffic: `${traffic}K`,
-        timeOnSite: `${Math.floor(Math.random() * 4 + 1)}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
-        bounceRate: `${bounce}%`,
-        pagesPerSession: (Math.random() * 4 + 1).toFixed(1),
-        sources,
-      })
-      setAnalyzing(false)
-      showToast('Análise concluída!', 'success')
-    }, 2500)
+    // Funcionalidade requer integração com Google Analytics ou similar
+    showToast('Funcionalidade requer integração com Google Analytics. Configure em Integrações.', 'info')
   }
 
   const handleAnalyzeSocial = () => {
@@ -236,22 +203,8 @@ export default function SocialPage() {
       showToast('Digite um @ para analisar', 'error')
       return
     }
-    setAnalyzing(true)
-    setSocialAnalysis(null)
-
-    setTimeout(() => {
-      setSocialAnalysis({
-        handle: socialHandle,
-        platforms: [
-          { platform: 'Instagram', followers: `${Math.floor(Math.random() * 100 + 10)}K`, engagement: `${(Math.random() * 5 + 2).toFixed(1)}%`, growth: `+${(Math.random() * 10 + 1).toFixed(1)}%` },
-          { platform: 'Facebook', followers: `${Math.floor(Math.random() * 80 + 5)}K`, engagement: `${(Math.random() * 4 + 1).toFixed(1)}%`, growth: `+${(Math.random() * 8 + 0.5).toFixed(1)}%` },
-          { platform: 'LinkedIn', followers: `${Math.floor(Math.random() * 50 + 5)}K`, engagement: `${(Math.random() * 6 + 2).toFixed(1)}%`, growth: `+${(Math.random() * 12 + 2).toFixed(1)}%` },
-          { platform: 'Twitter', followers: `${Math.floor(Math.random() * 40 + 3)}K`, engagement: `${(Math.random() * 3 + 1).toFixed(1)}%`, growth: `+${(Math.random() * 6 + 0.5).toFixed(1)}%` },
-        ],
-      })
-      setAnalyzing(false)
-      showToast('Análise concluída!', 'success')
-    }, 2500)
+    // Funcionalidade requer integração com APIs de redes sociais
+    showToast('Funcionalidade requer integração com APIs de redes sociais. Configure em Integrações.', 'info')
   }
 
   const handleAnalyzePost = () => {
@@ -259,27 +212,8 @@ export default function SocialPage() {
       showToast('Cole o link do post para analisar', 'error')
       return
     }
-    setAnalyzing(true)
-    setPostAnalysis(null)
-
-    setTimeout(() => {
-      const likes = Math.floor(Math.random() * 10000 + 500)
-      const comments = Math.floor(Math.random() * 500 + 50)
-      const shares = Math.floor(Math.random() * 300 + 20)
-      const reach = Math.floor(Math.random() * 50000 + 5000)
-
-      setPostAnalysis({
-        url: postUrl,
-        likes,
-        comments,
-        shares,
-        reach,
-        engagement: `${((likes + comments + shares) / reach * 100).toFixed(2)}%`,
-        sentiment: Math.random() > 0.3 ? 'Positivo' : Math.random() > 0.5 ? 'Neutro' : 'Negativo',
-      })
-      setAnalyzing(false)
-      showToast('Análise do post concluída!', 'success')
-    }, 2500)
+    // Funcionalidade requer integração com APIs de redes sociais
+    showToast('Funcionalidade requer integração com APIs de redes sociais. Configure em Integrações.', 'info')
   }
 
   const handleEditPost = (post: ScheduledPost) => {
@@ -370,30 +304,30 @@ export default function SocialPage() {
         {/* Quick Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
           <StatCard
-            label="Seguidores Totais"
-            value={`${(socialMetrics.totalFollowers / 1000).toFixed(0)}K`}
+            label="Posts Publicados"
+            value={postStats.published}
             icon={Users}
             color="blue"
             delay={0}
           />
           <StatCard
-            label="Engajamento"
-            value={`${socialMetrics.engagement}%`}
-            icon={Heart}
+            label="Posts Agendados"
+            value={postStats.scheduled}
+            icon={Calendar}
             color="yellow"
             delay={0.1}
           />
           <StatCard
-            label="Alcance Mensal"
-            value={`${(socialMetrics.reach / 1000).toFixed(0)}K`}
+            label="Posts Falhados"
+            value={postStats.failed}
             icon={Eye}
             color="blue"
             delay={0.2}
           />
           <StatCard
-            label="Posts Agendados"
-            value={postStats.scheduled}
-            icon={Calendar}
+            label="Total de Posts"
+            value={postStats.total}
+            icon={Heart}
             color="yellow"
             delay={0.3}
           />
@@ -524,19 +458,14 @@ export default function SocialPage() {
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
                       {[
-                        { label: 'Tráfego Mensal', value: siteAnalysis.traffic, trend: `+${Math.floor(Math.random() * 20 + 5)}%` },
-                        { label: 'Tempo no Site', value: siteAnalysis.timeOnSite, trend: `+${Math.floor(Math.random() * 15 + 2)}%` },
-                        { label: 'Taxa de Rejeição', value: siteAnalysis.bounceRate, trend: `-${Math.floor(Math.random() * 10 + 3)}%` },
-                        { label: 'Páginas/Sessão', value: siteAnalysis.pagesPerSession, trend: `+${Math.floor(Math.random() * 20 + 5)}%` },
+                        { label: 'Tráfego Mensal', value: siteAnalysis.traffic },
+                        { label: 'Tempo no Site', value: siteAnalysis.timeOnSite },
+                        { label: 'Taxa de Rejeição', value: siteAnalysis.bounceRate },
+                        { label: 'Páginas/Sessão', value: siteAnalysis.pagesPerSession },
                       ].map((metric, idx) => (
                         <div key={idx} style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
                           <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px' }}>{metric.label}</p>
-                          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-                            <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{metric.value}</p>
-                            <span style={{ fontSize: '12px', fontWeight: 500, color: metric.trend.startsWith('+') ? '#10B981' : '#EF4444' }}>
-                              {metric.trend}
-                            </span>
-                          </div>
+                          <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{metric.value}</p>
                         </div>
                       ))}
                     </div>

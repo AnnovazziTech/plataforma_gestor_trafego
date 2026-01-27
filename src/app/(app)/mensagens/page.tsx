@@ -114,62 +114,7 @@ interface Lead {
   history: { status: LeadStatus; date: string }[]
 }
 
-// Mock Data
-const salesData = [
-  { date: '01/02', vendas: 12, valor: 2400 },
-  { date: '02/02', vendas: 8, valor: 1600 },
-  { date: '03/02', vendas: 15, valor: 3000 },
-  { date: '04/02', vendas: 22, valor: 4400 },
-  { date: '05/02', vendas: 18, valor: 3600 },
-  { date: '06/02', vendas: 25, valor: 5000 },
-  { date: '07/02', vendas: 30, valor: 6000 },
-]
-
-const conversionData = [
-  { source: 'Meta Ads', conversions: 45, value: 9000 },
-  { source: 'Google Ads', conversions: 32, value: 6400 },
-  { source: 'TikTok Ads', conversions: 18, value: 3600 },
-  { source: 'Organico', conversions: 25, value: 5000 },
-]
-
-const mockAccounts: WhatsAppAccount[] = [
-  { id: '1', name: 'Loja Principal', phone: '+55 11 99999-1234', connected: true, lastSync: '2024-02-15 10:30' },
-  { id: '2', name: 'Suporte', phone: '+55 11 98888-5678', connected: false },
-]
-
-const mockSales: WhatsAppSale[] = [
-  { id: '1', clientName: 'Joao Silva', phone: '(11) 99999-1234', value: 299, product: 'Curso Online', source: 'Meta Ads', date: '2024-02-15 10:30', status: 'completed' },
-  { id: '2', clientName: 'Maria Santos', phone: '(11) 98888-5678', value: 599, product: 'Consultoria', source: 'Google Ads', date: '2024-02-15 11:45', status: 'completed' },
-  { id: '3', clientName: 'Pedro Costa', phone: '(11) 97777-9012', value: 149, product: 'E-book', source: 'TikTok Ads', date: '2024-02-15 14:20', status: 'pending' },
-  { id: '4', clientName: 'Ana Oliveira', phone: '(11) 96666-3456', value: 899, product: 'Mentoria', source: 'Meta Ads', date: '2024-02-14 16:00', status: 'completed' },
-]
-
-const mockContacts: Contact[] = [
-  { id: '1', name: 'João Silva', phone: '(11) 99999-1234', lastMessage: 'Olá, gostaria de saber mais sobre o produto', lastMessageTime: '10:30', unreadCount: 2, status: 'online', source: 'Meta Ads' },
-  { id: '2', name: 'Maria Santos', phone: '(11) 98888-5678', lastMessage: 'Obrigada pelo atendimento!', lastMessageTime: '09:15', unreadCount: 0, status: 'offline', source: 'Google Ads' },
-  { id: '3', name: 'Pedro Costa', phone: '(11) 97777-9012', lastMessage: 'Qual o prazo de entrega?', lastMessageTime: 'Ontem', unreadCount: 1, status: 'online', source: 'TikTok Ads' },
-  { id: '4', name: 'Ana Oliveira', phone: '(11) 96666-3456', lastMessage: 'Vou pensar e te retorno', lastMessageTime: 'Ontem', unreadCount: 0, status: 'offline', source: 'Organico' },
-  { id: '5', name: 'Carlos Mendes', phone: '(11) 95555-7890', lastMessage: 'Fechado! Pode enviar o link', lastMessageTime: '2 dias', unreadCount: 0, status: 'offline', source: 'Meta Ads' },
-]
-
-const mockMessages: Message[] = [
-  { id: '1', content: 'Olá! Vi seu anúncio e gostaria de saber mais sobre o produto', timestamp: '10:25', sender: 'contact', type: 'text' },
-  { id: '2', content: 'Olá João! Claro, fico feliz em ajudar. Qual produto você viu?', timestamp: '10:26', sender: 'user', type: 'text' },
-  { id: '3', content: 'O curso de marketing digital', timestamp: '10:27', sender: 'contact', type: 'text' },
-  { id: '4', content: 'Excelente escolha! O curso tem 40 horas de conteúdo, certificado e acesso vitalício. O valor é R$ 299 à vista ou 12x de R$ 29,90', timestamp: '10:28', sender: 'user', type: 'text' },
-  { id: '5', content: 'Qual a forma de pagamento?', timestamp: '10:30', sender: 'contact', type: 'text' },
-]
-
-const mockLeads: Lead[] = [
-  { id: '1', name: 'Lucas Ferreira', phone: '(11) 99999-0001', email: 'lucas@email.com', source: 'Meta Ads', value: 500, status: 'NEW', createdAt: '2024-02-15 08:00', lastInteraction: '2024-02-15 08:00', history: [{ status: 'NEW', date: '2024-02-15 08:00' }] },
-  { id: '2', name: 'Juliana Lima', phone: '(11) 99999-0002', source: 'Google Ads', value: 1200, status: 'NEW', createdAt: '2024-02-15 09:30', lastInteraction: '2024-02-15 09:30', history: [{ status: 'NEW', date: '2024-02-15 09:30' }] },
-  { id: '3', name: 'Roberto Alves', phone: '(11) 99999-0003', email: 'roberto@email.com', source: 'TikTok Ads', value: 350, status: 'CONTACTED', createdAt: '2024-02-14 14:00', lastInteraction: '2024-02-15 10:00', history: [{ status: 'NEW', date: '2024-02-14 14:00' }, { status: 'CONTACTED', date: '2024-02-15 10:00' }] },
-  { id: '4', name: 'Fernanda Costa', phone: '(11) 99999-0004', source: 'Meta Ads', value: 800, status: 'QUALIFIED', createdAt: '2024-02-13 16:00', lastInteraction: '2024-02-15 11:30', history: [{ status: 'NEW', date: '2024-02-13 16:00' }, { status: 'QUALIFIED', date: '2024-02-14 09:00' }] },
-  { id: '5', name: 'Marcelo Santos', phone: '(11) 99999-0005', email: 'marcelo@email.com', source: 'Google Ads', value: 2500, status: 'WON', createdAt: '2024-02-10 10:00', lastInteraction: '2024-02-14 15:00', history: [{ status: 'NEW', date: '2024-02-10 10:00' }, { status: 'CONTACTED', date: '2024-02-11 14:00' }, { status: 'WON', date: '2024-02-14 15:00' }] },
-  { id: '6', name: 'Patricia Souza', phone: '(11) 99999-0006', source: 'Organico', value: 450, status: 'WON', createdAt: '2024-02-08 11:00', lastInteraction: '2024-02-12 16:00', history: [{ status: 'NEW', date: '2024-02-08 11:00' }, { status: 'CONTACTED', date: '2024-02-09 10:00' }, { status: 'WON', date: '2024-02-12 16:00' }] },
-  { id: '7', name: 'André Oliveira', phone: '(11) 99999-0007', source: 'Meta Ads', status: 'LOST', createdAt: '2024-02-05 09:00', lastInteraction: '2024-02-07 14:00', notes: 'Sem interesse no momento', history: [{ status: 'NEW', date: '2024-02-05 09:00' }, { status: 'CONTACTED', date: '2024-02-06 11:00' }, { status: 'LOST', date: '2024-02-07 14:00' }] },
-  { id: '8', name: 'Camila Ribeiro', phone: '(11) 99999-0008', email: 'camila@email.com', source: 'Google Ads', value: 600, status: 'REMARKETING', createdAt: '2024-02-01 13:00', lastInteraction: '2024-02-15 09:00', notes: 'Voltou a demonstrar interesse', history: [{ status: 'NEW', date: '2024-02-01 13:00' }, { status: 'CONTACTED', date: '2024-02-02 10:00' }, { status: 'LOST', date: '2024-02-05 16:00' }, { status: 'REMARKETING', date: '2024-02-15 09:00' }] },
-]
+// Dados serão carregados do banco de dados via API
 
 const statusConfig: Record<LeadStatus, { label: string; color: string; bgColor: string; icon: any }> = {
   NEW: { label: 'Novo Lead', color: '#3B82F6', bgColor: 'rgba(59, 130, 246, 0.1)', icon: UserPlus },
@@ -219,6 +164,9 @@ export default function MensagensPage() {
 
   // Funil State
   const [draggedLead, setDraggedLead] = useState<Lead | null>(null)
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
+  const [showLeadModal, setShowLeadModal] = useState(false)
+  const [leadNote, setLeadNote] = useState('')
 
   // Fetch data on mount
   useEffect(() => {
@@ -358,6 +306,42 @@ export default function MensagensPage() {
     }
 
     setDraggedLead(null)
+  }
+
+  const handleOpenLeadModal = (lead: Lead) => {
+    setSelectedLead(lead)
+    setLeadNote(lead.notes || '')
+    setShowLeadModal(true)
+  }
+
+  const handleSaveLeadNote = async () => {
+    if (!selectedLead) return
+    try {
+      await updateLead(selectedLead.id, { notes: leadNote })
+      showToast('Nota salva com sucesso', 'success')
+      setShowLeadModal(false)
+    } catch (error) {
+      showToast('Erro ao salvar nota', 'error')
+    }
+  }
+
+  const handleQuickAction = async (lead: Lead, action: 'whatsapp' | 'call' | 'email') => {
+    const phone = lead.phone?.replace(/\D/g, '')
+    switch (action) {
+      case 'whatsapp':
+        window.open(`https://wa.me/55${phone}`, '_blank')
+        break
+      case 'call':
+        window.open(`tel:${lead.phone}`, '_blank')
+        break
+      case 'email':
+        if (lead.email) {
+          window.open(`mailto:${lead.email}`, '_blank')
+        } else {
+          showToast('Lead sem email cadastrado', 'warning')
+        }
+        break
+    }
   }
 
   // Aplicar filtro de busca sobre contacts já filtrados por plataforma
@@ -606,29 +590,10 @@ export default function MensagensPage() {
                       }}
                     >
                       <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '20px' }}>Vendas por WhatsApp (Ultimos 7 dias)</h3>
-                      <div style={{ height: '240px' }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={salesData}>
-                            <defs>
-                              <linearGradient id="colorVendas" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#25D366" stopOpacity={0.3} />
-                                <stop offset="95%" stopColor="#25D366" stopOpacity={0} />
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                            <XAxis dataKey="date" stroke="#6B6B7B" fontSize={12} />
-                            <YAxis stroke="#6B6B7B" fontSize={12} />
-                            <Tooltip
-                              contentStyle={{ backgroundColor: '#12121A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                              labelStyle={{ color: '#fff' }}
-                              formatter={(value: number, name: string) => [
-                                name === 'valor' ? `R$ ${value}` : value,
-                                name === 'valor' ? 'Valor' : 'Vendas'
-                              ]}
-                            />
-                            <Area type="monotone" dataKey="vendas" stroke="#25D366" fill="url(#colorVendas)" strokeWidth={2} />
-                          </AreaChart>
-                        </ResponsiveContainer>
+                      <div style={{ height: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <TrendingUp size={32} style={{ color: '#3B3B4B', marginBottom: '12px' }} />
+                        <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Nenhuma venda registrada</p>
+                        <p style={{ fontSize: '12px', color: '#4B4B5B', margin: 0, marginTop: '4px' }}>Conecte o WhatsApp para rastrear vendas</p>
                       </div>
                     </div>
 
@@ -642,19 +607,10 @@ export default function MensagensPage() {
                       }}
                     >
                       <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '20px' }}>Conversoes por Fonte de Trafego</h3>
-                      <div style={{ height: '240px' }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={conversionData} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                            <XAxis type="number" stroke="#6B6B7B" fontSize={12} />
-                            <YAxis dataKey="source" type="category" stroke="#6B6B7B" fontSize={12} width={80} />
-                            <Tooltip
-                              contentStyle={{ backgroundColor: '#12121A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                              labelStyle={{ color: '#fff' }}
-                            />
-                            <Bar dataKey="conversions" fill="#3B82F6" radius={[0, 4, 4, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
+                      <div style={{ height: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <Target size={32} style={{ color: '#3B3B4B', marginBottom: '12px' }} />
+                        <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Nenhuma conversão registrada</p>
+                        <p style={{ fontSize: '12px', color: '#4B4B5B', margin: 0, marginTop: '4px' }}>Dados serão exibidos quando houver vendas</p>
                       </div>
                     </div>
                   </div>
@@ -671,12 +627,7 @@ export default function MensagensPage() {
                   >
                     <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '20px' }}>ROI por Fonte de Trafego</h3>
                     <ROIGrid
-                      data={[
-                        { source: 'Meta Ads', invested: 2500, revenue: 9000, roi: 260, conversions: 45 },
-                        { source: 'Google Ads', invested: 1800, revenue: 6400, roi: 256, conversions: 32 },
-                        { source: 'TikTok Ads', invested: 800, revenue: 3600, roi: 350, conversions: 18 },
-                        { source: 'LinkedIn Ads', invested: 500, revenue: 2000, roi: 300, conversions: 12 },
-                      ]}
+                      data={[]}
                       variant="default"
                       columns={4}
                     />
@@ -1100,6 +1051,53 @@ export default function MensagensPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                 >
+                  {/* Loading State */}
+                  {leadsLoading ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0' }}>
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        border: '3px solid rgba(59, 130, 246, 0.2)',
+                        borderTopColor: '#3B82F6',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        marginBottom: '16px',
+                      }} />
+                      <p style={{ fontSize: '14px', color: '#6B6B7B' }}>Carregando leads...</p>
+                      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                    </div>
+                  ) : filteredLeads.length === 0 ? (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '80px 24px',
+                      borderRadius: '20px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                      border: '1px dashed rgba(255, 255, 255, 0.1)',
+                    }}>
+                      <div style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '16px',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: '16px',
+                      }}>
+                        <Users size={32} style={{ color: '#3B82F6' }} />
+                      </div>
+                      <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', marginBottom: '8px' }}>Nenhum lead encontrado</h3>
+                      <p style={{ fontSize: '14px', color: '#6B6B7B', textAlign: 'center', maxWidth: '400px' }}>
+                        {activePlatform !== 'all'
+                          ? `Nenhum lead encontrado para ${platformIcons[activePlatform].label}. Tente selecionar outra plataforma.`
+                          : 'Conecte suas campanhas para comecar a receber leads automaticamente.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <>
                   {/* Stats do Funil */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px', overflowX: 'auto' }}>
                     {(Object.keys(statusConfig) as LeadStatus[]).map((status, idx) => {
@@ -1197,8 +1195,16 @@ export default function MensagensPage() {
                                 }}
                               >
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                  <span style={{ fontSize: '13px', fontWeight: 500, color: '#FFFFFF' }}>{lead.name}</span>
-                                  <button style={{ padding: '4px', borderRadius: '4px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
+                                  <span
+                                    style={{ fontSize: '13px', fontWeight: 500, color: '#FFFFFF', cursor: 'pointer' }}
+                                    onClick={() => handleOpenLeadModal(lead)}
+                                  >
+                                    {lead.name}
+                                  </span>
+                                  <button
+                                    onClick={() => handleOpenLeadModal(lead)}
+                                    style={{ padding: '4px', borderRadius: '4px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                                  >
                                     <MoreVertical size={14} />
                                   </button>
                                 </div>
@@ -1206,7 +1212,7 @@ export default function MensagensPage() {
                                   <Phone size={10} />
                                   {lead.phone}
                                 </p>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                                   <span
                                     style={{
                                       padding: '2px 8px',
@@ -1224,6 +1230,65 @@ export default function MensagensPage() {
                                     </span>
                                   )}
                                 </div>
+                                {/* Quick Actions */}
+                                <div style={{ display: 'flex', gap: '6px', paddingTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleQuickAction(lead, 'whatsapp'); }}
+                                    title="WhatsApp"
+                                    style={{
+                                      flex: 1,
+                                      padding: '6px',
+                                      borderRadius: '6px',
+                                      backgroundColor: 'rgba(37, 211, 102, 0.1)',
+                                      border: 'none',
+                                      color: '#25D366',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                    }}
+                                  >
+                                    <MessageCircle size={12} />
+                                  </button>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleQuickAction(lead, 'call'); }}
+                                    title="Ligar"
+                                    style={{
+                                      flex: 1,
+                                      padding: '6px',
+                                      borderRadius: '6px',
+                                      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                      border: 'none',
+                                      color: '#3B82F6',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                    }}
+                                  >
+                                    <Phone size={12} />
+                                  </button>
+                                  {lead.email && (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleQuickAction(lead, 'email'); }}
+                                      title="Email"
+                                      style={{
+                                        flex: 1,
+                                        padding: '6px',
+                                        borderRadius: '6px',
+                                        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                                        border: 'none',
+                                        color: '#A855F7',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                      }}
+                                    >
+                                      <Send size={12} />
+                                    </button>
+                                  )}
+                                </div>
                                 {lead.notes && (
                                   <p style={{ fontSize: '10px', color: '#A0A0B0', marginTop: '8px', fontStyle: 'italic' }}>
                                     {lead.notes}
@@ -1236,6 +1301,8 @@ export default function MensagensPage() {
                       )
                     })}
                   </div>
+                    </>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -1341,6 +1408,248 @@ export default function MensagensPage() {
                   <Plus size={16} style={{ color: '#6B6B7B' }} />
                   <span style={{ fontSize: '14px', color: '#6B6B7B' }}>Adicionar nova conta</span>
                 </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal de Detalhes do Lead */}
+      <AnimatePresence>
+        {showLeadModal && selectedLead && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowLeadModal(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '500px',
+                background: 'linear-gradient(to bottom right, #12121A, #0D0D14)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '20px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '50%',
+                      backgroundColor: statusConfig[selectedLead.status].bgColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {(() => {
+                      const IconComponent = statusConfig[selectedLead.status].icon
+                      return <IconComponent size={24} style={{ color: statusConfig[selectedLead.status].color }} />
+                    })()}
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>{selectedLead.name}</h2>
+                    <Badge variant="info" style={{ backgroundColor: statusConfig[selectedLead.status].bgColor, color: statusConfig[selectedLead.status].color }}>
+                      {statusConfig[selectedLead.status].label}
+                    </Badge>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowLeadModal(false)}
+                  style={{ padding: '8px', borderRadius: '8px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div style={{ padding: '24px' }}>
+                {/* Contact Info */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: '0 0 4px' }}>Telefone</p>
+                    <p style={{ fontSize: '14px', color: '#FFFFFF', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Phone size={14} />
+                      {selectedLead.phone || 'Nao informado'}
+                    </p>
+                  </div>
+                  <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: '0 0 4px' }}>Email</p>
+                    <p style={{ fontSize: '14px', color: '#FFFFFF', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Send size={14} />
+                      {selectedLead.email || 'Nao informado'}
+                    </p>
+                  </div>
+                  <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: '0 0 4px' }}>Fonte</p>
+                    <p style={{ fontSize: '14px', color: '#3B82F6', margin: 0 }}>{selectedLead.source}</p>
+                  </div>
+                  <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', margin: '0 0 4px' }}>Valor Potencial</p>
+                    <p style={{ fontSize: '14px', color: '#34D399', margin: 0, fontWeight: 600 }}>
+                      {selectedLead.value ? `R$ ${selectedLead.value.toLocaleString('pt-BR')}` : 'Nao informado'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+                  <button
+                    onClick={() => handleQuickAction(selectedLead, 'whatsapp')}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(37, 211, 102, 0.1)',
+                      border: '1px solid rgba(37, 211, 102, 0.3)',
+                      color: '#25D366',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    <MessageCircle size={18} />
+                    WhatsApp
+                  </button>
+                  <button
+                    onClick={() => handleQuickAction(selectedLead, 'call')}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      color: '#3B82F6',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    <Phone size={18} />
+                    Ligar
+                  </button>
+                  {selectedLead.email && (
+                    <button
+                      onClick={() => handleQuickAction(selectedLead, 'email')}
+                      style={{
+                        flex: 1,
+                        padding: '12px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                        border: '1px solid rgba(168, 85, 247, 0.3)',
+                        color: '#A855F7',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      <Send size={18} />
+                      Email
+                    </button>
+                  )}
+                </div>
+
+                {/* Notes */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>
+                    Notas
+                  </label>
+                  <textarea
+                    value={leadNote}
+                    onChange={(e) => setLeadNote(e.target.value)}
+                    placeholder="Adicione observacoes sobre este lead..."
+                    style={{
+                      width: '100%',
+                      height: '100px',
+                      padding: '12px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      fontSize: '14px',
+                      color: '#FFFFFF',
+                      resize: 'none',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+
+                {/* History */}
+                {selectedLead.history && selectedLead.history.length > 0 && (
+                  <div>
+                    <h4 style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>Historico</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {selectedLead.history.map((entry, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '10px 12px',
+                            borderRadius: '8px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: '8px',
+                              height: '8px',
+                              borderRadius: '50%',
+                              backgroundColor: statusConfig[entry.status].color,
+                            }}
+                          />
+                          <span style={{ fontSize: '13px', color: '#FFFFFF' }}>{statusConfig[entry.status].label}</span>
+                          <span style={{ fontSize: '12px', color: '#6B6B7B', marginLeft: 'auto' }}>
+                            {new Date(entry.date).toLocaleDateString('pt-BR')}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <Button variant="secondary" onClick={() => setShowLeadModal(false)}>
+                  Fechar
+                </Button>
+                <Button variant="primary" onClick={handleSaveLeadNote}>
+                  Salvar Nota
+                </Button>
               </div>
             </motion.div>
           </motion.div>

@@ -50,116 +50,7 @@ interface Lesson {
   isLocked: boolean
 }
 
-const mockCourses: Course[] = [
-  {
-    id: '1',
-    title: 'Facebook Ads do Zero ao Avancado',
-    description: 'Aprenda a criar campanhas de alta performance no Facebook e Instagram Ads',
-    instructor: 'Pedro Sobral',
-    instructorAvatar: 'PS',
-    category: 'Facebook Ads',
-    level: 'iniciante',
-    duration: '12h 30min',
-    lessons: 45,
-    students: 3420,
-    rating: 4.9,
-    reviews: 892,
-    thumbnail: 'gradient-blue',
-    progress: 65,
-    isLocked: false,
-    isFeatured: true,
-  },
-  {
-    id: '2',
-    title: 'Google Ads para Gestores de Trafego',
-    description: 'Domine o Google Ads e aumente seus resultados com clientes',
-    instructor: 'Ana Cardoso',
-    instructorAvatar: 'AC',
-    category: 'Google Ads',
-    level: 'intermediario',
-    duration: '10h 15min',
-    lessons: 38,
-    students: 2150,
-    rating: 4.8,
-    reviews: 567,
-    thumbnail: 'gradient-green',
-    progress: 30,
-    isLocked: false,
-    isFeatured: true,
-  },
-  {
-    id: '3',
-    title: 'TikTok Ads: A Nova Fronteira',
-    description: 'Aproveite o potencial do TikTok Ads para seus clientes',
-    instructor: 'Lucas Mendes',
-    instructorAvatar: 'LM',
-    category: 'TikTok Ads',
-    level: 'iniciante',
-    duration: '6h 45min',
-    lessons: 24,
-    students: 1890,
-    rating: 4.7,
-    reviews: 423,
-    thumbnail: 'gradient-pink',
-    progress: 0,
-    isLocked: false,
-    isFeatured: false,
-  },
-  {
-    id: '4',
-    title: 'Copywriting para Anuncios',
-    description: 'Escreva copys que convertem e aumentam o ROI das campanhas',
-    instructor: 'Julia Santos',
-    instructorAvatar: 'JS',
-    category: 'Copywriting',
-    level: 'intermediario',
-    duration: '8h 20min',
-    lessons: 32,
-    students: 2780,
-    rating: 4.9,
-    reviews: 712,
-    thumbnail: 'gradient-purple',
-    progress: 100,
-    isLocked: false,
-    isFeatured: true,
-  },
-  {
-    id: '5',
-    title: 'Analise de Dados e Metricas',
-    description: 'Interprete dados e tome decisoes baseadas em metricas reais',
-    instructor: 'Rafael Costa',
-    instructorAvatar: 'RC',
-    category: 'Analytics',
-    level: 'avancado',
-    duration: '9h 10min',
-    lessons: 28,
-    students: 1560,
-    rating: 4.8,
-    reviews: 389,
-    thumbnail: 'gradient-orange',
-    progress: 0,
-    isLocked: true,
-    isFeatured: false,
-  },
-  {
-    id: '6',
-    title: 'Vendas e Prospeccao de Clientes',
-    description: 'Aprenda a vender seus servicos e conquistar mais clientes',
-    instructor: 'Marcos Silva',
-    instructorAvatar: 'MS',
-    category: 'Vendas',
-    level: 'iniciante',
-    duration: '7h 30min',
-    lessons: 26,
-    students: 3120,
-    rating: 4.9,
-    reviews: 834,
-    thumbnail: 'gradient-teal',
-    progress: 15,
-    isLocked: false,
-    isFeatured: false,
-  },
-]
+// Cursos serão carregados via API quando implementado
 
 const categories = ['Todos', 'Facebook Ads', 'Google Ads', 'TikTok Ads', 'Copywriting', 'Analytics', 'Vendas']
 
@@ -180,7 +71,7 @@ const thumbnailGradients: Record<string, string> = {
 
 export default function CursosPage() {
   const { showToast } = useApp()
-  const [courses] = useState<Course[]>(mockCourses)
+  const [courses] = useState<Course[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Todos')
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)

@@ -149,17 +149,17 @@ export function generateReportPDF(report: Report): void {
       }
     })
   } else {
-    // Fallback to mock data
+    // Sem dados disponíveis
     metricsData = [
       ['Métrica', 'Valor'],
-      ['Impressões', '1.234.567'],
-      ['Cliques', '45.678'],
-      ['CTR', '3.70%'],
-      ['CPC', 'R$ 0,85'],
-      ['Conversões', '1.234'],
-      ['Investimento', 'R$ 38.812,50'],
-      ['ROAS', '4.20x'],
-      ['CPA', 'R$ 31,45'],
+      ['Impressões', '-'],
+      ['Cliques', '-'],
+      ['CTR', '-'],
+      ['CPC', '-'],
+      ['Conversões', '-'],
+      ['Investimento', '-'],
+      ['ROAS', '-'],
+      ['CPA', '-'],
     ]
   }
 
@@ -295,24 +295,10 @@ export function generateQuickReportPDF(
       formatMetricValue(metric, aggregatedMetrics[metric]),
     ])
   } else {
-    // Mock values for selected metrics
-    const mockValues: Record<string, string> = {
-      impressions: '1.234.567',
-      clicks: '45.678',
-      ctr: '3,70%',
-      cpc: 'R$ 0,85',
-      conversions: '1.234',
-      investment: 'R$ 38.812,50',
-      spent: 'R$ 38.812,50',
-      roas: '4,20x',
-      cpa: 'R$ 31,45',
-      reach: '890.123',
-      frequency: '1,4',
-    }
-
+    // Sem dados disponíveis - mostrar traços
     selectedMetricsData = metrics.map(metric => [
       metricLabels[metric] || metric,
-      mockValues[metric] || '-',
+      '-',
     ])
   }
 

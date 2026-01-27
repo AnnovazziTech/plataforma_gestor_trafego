@@ -44,102 +44,7 @@ interface Product {
   isPurchased: boolean
 }
 
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Pack de Copys para Facebook Ads',
-    description: '100+ modelos de copy prontos para usar em suas campanhas de Facebook e Instagram Ads',
-    category: 'Copys',
-    price: 47,
-    originalPrice: 97,
-    rating: 4.9,
-    reviews: 234,
-    downloads: 1520,
-    icon: 'FileText',
-    features: ['100+ copys prontas', 'Segmentadas por nicho', 'Atualizacoes gratuitas', 'Suporte por email'],
-    isFeatured: true,
-    isNew: false,
-    isPurchased: false,
-  },
-  {
-    id: '2',
-    name: 'Templates Canva - Criativos Premium',
-    description: 'Pack com 50 templates editaveis no Canva para criar anuncios de alta conversao',
-    category: 'Templates',
-    price: 67,
-    originalPrice: 127,
-    rating: 4.8,
-    reviews: 189,
-    downloads: 890,
-    icon: 'Palette',
-    features: ['50 templates editaveis', 'Videos e imagens', 'Formatos Instagram/Facebook', 'Feed e Stories'],
-    isFeatured: true,
-    isNew: true,
-    isPurchased: false,
-  },
-  {
-    id: '3',
-    name: 'Planilha de Gestao de Clientes',
-    description: 'Planilha completa para gerenciar clientes, campanhas, resultados e comissoes',
-    category: 'Planilhas',
-    price: 37,
-    rating: 4.7,
-    reviews: 156,
-    downloads: 2340,
-    icon: 'BarChart3',
-    features: ['Dashboard automatico', 'Controle de clientes', 'Relatorio de resultados', 'Calculadora de comissao'],
-    isFeatured: false,
-    isNew: false,
-    isPurchased: true,
-  },
-  {
-    id: '4',
-    name: 'Scripts de Vendas para Gestores',
-    description: 'Scripts testados para fechar mais clientes como gestor de trafego',
-    category: 'Scripts',
-    price: 57,
-    originalPrice: 97,
-    rating: 4.9,
-    reviews: 312,
-    downloads: 1890,
-    icon: 'Megaphone',
-    features: ['20+ scripts de venda', 'Objecoes respondidas', 'Templates de proposta', 'Follow-up automatico'],
-    isFeatured: true,
-    isNew: false,
-    isPurchased: false,
-  },
-  {
-    id: '5',
-    name: 'Automacao de Relatorios',
-    description: 'Template de relatorio automatizado com integracao Google Sheets + Looker Studio',
-    category: 'Automacao',
-    price: 87,
-    rating: 4.6,
-    reviews: 89,
-    downloads: 456,
-    icon: 'Bot',
-    features: ['Relatorio automatico', 'Integracao Meta Ads', 'Integracao Google Ads', 'Graficos prontos'],
-    isFeatured: false,
-    isNew: true,
-    isPurchased: false,
-  },
-  {
-    id: '6',
-    name: 'Pack de Videos para Ads',
-    description: '30 videos em formato vertical prontos para usar como criativos',
-    category: 'Videos',
-    price: 97,
-    originalPrice: 197,
-    rating: 4.8,
-    reviews: 145,
-    downloads: 670,
-    icon: 'Video',
-    features: ['30 videos editaveis', 'Formato 9:16', 'Legendas incluidas', 'Nichos variados'],
-    isFeatured: false,
-    isNew: false,
-    isPurchased: false,
-  },
-]
+// Dados serao carregados do banco de dados via API
 
 const categories = ['Todos', 'Copys', 'Templates', 'Planilhas', 'Scripts', 'Automacao', 'Videos']
 
@@ -156,7 +61,7 @@ const iconMap: Record<string, any> = {
 
 export default function MarketplacePage() {
   const { showToast } = useApp()
-  const [products, setProducts] = useState<Product[]>(mockProducts)
+  const [products, setProducts] = useState<Product[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Todos')
   const [sortBy, setSortBy] = useState<'popular' | 'recent' | 'price'>('popular')

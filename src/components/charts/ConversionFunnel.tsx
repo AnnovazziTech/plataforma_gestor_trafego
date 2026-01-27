@@ -14,6 +14,7 @@ interface FunnelStage {
 
 interface ConversionFunnelProps {
   data: FunnelStage[]
+  spent?: number
 }
 
 const stageIcons = [
@@ -24,7 +25,7 @@ const stageIcons = [
   { icon: Target, color: '#FDE047' },
 ]
 
-export function ConversionFunnel({ data }: ConversionFunnelProps) {
+export function ConversionFunnel({ data, spent = 0 }: ConversionFunnelProps) {
   const funnelData = data.length > 0 ? data : [
     { stage: 'Impressões', value: 0, percentage: 100 },
     { stage: 'Cliques', value: 0, percentage: 0 },
@@ -266,7 +267,9 @@ export function ConversionFunnel({ data }: ConversionFunnelProps) {
                 <DollarSign size={14} style={{ color: 'rgba(250, 204, 21, 0.5)' }} />
               </div>
               <p style={{ fontSize: '24px', fontWeight: 700, color: '#FACC15', marginBottom: '4px', margin: 0 }}>
-                R$ 17,74
+                {funnelData[funnelData.length - 1]?.value > 0
+                  ? `R$ ${(spent / funnelData[funnelData.length - 1].value).toFixed(2)}`
+                  : 'R$ 0,00'}
               </p>
               <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Custo por Conversao</p>
             </motion.div>

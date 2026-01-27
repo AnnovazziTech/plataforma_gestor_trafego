@@ -50,13 +50,7 @@ interface PageConfig {
   accentColor: string
 }
 
-const mockLinks: LinkItem[] = [
-  { id: '1', title: 'Meu Portfolio', url: 'https://meuportfolio.com', icon: 'Globe', clicks: 234, isActive: true },
-  { id: '2', title: 'Instagram', url: 'https://instagram.com/gestor', icon: 'Instagram', clicks: 567, isActive: true },
-  { id: '3', title: 'WhatsApp', url: 'https://wa.me/5511999999999', icon: 'MessageCircle', clicks: 892, isActive: true },
-  { id: '4', title: 'LinkedIn', url: 'https://linkedin.com/in/gestor', icon: 'Linkedin', clicks: 123, isActive: true },
-  { id: '5', title: 'Agendar Reuniao', url: 'https://calendly.com/gestor', icon: 'Mail', clicks: 345, isActive: false },
-]
+// Dados serao carregados do banco de dados via API
 
 const iconMap: Record<string, any> = {
   Globe,
@@ -84,7 +78,7 @@ const accentColors = [
 
 export default function MeuLinkPage() {
   const { showToast } = useApp()
-  const [links, setLinks] = useState<LinkItem[]>(mockLinks)
+  const [links, setLinks] = useState<LinkItem[]>([])
   const [pageConfig, setPageConfig] = useState<PageConfig>({
     username: 'gestor-trafego',
     displayName: 'Gestor de Trafego',
@@ -189,7 +183,7 @@ export default function MeuLinkPage() {
                 }}
               >
                 <p style={{ fontSize: '12px', color: '#6B6B7B', margin: '0 0 4px' }}>CTR Medio</p>
-                <p style={{ fontSize: '28px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>4.2%</p>
+                <p style={{ fontSize: '28px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>-</p>
               </motion.div>
             </div>
 

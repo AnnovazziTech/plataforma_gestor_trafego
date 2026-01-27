@@ -106,34 +106,15 @@ export const GET = withAuth(async (req, ctx) => {
       })
     )
 
-    // Dados de audiencia simulados (seria de integracao real)
-    // Por enquanto, gerar baseado nos dados existentes
-    const audienceByDevice = [
-      { device: 'mobile', value: 65 },
-      { device: 'desktop', value: 30 },
-      { device: 'tablet', value: 5 },
-    ]
+    // Dados de audiencia - requerem integracao com APIs de plataformas
+    // Retornando arrays vazios ate que dados reais sejam sincronizados
+    const audienceByDevice: { device: string; value: number }[] = []
+    const audienceByAge: { age: string; value: number }[] = []
+    const audienceByGender: { gender: string; value: number }[] = []
 
-    const audienceByAge = [
-      { age: '18-24', value: 15 },
-      { age: '25-34', value: 35 },
-      { age: '35-44', value: 25 },
-      { age: '45-54', value: 15 },
-      { age: '55+', value: 10 },
-    ]
-
-    const audienceByGender = [
-      { gender: 'male', value: 48 },
-      { gender: 'female', value: 52 },
-    ]
-
-    // Performance por hora (simulado)
-    const hourlyPerformance = Array.from({ length: 24 }, (_, i) => ({
-      hour: i,
-      impressions: Math.floor(Math.random() * 10000) + 1000,
-      clicks: Math.floor(Math.random() * 500) + 50,
-      conversions: Math.floor(Math.random() * 50) + 5,
-    }))
+    // Performance por hora - calculado a partir de metricas diarias quando disponiveis
+    // Por hora requer dados granulares das APIs das plataformas
+    const hourlyPerformance: { hour: number; impressions: number; clicks: number; conversions: number }[] = []
 
     // Calcular totais
     const totals = timeSeriesData.reduce(

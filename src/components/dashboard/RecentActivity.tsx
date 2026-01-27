@@ -26,34 +26,6 @@ interface Activity {
   timestamp: string
 }
 
-// Dados de fallback caso a API nao retorne dados
-const fallbackActivities: Activity[] = [
-  {
-    id: '1',
-    type: 'milestone_reached',
-    title: 'Meta de conversoes atingida',
-    description: 'Campanha "Remarketing" alcancou 1000 conversoes',
-    platform: 'meta',
-    timestamp: new Date(Date.now() - 3600000).toISOString(), // 1h atras
-  },
-  {
-    id: '2',
-    type: 'budget_increased',
-    title: 'Budget aumentado automaticamente',
-    description: 'Black Friday 2024 - Budget aumentado em 20%',
-    platform: 'meta',
-    timestamp: new Date(Date.now() - 7200000).toISOString(), // 2h atras
-  },
-  {
-    id: '3',
-    type: 'campaign_started',
-    title: 'Campanha iniciada',
-    description: 'TikTok - Gen Z Campaign esta ativa',
-    platform: 'tiktok',
-    timestamp: new Date(Date.now() - 14400000).toISOString(), // 4h atras
-  },
-]
-
 export function RecentActivity() {
   const router = useRouter()
   const { showToast } = useApp()
@@ -69,15 +41,13 @@ export function RecentActivity() {
       const response = await fetch('/api/activities')
       if (response.ok) {
         const data = await response.json()
-        // Se a API retornar array vazio, usar fallback
-        setActivities(data.length > 0 ? data : fallbackActivities)
+        setActivities(data || [])
       } else {
-        // Usar fallback em caso de erro
-        setActivities(fallbackActivities)
+        setActivities([])
       }
     } catch (error) {
       console.error('Erro ao buscar atividades:', error)
-      setActivities(fallbackActivities)
+      setActivities([])
     } finally {
       setIsLoading(false)
     }

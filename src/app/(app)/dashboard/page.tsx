@@ -257,7 +257,7 @@ export default function DashboardPage() {
             marginBottom: '16px',
           }}
         >
-          <ConversionFunnel data={dashboardData?.conversionFunnel || []} />
+          <ConversionFunnel data={dashboardData?.conversionFunnel || []} spent={dashboardData?.metrics?.totalSpent || 0} />
           <CampaignPerformance data={dashboardData?.campaignPerformance || []} />
         </div>
 

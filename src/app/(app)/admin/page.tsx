@@ -87,18 +87,7 @@ interface Appointment {
   reminder: boolean
 }
 
-const mockClients: Client[] = [
-  { id: '1', name: 'Empresa ABC', email: 'contato@abc.com', phone: '(11) 99999-1234', contractStart: '2024-01-01', contractEnd: '2024-12-31', contractValue: 5000, notes: 'Cliente premium', status: 'active' },
-  { id: '2', name: 'Loja XYZ', email: 'loja@xyz.com', phone: '(11) 98888-5678', contractStart: '2024-03-15', contractEnd: '2024-09-15', contractValue: 3500, notes: 'Foco em e-commerce', status: 'active' },
-  { id: '3', name: 'Tech Solutions', email: 'tech@solutions.com', phone: '(11) 97777-9012', contractStart: '2024-06-01', contractEnd: '2025-06-01', contractValue: 8000, notes: 'Contrato anual', status: 'pending' },
-]
-
-const mockExpenses: Expense[] = [
-  { id: '1', description: 'Ferramentas de Marketing', amount: 299, category: 'Software', date: '2024-01-15' },
-  { id: '2', description: 'Assinatura Semrush', amount: 499, category: 'Software', date: '2024-01-10' },
-  { id: '3', description: 'Curso de Tráfego', amount: 1997, category: 'Educação', date: '2024-01-05' },
-]
-
+// Templates de serviços disponíveis para orçamentos
 const serviceTemplates: ServiceTemplate[] = [
   { id: '1', name: 'Gestão de Tráfego - Meta Ads', description: 'Gerenciamento completo de campanhas no Facebook e Instagram', defaultPrice: 1500, category: 'Gestão' },
   { id: '2', name: 'Gestão de Tráfego - Google Ads', description: 'Gerenciamento completo de campanhas no Google', defaultPrice: 1500, category: 'Gestão' },
@@ -108,106 +97,20 @@ const serviceTemplates: ServiceTemplate[] = [
   { id: '6', name: 'Setup de Pixel/Conversões', description: 'Configuração completa de rastreamento', defaultPrice: 400, category: 'Técnico' },
 ]
 
-const mockQuotes: Quote[] = [
-  {
-    id: '1',
-    number: 'ORC-2024-001',
-    client: { name: 'Empresa ABC', email: 'contato@abc.com', phone: '(11) 99999-1234', company: 'ABC Ltda' },
-    services: [
-      { id: '1', name: 'Gestão de Tráfego - Meta Ads', description: 'Gestão mensal', quantity: 1, unitPrice: 1500, total: 1500 },
-      { id: '2', name: 'Criação de Criativos', description: '10 peças', quantity: 10, unitPrice: 50, total: 500 },
-    ],
-    subtotal: 2000,
-    discount: 10,
-    discountType: 'percent',
-    total: 1800,
-    validUntil: '2024-02-15',
-    notes: 'Proposta válida por 15 dias',
-    paymentTerms: 'Pagamento à vista ou parcelado em 3x',
-    status: 'sent',
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z',
-    sentAt: '2024-01-15T14:00:00Z',
-  },
-  {
-    id: '2',
-    number: 'ORC-2024-002',
-    client: { name: 'Loja XYZ', email: 'loja@xyz.com', phone: '(11) 98888-5678', company: 'XYZ Comércio' },
-    services: [
-      { id: '1', name: 'Gestão de Tráfego - Google Ads', description: 'Gestão mensal', quantity: 1, unitPrice: 1500, total: 1500 },
-    ],
-    subtotal: 1500,
-    discount: 0,
-    discountType: 'fixed',
-    total: 1500,
-    validUntil: '2024-02-20',
-    status: 'accepted',
-    createdAt: '2024-01-20T09:00:00Z',
-    updatedAt: '2024-01-22T11:00:00Z',
-    sentAt: '2024-01-20T10:00:00Z',
-    viewedAt: '2024-01-21T08:00:00Z',
-    respondedAt: '2024-01-22T11:00:00Z',
-  },
-  {
-    id: '3',
-    number: 'ORC-2024-003',
-    client: { name: 'Tech Solutions', email: 'tech@solutions.com', phone: '(11) 97777-9012' },
-    services: [
-      { id: '1', name: 'Gestão de Tráfego - Meta Ads', description: 'Gestão mensal', quantity: 1, unitPrice: 1500, total: 1500 },
-      { id: '2', name: 'Gestão de Tráfego - Google Ads', description: 'Gestão mensal', quantity: 1, unitPrice: 1500, total: 1500 },
-      { id: '3', name: 'Consultoria de Marketing', description: 'Sessão inicial', quantity: 2, unitPrice: 800, total: 1600 },
-    ],
-    subtotal: 4600,
-    discount: 500,
-    discountType: 'fixed',
-    total: 4100,
-    validUntil: '2024-01-25',
-    status: 'draft',
-    createdAt: '2024-01-25T14:00:00Z',
-    updatedAt: '2024-01-25T14:00:00Z',
-  },
-]
-
-const revenueData = [
-  { month: 'Jan', receita: 15000, despesas: 3500 },
-  { month: 'Fev', receita: 18000, despesas: 4200 },
-  { month: 'Mar', receita: 22000, despesas: 3800 },
-  { month: 'Abr', receita: 19500, despesas: 4500 },
-  { month: 'Mai', receita: 25000, despesas: 4100 },
-  { month: 'Jun', receita: 28000, despesas: 5200 },
-]
-
-const productivityData = [
-  { day: 'Seg', hours: 8.5 },
-  { day: 'Ter', hours: 7.2 },
-  { day: 'Qua', hours: 9.1 },
-  { day: 'Qui', hours: 6.8 },
-  { day: 'Sex', hours: 8.0 },
-  { day: 'Sáb', hours: 4.5 },
-  { day: 'Dom', hours: 2.0 },
-]
-
 type TabType = 'clients' | 'finances' | 'agenda' | 'productivity' | 'budget'
 
 export default function AdminPage() {
   const { showToast, connectedAccounts } = useApp()
   const [activeTab, setActiveTab] = useState<TabType>('clients')
-  const [clients, setClients] = useState<Client[]>(mockClients)
-  const [expenses, setExpenses] = useState<Expense[]>(mockExpenses)
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', title: 'Revisar campanhas do cliente ABC', completed: false, date: new Date().toISOString().split('T')[0] },
-    { id: '2', title: 'Enviar relatório semanal', completed: true, date: new Date().toISOString().split('T')[0] },
-    { id: '3', title: 'Reunião com novo cliente', completed: false, date: new Date().toISOString().split('T')[0] },
-  ])
-  const [appointments, setAppointments] = useState<Appointment[]>([
-    { id: '1', title: 'Reunião com Cliente ABC', date: '2024-02-15', time: '10:00', reminder: true },
-    { id: '2', title: 'Call de Alinhamento', date: '2024-02-16', time: '14:30', reminder: true },
-  ])
+  const [clients, setClients] = useState<Client[]>([])
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [appointments, setAppointments] = useState<Appointment[]>([])
   const [showClientModal, setShowClientModal] = useState(false)
   const [showExpenseModal, setShowExpenseModal] = useState(false)
   const [showAppointmentModal, setShowAppointmentModal] = useState(false)
   const [showQuoteModal, setShowQuoteModal] = useState(false)
-  const [quotes, setQuotes] = useState<Quote[]>(mockQuotes)
+  const [quotes, setQuotes] = useState<Quote[]>([])
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null)
   const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [selectedClient, setSelectedClient] = useState<string>('')
@@ -745,30 +648,10 @@ export default function AdminPage() {
                 marginBottom: '24px',
               }}>
                 <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0, marginBottom: '16px' }}>Receita x Despesas</h3>
-                <div style={{ height: '256px' }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={revenueData}>
-                      <defs>
-                        <linearGradient id="receita" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
-                        </linearGradient>
-                        <linearGradient id="despesas" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#FACC15" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#FACC15" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                      <XAxis dataKey="month" stroke="#6B6B7B" fontSize={12} />
-                      <YAxis stroke="#6B6B7B" fontSize={12} tickFormatter={(v) => `R$${v/1000}k`} />
-                      <Tooltip
-                        contentStyle={{ backgroundColor: '#12121A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                        labelStyle={{ color: '#fff' }}
-                      />
-                      <Area type="monotone" dataKey="receita" stroke="#3B82F6" fill="url(#receita)" strokeWidth={2} />
-                      <Area type="monotone" dataKey="despesas" stroke="#FACC15" fill="url(#despesas)" strokeWidth={2} />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                <div style={{ height: '256px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  <TrendingUp size={32} style={{ color: '#3B3B4B', marginBottom: '12px' }} />
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Nenhum dado financeiro registrado</p>
+                  <p style={{ fontSize: '12px', color: '#4B4B5B', margin: 0, marginTop: '4px' }}>Adicione clientes e despesas para ver o gráfico</p>
                 </div>
               </div>
 
@@ -1057,32 +940,22 @@ export default function AdminPage() {
                 border: '1px solid rgba(255, 255, 255, 0.05)',
               }}>
                 <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0, marginBottom: '16px' }}>Horas Trabalhadas por Dia</h3>
-                <div style={{ height: '256px' }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={productivityData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                      <XAxis dataKey="day" stroke="#6B6B7B" fontSize={12} />
-                      <YAxis stroke="#6B6B7B" fontSize={12} />
-                      <Tooltip
-                        contentStyle={{ backgroundColor: '#12121A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                        labelStyle={{ color: '#fff' }}
-                        formatter={(value: number) => [`${value}h`, 'Horas']}
-                      />
-                      <Bar dataKey="hours" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div style={{ height: '256px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  <Timer size={32} style={{ color: '#3B3B4B', marginBottom: '12px' }} />
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Nenhum registro de tempo</p>
+                  <p style={{ fontSize: '12px', color: '#4B4B5B', margin: 0, marginTop: '4px' }}>Use o timer acima para registrar suas horas</p>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
                   <div style={{ textAlign: 'center' }}>
-                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>46h</p>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>0h</p>
                     <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Esta semana</p>
                   </div>
                   <div style={{ textAlign: 'center' }}>
-                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#3B82F6', margin: 0 }}>8.2h</p>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#3B82F6', margin: 0 }}>0h</p>
                     <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Média diária</p>
                   </div>
                   <div style={{ textAlign: 'center' }}>
-                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#10B981', margin: 0 }}>+12%</p>
+                    <p style={{ fontSize: '24px', fontWeight: 700, color: '#6B6B7B', margin: 0 }}>--</p>
                     <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>vs semana anterior</p>
                   </div>
                 </div>

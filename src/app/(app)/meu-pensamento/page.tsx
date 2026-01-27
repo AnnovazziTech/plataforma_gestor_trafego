@@ -57,53 +57,7 @@ interface Goal {
   isCompleted: boolean
 }
 
-const mockNotes: Note[] = [
-  {
-    id: '1',
-    title: 'Estrategia de Escala para E-commerce',
-    content: 'Para escalar campanhas de e-commerce, comecar com CBO (Campaign Budget Optimization) e depois migrar para ABO quando identificar os melhores conjuntos. Testar publicos semelhantes de 1% a 5% baseados em compradores dos ultimos 30 dias...',
-    category: 'Estrategia',
-    tags: ['e-commerce', 'escala', 'facebook'],
-    isFavorite: true,
-    isPinned: true,
-    createdAt: '2024-01-15T10:30:00',
-    updatedAt: '2024-01-18T14:20:00',
-  },
-  {
-    id: '2',
-    title: 'Copy que Converte - Formulas',
-    content: 'AIDA: Atencao, Interesse, Desejo, Acao. PAS: Problema, Agitacao, Solucao. 4Us: Util, Urgente, Unico, Ultra-especifico. Sempre comecar com o beneficio principal na primeira linha...',
-    category: 'Copywriting',
-    tags: ['copy', 'conversao', 'formulas'],
-    isFavorite: true,
-    isPinned: false,
-    createdAt: '2024-01-10T09:00:00',
-    updatedAt: '2024-01-10T09:00:00',
-  },
-  {
-    id: '3',
-    title: 'Checklist Pre-Lancamento',
-    content: '1. Pixel instalado e testado\n2. Eventos customizados configurados\n3. Publicos criados (LAL, Remarketing, Interesses)\n4. Criativos aprovados (3 variacoes minimo)\n5. Copy revisada\n6. Landing page testada em mobile\n7. UTMs configuradas...',
-    category: 'Processos',
-    tags: ['checklist', 'lancamento', 'processo'],
-    isFavorite: false,
-    isPinned: false,
-    createdAt: '2024-01-08T16:45:00',
-    updatedAt: '2024-01-12T11:30:00',
-  },
-]
-
-const mockIdeas: Idea[] = [
-  { id: '1', content: 'Testar videos de 6 segundos para awareness', category: 'Criativos', status: 'testing', createdAt: '2024-01-18' },
-  { id: '2', content: 'Criar automacao de relatorios semanais', category: 'Processos', status: 'new', createdAt: '2024-01-17' },
-  { id: '3', content: 'Publico de engajamento 365 dias para remarketing frio', category: 'Publicos', status: 'validated', createdAt: '2024-01-15' },
-]
-
-const mockGoals: Goal[] = [
-  { id: '1', title: 'Atingir R$ 50k em faturamento de clientes', description: 'Meta mensal de faturamento com servicos', deadline: '2024-02-29', progress: 68, isCompleted: false },
-  { id: '2', title: 'Conquistar 5 novos clientes', description: 'Novos contratos fechados no mes', deadline: '2024-02-29', progress: 40, isCompleted: false },
-  { id: '3', title: 'Completar curso de Google Ads', description: 'Certificacao Google Ads Search', deadline: '2024-01-31', progress: 100, isCompleted: true },
-]
+// Dados serao carregados do banco de dados via API
 
 const categories = ['Todas', 'Estrategia', 'Copywriting', 'Processos', 'Criativos', 'Publicos', 'Metricas']
 
@@ -117,9 +71,9 @@ const statusConfig = {
 export default function MeuPensamentoPage() {
   const { showToast } = useApp()
   const [activeTab, setActiveTab] = useState<'notes' | 'ideas' | 'goals'>('notes')
-  const [notes, setNotes] = useState<Note[]>(mockNotes)
-  const [ideas, setIdeas] = useState<Idea[]>(mockIdeas)
-  const [goals, setGoals] = useState<Goal[]>(mockGoals)
+  const [notes, setNotes] = useState<Note[]>([])
+  const [ideas, setIdeas] = useState<Idea[]>([])
+  const [goals, setGoals] = useState<Goal[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Todas')
   const [showNoteModal, setShowNoteModal] = useState(false)
