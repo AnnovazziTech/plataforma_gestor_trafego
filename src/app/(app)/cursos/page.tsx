@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Header } from '@/components/layout'
 import { Button, Badge } from '@/components/ui'
@@ -71,10 +71,30 @@ const thumbnailGradients: Record<string, string> = {
 
 export default function CursosPage() {
   const { showToast } = useApp()
-  const [courses] = useState<Course[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Todos')
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchCourses()
+  }, [selectedCategory])
+
+  const fetchCourses = async () => {
+    try {
+      const categoryParam = selectedCategory !== 'Todos' ? `?category=${selectedCategory}` : ''
+      const response = await fetch(`/api/courses${categoryParam}`)
+      if (response.ok) {
+        const data = await response.json()
+        setCourses(data)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar cursos:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const filteredCourses = courses.filter(c => {
     const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -86,13 +106,33 @@ export default function CursosPage() {
   const inProgressCourses = courses.filter(c => c.progress > 0 && c.progress < 100)
   const completedCourses = courses.filter(c => c.progress === 100)
 
-  const handleStartCourse = (course: Course) => {
+  const handleStartCourse = async (course: Course) => {
     if (course.isLocked) {
       showToast('Este curso requer upgrade do plano', 'warning')
       return
     }
-    setSelectedCourse(course)
-    showToast(`Iniciando ${course.title}...`, 'info')
+
+    try {
+      // Enroll in course
+      const response = await fetch(`/api/courses/${course.id}/enroll`, {
+        method: 'POST',
+      })
+
+      if (response.ok) {
+        setSelectedCourse(course)
+        showToast(`Iniciando ${course.title}...`, 'info')
+        fetchCourses() // Refresh to show updated progress
+      } else if (response.status === 409) {
+        // Already enrolled
+        setSelectedCourse(course)
+        showToast(`Continuando ${course.title}...`, 'info')
+      } else {
+        showToast('Erro ao iniciar curso', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao iniciar curso:', error)
+      showToast('Erro ao iniciar curso', 'error')
+    }
   }
 
   return (

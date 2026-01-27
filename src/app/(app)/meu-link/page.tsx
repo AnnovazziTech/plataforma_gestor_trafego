@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import { Header } from '@/components/layout'
 import { Button, Badge } from '@/components/ui'
@@ -91,6 +91,38 @@ export default function MeuLinkPage() {
   const [editingLink, setEditingLink] = useState<LinkItem | null>(null)
   const [newLink, setNewLink] = useState({ title: '', url: '', icon: 'Link2' })
   const [showPreview, setShowPreview] = useState(false)
+  const [linkPageId, setLinkPageId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Carregar dados da API
+  useEffect(() => {
+    fetchLinkPage()
+  }, [])
+
+  const fetchLinkPage = async () => {
+    try {
+      const response = await fetch('/api/link-pages')
+      if (response.ok) {
+        const data = await response.json()
+        if (data) {
+          setLinkPageId(data.id)
+          setPageConfig({
+            username: data.username,
+            displayName: data.displayName,
+            bio: data.bio || '',
+            avatar: data.avatar || '',
+            theme: data.theme || 'dark',
+            accentColor: data.accentColor || '#3B82F6',
+          })
+          setLinks(data.links || [])
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar página de links:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const pageUrl = `trafficpro.link/${pageConfig.username}`
 
@@ -99,32 +131,99 @@ export default function MeuLinkPage() {
     showToast('Link copiado para a area de transferencia!', 'success')
   }
 
-  const handleAddLink = () => {
+  const handleAddLink = async () => {
     if (!newLink.title.trim() || !newLink.url.trim()) {
       showToast('Preencha todos os campos', 'error')
       return
     }
 
-    const link: LinkItem = {
-      id: Date.now().toString(),
-      ...newLink,
-      clicks: 0,
-      isActive: true,
+    try {
+      const response = await fetch('/api/link-pages/links', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          linkPageId,
+          title: newLink.title,
+          url: newLink.url,
+          icon: newLink.icon,
+          order: links.length,
+        }),
+      })
+
+      if (response.ok) {
+        const createdLink = await response.json()
+        setLinks(prev => [...prev, { ...createdLink, clicks: createdLink.clicks || 0 }])
+        setNewLink({ title: '', url: '', icon: 'Link2' })
+        setShowAddModal(false)
+        showToast('Link adicionado com sucesso!', 'success')
+      } else {
+        showToast('Erro ao adicionar link', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar link:', error)
+      showToast('Erro ao adicionar link', 'error')
     }
-
-    setLinks(prev => [...prev, link])
-    setNewLink({ title: '', url: '', icon: 'Link2' })
-    setShowAddModal(false)
-    showToast('Link adicionado com sucesso!', 'success')
   }
 
-  const handleDeleteLink = (id: string) => {
-    setLinks(prev => prev.filter(l => l.id !== id))
-    showToast('Link removido!', 'info')
+  const handleDeleteLink = async (id: string) => {
+    try {
+      const response = await fetch('/api/link-pages/links', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+
+      if (response.ok) {
+        setLinks(prev => prev.filter(l => l.id !== id))
+        showToast('Link removido!', 'info')
+      } else {
+        showToast('Erro ao remover link', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao remover link:', error)
+      showToast('Erro ao remover link', 'error')
+    }
   }
 
-  const toggleLinkActive = (id: string) => {
-    setLinks(prev => prev.map(l => l.id === id ? { ...l, isActive: !l.isActive } : l))
+  const toggleLinkActive = async (id: string) => {
+    const link = links.find(l => l.id === id)
+    if (!link) return
+
+    try {
+      const response = await fetch('/api/link-pages/links', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isActive: !link.isActive }),
+      })
+
+      if (response.ok) {
+        setLinks(prev => prev.map(l => l.id === id ? { ...l, isActive: !l.isActive } : l))
+      } else {
+        showToast('Erro ao atualizar link', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar link:', error)
+      showToast('Erro ao atualizar link', 'error')
+    }
+  }
+
+  const savePageConfig = async () => {
+    try {
+      const response = await fetch('/api/link-pages', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pageConfig),
+      })
+
+      if (response.ok) {
+        showToast('Configurações salvas!', 'success')
+      } else {
+        showToast('Erro ao salvar configurações', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao salvar configurações:', error)
+      showToast('Erro ao salvar configurações', 'error')
+    }
   }
 
   const totalClicks = links.reduce((acc, l) => acc + l.clicks, 0)
@@ -322,6 +421,10 @@ export default function MeuLinkPage() {
                     ))}
                   </div>
                 </div>
+
+                <Button variant="primary" onClick={savePageConfig} style={{ marginTop: '8px' }}>
+                  Salvar Configuracoes
+                </Button>
               </div>
             </motion.div>
 

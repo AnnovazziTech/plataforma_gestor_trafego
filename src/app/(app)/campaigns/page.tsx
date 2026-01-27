@@ -65,75 +65,78 @@ const statusColors: Record<CampaignStatus, 'success' | 'warning' | 'error' | 'in
   error: 'error',
 }
 
-// Todas as métricas disponíveis do Meta Ads
+// Todas as métricas disponíveis do Meta Ads - Expandido
 const allMetrics = [
-  { key: 'impressions', label: 'Impressões', category: 'Alcance' },
-  { key: 'reach', label: 'Alcance', category: 'Alcance' },
-  { key: 'frequency', label: 'Frequência', category: 'Alcance' },
-  { key: 'clicks', label: 'Cliques', category: 'Engajamento' },
-  { key: 'ctr', label: 'CTR (%)', category: 'Engajamento' },
-  { key: 'engagement', label: 'Engajamento', category: 'Engajamento' },
-  { key: 'videoViews', label: 'Visualizações de Vídeo', category: 'Vídeo' },
-  { key: 'videoCompletionRate', label: 'Taxa de Conclusão (%)', category: 'Vídeo' },
-  { key: 'conversions', label: 'Conversões', category: 'Conversão' },
-  { key: 'conversionRate', label: 'Taxa de Conversão (%)', category: 'Conversão' },
-  { key: 'costPerConversion', label: 'Custo por Conversão', category: 'Conversão' },
-  { key: 'spent', label: 'Valor Gasto', category: 'Custo' },
-  { key: 'cpc', label: 'CPC', category: 'Custo' },
-  { key: 'cpm', label: 'CPM', category: 'Custo' },
-  { key: 'roas', label: 'ROAS', category: 'Retorno' },
+  // Alcance
+  { key: 'impressions', label: 'Impressões', category: 'Alcance', description: 'Total de vezes que o anúncio foi exibido' },
+  { key: 'reach', label: 'Alcance', category: 'Alcance', description: 'Número de pessoas únicas que viram o anúncio' },
+  { key: 'frequency', label: 'Frequência', category: 'Alcance', description: 'Média de vezes que cada pessoa viu o anúncio' },
+  { key: 'uniqueImpressions', label: 'Impressões Únicas', category: 'Alcance', description: 'Impressões para usuários únicos' },
+
+  // Cliques
+  { key: 'clicks', label: 'Cliques (Todos)', category: 'Cliques', description: 'Total de cliques no anúncio' },
+  { key: 'uniqueClicks', label: 'Cliques Únicos', category: 'Cliques', description: 'Cliques de usuários únicos' },
+  { key: 'linkClicks', label: 'Cliques no Link', category: 'Cliques', description: 'Cliques que direcionam para destino' },
+  { key: 'uniqueLinkClicks', label: 'Cliques Únicos no Link', category: 'Cliques', description: 'Cliques únicos no link' },
+  { key: 'outboundClicks', label: 'Cliques Externos', category: 'Cliques', description: 'Cliques para fora do Facebook' },
+  { key: 'ctr', label: 'CTR (%)', category: 'Cliques', description: 'Taxa de cliques (cliques/impressões)' },
+  { key: 'uniqueCtr', label: 'CTR Único (%)', category: 'Cliques', description: 'CTR para usuários únicos' },
+
+  // Custo
+  { key: 'spent', label: 'Valor Gasto', category: 'Custo', description: 'Total investido na campanha' },
+  { key: 'cpc', label: 'CPC', category: 'Custo', description: 'Custo por clique' },
+  { key: 'cpm', label: 'CPM', category: 'Custo', description: 'Custo por mil impressões' },
+  { key: 'costPerResult', label: 'Custo por Resultado', category: 'Custo', description: 'Custo médio por resultado' },
+
+  // Engajamento
+  { key: 'postEngagement', label: 'Engajamento do Post', category: 'Engajamento', description: 'Total de interações com o post' },
+  { key: 'pageEngagement', label: 'Engajamento da Página', category: 'Engajamento', description: 'Interações com a página' },
+  { key: 'likes', label: 'Curtidas', category: 'Engajamento', description: 'Número de curtidas' },
+  { key: 'comments', label: 'Comentários', category: 'Engajamento', description: 'Número de comentários' },
+  { key: 'shares', label: 'Compartilhamentos', category: 'Engajamento', description: 'Número de compartilhamentos' },
+  { key: 'saves', label: 'Salvos', category: 'Engajamento', description: 'Número de salvamentos' },
+  { key: 'postReactions', label: 'Reações', category: 'Engajamento', description: 'Total de reações no post' },
+
+  // Vídeo
+  { key: 'videoViews', label: 'Visualizações de Vídeo', category: 'Vídeo', description: 'Total de visualizações' },
+  { key: 'videoViewsP25', label: 'Vídeo 25%', category: 'Vídeo', description: 'Assistiram 25% do vídeo' },
+  { key: 'videoViewsP50', label: 'Vídeo 50%', category: 'Vídeo', description: 'Assistiram 50% do vídeo' },
+  { key: 'videoViewsP75', label: 'Vídeo 75%', category: 'Vídeo', description: 'Assistiram 75% do vídeo' },
+  { key: 'videoViewsP100', label: 'Vídeo 100%', category: 'Vídeo', description: 'Assistiram o vídeo completo' },
+  { key: 'videoThruplay', label: 'ThruPlay', category: 'Vídeo', description: 'Assistiram 15s ou vídeo completo' },
+  { key: 'videoCompletionRate', label: 'Taxa de Conclusão (%)', category: 'Vídeo', description: 'Porcentagem que completou' },
+
+  // Conversão
+  { key: 'conversions', label: 'Conversões', category: 'Conversão', description: 'Total de conversões' },
+  { key: 'conversionRate', label: 'Taxa de Conversão (%)', category: 'Conversão', description: 'Cliques que converteram' },
+  { key: 'costPerConversion', label: 'Custo por Conversão', category: 'Conversão', description: 'Custo médio por conversão' },
+  { key: 'leads', label: 'Leads', category: 'Conversão', description: 'Total de leads gerados' },
+  { key: 'costPerLead', label: 'Custo por Lead', category: 'Conversão', description: 'Custo médio por lead' },
+  { key: 'purchases', label: 'Compras', category: 'Conversão', description: 'Total de compras' },
+  { key: 'purchaseValue', label: 'Valor das Compras', category: 'Conversão', description: 'Receita total das compras' },
+  { key: 'addToCart', label: 'Add to Cart', category: 'Conversão', description: 'Adições ao carrinho' },
+  { key: 'initiateCheckout', label: 'Checkout Iniciado', category: 'Conversão', description: 'Checkouts iniciados' },
+
+  // Landing Page
+  { key: 'landingPageViews', label: 'Visualizações da LP', category: 'Landing Page', description: 'Visualizações da página de destino' },
+
+  // Retorno
+  { key: 'roas', label: 'ROAS', category: 'Retorno', description: 'Retorno sobre investimento em anúncios' },
 ]
 
-// Mock de dados históricos de 4 semanas para campanhas
-const generateWeeklyData = (campaign: Campaign) => {
-  const baseMetrics = campaign.metrics
-  return [
-    {
-      week: 'Semana 1',
-      impressions: Math.round(baseMetrics.impressions * 0.75),
-      clicks: Math.round(baseMetrics.clicks * 0.72),
-      conversions: Math.round(baseMetrics.conversions * 0.68),
-      spent: baseMetrics.cpc * baseMetrics.clicks * 0.70,
-      ctr: baseMetrics.ctr * 0.92,
-      cpc: baseMetrics.cpc * 1.08,
-      roas: baseMetrics.roas * 0.85,
-      reach: Math.round(baseMetrics.reach * 0.73),
-    },
-    {
-      week: 'Semana 2',
-      impressions: Math.round(baseMetrics.impressions * 0.85),
-      clicks: Math.round(baseMetrics.clicks * 0.82),
-      conversions: Math.round(baseMetrics.conversions * 0.80),
-      spent: baseMetrics.cpc * baseMetrics.clicks * 0.80,
-      ctr: baseMetrics.ctr * 0.96,
-      cpc: baseMetrics.cpc * 1.02,
-      roas: baseMetrics.roas * 0.92,
-      reach: Math.round(baseMetrics.reach * 0.83),
-    },
-    {
-      week: 'Semana 3',
-      impressions: Math.round(baseMetrics.impressions * 0.92),
-      clicks: Math.round(baseMetrics.clicks * 0.90),
-      conversions: Math.round(baseMetrics.conversions * 0.88),
-      spent: baseMetrics.cpc * baseMetrics.clicks * 0.88,
-      ctr: baseMetrics.ctr * 0.98,
-      cpc: baseMetrics.cpc * 1.00,
-      roas: baseMetrics.roas * 0.96,
-      reach: Math.round(baseMetrics.reach * 0.90),
-    },
-    {
-      week: 'Semana 4 (Atual)',
-      impressions: baseMetrics.impressions,
-      clicks: baseMetrics.clicks,
-      conversions: baseMetrics.conversions,
-      spent: baseMetrics.cpc * baseMetrics.clicks,
-      ctr: baseMetrics.ctr,
-      cpc: baseMetrics.cpc,
-      roas: baseMetrics.roas,
-      reach: baseMetrics.reach,
-    },
-  ]
-}
+// Categorias de métricas para o modal
+const metricCategories = [
+  { key: 'Alcance', color: '#3B82F6' },
+  { key: 'Cliques', color: '#10B981' },
+  { key: 'Custo', color: '#F59E0B' },
+  { key: 'Engajamento', color: '#8B5CF6' },
+  { key: 'Vídeo', color: '#EC4899' },
+  { key: 'Conversão', color: '#14B8A6' },
+  { key: 'Landing Page', color: '#6366F1' },
+  { key: 'Retorno', color: '#22C55E' },
+]
+
+// Dados históricos serao carregados da API quando disponíveis
 
 export default function CampaignsPage() {
   const searchParams = useSearchParams()
@@ -163,6 +166,20 @@ export default function CampaignsPage() {
   // Estado para comparação de campanhas
   const [campaignForComparison, setCampaignForComparison] = useState<Campaign | null>(null)
   const [weeklyData, setWeeklyData] = useState<any[]>([])
+  const [comparisonLoading, setComparisonLoading] = useState(false)
+  const [comparisonAnalysis, setComparisonAnalysis] = useState<{
+    trend: 'improving' | 'stable' | 'declining'
+    recommendation: 'scale' | 'maintain' | 'optimize' | 'pause'
+    insights: string[]
+  } | null>(null)
+  const [comparisonChanges, setComparisonChanges] = useState<{
+    impressions: number
+    clicks: number
+    conversions: number
+    spent: number
+    ctr: number
+    roas: number
+  } | null>(null)
 
   // Estado para modal de edição
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null)
@@ -194,29 +211,83 @@ export default function CampaignsPage() {
   const platforms: Platform[] = ['meta', 'google', 'tiktok', 'linkedin', 'twitter']
   const statuses: CampaignStatus[] = ['active', 'paused', 'ended', 'draft', 'error']
 
-  const handleAiAnalysis = (campaignId: string, campaignName: string) => {
+  const handleAiAnalysis = async (campaignId: string, campaignName: string) => {
     setIsAnalyzing(campaignId)
+    setComparisonLoading(true)
 
-    // Encontrar a campanha e gerar dados de comparação
+    // Encontrar a campanha
     const campaign = campaigns.find(c => c.id === campaignId)
     if (campaign) {
       setCampaignForComparison(campaign as Campaign)
-      setWeeklyData(generateWeeklyData(campaign as Campaign))
     }
 
-    setTimeout(() => {
-      const analyses = [
-        `A campanha "${campaignName}" apresenta um CTR acima da media do mercado. Recomenda-se aumentar o orcamento em 20% para escalar os resultados. O publico-alvo esta bem segmentado, mas considere testar novos criativos para evitar fadiga de anuncio.`,
-        `Esta campanha tem um ROAS excelente de 3.5x. Os horarios de maior conversao sao entre 19h-22h. Sugestao: concentrar 60% do orcamento neste periodo para maximizar ROI.`,
-        `A campanha "${campaignName}" esta com CPC elevado comparado ao benchmark. Recomendacoes: 1) Revisar segmentacao de publico, 2) Testar novos titulos de anuncio, 3) Considerar formato de video curto.`,
-        `Performance solida com tendencia de crescimento. O custo por conversao diminuiu 15% na ultima semana. Mantenha a estrategia atual e monitore a frequencia para evitar saturacao.`
-      ]
+    try {
+      // Buscar dados reais do endpoint de comparação
+      const response = await fetch(`/api/campaigns/${campaignId}/comparison`)
+
+      if (response.ok) {
+        const data = await response.json()
+
+        // Transformar dados para o formato esperado pelos gráficos
+        const formattedWeeklyData = data.weeks.map((week: any, idx: number) => ({
+          week: idx === 3 ? `Semana ${week.week} (Atual)` : `Semana ${week.week}`,
+          weekLabel: week.weekLabel,
+          impressions: week.impressions,
+          reach: week.reach,
+          clicks: week.clicks,
+          ctr: week.ctr,
+          cpc: week.cpc,
+          cpm: week.cpm,
+          conversions: week.conversions,
+          spent: week.spent,
+          roas: week.roas,
+        }))
+
+        setWeeklyData(formattedWeeklyData)
+        setComparisonChanges(data.changes)
+        setComparisonAnalysis(data.analysis)
+
+        // Gerar análise de IA baseada nos dados reais
+        const trendText = data.analysis.trend === 'improving'
+          ? 'em tendencia de crescimento'
+          : data.analysis.trend === 'declining'
+            ? 'em tendencia de queda'
+            : 'estavel'
+
+        const recommendationMap: Record<string, string> = {
+          scale: 'Recomendacao: ESCALAR - Aumentar orcamento em 20-30%',
+          maintain: 'Recomendacao: MANTER - Performance consistente',
+          optimize: 'Recomendacao: OTIMIZAR - Testar novos criativos e segmentacoes',
+          pause: 'Recomendacao: PAUSAR - Revisar estrategia antes de continuar'
+        }
+        const recommendationText = recommendationMap[data.analysis.recommendation] || 'Analise em andamento'
+
+        const analysisText = `A campanha "${campaignName}" esta ${trendText}. ${recommendationText}. ${data.analysis.insights.slice(0, 2).join('. ')}.`
+
+        setAiAnalysis({
+          campaignId,
+          analysis: analysisText
+        })
+      } else {
+        // Sem dados históricos disponíveis
+        setWeeklyData([])
+        setAiAnalysis({
+          campaignId,
+          analysis: `Dados historicos da campanha "${campaignName}" nao disponiveis. Sincronize as campanhas para obter dados atualizados.`
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao buscar comparacao:', error)
+      // Erro ao carregar - mostrar estado vazio
+      setWeeklyData([])
       setAiAnalysis({
         campaignId,
-        analysis: analyses[Math.floor(Math.random() * analyses.length)]
+        analysis: `Nao foi possivel carregar dados historicos da campanha "${campaignName}". Verifique a conexao e tente novamente.`
       })
+    } finally {
+      setComparisonLoading(false)
       setIsAnalyzing(null)
-    }, 2000)
+    }
   }
 
   const toggleMetric = (metricKey: string) => {
@@ -607,13 +678,61 @@ export default function CampaignsPage() {
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                    <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', textAlign: 'center' }}>
-                      <p style={{ fontSize: '12px', color: '#34D399', marginBottom: '4px', margin: 0 }}>Recomendacao</p>
-                      <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Escalar</p>
+                    <div style={{
+                      padding: '12px',
+                      borderRadius: '12px',
+                      backgroundColor: comparisonAnalysis?.recommendation === 'scale' ? 'rgba(16, 185, 129, 0.1)'
+                        : comparisonAnalysis?.recommendation === 'maintain' ? 'rgba(59, 130, 246, 0.1)'
+                        : comparisonAnalysis?.recommendation === 'optimize' ? 'rgba(250, 204, 21, 0.1)'
+                        : 'rgba(239, 68, 68, 0.1)',
+                      border: `1px solid ${comparisonAnalysis?.recommendation === 'scale' ? 'rgba(16, 185, 129, 0.2)'
+                        : comparisonAnalysis?.recommendation === 'maintain' ? 'rgba(59, 130, 246, 0.2)'
+                        : comparisonAnalysis?.recommendation === 'optimize' ? 'rgba(250, 204, 21, 0.2)'
+                        : 'rgba(239, 68, 68, 0.2)'}`,
+                      textAlign: 'center'
+                    }}>
+                      <p style={{
+                        fontSize: '12px',
+                        color: comparisonAnalysis?.recommendation === 'scale' ? '#34D399'
+                          : comparisonAnalysis?.recommendation === 'maintain' ? '#3B82F6'
+                          : comparisonAnalysis?.recommendation === 'optimize' ? '#FACC15'
+                          : '#EF4444',
+                        marginBottom: '4px',
+                        margin: 0
+                      }}>Recomendacao</p>
+                      <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>
+                        {comparisonAnalysis?.recommendation === 'scale' ? 'Escalar'
+                          : comparisonAnalysis?.recommendation === 'maintain' ? 'Manter'
+                          : comparisonAnalysis?.recommendation === 'optimize' ? 'Otimizar'
+                          : comparisonAnalysis?.recommendation === 'pause' ? 'Pausar'
+                          : 'Escalar'}
+                      </p>
                     </div>
-                    <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(250, 204, 21, 0.1)', border: '1px solid rgba(250, 204, 21, 0.2)', textAlign: 'center' }}>
-                      <p style={{ fontSize: '12px', color: '#FACC15', marginBottom: '4px', margin: 0 }}>Prioridade</p>
-                      <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Alta</p>
+                    <div style={{
+                      padding: '12px',
+                      borderRadius: '12px',
+                      backgroundColor: comparisonAnalysis?.trend === 'improving' ? 'rgba(16, 185, 129, 0.1)'
+                        : comparisonAnalysis?.trend === 'stable' ? 'rgba(250, 204, 21, 0.1)'
+                        : 'rgba(239, 68, 68, 0.1)',
+                      border: `1px solid ${comparisonAnalysis?.trend === 'improving' ? 'rgba(16, 185, 129, 0.2)'
+                        : comparisonAnalysis?.trend === 'stable' ? 'rgba(250, 204, 21, 0.2)'
+                        : 'rgba(239, 68, 68, 0.2)'}`,
+                      textAlign: 'center'
+                    }}>
+                      <p style={{
+                        fontSize: '12px',
+                        color: comparisonAnalysis?.trend === 'improving' ? '#34D399'
+                          : comparisonAnalysis?.trend === 'stable' ? '#FACC15'
+                          : '#EF4444',
+                        marginBottom: '4px',
+                        margin: 0
+                      }}>Tendencia</p>
+                      <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>
+                        {comparisonAnalysis?.trend === 'improving' ? 'Crescendo'
+                          : comparisonAnalysis?.trend === 'stable' ? 'Estavel'
+                          : comparisonAnalysis?.trend === 'declining' ? 'Declinando'
+                          : 'Analisando...'}
+                      </p>
                     </div>
                   </div>
                 </motion.div>
@@ -634,7 +753,7 @@ export default function CampaignsPage() {
 
         {/* Comparação de Campanhas - Últimas 4 Semanas */}
         <AnimatePresence>
-          {campaignForComparison && weeklyData.length > 0 && (
+          {campaignForComparison && (comparisonLoading || weeklyData.length > 0) && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -668,6 +787,8 @@ export default function CampaignsPage() {
                     onClick={() => {
                       setCampaignForComparison(null)
                       setWeeklyData([])
+                      setComparisonAnalysis(null)
+                      setComparisonChanges(null)
                     }}
                     style={{ padding: '8px', borderRadius: '8px', background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
                   >
@@ -675,7 +796,28 @@ export default function CampaignsPage() {
                   </button>
                 </div>
 
+                {/* Loading State */}
+                {comparisonLoading && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px' }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        margin: '0 auto 16px',
+                        border: '3px solid rgba(59, 130, 246, 0.2)',
+                        borderTopColor: '#3B82F6',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                      }} />
+                      <p style={{ fontSize: '14px', color: '#6B6B7B' }}>Carregando dados das ultimas 4 semanas...</p>
+                      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                    </div>
+                  </div>
+                )}
+
                 {/* Métricas Cards */}
+                {!comparisonLoading && weeklyData.length > 0 && (
+                <>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
                   {[
                     { key: 'impressions', label: 'Impressões', format: (v: number) => formatCompactNumber(v) },
@@ -813,7 +955,7 @@ export default function CampaignsPage() {
                     <tbody>
                       {weeklyData.map((week, idx) => (
                         <tr key={week.week} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', backgroundColor: idx === 3 ? 'rgba(59, 130, 246, 0.05)' : 'transparent' }}>
-                          <td style={{ padding: '12px 16px', fontSize: '14px', fontWeight: idx === 3 ? 600 : 400, color: idx === 3 ? '#3B82F6' : '#FFFFFF' }}>{week.week}</td>
+                          <td style={{ padding: '12px 16px', fontSize: '14px', fontWeight: idx === 3 ? 600 : 400, color: idx === 3 ? '#3B82F6' : '#FFFFFF' }}>{week.weekLabel || week.week}</td>
                           <td style={{ padding: '12px 16px', fontSize: '14px', color: '#A0A0B0', textAlign: 'right' }}>{formatCompactNumber(week.impressions)}</td>
                           <td style={{ padding: '12px 16px', fontSize: '14px', color: '#A0A0B0', textAlign: 'right' }}>{formatCompactNumber(week.clicks)}</td>
                           <td style={{ padding: '12px 16px', fontSize: '14px', color: '#A0A0B0', textAlign: 'right' }}>{week.ctr.toFixed(2)}%</td>
@@ -825,6 +967,25 @@ export default function CampaignsPage() {
                     </tbody>
                   </table>
                 </div>
+
+                {/* Insights da Análise */}
+                {comparisonAnalysis && comparisonAnalysis.insights.length > 0 && (
+                  <div style={{ marginTop: '24px', padding: '20px', borderRadius: '16px', backgroundColor: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#A855F7', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Sparkles size={16} />
+                      Insights da Análise
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                      {comparisonAnalysis.insights.map((insight, idx) => (
+                        <li key={idx} style={{ fontSize: '14px', color: '#A0A0B0', marginBottom: '8px', lineHeight: '1.5' }}>
+                          {insight}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                </>
+                )}
               </div>
             </motion.div>
           )}

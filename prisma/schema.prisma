@@ -5,6 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  schemas  = ["sistema_gestor"]
 }
 
 model Plan {
@@ -35,6 +36,7 @@ model Plan {
   organizations      Organization[]
 
   @@map("plans")
+  @@schema("sistema_gestor")
 }
 
 model Organization {
@@ -57,6 +59,7 @@ model Organization {
   apiKeys              ApiKey[]
   artTemplates         ArtTemplateSaved[]
   auditLogs            AuditLog[]
+  automations          Automation[]
   campaigns            Campaign[]
   conversations        Conversation[]
   creatives            Creative[]
@@ -67,8 +70,21 @@ model Organization {
   reports              Report[]
   scheduledPosts       ScheduledPost[]
   webhooks             Webhook[]
+  // Novas relações
+  prospects            Prospect[]
+  notes                Note[]
+  ideas                Idea[]
+  goals                Goal[]
+  linkPages            LinkPage[]
+  purchases            Purchase[]
+  enrollments          Enrollment[]
+  lessonProgress       LessonProgress[]
+  clients              Client[]
+  expenses             Expense[]
+  quotes               Quote[]
 
   @@map("organizations")
+  @@schema("sistema_gestor")
 }
 
 model User {
@@ -88,6 +104,7 @@ model User {
   sessions      Session[]
 
   @@map("users")
+  @@schema("sistema_gestor")
 }
 
 model OrganizationMember {
@@ -109,6 +126,7 @@ model OrganizationMember {
 
   @@unique([organizationId, userId])
   @@map("organization_members")
+  @@schema("sistema_gestor")
 }
 
 model Account {
@@ -128,6 +146,7 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
+  @@schema("sistema_gestor")
 }
 
 model Session {
@@ -138,6 +157,7 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
+  @@schema("sistema_gestor")
 }
 
 model VerificationToken {
@@ -147,6 +167,7 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+  @@schema("sistema_gestor")
 }
 
 model Integration {
@@ -175,6 +196,7 @@ model Integration {
 
   @@unique([organizationId, platform, platformAccountId])
   @@map("integrations")
+  @@schema("sistema_gestor")
 }
 
 model AdAccount {
@@ -192,6 +214,7 @@ model AdAccount {
 
   @@unique([integrationId, platformAdAccountId])
   @@map("ad_accounts")
+  @@schema("sistema_gestor")
 }
 
 model Campaign {
@@ -224,33 +247,71 @@ model Campaign {
   @@index([organizationId, status])
   @@index([organizationId, platform])
   @@map("campaigns")
+  @@schema("sistema_gestor")
 }
 
 model CampaignMetrics {
   id                  String   @id @default(cuid())
   campaignId          String
+
+  // Métricas de Alcance
   impressions         Int      @default(0)
   reach               Int      @default(0)
+  frequency           Float    @default(0)
+  uniqueImpressions   Int      @default(0)
+
+  // Métricas de Cliques
   clicks              Int      @default(0)
+  uniqueClicks        Int      @default(0)
+  linkClicks          Int      @default(0)
+  uniqueLinkClicks    Int      @default(0)
+  outboundClicks      Int      @default(0)
   ctr                 Float    @default(0)
+  uniqueCtr           Float    @default(0)
+
+  // Métricas de Custo
+  spent               Float    @default(0)
   cpc                 Float    @default(0)
   cpm                 Float    @default(0)
-  conversions         Int      @default(0)
-  conversionRate      Float    @default(0)
-  costPerConversion   Float    @default(0)
-  spent               Float    @default(0)
-  roas                Float    @default(0)
-  frequency           Float    @default(0)
+  costPerResult       Float    @default(0)
+
+  // Métricas de Engajamento
+  postEngagement      Int      @default(0)
+  pageEngagement      Int      @default(0)
+  likes               Int      @default(0)
+  comments            Int      @default(0)
+  shares              Int      @default(0)
+  saves               Int      @default(0)
+  postReactions       Int      @default(0)
+
+  // Métricas de Vídeo
   videoViews          Int      @default(0)
   videoViewsP25       Int      @default(0)
   videoViewsP50       Int      @default(0)
   videoViewsP75       Int      @default(0)
   videoViewsP100      Int      @default(0)
+  videoThruplay       Int      @default(0)
+  videoAvgTimeWatched Float    @default(0)
   videoCompletionRate Float    @default(0)
-  likes               Int      @default(0)
-  comments            Int      @default(0)
-  shares              Int      @default(0)
-  saves               Int      @default(0)
+
+  // Métricas de Conversão
+  conversions         Int      @default(0)
+  conversionRate      Float    @default(0)
+  costPerConversion   Float    @default(0)
+  leads               Int      @default(0)
+  costPerLead         Float    @default(0)
+  purchases           Int      @default(0)
+  purchaseValue       Float    @default(0)
+  addToCart           Int      @default(0)
+  initiateCheckout    Int      @default(0)
+
+  // Métricas de Retorno
+  roas                Float    @default(0)
+
+  // Métricas de Landing Page
+  landingPageViews    Int      @default(0)
+
+  // Período
   periodStart         DateTime
   periodEnd           DateTime
   createdAt           DateTime @default(now())
@@ -259,27 +320,58 @@ model CampaignMetrics {
 
   @@unique([campaignId, periodStart, periodEnd])
   @@map("campaign_metrics")
+  @@schema("sistema_gestor")
 }
 
 model CampaignDailyMetrics {
   id          String   @id @default(cuid())
   campaignId  String
   date        DateTime @db.Date
+
+  // Métricas de Alcance
   impressions Int      @default(0)
   reach       Int      @default(0)
+  frequency   Float    @default(0)
+
+  // Métricas de Cliques
   clicks      Int      @default(0)
+  linkClicks  Int      @default(0)
   ctr         Float    @default(0)
+
+  // Métricas de Custo
+  spent       Float    @default(0)
   cpc         Float    @default(0)
   cpm         Float    @default(0)
+
+  // Métricas de Engajamento
+  engagement  Int      @default(0)
+  likes       Int      @default(0)
+  comments    Int      @default(0)
+  shares      Int      @default(0)
+
+  // Métricas de Vídeo
+  videoViews  Int      @default(0)
+  videoThruplay Int    @default(0)
+
+  // Métricas de Conversão
   conversions Int      @default(0)
-  spent       Float    @default(0)
+  leads       Int      @default(0)
+  purchases   Int      @default(0)
+  purchaseValue Float  @default(0)
+
+  // Métricas de Retorno
   roas        Float    @default(0)
+
+  // Métricas de Landing Page
+  landingPageViews Int @default(0)
+
   createdAt   DateTime @default(now())
   campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@unique([campaignId, date])
   @@index([campaignId, date])
   @@map("campaign_daily_metrics")
+  @@schema("sistema_gestor")
 }
 
 model Lead {
@@ -316,6 +408,7 @@ model Lead {
   @@index([phone])
   @@index([email])
   @@map("leads")
+  @@schema("sistema_gestor")
 }
 
 model LeadHistory {
@@ -330,6 +423,7 @@ model LeadHistory {
 
   @@index([leadId, createdAt])
   @@map("lead_history")
+  @@schema("sistema_gestor")
 }
 
 model Conversation {
@@ -357,6 +451,7 @@ model Conversation {
   @@unique([organizationId, integrationId, contactPhone])
   @@index([organizationId, status])
   @@map("conversations")
+  @@schema("sistema_gestor")
 }
 
 model Message {
@@ -375,6 +470,7 @@ model Message {
 
   @@index([conversationId, createdAt])
   @@map("messages")
+  @@schema("sistema_gestor")
 }
 
 model Creative {
@@ -400,6 +496,7 @@ model Creative {
 
   @@index([organizationId, type])
   @@map("creatives")
+  @@schema("sistema_gestor")
 }
 
 model ArtTemplateSaved {
@@ -413,6 +510,7 @@ model ArtTemplateSaved {
 
   @@unique([organizationId, templateId])
   @@map("art_templates_saved")
+  @@schema("sistema_gestor")
 }
 
 model ArtTemplate {
@@ -436,6 +534,7 @@ model ArtTemplate {
   @@index([niche])
   @@index([type])
   @@map("art_templates")
+  @@schema("sistema_gestor")
 }
 
 model Webhook {
@@ -452,6 +551,7 @@ model Webhook {
   organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@map("webhooks")
+  @@schema("sistema_gestor")
 }
 
 model ApiKey {
@@ -468,6 +568,7 @@ model ApiKey {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@map("api_keys")
+  @@schema("sistema_gestor")
 }
 
 model AuditLog {
@@ -488,15 +589,16 @@ model AuditLog {
   @@index([organizationId, createdAt])
   @@index([organizationId, action])
   @@map("audit_logs")
+  @@schema("sistema_gestor")
 }
 
 model Report {
-  id             String              @id @default(cuid())
+  id             String                @id @default(cuid())
   organizationId String
   name           String
-  type           ReportType          @default(PERFORMANCE)
-  frequency      ReportFrequency     @default(ONCE)
-  status         ReportStatus        @default(ACTIVE)
+  type           ReportType            @default(PERFORMANCE)
+  frequency      ReportFrequency       @default(ONCE)
+  status         ReportStatus          @default(ACTIVE)
   platforms      IntegrationPlatform[]
   metrics        String[]
   dateRangeStart DateTime
@@ -504,176 +606,47 @@ model Report {
   recipients     String[]
   sendMethod     SendMethod?
   lastGenerated  DateTime?
-  generatedCount Int                 @default(0)
+  generatedCount Int                   @default(0)
   reportData     Json?
-  isActive       Boolean             @default(true)
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
-  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  isActive       Boolean               @default(true)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  organization   Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, status])
   @@index([organizationId, type])
   @@map("reports")
+  @@schema("sistema_gestor")
 }
 
-enum SubscriptionStatus {
-  TRIALING
-  ACTIVE
-  PAST_DUE
-  CANCELED
-  UNPAID
-  INCOMPLETE
+model Automation {
+  id             String           @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  triggerType    AutomationTrigger
+  triggerConfig  Json
+  actionType     AutomationAction
+  actionConfig   Json
+  isActive       Boolean          @default(true)
+  lastRunAt      DateTime?
+  runCount       Int              @default(0)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, isActive])
+  @@map("automations")
+  @@schema("sistema_gestor")
 }
 
-enum MemberRole {
-  OWNER
-  ADMIN
-  MEMBER
-  VIEWER
-}
-
-enum IntegrationPlatform {
-  META
-  GOOGLE
-  TIKTOK
-  LINKEDIN
-  WHATSAPP
-  TWITTER
-}
-
-enum IntegrationStatus {
-  PENDING
-  CONNECTED
-  ERROR
-  EXPIRED
-  DISCONNECTED
-}
-
-enum CampaignObjective {
-  AWARENESS
-  TRAFFIC
-  ENGAGEMENT
-  LEADS
-  SALES
-  APP_INSTALLS
-  VIDEO_VIEWS
-  MESSAGES
-  CONVERSIONS
-}
-
-enum CampaignStatus {
-  DRAFT
-  PENDING
-  ACTIVE
-  PAUSED
-  ENDED
-  ERROR
-  ARCHIVED
-}
-
-enum BudgetType {
-  DAILY
-  LIFETIME
-}
-
-enum LeadSource {
-  META_ADS
-  GOOGLE_ADS
-  TIKTOK_ADS
-  LINKEDIN_ADS
-  WHATSAPP
-  ORGANIC
-  REFERRAL
-  WEBSITE
-  MANUAL
-  OTHER
-}
-
-enum LeadStatus {
-  NEW
-  CONTACTED
-  QUALIFIED
-  PROPOSAL
-  NEGOTIATION
-  WON
-  LOST
-  REMARKETING
-}
-
-enum ConversationStatus {
-  OPEN
-  PENDING
-  RESOLVED
-  ARCHIVED
-}
-
-enum MessageType {
-  TEXT
-  IMAGE
-  VIDEO
-  AUDIO
-  DOCUMENT
-  LOCATION
-  CONTACT
-  STICKER
-  TEMPLATE
-}
-
-enum MessageDirection {
-  INBOUND
-  OUTBOUND
-}
-
-enum MessageStatus {
-  PENDING
-  SENT
-  DELIVERED
-  READ
-  FAILED
-}
-
-enum CreativeType {
-  IMAGE
-  VIDEO
-  CAROUSEL
-  TEXT
-}
-
-enum ReportType {
-  PERFORMANCE
-  AUDIENCE
-  CREATIVE
-  CUSTOM
-}
-
-enum ReportFrequency {
-  ONCE
-  DAILY
-  WEEKLY
-  MONTHLY
-  CUSTOM
-}
-
-enum ReportStatus {
-  ACTIVE
-  PAUSED
-  ARCHIVED
-}
-
-enum SendMethod {
-  EMAIL
-  WHATSAPP
-  DOWNLOAD
-}
-
-// Scheduled Posts
 model ScheduledPost {
   id             String              @id @default(cuid())
   organizationId String
   name           String
   platform       SocialPlatform
   scheduledDate  DateTime
-  scheduledTime  String              // HH:mm format
+  scheduledTime  String
   format         PostFormat          @default(FEED)
   text           String?
   mediaUrl       String?
@@ -688,6 +661,215 @@ model ScheduledPost {
   @@index([organizationId, status])
   @@index([organizationId, scheduledDate])
   @@map("scheduled_posts")
+  @@schema("sistema_gestor")
+}
+
+// Enums
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  INCOMPLETE
+
+  @@schema("sistema_gestor")
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+
+  @@schema("sistema_gestor")
+}
+
+enum IntegrationPlatform {
+  META
+  GOOGLE
+  TIKTOK
+  LINKEDIN
+  WHATSAPP
+  TWITTER
+
+  @@schema("sistema_gestor")
+}
+
+enum IntegrationStatus {
+  PENDING
+  CONNECTED
+  ERROR
+  EXPIRED
+  DISCONNECTED
+
+  @@schema("sistema_gestor")
+}
+
+enum CampaignObjective {
+  AWARENESS
+  TRAFFIC
+  ENGAGEMENT
+  LEADS
+  SALES
+  APP_INSTALLS
+  VIDEO_VIEWS
+  MESSAGES
+  CONVERSIONS
+
+  @@schema("sistema_gestor")
+}
+
+enum CampaignStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  PAUSED
+  ENDED
+  ERROR
+  ARCHIVED
+
+  @@schema("sistema_gestor")
+}
+
+enum BudgetType {
+  DAILY
+  LIFETIME
+
+  @@schema("sistema_gestor")
+}
+
+enum LeadSource {
+  META_ADS
+  GOOGLE_ADS
+  TIKTOK_ADS
+  LINKEDIN_ADS
+  WHATSAPP
+  ORGANIC
+  REFERRAL
+  WEBSITE
+  MANUAL
+  OTHER
+
+  @@schema("sistema_gestor")
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+  REMARKETING
+
+  @@schema("sistema_gestor")
+}
+
+enum ConversationStatus {
+  OPEN
+  PENDING
+  RESOLVED
+  ARCHIVED
+
+  @@schema("sistema_gestor")
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+  LOCATION
+  CONTACT
+  STICKER
+  TEMPLATE
+
+  @@schema("sistema_gestor")
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+
+  @@schema("sistema_gestor")
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+
+  @@schema("sistema_gestor")
+}
+
+enum CreativeType {
+  IMAGE
+  VIDEO
+  CAROUSEL
+  TEXT
+
+  @@schema("sistema_gestor")
+}
+
+enum ReportType {
+  PERFORMANCE
+  AUDIENCE
+  CREATIVE
+  CUSTOM
+
+  @@schema("sistema_gestor")
+}
+
+enum ReportFrequency {
+  ONCE
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
+
+  @@schema("sistema_gestor")
+}
+
+enum ReportStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+
+  @@schema("sistema_gestor")
+}
+
+enum SendMethod {
+  EMAIL
+  WHATSAPP
+  DOWNLOAD
+
+  @@schema("sistema_gestor")
+}
+
+enum AutomationTrigger {
+  SCHEDULE
+  METRIC_THRESHOLD
+  LEAD_STATUS_CHANGE
+  CAMPAIGN_STATUS_CHANGE
+  BUDGET_DEPLETED
+
+  @@schema("sistema_gestor")
+}
+
+enum AutomationAction {
+  PAUSE_CAMPAIGN
+  ACTIVATE_CAMPAIGN
+  ADJUST_BUDGET
+  ADJUST_BID
+  SEND_NOTIFICATION
+  SEND_WEBHOOK
+
+  @@schema("sistema_gestor")
 }
 
 enum SocialPlatform {
@@ -696,6 +878,8 @@ enum SocialPlatform {
   LINKEDIN
   TWITTER
   TIKTOK
+
+  @@schema("sistema_gestor")
 }
 
 enum PostFormat {
@@ -703,11 +887,15 @@ enum PostFormat {
   STORY
   REELS
   CAROUSEL
+
+  @@schema("sistema_gestor")
 }
 
 enum MediaType {
   IMAGE
   VIDEO
+
+  @@schema("sistema_gestor")
 }
 
 enum ScheduledPostStatus {
@@ -716,4 +904,395 @@ enum ScheduledPostStatus {
   PUBLISHED
   FAILED
   CANCELLED
+
+  @@schema("sistema_gestor")
+}
+
+// ==========================================
+// NOVOS MODELOS - Funcionalidades Adicionais
+// ==========================================
+
+// Prospecção - Gerenciamento de Prospects
+model Prospect {
+  id             String         @id @default(cuid())
+  organizationId String
+  companyName    String
+  website        String?
+  industry       String?
+  size           String?
+  location       String?
+  contactName    String?
+  contactEmail   String?
+  contactPhone   String?
+  socialMedia    Json?
+  status         ProspectStatus @default(NEW)
+  score          Int            @default(50)
+  notes          String?
+  isFavorite     Boolean        @default(false)
+  lastContactAt  DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([organizationId, score])
+  @@map("prospects")
+  @@schema("sistema_gestor")
+}
+
+enum ProspectStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  WON
+  LOST
+
+  @@schema("sistema_gestor")
+}
+
+// Meu Pensamento - Notas
+model Note {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  title          String
+  content        String
+  category       String?
+  tags           String[]
+  isFavorite     Boolean      @default(false)
+  isPinned       Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, userId])
+  @@index([organizationId, category])
+  @@map("notes")
+  @@schema("sistema_gestor")
+}
+
+// Meu Pensamento - Ideias
+model Idea {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  content        String
+  category       String?
+  status         IdeaStatus   @default(NEW)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, userId])
+  @@index([organizationId, status])
+  @@map("ideas")
+  @@schema("sistema_gestor")
+}
+
+enum IdeaStatus {
+  NEW
+  TESTING
+  VALIDATED
+  DISCARDED
+
+  @@schema("sistema_gestor")
+}
+
+// Meu Pensamento - Metas
+model Goal {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  title          String
+  description    String?
+  deadline       DateTime?
+  progress       Int          @default(0)
+  isCompleted    Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, userId])
+  @@index([organizationId, isCompleted])
+  @@map("goals")
+  @@schema("sistema_gestor")
+}
+
+// Meu Link - Página de Links
+model LinkPage {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  username       String       @unique
+  displayName    String
+  bio            String?
+  avatar         String?
+  theme          String       @default("dark")
+  accentColor    String       @default("#3B82F6")
+  totalViews     Int          @default(0)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  links          LinkItem[]
+
+  @@index([organizationId, userId])
+  @@map("link_pages")
+  @@schema("sistema_gestor")
+}
+
+// Meu Link - Itens de Link
+model LinkItem {
+  id         String   @id @default(cuid())
+  linkPageId String
+  title      String
+  url        String
+  icon       String   @default("Link2")
+  clicks     Int      @default(0)
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  linkPage   LinkPage @relation(fields: [linkPageId], references: [id], onDelete: Cascade)
+
+  @@index([linkPageId, sortOrder])
+  @@map("link_items")
+  @@schema("sistema_gestor")
+}
+
+// Marketplace - Produtos
+model Product {
+  id           String     @id @default(cuid())
+  name         String
+  description  String
+  category     String
+  price        Float
+  originalPrice Float?
+  icon         String     @default("FileText")
+  features     String[]
+  downloadUrl  String?
+  isFeatured   Boolean    @default(false)
+  isNew        Boolean    @default(false)
+  isActive     Boolean    @default(true)
+  rating       Float      @default(0)
+  reviewCount  Int        @default(0)
+  downloadCount Int       @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  purchases    Purchase[]
+
+  @@index([category])
+  @@index([isFeatured])
+  @@map("products")
+  @@schema("sistema_gestor")
+}
+
+// Marketplace - Compras
+model Purchase {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  productId      String
+  price          Float
+  status         PurchaseStatus @default(COMPLETED)
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product        Product      @relation(fields: [productId], references: [id])
+
+  @@unique([organizationId, productId])
+  @@index([organizationId])
+  @@map("purchases")
+  @@schema("sistema_gestor")
+}
+
+enum PurchaseStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+
+  @@schema("sistema_gestor")
+}
+
+// Cursos - Curso
+model Course {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  thumbnail   String?
+  instructor  String?
+  duration    String?
+  level       CourseLevel  @default(BEGINNER)
+  category    String?
+  tags        String[]
+  isFeatured  Boolean      @default(false)
+  isNew       Boolean      @default(false)
+  isActive    Boolean      @default(true)
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  lessons     Lesson[]
+  enrollments Enrollment[]
+
+  @@index([category])
+  @@index([isFeatured])
+  @@map("courses")
+  @@schema("sistema_gestor")
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+
+  @@schema("sistema_gestor")
+}
+
+// Cursos - Aulas
+model Lesson {
+  id          String   @id @default(cuid())
+  courseId    String
+  title       String
+  description String?
+  videoUrl    String?
+  duration    String?
+  content     String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress    LessonProgress[]
+
+  @@index([courseId, sortOrder])
+  @@map("lessons")
+  @@schema("sistema_gestor")
+}
+
+// Cursos - Matrículas
+model Enrollment {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  courseId       String
+  progress       Int          @default(0)
+  completedAt    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  course         Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId, courseId])
+  @@index([organizationId, userId])
+  @@map("enrollments")
+  @@schema("sistema_gestor")
+}
+
+// Cursos - Progresso de Aulas
+model LessonProgress {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  lessonId       String
+  isCompleted    Boolean      @default(false)
+  watchedSeconds Int          @default(0)
+  completedAt    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lesson         Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId, lessonId])
+  @@index([organizationId, userId])
+  @@map("lesson_progress")
+  @@schema("sistema_gestor")
+}
+
+// Admin - Clientes (Gestão do Gestor)
+model Client {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  email          String?
+  phone          String?
+  company        String?
+  contractValue  Float?
+  startDate      DateTime?
+  status         ClientStatus @default(ACTIVE)
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  expenses       Expense[]
+
+  @@index([organizationId, status])
+  @@map("clients")
+  @@schema("sistema_gestor")
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  PAUSED
+
+  @@schema("sistema_gestor")
+}
+
+// Admin - Despesas
+model Expense {
+  id             String         @id @default(cuid())
+  organizationId String
+  clientId       String?
+  description    String
+  amount         Float
+  category       ExpenseCategory
+  date           DateTime       @default(now())
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client         Client?        @relation(fields: [clientId], references: [id])
+
+  @@index([organizationId, date])
+  @@index([organizationId, category])
+  @@map("expenses")
+  @@schema("sistema_gestor")
+}
+
+enum ExpenseCategory {
+  MARKETING
+  SOFTWARE
+  TOOLS
+  OTHER
+
+  @@schema("sistema_gestor")
+}
+
+// Admin - Orçamentos
+model Quote {
+  id             String       @id @default(cuid())
+  organizationId String
+  clientName     String
+  clientEmail    String?
+  services       Json
+  totalValue     Float
+  status         QuoteStatus  @default(DRAFT)
+  validUntil     DateTime?
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@map("quotes")
+  @@schema("sistema_gestor")
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+
+  @@schema("sistema_gestor")
 }

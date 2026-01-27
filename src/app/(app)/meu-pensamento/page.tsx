@@ -81,6 +81,39 @@ export default function MeuPensamentoPage() {
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [newNote, setNewNote] = useState({ title: '', content: '', category: 'Estrategia', tags: '' })
   const [newIdea, setNewIdea] = useState({ content: '', category: 'Estrategia' })
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Carregar dados da API
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    try {
+      const [notesRes, ideasRes, goalsRes] = await Promise.all([
+        fetch('/api/notes'),
+        fetch('/api/ideas'),
+        fetch('/api/goals'),
+      ])
+
+      if (notesRes.ok) {
+        const data = await notesRes.json()
+        setNotes(data)
+      }
+      if (ideasRes.ok) {
+        const data = await ideasRes.json()
+        setIdeas(data)
+      }
+      if (goalsRes.ok) {
+        const data = await goalsRes.json()
+        setGoals(data)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const filteredNotes = notes.filter(n => {
     const matchesSearch = n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -93,73 +126,138 @@ export default function MeuPensamentoPage() {
     return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   })
 
-  const handleSaveNote = () => {
+  const handleSaveNote = async () => {
     if (!newNote.title.trim()) {
       showToast('Informe o titulo da nota', 'error')
       return
     }
 
-    const note: Note = {
-      id: editingNote?.id || Date.now().toString(),
-      title: newNote.title,
-      content: newNote.content,
-      category: newNote.category,
-      tags: newNote.tags.split(',').map(t => t.trim()).filter(t => t),
-      isFavorite: editingNote?.isFavorite || false,
-      isPinned: editingNote?.isPinned || false,
-      createdAt: editingNote?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
+    try {
+      const tags = newNote.tags.split(',').map(t => t.trim()).filter(t => t)
 
-    if (editingNote) {
-      setNotes(prev => prev.map(n => n.id === editingNote.id ? note : n))
-      showToast('Nota atualizada!', 'success')
-    } else {
-      setNotes(prev => [note, ...prev])
-      showToast('Nota criada!', 'success')
-    }
+      if (editingNote) {
+        const response = await fetch(`/api/notes/${editingNote.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...newNote, tags }),
+        })
+        if (response.ok) {
+          const updated = await response.json()
+          setNotes(prev => prev.map(n => n.id === editingNote.id ? updated : n))
+          showToast('Nota atualizada!', 'success')
+        }
+      } else {
+        const response = await fetch('/api/notes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...newNote, tags }),
+        })
+        if (response.ok) {
+          const note = await response.json()
+          setNotes(prev => [note, ...prev])
+          showToast('Nota criada!', 'success')
+        }
+      }
 
-    setShowNoteModal(false)
-    setEditingNote(null)
-    setNewNote({ title: '', content: '', category: 'Estrategia', tags: '' })
+      setShowNoteModal(false)
+      setEditingNote(null)
+      setNewNote({ title: '', content: '', category: 'Estrategia', tags: '' })
+    } catch (error) {
+      console.error('Erro ao salvar nota:', error)
+      showToast('Erro ao salvar nota', 'error')
+    }
   }
 
-  const handleSaveIdea = () => {
+  const handleSaveIdea = async () => {
     if (!newIdea.content.trim()) {
       showToast('Escreva sua ideia', 'error')
       return
     }
 
-    const idea: Idea = {
-      id: Date.now().toString(),
-      content: newIdea.content,
-      category: newIdea.category,
-      status: 'new',
-      createdAt: new Date().toISOString().split('T')[0],
+    try {
+      const response = await fetch('/api/ideas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newIdea),
+      })
+
+      if (response.ok) {
+        const idea = await response.json()
+        setIdeas(prev => [idea, ...prev])
+        setShowIdeaModal(false)
+        setNewIdea({ content: '', category: 'Estrategia' })
+        showToast('Ideia salva!', 'success')
+      }
+    } catch (error) {
+      console.error('Erro ao salvar ideia:', error)
+      showToast('Erro ao salvar ideia', 'error')
     }
-
-    setIdeas(prev => [idea, ...prev])
-    setShowIdeaModal(false)
-    setNewIdea({ content: '', category: 'Estrategia' })
-    showToast('Ideia salva!', 'success')
   }
 
-  const toggleFavorite = (id: string) => {
-    setNotes(prev => prev.map(n => n.id === id ? { ...n, isFavorite: !n.isFavorite } : n))
+  const toggleFavorite = async (id: string) => {
+    const note = notes.find(n => n.id === id)
+    if (!note) return
+
+    try {
+      const response = await fetch(`/api/notes/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFavorite: !note.isFavorite }),
+      })
+      if (response.ok) {
+        setNotes(prev => prev.map(n => n.id === id ? { ...n, isFavorite: !n.isFavorite } : n))
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar favorito:', error)
+    }
   }
 
-  const togglePin = (id: string) => {
-    setNotes(prev => prev.map(n => n.id === id ? { ...n, isPinned: !n.isPinned } : n))
+  const togglePin = async (id: string) => {
+    const note = notes.find(n => n.id === id)
+    if (!note) return
+
+    try {
+      const response = await fetch(`/api/notes/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPinned: !note.isPinned }),
+      })
+      if (response.ok) {
+        setNotes(prev => prev.map(n => n.id === id ? { ...n, isPinned: !n.isPinned } : n))
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar pin:', error)
+    }
   }
 
-  const deleteNote = (id: string) => {
-    setNotes(prev => prev.filter(n => n.id !== id))
-    showToast('Nota removida!', 'info')
+  const deleteNote = async (id: string) => {
+    try {
+      const response = await fetch(`/api/notes/${id}`, { method: 'DELETE' })
+      if (response.ok) {
+        setNotes(prev => prev.filter(n => n.id !== id))
+        showToast('Nota removida!', 'info')
+      }
+    } catch (error) {
+      console.error('Erro ao deletar nota:', error)
+      showToast('Erro ao deletar nota', 'error')
+    }
   }
 
-  const updateIdeaStatus = (id: string, status: Idea['status']) => {
-    setIdeas(prev => prev.map(i => i.id === id ? { ...i, status } : i))
-    showToast('Status atualizado!', 'success')
+  const updateIdeaStatus = async (id: string, status: Idea['status']) => {
+    try {
+      const response = await fetch(`/api/ideas/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      if (response.ok) {
+        setIdeas(prev => prev.map(i => i.id === id ? { ...i, status } : i))
+        showToast('Status atualizado!', 'success')
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error)
+      showToast('Erro ao atualizar status', 'error')
+    }
   }
 
   const formatDate = (date: string) => {

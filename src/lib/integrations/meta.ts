@@ -33,16 +33,99 @@ interface MetaCampaign {
 }
 
 interface MetaInsights {
+  // Alcance
   impressions: string
   reach: string
+  frequency?: string
+
+  // Cliques
   clicks: string
+  unique_clicks?: string
+  inline_link_clicks?: string
+  unique_inline_link_clicks?: string
+  outbound_clicks?: Array<{ action_type: string; value: string }>
+
+  // Custo
   spend: string
   ctr: string
   cpc: string
   cpm: string
+  cost_per_unique_click?: string
+  cost_per_inline_link_click?: string
+
+  // Engajamento
+  inline_post_engagement?: string
+  page_engagement?: string
+  post_reactions?: string
+
+  // Video
+  video_p25_watched_actions?: Array<{ action_type: string; value: string }>
+  video_p50_watched_actions?: Array<{ action_type: string; value: string }>
+  video_p75_watched_actions?: Array<{ action_type: string; value: string }>
+  video_p100_watched_actions?: Array<{ action_type: string; value: string }>
+  video_thruplay_watched_actions?: Array<{ action_type: string; value: string }>
+  video_avg_time_watched_actions?: Array<{ action_type: string; value: string }>
+
+  // Conversao
   conversions?: string
   actions?: Array<{ action_type: string; value: string }>
+  action_values?: Array<{ action_type: string; value: string }>
+  cost_per_action_type?: Array<{ action_type: string; value: string }>
+
+  // Landing Page
+  landing_page_views?: Array<{ action_type: string; value: string }>
+
+  // Social
+  social_spend?: string
+
+  // Data
+  date_start?: string
+  date_stop?: string
 }
+
+// Lista completa de métricas para requisitar da Meta API
+export const META_INSIGHTS_FIELDS = [
+  // Alcance
+  'impressions',
+  'reach',
+  'frequency',
+
+  // Cliques
+  'clicks',
+  'unique_clicks',
+  'inline_link_clicks',
+  'unique_inline_link_clicks',
+  'outbound_clicks',
+
+  // Custo
+  'spend',
+  'ctr',
+  'cpc',
+  'cpm',
+  'cost_per_unique_click',
+  'cost_per_inline_link_click',
+
+  // Engajamento
+  'inline_post_engagement',
+  'page_engagement',
+
+  // Video
+  'video_p25_watched_actions',
+  'video_p50_watched_actions',
+  'video_p75_watched_actions',
+  'video_p100_watched_actions',
+  'video_thruplay_watched_actions',
+  'video_avg_time_watched_actions',
+
+  // Conversao
+  'conversions',
+  'actions',
+  'action_values',
+  'cost_per_action_type',
+
+  // Landing Page
+  'landing_page_views',
+]
 
 /**
  * Gerar URL de OAuth do Meta
@@ -181,17 +264,7 @@ export async function getMetaCampaignInsights(
   campaignId: string,
   datePreset: string = 'last_30d'
 ): Promise<MetaInsights | null> {
-  const fields = [
-    'impressions',
-    'reach',
-    'clicks',
-    'spend',
-    'ctr',
-    'cpc',
-    'cpm',
-    'actions',
-    'conversions',
-  ].join(',')
+  const fields = META_INSIGHTS_FIELDS.join(',')
 
   const response = await fetch(
     `${META_BASE_URL}/${campaignId}/insights?fields=${fields}&date_preset=${datePreset}&access_token=${accessToken}`
@@ -215,16 +288,7 @@ export async function getMetaCampaignDailyInsights(
   since: string,
   until: string
 ): Promise<MetaInsights[]> {
-  const fields = [
-    'impressions',
-    'reach',
-    'clicks',
-    'spend',
-    'ctr',
-    'cpc',
-    'cpm',
-    'actions',
-  ].join(',')
+  const fields = META_INSIGHTS_FIELDS.join(',')
 
   const params = new URLSearchParams({
     fields,
@@ -244,6 +308,92 @@ export async function getMetaCampaignDailyInsights(
 
   const data = await response.json()
   return data.data || []
+}
+
+/**
+ * Extrair valor de ação específica
+ */
+export function extractActionValue(
+  actions: Array<{ action_type: string; value: string }> | undefined,
+  actionType: string
+): number {
+  if (!actions) return 0
+  const action = actions.find(a => a.action_type === actionType)
+  return action ? parseInt(action.value) || 0 : 0
+}
+
+/**
+ * Extrair valor monetário de ação específica
+ */
+export function extractActionMoneyValue(
+  actionValues: Array<{ action_type: string; value: string }> | undefined,
+  actionType: string
+): number {
+  if (!actionValues) return 0
+  const action = actionValues.find(a => a.action_type === actionType)
+  return action ? parseFloat(action.value) || 0 : 0
+}
+
+/**
+ * Extrair contagem de video views por percentual
+ */
+export function extractVideoViews(
+  videoActions: Array<{ action_type: string; value: string }> | undefined
+): number {
+  if (!videoActions || videoActions.length === 0) return 0
+  return videoActions.reduce((sum, a) => sum + (parseInt(a.value) || 0), 0)
+}
+
+/**
+ * Parsear métricas do Meta para nosso formato
+ */
+export function parseMetaInsights(insights: MetaInsights) {
+  return {
+    // Alcance
+    impressions: parseInt(insights.impressions) || 0,
+    reach: parseInt(insights.reach) || 0,
+    frequency: parseFloat(insights.frequency || '0') || 0,
+
+    // Cliques
+    clicks: parseInt(insights.clicks) || 0,
+    uniqueClicks: parseInt(insights.unique_clicks || '0') || 0,
+    linkClicks: parseInt(insights.inline_link_clicks || '0') || 0,
+    uniqueLinkClicks: parseInt(insights.unique_inline_link_clicks || '0') || 0,
+    outboundClicks: extractActionValue(insights.outbound_clicks, 'outbound_click'),
+
+    // Custo
+    spent: parseFloat(insights.spend) || 0,
+    ctr: parseFloat(insights.ctr) || 0,
+    cpc: parseFloat(insights.cpc) || 0,
+    cpm: parseFloat(insights.cpm) || 0,
+
+    // Engajamento
+    postEngagement: parseInt(insights.inline_post_engagement || '0') || 0,
+    pageEngagement: parseInt(insights.page_engagement || '0') || 0,
+    likes: extractActionValue(insights.actions, 'like'),
+    comments: extractActionValue(insights.actions, 'comment'),
+    shares: extractActionValue(insights.actions, 'post'),
+    postReactions: extractActionValue(insights.actions, 'post_reaction'),
+
+    // Video
+    videoViews: extractVideoViews(insights.video_p25_watched_actions),
+    videoViewsP25: extractVideoViews(insights.video_p25_watched_actions),
+    videoViewsP50: extractVideoViews(insights.video_p50_watched_actions),
+    videoViewsP75: extractVideoViews(insights.video_p75_watched_actions),
+    videoViewsP100: extractVideoViews(insights.video_p100_watched_actions),
+    videoThruplay: extractVideoViews(insights.video_thruplay_watched_actions),
+
+    // Conversao
+    conversions: parseInt(insights.conversions || '0') || extractActionValue(insights.actions, 'omni_complete_registration') + extractActionValue(insights.actions, 'purchase') + extractActionValue(insights.actions, 'lead'),
+    leads: extractActionValue(insights.actions, 'lead') + extractActionValue(insights.actions, 'omni_complete_registration'),
+    purchases: extractActionValue(insights.actions, 'purchase') + extractActionValue(insights.actions, 'omni_purchase'),
+    purchaseValue: extractActionMoneyValue(insights.action_values, 'purchase') + extractActionMoneyValue(insights.action_values, 'omni_purchase'),
+    addToCart: extractActionValue(insights.actions, 'add_to_cart') + extractActionValue(insights.actions, 'omni_add_to_cart'),
+    initiateCheckout: extractActionValue(insights.actions, 'initiate_checkout') + extractActionValue(insights.actions, 'omni_initiated_checkout'),
+
+    // Landing Page
+    landingPageViews: extractVideoViews(insights.landing_page_views),
+  }
 }
 
 /**

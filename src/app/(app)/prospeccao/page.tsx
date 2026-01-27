@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout'
 import { Button, Badge, StatCard } from '@/components/ui'
@@ -89,6 +89,27 @@ export default function ProspeccaoPage() {
     location: '',
     notes: '',
   })
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Carregar dados da API
+  useEffect(() => {
+    fetchProspects()
+  }, [])
+
+  const fetchProspects = async () => {
+    try {
+      const response = await fetch('/api/prospects')
+      if (response.ok) {
+        const data = await response.json()
+        setProspects(data)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar prospectos:', error)
+      showToast('Erro ao carregar prospectos', 'error')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const filteredProspects = prospects.filter(p => {
     const matchesSearch = p.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -98,49 +119,84 @@ export default function ProspeccaoPage() {
     return matchesSearch && matchesIndustry && matchesStatus
   })
 
-  const handleAddProspect = () => {
+  const handleAddProspect = async () => {
     if (!newProspect.companyName.trim()) {
       showToast('Informe o nome da empresa', 'error')
       return
     }
 
-    const prospect: Prospect = {
-      id: Date.now().toString(),
-      ...newProspect,
-      size: '1-10 funcionarios',
-      socialMedia: {},
-      status: 'new',
-      score: 50,
-      isFavorite: false,
-      createdAt: new Date().toISOString().split('T')[0],
+    try {
+      const response = await fetch('/api/prospects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProspect),
+      })
+
+      if (response.ok) {
+        const prospect = await response.json()
+        setProspects(prev => [prospect, ...prev])
+        setShowAddModal(false)
+        setNewProspect({
+          companyName: '',
+          website: '',
+          industry: 'Tecnologia',
+          contactName: '',
+          contactEmail: '',
+          contactPhone: '',
+          location: '',
+          notes: '',
+        })
+        showToast('Prospecto adicionado com sucesso!', 'success')
+      } else {
+        showToast('Erro ao adicionar prospecto', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar prospecto:', error)
+      showToast('Erro ao adicionar prospecto', 'error')
     }
-
-    setProspects(prev => [prospect, ...prev])
-    setShowAddModal(false)
-    setNewProspect({
-      companyName: '',
-      website: '',
-      industry: 'Tecnologia',
-      contactName: '',
-      contactEmail: '',
-      contactPhone: '',
-      location: '',
-      notes: '',
-    })
-    showToast('Prospecto adicionado com sucesso!', 'success')
   }
 
-  const toggleFavorite = (id: string) => {
-    setProspects(prev => prev.map(p =>
-      p.id === id ? { ...p, isFavorite: !p.isFavorite } : p
-    ))
+  const toggleFavorite = async (id: string) => {
+    const prospect = prospects.find(p => p.id === id)
+    if (!prospect) return
+
+    try {
+      const response = await fetch(`/api/prospects/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFavorite: !prospect.isFavorite }),
+      })
+
+      if (response.ok) {
+        setProspects(prev => prev.map(p =>
+          p.id === id ? { ...p, isFavorite: !p.isFavorite } : p
+        ))
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar favorito:', error)
+    }
   }
 
-  const updateStatus = (id: string, status: Prospect['status']) => {
-    setProspects(prev => prev.map(p =>
-      p.id === id ? { ...p, status, lastContact: new Date().toISOString().split('T')[0] } : p
-    ))
-    showToast('Status atualizado!', 'success')
+  const updateStatus = async (id: string, status: Prospect['status']) => {
+    try {
+      const response = await fetch(`/api/prospects/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, lastContactAt: new Date().toISOString() }),
+      })
+
+      if (response.ok) {
+        setProspects(prev => prev.map(p =>
+          p.id === id ? { ...p, status, lastContact: new Date().toISOString().split('T')[0] } : p
+        ))
+        showToast('Status atualizado!', 'success')
+      } else {
+        showToast('Erro ao atualizar status', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error)
+      showToast('Erro ao atualizar status', 'error')
+    }
   }
 
   const stats = {

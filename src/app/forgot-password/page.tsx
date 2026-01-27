@@ -22,11 +22,16 @@ export default function ForgotPasswordPage() {
 
     setLoading(true)
 
-    // Simular envio - implementar API real depois
-    await new Promise(resolve => setTimeout(resolve, 1500))
-
-    setSent(true)
-    setLoading(false)
+    try {
+      // TODO: Implementar API de recuperação de senha
+      // Por enquanto, apenas mostra mensagem de sucesso
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setSent(true)
+    } catch (error) {
+      console.error('Erro ao enviar email:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (sent) {

@@ -148,7 +148,69 @@ export default function AdminPage() {
     date: new Date().toISOString().split('T')[0],
   })
 
-  // Simular tempo online
+  // Carregar dados da API
+  useEffect(() => {
+    fetchClients()
+    fetchExpenses()
+    fetchQuotes()
+  }, [])
+
+  const fetchClients = async () => {
+    try {
+      const response = await fetch('/api/clients')
+      if (response.ok) {
+        const data = await response.json()
+        setClients(data)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar clientes:', error)
+    }
+  }
+
+  const fetchExpenses = async () => {
+    try {
+      const response = await fetch('/api/expenses')
+      if (response.ok) {
+        const data = await response.json()
+        setExpenses(data)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar despesas:', error)
+    }
+  }
+
+  const fetchQuotes = async () => {
+    try {
+      const response = await fetch('/api/quotes')
+      if (response.ok) {
+        const data = await response.json()
+        setQuotes(data.map((q: any) => ({
+          id: q.id,
+          number: `ORC-${new Date(q.createdAt).getFullYear()}-${q.id.slice(-3)}`,
+          client: {
+            name: q.clientName,
+            email: q.clientEmail,
+            phone: '',
+            company: q.clientName,
+          },
+          services: q.services || [],
+          subtotal: q.totalValue,
+          discount: 0,
+          discountType: 'percent' as const,
+          total: q.totalValue,
+          validUntil: q.validUntil || new Date().toISOString(),
+          notes: q.notes,
+          status: q.status?.toLowerCase() || 'draft',
+          createdAt: q.createdAt,
+          updatedAt: q.updatedAt || q.createdAt,
+        })))
+      }
+    } catch (error) {
+      console.error('Erro ao carregar orçamentos:', error)
+    }
+  }
+
+  // Contador de tempo online na sessao atual
   useEffect(() => {
     const interval = setInterval(() => {
       setOnlineTime(prev => prev + 1)
@@ -259,7 +321,7 @@ export default function AdminPage() {
     setEditingQuote(null)
   }
 
-  const handleCreateQuote = () => {
+  const handleCreateQuote = async () => {
     if (!selectedClient) {
       showToast('Selecione um cliente', 'error')
       return
@@ -276,32 +338,32 @@ export default function AdminPage() {
     const validUntil = new Date()
     validUntil.setDate(validUntil.getDate() + quoteValidDays)
 
-    const newQuote: Quote = {
-      id: Date.now().toString(),
-      number: generateQuoteNumber(),
-      client: {
-        name: client.name,
-        email: client.email,
-        phone: client.phone,
-        company: client.name,
-      },
-      services: quoteServices,
-      subtotal,
-      discount: quoteDiscount.value,
-      discountType: quoteDiscount.type,
-      total,
-      validUntil: validUntil.toISOString().split('T')[0],
-      notes: quoteNotes || undefined,
-      paymentTerms: quotePaymentTerms || undefined,
-      status: 'draft',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
+    try {
+      const response = await fetch('/api/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientName: client.name,
+          clientEmail: client.email,
+          services: quoteServices,
+          totalValue: total,
+          validUntil: validUntil.toISOString(),
+          notes: quoteNotes || null,
+        }),
+      })
 
-    setQuotes(prev => [newQuote, ...prev])
-    setShowQuoteModal(false)
-    resetQuoteForm()
-    showToast('Orçamento criado com sucesso!', 'success')
+      if (response.ok) {
+        setShowQuoteModal(false)
+        resetQuoteForm()
+        showToast('Orçamento criado com sucesso!', 'success')
+        fetchQuotes()
+      } else {
+        showToast('Erro ao criar orçamento', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao criar orçamento:', error)
+      showToast('Erro ao criar orçamento', 'error')
+    }
   }
 
   const handleSendQuote = (quote: Quote, method: 'email' | 'whatsapp') => {
@@ -327,9 +389,22 @@ export default function AdminPage() {
     }
   }
 
-  const handleDeleteQuote = (quoteId: string) => {
-    setQuotes(prev => prev.filter(q => q.id !== quoteId))
-    showToast('Orçamento removido', 'info')
+  const handleDeleteQuote = async (quoteId: string) => {
+    try {
+      const response = await fetch(`/api/quotes/${quoteId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        setQuotes(prev => prev.filter(q => q.id !== quoteId))
+        showToast('Orçamento removido', 'info')
+      } else {
+        showToast('Erro ao remover orçamento', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao remover orçamento:', error)
+      showToast('Erro ao remover orçamento', 'error')
+    }
   }
 
   const handleAddAppointment = () => {
@@ -360,7 +435,7 @@ export default function AdminPage() {
     showToast('Compromisso agendado com sucesso!', 'success')
   }
 
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (!newExpense.description.trim()) {
       showToast('Por favor, informe a descrição da despesa', 'error')
       return
@@ -370,18 +445,30 @@ export default function AdminPage() {
       return
     }
 
-    const expense: Expense = {
-      id: Date.now().toString(),
-      description: newExpense.description,
-      amount: parseFloat(newExpense.amount),
-      category: newExpense.category,
-      date: newExpense.date,
-    }
+    try {
+      const response = await fetch('/api/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          description: newExpense.description,
+          amount: parseFloat(newExpense.amount),
+          category: newExpense.category,
+          date: newExpense.date,
+        }),
+      })
 
-    setExpenses(prev => [...prev, expense])
-    setShowExpenseModal(false)
-    setNewExpense({ description: '', amount: '', category: 'marketing', date: new Date().toISOString().split('T')[0] })
-    showToast('Despesa adicionada com sucesso!', 'success')
+      if (response.ok) {
+        setShowExpenseModal(false)
+        setNewExpense({ description: '', amount: '', category: 'marketing', date: new Date().toISOString().split('T')[0] })
+        showToast('Despesa adicionada com sucesso!', 'success')
+        fetchExpenses()
+      } else {
+        showToast('Erro ao adicionar despesa', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar despesa:', error)
+      showToast('Erro ao adicionar despesa', 'error')
+    }
   }
 
   const handleEditClient = (client: Client) => {
@@ -398,7 +485,7 @@ export default function AdminPage() {
     setShowClientModal(true)
   }
 
-  const handleAddClient = () => {
+  const handleAddClient = async () => {
     if (!newClient.name.trim()) {
       showToast('Por favor, informe o nome do cliente', 'error')
       return
@@ -408,44 +495,60 @@ export default function AdminPage() {
       return
     }
 
-    if (editingClient) {
-      // Atualizar cliente existente
-      setClients(prev => prev.map(c =>
-        c.id === editingClient.id
-          ? {
-              ...c,
-              name: newClient.name,
-              email: newClient.email,
-              phone: newClient.phone,
-              contractStart: newClient.contractStart || c.contractStart,
-              contractEnd: newClient.contractEnd || '',
-              contractValue: parseFloat(newClient.contractValue) || 0,
-              notes: newClient.notes,
-            }
-          : c
-      ))
-      setShowClientModal(false)
-      setEditingClient(null)
-      setNewClient({ name: '', email: '', phone: '', contractStart: '', contractEnd: '', contractValue: '', notes: '' })
-      showToast('Cliente atualizado com sucesso!', 'success')
-    } else {
-      // Criar novo cliente
-      const client: Client = {
-        id: Date.now().toString(),
-        name: newClient.name,
-        email: newClient.email,
-        phone: newClient.phone,
-        contractStart: newClient.contractStart || new Date().toISOString().split('T')[0],
-        contractEnd: newClient.contractEnd || '',
-        contractValue: parseFloat(newClient.contractValue) || 0,
-        notes: newClient.notes,
-        status: 'pending',
-      }
+    try {
+      if (editingClient) {
+        // Atualizar cliente existente via API
+        const response = await fetch(`/api/clients/${editingClient.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: newClient.name,
+            email: newClient.email,
+            phone: newClient.phone,
+            contractStart: newClient.contractStart || editingClient.contractStart,
+            contractEnd: newClient.contractEnd || null,
+            contractValue: parseFloat(newClient.contractValue) || 0,
+            notes: newClient.notes,
+          }),
+        })
 
-      setClients(prev => [...prev, client])
-      setShowClientModal(false)
-      setNewClient({ name: '', email: '', phone: '', contractStart: '', contractEnd: '', contractValue: '', notes: '' })
-      showToast('Cliente adicionado com sucesso!', 'success')
+        if (response.ok) {
+          setShowClientModal(false)
+          setEditingClient(null)
+          setNewClient({ name: '', email: '', phone: '', contractStart: '', contractEnd: '', contractValue: '', notes: '' })
+          showToast('Cliente atualizado com sucesso!', 'success')
+          fetchClients()
+        } else {
+          showToast('Erro ao atualizar cliente', 'error')
+        }
+      } else {
+        // Criar novo cliente via API
+        const response = await fetch('/api/clients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: newClient.name,
+            email: newClient.email,
+            phone: newClient.phone,
+            contractStart: newClient.contractStart || new Date().toISOString().split('T')[0],
+            contractEnd: newClient.contractEnd || null,
+            contractValue: parseFloat(newClient.contractValue) || 0,
+            notes: newClient.notes,
+          }),
+        })
+
+        if (response.ok) {
+          setShowClientModal(false)
+          setNewClient({ name: '', email: '', phone: '', contractStart: '', contractEnd: '', contractValue: '', notes: '' })
+          showToast('Cliente adicionado com sucesso!', 'success')
+          fetchClients()
+        } else {
+          showToast('Erro ao adicionar cliente', 'error')
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao salvar cliente:', error)
+      showToast('Erro ao salvar cliente', 'error')
     }
   }
 
@@ -593,9 +696,18 @@ export default function AdminPage() {
                             <Edit size={14} />
                           </button>
                           <button
-                            onClick={() => {
-                              setClients(prev => prev.filter(c => c.id !== client.id))
-                              showToast('Cliente removido', 'info')
+                            onClick={async () => {
+                              try {
+                                const response = await fetch(`/api/clients/${client.id}`, { method: 'DELETE' })
+                                if (response.ok) {
+                                  setClients(prev => prev.filter(c => c.id !== client.id))
+                                  showToast('Cliente removido', 'info')
+                                } else {
+                                  showToast('Erro ao remover cliente', 'error')
+                                }
+                              } catch (error) {
+                                showToast('Erro ao remover cliente', 'error')
+                              }
                             }}
                             style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
                           >
@@ -692,7 +804,19 @@ export default function AdminPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <span style={{ fontSize: '14px', fontWeight: 600, color: '#EF4444' }}>- R$ {expense.amount.toLocaleString('pt-BR')}</span>
                       <button
-                        onClick={() => setExpenses(prev => prev.filter(e => e.id !== expense.id))}
+                        onClick={async () => {
+                          try {
+                            const response = await fetch(`/api/expenses/${expense.id}`, { method: 'DELETE' })
+                            if (response.ok) {
+                              setExpenses(prev => prev.filter(e => e.id !== expense.id))
+                              showToast('Despesa removida', 'info')
+                            } else {
+                              showToast('Erro ao remover despesa', 'error')
+                            }
+                          } catch (error) {
+                            showToast('Erro ao remover despesa', 'error')
+                          }
+                        }}
                         style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}
                       >
                         <Trash2 size={14} />

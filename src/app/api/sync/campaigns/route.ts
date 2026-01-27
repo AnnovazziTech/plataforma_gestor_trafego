@@ -11,6 +11,7 @@ import {
   getMetaCampaignInsights,
   mapMetaObjective,
   mapMetaStatus,
+  parseMetaInsights,
 } from '@/lib/integrations/meta'
 import {
   getGoogleCampaigns,
@@ -135,6 +136,77 @@ export const POST = withAuth(async (req, ctx) => {
                 periodStart.setDate(periodStart.getDate() - 30)
                 const periodEnd = new Date()
 
+                // Parsear métricas usando a função expandida
+                const parsedMetrics = parseMetaInsights(insights)
+
+                // Calcular métricas derivadas
+                const roas = parsedMetrics.spent > 0 ? parsedMetrics.purchaseValue / parsedMetrics.spent : 0
+                const conversionRate = parsedMetrics.clicks > 0 ? (parsedMetrics.conversions / parsedMetrics.clicks) * 100 : 0
+                const costPerConversion = parsedMetrics.conversions > 0 ? parsedMetrics.spent / parsedMetrics.conversions : 0
+                const costPerLead = parsedMetrics.leads > 0 ? parsedMetrics.spent / parsedMetrics.leads : 0
+                const costPerResult = parsedMetrics.conversions > 0 ? parsedMetrics.spent / parsedMetrics.conversions : 0
+                const uniqueCtr = parsedMetrics.reach > 0 ? (parsedMetrics.uniqueClicks / parsedMetrics.reach) * 100 : 0
+                const videoCompletionRate = parsedMetrics.videoViews > 0 ? (parsedMetrics.videoViewsP100 / parsedMetrics.videoViews) * 100 : 0
+
+                const metricsData = {
+                  // Alcance
+                  impressions: parsedMetrics.impressions,
+                  reach: parsedMetrics.reach,
+                  frequency: parsedMetrics.frequency,
+                  uniqueImpressions: parsedMetrics.reach, // Aproximação
+
+                  // Cliques
+                  clicks: parsedMetrics.clicks,
+                  uniqueClicks: parsedMetrics.uniqueClicks,
+                  linkClicks: parsedMetrics.linkClicks,
+                  uniqueLinkClicks: parsedMetrics.uniqueLinkClicks,
+                  outboundClicks: parsedMetrics.outboundClicks,
+                  ctr: parsedMetrics.ctr,
+                  uniqueCtr,
+
+                  // Custo
+                  spent: parsedMetrics.spent,
+                  cpc: parsedMetrics.cpc,
+                  cpm: parsedMetrics.cpm,
+                  costPerResult,
+
+                  // Engajamento
+                  postEngagement: parsedMetrics.postEngagement,
+                  pageEngagement: parsedMetrics.pageEngagement,
+                  likes: parsedMetrics.likes,
+                  comments: parsedMetrics.comments,
+                  shares: parsedMetrics.shares,
+                  saves: 0,
+                  postReactions: parsedMetrics.postReactions,
+
+                  // Video
+                  videoViews: parsedMetrics.videoViews,
+                  videoViewsP25: parsedMetrics.videoViewsP25,
+                  videoViewsP50: parsedMetrics.videoViewsP50,
+                  videoViewsP75: parsedMetrics.videoViewsP75,
+                  videoViewsP100: parsedMetrics.videoViewsP100,
+                  videoThruplay: parsedMetrics.videoThruplay,
+                  videoAvgTimeWatched: 0, // Precisa de processamento adicional
+                  videoCompletionRate,
+
+                  // Conversao
+                  conversions: parsedMetrics.conversions,
+                  conversionRate,
+                  costPerConversion,
+                  leads: parsedMetrics.leads,
+                  costPerLead,
+                  purchases: parsedMetrics.purchases,
+                  purchaseValue: parsedMetrics.purchaseValue,
+                  addToCart: parsedMetrics.addToCart,
+                  initiateCheckout: parsedMetrics.initiateCheckout,
+
+                  // Retorno
+                  roas,
+
+                  // Landing Page
+                  landingPageViews: parsedMetrics.landingPageViews,
+                }
+
                 await prisma.campaignMetrics.upsert({
                   where: {
                     campaignId_periodStart_periodEnd: {
@@ -145,31 +217,17 @@ export const POST = withAuth(async (req, ctx) => {
                   },
                   create: {
                     campaignId: savedCampaign.id,
-                    impressions: parseInt(insights.impressions || '0'),
-                    reach: parseInt(insights.reach || '0'),
-                    clicks: parseInt(insights.clicks || '0'),
-                    ctr: parseFloat(insights.ctr || '0'),
-                    cpc: parseFloat(insights.cpc || '0'),
-                    cpm: parseFloat(insights.cpm || '0'),
-                    spent: parseFloat(insights.spend || '0'),
+                    ...metricsData,
                     periodStart,
                     periodEnd,
                   },
-                  update: {
-                    impressions: parseInt(insights.impressions || '0'),
-                    reach: parseInt(insights.reach || '0'),
-                    clicks: parseInt(insights.clicks || '0'),
-                    ctr: parseFloat(insights.ctr || '0'),
-                    cpc: parseFloat(insights.cpc || '0'),
-                    cpm: parseFloat(insights.cpm || '0'),
-                    spent: parseFloat(insights.spend || '0'),
-                  },
+                  update: metricsData,
                 })
 
                 // Atualizar spent na campanha
                 await prisma.campaign.update({
                   where: { id: savedCampaign.id },
-                  data: { spent: parseFloat(insights.spend || '0') },
+                  data: { spent: parsedMetrics.spent },
                 })
 
                 syncedMetrics++

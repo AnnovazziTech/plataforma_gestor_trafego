@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Header } from '@/components/layout'
 import { Button, Badge } from '@/components/ui'
@@ -66,6 +66,26 @@ export default function MarketplacePage() {
   const [selectedCategory, setSelectedCategory] = useState('Todos')
   const [sortBy, setSortBy] = useState<'popular' | 'recent' | 'price'>('popular')
   const [favorites, setFavorites] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchProducts()
+  }, [selectedCategory])
+
+  const fetchProducts = async () => {
+    try {
+      const categoryParam = selectedCategory !== 'Todos' ? `?category=${selectedCategory}` : ''
+      const response = await fetch(`/api/products${categoryParam}`)
+      if (response.ok) {
+        const data = await response.json()
+        setProducts(data)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar produtos:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const filteredProducts = products
     .filter(p => {
@@ -84,13 +104,32 @@ export default function MarketplacePage() {
     setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id])
   }
 
-  const handlePurchase = (product: Product) => {
+  const handlePurchase = async (product: Product) => {
     if (product.isPurchased) {
       showToast('Acessando produto...', 'info')
       return
     }
-    showToast('Redirecionando para pagamento...', 'info')
-    // Aqui integraria com Stripe/Hotmart/etc
+
+    try {
+      const response = await fetch(`/api/products/${product.id}/purchase`, {
+        method: 'POST',
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        if (result.paymentUrl) {
+          window.location.href = result.paymentUrl
+        } else {
+          showToast('Produto adquirido com sucesso!', 'success')
+          fetchProducts()
+        }
+      } else {
+        showToast('Erro ao processar compra', 'error')
+      }
+    } catch (error) {
+      console.error('Erro ao processar compra:', error)
+      showToast('Erro ao processar compra', 'error')
+    }
   }
 
   const featuredProducts = products.filter(p => p.isFeatured)

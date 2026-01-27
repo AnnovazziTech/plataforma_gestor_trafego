@@ -26,6 +26,12 @@ import {
   ChevronUp,
   Copy,
   Users,
+  RefreshCw,
+  UserX,
+  MessageSquare,
+  Mail,
+  UserPlus,
+  Filter,
 } from 'lucide-react'
 import { PlatformIcon } from '@/components/ui'
 import { Automation } from '@/types'
@@ -98,16 +104,222 @@ const targetToApi: Record<string, string> = {
   ad: 'ad',
 }
 
+// Lead automation constants
+const leadStatusLabels: Record<string, string> = {
+  NEW: 'Novo',
+  CONTACTED: 'Contatado',
+  QUALIFIED: 'Qualificado',
+  PROPOSAL: 'Proposta',
+  NEGOTIATION: 'Negociacao',
+  WON: 'Ganho',
+  LOST: 'Perdido',
+  REMARKETING: 'Remarketing',
+}
+
+const leadAutomationTypeLabels: Record<string, string> = {
+  lead_status_change: 'Mudanca de Status',
+  lead_inactivity: 'Inatividade',
+  lead_remarketing: 'Remarketing',
+}
+
+const leadAutomationTypeColors: Record<string, { bg: string; color: string }> = {
+  lead_status_change: { bg: 'rgba(168, 85, 247, 0.1)', color: '#A855F7' },
+  lead_inactivity: { bg: 'rgba(251, 146, 60, 0.1)', color: '#FB923C' },
+  lead_remarketing: { bg: 'rgba(34, 197, 94, 0.1)', color: '#22C55E' },
+}
+
+const leadActionLabels: Record<string, string> = {
+  change_status: 'Alterar Status',
+  send_message: 'Enviar Mensagem',
+  create_task: 'Criar Tarefa',
+  notify: 'Notificar',
+}
+
+const leadActionIcons: Record<string, ReactNode> = {
+  change_status: <RefreshCw size={14} />,
+  send_message: <MessageSquare size={14} />,
+  create_task: <Target size={14} />,
+  notify: <Bell size={14} />,
+}
+
+interface LeadAutomation {
+  id: string
+  name: string
+  type: 'lead_status_change' | 'lead_inactivity' | 'lead_remarketing'
+  status: 'active' | 'paused'
+  trigger: {
+    fromStatus?: string
+    toStatus?: string
+    inactiveDays?: number
+    lostDaysAgo?: number
+  }
+  action: {
+    type: 'change_status' | 'send_message' | 'create_task' | 'notify'
+    newStatus?: string
+    messageTemplate?: string
+    messageChannel?: string
+    taskTitle?: string
+    notificationMessage?: string
+  }
+  executionCount?: number
+  lastExecutedAt?: string
+  createdAt?: string
+}
+
 export default function AutomationPage() {
   const { automations, automationsLoading, fetchAutomations, addAutomation, updateAutomation, deleteAutomation, toggleAutomationStatus, showToast, connectedAccounts } = useApp()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingAutomation, setEditingAutomation] = useState<Automation | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'campaigns' | 'leads'>('campaigns')
+
+  // Lead automations state
+  const [leadAutomations, setLeadAutomations] = useState<LeadAutomation[]>([])
+  const [leadAutomationsLoading, setLeadAutomationsLoading] = useState(false)
+  const [leadStats, setLeadStats] = useState({ remarketingLeads: 0, recoverableLeads: 0 })
+  const [showLeadModal, setShowLeadModal] = useState(false)
+  const [editingLeadAutomation, setEditingLeadAutomation] = useState<LeadAutomation | null>(null)
+  const [showLeadDeleteConfirm, setShowLeadDeleteConfirm] = useState<string | null>(null)
+
+  // Lead automation form state
+  const [leadFormData, setLeadFormData] = useState({
+    name: '',
+    type: 'lead_remarketing' as 'lead_status_change' | 'lead_inactivity' | 'lead_remarketing',
+    triggerFromStatus: 'LOST',
+    triggerToStatus: 'REMARKETING',
+    triggerInactiveDays: 7,
+    triggerLostDaysAgo: 30,
+    actionType: 'change_status' as 'change_status' | 'send_message' | 'create_task' | 'notify',
+    actionNewStatus: 'REMARKETING',
+    actionMessageTemplate: '',
+    actionMessageChannel: 'whatsapp' as 'whatsapp' | 'email' | 'sms',
+    actionTaskTitle: '',
+    actionNotificationMessage: '',
+  })
+
   // Buscar automações ao montar o componente
   useEffect(() => {
     fetchAutomations()
+    fetchLeadAutomations()
   }, [fetchAutomations])
+
+  // Fetch lead automations
+  const fetchLeadAutomations = async () => {
+    setLeadAutomationsLoading(true)
+    try {
+      const response = await fetch('/api/automations/leads')
+      if (response.ok) {
+        const data = await response.json()
+        setLeadAutomations(data.automations || [])
+        setLeadStats({
+          remarketingLeads: data.stats?.remarketingLeads || 0,
+          recoverableLeads: data.stats?.recoverableLeads || 0,
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao buscar automacoes de leads:', error)
+    } finally {
+      setLeadAutomationsLoading(false)
+    }
+  }
+
+  // Create lead automation
+  const handleCreateLeadAutomation = async () => {
+    if (!leadFormData.name) {
+      showToast('Nome obrigatorio', 'error')
+      return
+    }
+
+    try {
+      const payload: any = {
+        name: leadFormData.name,
+        type: leadFormData.type,
+        status: 'active',
+        trigger: {},
+        action: { type: leadFormData.actionType },
+      }
+
+      // Configure trigger based on type
+      if (leadFormData.type === 'lead_status_change') {
+        payload.trigger.fromStatus = leadFormData.triggerFromStatus
+        payload.trigger.toStatus = leadFormData.triggerToStatus
+      } else if (leadFormData.type === 'lead_inactivity') {
+        payload.trigger.inactiveDays = leadFormData.triggerInactiveDays
+      } else if (leadFormData.type === 'lead_remarketing') {
+        payload.trigger.lostDaysAgo = leadFormData.triggerLostDaysAgo
+      }
+
+      // Configure action based on type
+      if (leadFormData.actionType === 'change_status') {
+        payload.action.newStatus = leadFormData.actionNewStatus
+      } else if (leadFormData.actionType === 'send_message') {
+        payload.action.messageTemplate = leadFormData.actionMessageTemplate
+        payload.action.messageChannel = leadFormData.actionMessageChannel
+      } else if (leadFormData.actionType === 'create_task') {
+        payload.action.taskTitle = leadFormData.actionTaskTitle
+      } else if (leadFormData.actionType === 'notify') {
+        payload.action.notificationMessage = leadFormData.actionNotificationMessage
+      }
+
+      const response = await fetch('/api/automations/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (response.ok) {
+        showToast('Automacao de leads criada com sucesso!', 'success')
+        setShowLeadModal(false)
+        resetLeadForm()
+        fetchLeadAutomations()
+      } else {
+        const error = await response.json()
+        showToast(error.error || 'Erro ao criar automacao', 'error')
+      }
+    } catch (error) {
+      showToast('Erro ao criar automacao de leads', 'error')
+    }
+  }
+
+  // Process lead automations (manual trigger)
+  const handleProcessLeadAutomations = async () => {
+    try {
+      const response = await fetch('/api/automations/leads/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        showToast(`Processadas ${data.processedLeads} leads, ${data.executedActions} acoes executadas`, 'success')
+        fetchLeadAutomations()
+      } else {
+        showToast('Erro ao processar automacoes', 'error')
+      }
+    } catch (error) {
+      showToast('Erro ao processar automacoes de leads', 'error')
+    }
+  }
+
+  const resetLeadForm = () => {
+    setLeadFormData({
+      name: '',
+      type: 'lead_remarketing',
+      triggerFromStatus: 'LOST',
+      triggerToStatus: 'REMARKETING',
+      triggerInactiveDays: 7,
+      triggerLostDaysAgo: 30,
+      actionType: 'change_status',
+      actionNewStatus: 'REMARKETING',
+      actionMessageTemplate: '',
+      actionMessageChannel: 'whatsapp',
+      actionTaskTitle: '',
+      actionNotificationMessage: '',
+    })
+  }
 
   // Form state for creating automation
   const [formData, setFormData] = useState({
@@ -257,53 +469,348 @@ export default function AutomationPage() {
   return (
     <div style={{ minHeight: '100vh' }}>
       <Header
-        title="Automação"
-        subtitle="Configure regras e gatilhos automáticos para suas campanhas"
+        title="Automacao"
+        subtitle="Configure regras e gatilhos automaticos para campanhas e leads"
       />
 
       <main style={{ padding: '24px 32px', paddingBottom: '80px' }}>
-        {/* Quick Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
-          <StatCard
-            label="Automações Ativas"
-            value={activeAutomations}
-            icon={Zap}
-            color="blue"
-            delay={0}
-          />
-          <StatCard
-            label="Gatilhos Executados"
-            value={totalTriggers}
-            icon={Activity}
-            color="yellow"
-            delay={0.1}
-          />
-          <StatCard
-            label="Campanhas Otimizadas"
-            value={18}
-            icon={Target}
-            color="blue"
-            delay={0.2}
-          />
-          <StatCard
-            label="Economia Estimada"
-            value="R$ 12.450"
-            icon={DollarSign}
-            color="yellow"
-            delay={0.3}
-          />
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+          <button
+            onClick={() => setActiveTab('campaigns')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 20px',
+              borderRadius: '12px',
+              border: activeTab === 'campaigns' ? '1px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
+              backgroundColor: activeTab === 'campaigns' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.02)',
+              color: activeTab === 'campaigns' ? '#3B82F6' : '#A0A0B0',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            <Target size={18} />
+            Campanhas
+            <span style={{
+              padding: '2px 8px',
+              borderRadius: '10px',
+              backgroundColor: activeTab === 'campaigns' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+              fontSize: '12px',
+            }}>
+              {activeAutomations}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('leads')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 20px',
+              borderRadius: '12px',
+              border: activeTab === 'leads' ? '1px solid #A855F7' : '1px solid rgba(255, 255, 255, 0.1)',
+              backgroundColor: activeTab === 'leads' ? 'rgba(168, 85, 247, 0.1)' : 'rgba(255, 255, 255, 0.02)',
+              color: activeTab === 'leads' ? '#A855F7' : '#A0A0B0',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            <UserPlus size={18} />
+            Leads / Remarketing
+            <span style={{
+              padding: '2px 8px',
+              borderRadius: '10px',
+              backgroundColor: activeTab === 'leads' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+              fontSize: '12px',
+            }}>
+              {leadAutomations.filter(a => a.status === 'active').length}
+            </span>
+          </button>
         </div>
 
-        {/* Action Bar */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Minhas Automações</h2>
-          <Button variant="primary" onClick={() => setShowCreateModal(true)}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Plus size={18} />
-              Nova Automação
-            </span>
-          </Button>
-        </div>
+        {/* Campaign Automations Tab */}
+        {activeTab === 'campaigns' && (
+          <>
+            {/* Quick Stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
+              <StatCard
+                label="Automacoes Ativas"
+                value={activeAutomations}
+                icon={Zap}
+                color="blue"
+                delay={0}
+              />
+              <StatCard
+                label="Gatilhos Executados"
+                value={totalTriggers}
+                icon={Activity}
+                color="yellow"
+                delay={0.1}
+              />
+              <StatCard
+                label="Campanhas Otimizadas"
+                value={18}
+                icon={Target}
+                color="blue"
+                delay={0.2}
+              />
+              <StatCard
+                label="Economia Estimada"
+                value="R$ 12.450"
+                icon={DollarSign}
+                color="yellow"
+                delay={0.3}
+              />
+            </div>
+
+            {/* Action Bar */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Automacoes de Campanhas</h2>
+              <Button variant="primary" onClick={() => setShowCreateModal(true)}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Plus size={18} />
+                  Nova Automacao
+                </span>
+              </Button>
+            </div>
+          </>
+        )}
+
+        {/* Lead Automations Tab */}
+        {activeTab === 'leads' && (
+          <>
+            {/* Lead Stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
+              <StatCard
+                label="Automacoes Ativas"
+                value={leadAutomations.filter(a => a.status === 'active').length}
+                icon={RefreshCw}
+                color="blue"
+                delay={0}
+              />
+              <StatCard
+                label="Leads em Remarketing"
+                value={leadStats.remarketingLeads}
+                icon={UserPlus}
+                color="yellow"
+                delay={0.1}
+              />
+              <StatCard
+                label="Leads Recuperaveis"
+                value={leadStats.recoverableLeads}
+                icon={UserX}
+                color="blue"
+                delay={0.2}
+              />
+              <StatCard
+                label="Taxa de Recuperacao"
+                value={leadStats.recoverableLeads > 0 ? `${Math.round((leadStats.remarketingLeads / leadStats.recoverableLeads) * 100)}%` : '0%'}
+                icon={TrendingUp}
+                color="yellow"
+                delay={0.3}
+              />
+            </div>
+
+            {/* Action Bar */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Automacoes de Leads</h2>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <Button variant="secondary" onClick={handleProcessLeadAutomations}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Play size={18} />
+                    Executar Agora
+                  </span>
+                </Button>
+                <Button variant="primary" onClick={() => setShowLeadModal(true)}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Plus size={18} />
+                    Nova Regra
+                  </span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Lead Automations List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '48px' }}>
+              {leadAutomationsLoading ? (
+                <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    margin: '0 auto 16px',
+                    border: '3px solid rgba(168, 85, 247, 0.2)',
+                    borderTopColor: '#A855F7',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                  }} />
+                  <p style={{ fontSize: '14px', color: '#6B6B7B' }}>Carregando automacoes...</p>
+                </div>
+              ) : leadAutomations.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    textAlign: 'center',
+                    padding: '64px 24px',
+                    borderRadius: '16px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px dashed rgba(255, 255, 255, 0.1)',
+                  }}
+                >
+                  <div style={{
+                    width: '64px',
+                    height: '64px',
+                    margin: '0 auto 16px',
+                    borderRadius: '16px',
+                    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <RefreshCw size={32} style={{ color: '#A855F7' }} />
+                  </div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', marginBottom: '8px' }}>
+                    Nenhuma automacao de leads
+                  </h3>
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '24px', maxWidth: '400px', margin: '0 auto 24px' }}>
+                    Crie regras para mover leads automaticamente para remarketing, enviar mensagens de follow-up e recuperar vendas perdidas.
+                  </p>
+                  <Button variant="primary" onClick={() => setShowLeadModal(true)}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Plus size={18} />
+                      Criar Primeira Regra
+                    </span>
+                  </Button>
+                </motion.div>
+              ) : (
+                leadAutomations.map((automation, index) => (
+                  <LeadAutomationCard
+                    key={automation.id}
+                    automation={automation}
+                    index={index}
+                  />
+                ))
+              )}
+            </div>
+
+            {/* Lead Remarketing Templates */}
+            <div style={{ marginTop: '48px', paddingTop: '32px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', marginBottom: '24px' }}>Templates de Remarketing</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                {[
+                  {
+                    title: 'Recuperar Leads Perdidos',
+                    description: 'Move leads perdidos ha 30 dias para remarketing automaticamente',
+                    icon: RefreshCw,
+                    color: 'purple',
+                    type: 'lead_remarketing',
+                    trigger: { lostDaysAgo: 30 },
+                    action: { type: 'change_status', newStatus: 'REMARKETING' },
+                  },
+                  {
+                    title: 'Reativar Inativos',
+                    description: 'Notifica sobre leads sem atividade por 7 dias',
+                    icon: Clock,
+                    color: 'orange',
+                    type: 'lead_inactivity',
+                    trigger: { inactiveDays: 7 },
+                    action: { type: 'notify', notificationMessage: 'Lead inativo ha 7 dias' },
+                  },
+                  {
+                    title: 'Follow-up Automatico',
+                    description: 'Envia mensagem quando lead muda para Proposta',
+                    icon: MessageSquare,
+                    color: 'blue',
+                    type: 'lead_status_change',
+                    trigger: { toStatus: 'PROPOSAL' },
+                    action: { type: 'send_message', messageChannel: 'whatsapp' },
+                  },
+                ].map((template, index) => (
+                  <motion.div
+                    key={template.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ y: -4 }}
+                    onClick={() => {
+                      setLeadFormData({
+                        ...leadFormData,
+                        name: template.title,
+                        type: template.type as any,
+                        triggerLostDaysAgo: template.trigger.lostDaysAgo || 30,
+                        triggerInactiveDays: template.trigger.inactiveDays || 7,
+                        triggerToStatus: template.trigger.toStatus || 'REMARKETING',
+                        actionType: template.action.type as any,
+                        actionNewStatus: template.action.newStatus || 'REMARKETING',
+                        actionNotificationMessage: template.action.notificationMessage || '',
+                        actionMessageChannel: (template.action.messageChannel as any) || 'whatsapp',
+                      })
+                      setShowLeadModal(true)
+                    }}
+                    style={{
+                      padding: '24px',
+                      borderRadius: '16px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div style={{
+                      padding: '12px',
+                      borderRadius: '12px',
+                      marginBottom: '16px',
+                      width: 'fit-content',
+                      backgroundColor: template.color === 'purple' ? 'rgba(168, 85, 247, 0.1)' :
+                        template.color === 'orange' ? 'rgba(251, 146, 60, 0.1)' :
+                        'rgba(59, 130, 246, 0.1)',
+                      color: template.color === 'purple' ? '#A855F7' :
+                        template.color === 'orange' ? '#FB923C' :
+                        '#3B82F6',
+                    }}>
+                      <template.icon size={20} />
+                    </div>
+                    <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '8px' }}>
+                      {template.title}
+                    </h3>
+                    <p style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '16px' }}>{template.description}</p>
+                    <button
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        width: '100%',
+                        padding: '10px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                        border: '1px solid rgba(168, 85, 247, 0.2)',
+                        color: '#A855F7',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      <Copy size={14} />
+                      Usar Template
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Campaign Automations Content (only when campaigns tab is active) */}
+        {activeTab === 'campaigns' && (
+          <>
 
         {/* Automations List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '48px' }}>
@@ -505,7 +1012,413 @@ export default function AutomationPage() {
             ))}
           </div>
         </div>
+          </>
+        )}
       </main>
+
+      {/* Lead Automation Modal */}
+      <AnimatePresence>
+        {showLeadModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowLeadModal(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                maxWidth: '600px',
+                maxHeight: 'calc(100vh - 40px)',
+                overflow: 'auto',
+                backgroundColor: '#12121A',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '16px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              }}
+            >
+              {/* Modal Header */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '20px',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(to bottom right, #A855F7, #7C3AED)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <RefreshCw style={{ width: '20px', height: '20px', color: '#FFFFFF' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>Nova Regra de Remarketing</h2>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Configure automacao para leads</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowLeadModal(false)}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '8px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#6B6B7B',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Plus style={{ width: '20px', height: '20px', transform: 'rotate(45deg)' }} />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* Name */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Nome da Regra
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ex: Recuperar Leads Perdidos"
+                    value={leadFormData.name}
+                    onChange={(e) => setLeadFormData({ ...leadFormData, name: e.target.value })}
+                    style={{
+                      width: '100%',
+                      height: '48px',
+                      padding: '0 16px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                {/* Type */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Tipo de Gatilho
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                    {[
+                      { id: 'lead_remarketing', label: 'Remarketing', icon: RefreshCw, description: 'Leads perdidos' },
+                      { id: 'lead_inactivity', label: 'Inatividade', icon: Clock, description: 'Sem atividade' },
+                      { id: 'lead_status_change', label: 'Status', icon: Target, description: 'Mudanca de status' },
+                    ].map((type) => (
+                      <button
+                        key={type.id}
+                        type="button"
+                        onClick={() => setLeadFormData({ ...leadFormData, type: type.id as any })}
+                        style={{
+                          padding: '12px',
+                          borderRadius: '12px',
+                          border: leadFormData.type === type.id ? '1px solid #A855F7' : '1px solid rgba(255, 255, 255, 0.1)',
+                          backgroundColor: leadFormData.type === type.id ? 'rgba(168, 85, 247, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                          color: '#FFFFFF',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                      >
+                        <type.icon size={20} style={{ color: leadFormData.type === type.id ? '#A855F7' : '#6B6B7B' }} />
+                        <span style={{ fontSize: '12px', fontWeight: 500 }}>{type.label}</span>
+                        <span style={{ fontSize: '10px', color: '#6B6B7B' }}>{type.description}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Trigger Configuration */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Configuracao do Gatilho
+                  </label>
+
+                  {leadFormData.type === 'lead_remarketing' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ color: '#A0A0B0', fontSize: '14px' }}>Leads perdidos ha</span>
+                      <input
+                        type="number"
+                        value={leadFormData.triggerLostDaysAgo}
+                        onChange={(e) => setLeadFormData({ ...leadFormData, triggerLostDaysAgo: parseInt(e.target.value) || 30 })}
+                        style={{
+                          width: '80px',
+                          height: '40px',
+                          padding: '0 12px',
+                          borderRadius: '8px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#FFFFFF',
+                          fontSize: '14px',
+                          outline: 'none',
+                          textAlign: 'center',
+                        }}
+                      />
+                      <span style={{ color: '#A0A0B0', fontSize: '14px' }}>dias</span>
+                    </div>
+                  )}
+
+                  {leadFormData.type === 'lead_inactivity' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ color: '#A0A0B0', fontSize: '14px' }}>Leads sem atividade por</span>
+                      <input
+                        type="number"
+                        value={leadFormData.triggerInactiveDays}
+                        onChange={(e) => setLeadFormData({ ...leadFormData, triggerInactiveDays: parseInt(e.target.value) || 7 })}
+                        style={{
+                          width: '80px',
+                          height: '40px',
+                          padding: '0 12px',
+                          borderRadius: '8px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#FFFFFF',
+                          fontSize: '14px',
+                          outline: 'none',
+                          textAlign: 'center',
+                        }}
+                      />
+                      <span style={{ color: '#A0A0B0', fontSize: '14px' }}>dias</span>
+                    </div>
+                  )}
+
+                  {leadFormData.type === 'lead_status_change' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                      <span style={{ color: '#A0A0B0', fontSize: '14px' }}>Quando mudar de</span>
+                      <select
+                        value={leadFormData.triggerFromStatus}
+                        onChange={(e) => setLeadFormData({ ...leadFormData, triggerFromStatus: e.target.value })}
+                        style={{
+                          height: '40px',
+                          padding: '0 12px',
+                          borderRadius: '8px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#FFFFFF',
+                          fontSize: '14px',
+                          outline: 'none',
+                        }}
+                      >
+                        {Object.entries(leadStatusLabels).map(([value, label]) => (
+                          <option key={value} value={value} style={{ backgroundColor: '#12121A' }}>{label}</option>
+                        ))}
+                      </select>
+                      <span style={{ color: '#A0A0B0', fontSize: '14px' }}>para</span>
+                      <select
+                        value={leadFormData.triggerToStatus}
+                        onChange={(e) => setLeadFormData({ ...leadFormData, triggerToStatus: e.target.value })}
+                        style={{
+                          height: '40px',
+                          padding: '0 12px',
+                          borderRadius: '8px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#FFFFFF',
+                          fontSize: '14px',
+                          outline: 'none',
+                        }}
+                      >
+                        {Object.entries(leadStatusLabels).map(([value, label]) => (
+                          <option key={value} value={value} style={{ backgroundColor: '#12121A' }}>{label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Configuration */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
+                    Acao a Executar
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '16px' }}>
+                    {[
+                      { id: 'change_status', label: 'Alterar Status', icon: RefreshCw },
+                      { id: 'send_message', label: 'Enviar Mensagem', icon: MessageSquare },
+                      { id: 'create_task', label: 'Criar Tarefa', icon: Target },
+                      { id: 'notify', label: 'Notificar', icon: Bell },
+                    ].map((action) => (
+                      <button
+                        key={action.id}
+                        type="button"
+                        onClick={() => setLeadFormData({ ...leadFormData, actionType: action.id as any })}
+                        style={{
+                          padding: '12px',
+                          borderRadius: '12px',
+                          border: leadFormData.actionType === action.id ? '1px solid #10B981' : '1px solid rgba(255, 255, 255, 0.1)',
+                          backgroundColor: leadFormData.actionType === action.id ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                          color: '#FFFFFF',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                      >
+                        <action.icon size={16} style={{ color: leadFormData.actionType === action.id ? '#10B981' : '#6B6B7B' }} />
+                        <span style={{ fontSize: '14px' }}>{action.label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Action Details */}
+                  {leadFormData.actionType === 'change_status' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ color: '#A0A0B0', fontSize: '14px' }}>Mudar para:</span>
+                      <select
+                        value={leadFormData.actionNewStatus}
+                        onChange={(e) => setLeadFormData({ ...leadFormData, actionNewStatus: e.target.value })}
+                        style={{
+                          height: '40px',
+                          padding: '0 12px',
+                          borderRadius: '8px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#FFFFFF',
+                          fontSize: '14px',
+                          outline: 'none',
+                        }}
+                      >
+                        {Object.entries(leadStatusLabels).map(([value, label]) => (
+                          <option key={value} value={value} style={{ backgroundColor: '#12121A' }}>{label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {leadFormData.actionType === 'send_message' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ color: '#A0A0B0', fontSize: '14px' }}>Canal:</span>
+                        <select
+                          value={leadFormData.actionMessageChannel}
+                          onChange={(e) => setLeadFormData({ ...leadFormData, actionMessageChannel: e.target.value as any })}
+                          style={{
+                            height: '40px',
+                            padding: '0 12px',
+                            borderRadius: '8px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            color: '#FFFFFF',
+                            fontSize: '14px',
+                            outline: 'none',
+                          }}
+                        >
+                          <option value="whatsapp" style={{ backgroundColor: '#12121A' }}>WhatsApp</option>
+                          <option value="email" style={{ backgroundColor: '#12121A' }}>Email</option>
+                          <option value="sms" style={{ backgroundColor: '#12121A' }}>SMS</option>
+                        </select>
+                      </div>
+                      <textarea
+                        placeholder="Template da mensagem..."
+                        value={leadFormData.actionMessageTemplate}
+                        onChange={(e) => setLeadFormData({ ...leadFormData, actionMessageTemplate: e.target.value })}
+                        style={{
+                          width: '100%',
+                          height: '80px',
+                          padding: '12px',
+                          borderRadius: '8px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#FFFFFF',
+                          fontSize: '14px',
+                          outline: 'none',
+                          resize: 'none',
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {leadFormData.actionType === 'create_task' && (
+                    <input
+                      type="text"
+                      placeholder="Titulo da tarefa..."
+                      value={leadFormData.actionTaskTitle}
+                      onChange={(e) => setLeadFormData({ ...leadFormData, actionTaskTitle: e.target.value })}
+                      style={{
+                        width: '100%',
+                        height: '40px',
+                        padding: '0 12px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  )}
+
+                  {leadFormData.actionType === 'notify' && (
+                    <input
+                      type="text"
+                      placeholder="Mensagem da notificacao..."
+                      value={leadFormData.actionNotificationMessage}
+                      onChange={(e) => setLeadFormData({ ...leadFormData, actionNotificationMessage: e.target.value })}
+                      style={{
+                        width: '100%',
+                        height: '40px',
+                        padding: '0 12px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* Buttons */}
+                <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>
+                  <Button type="button" variant="ghost" onClick={() => { setShowLeadModal(false); resetLeadForm(); }} style={{ flex: 1 }}>
+                    Cancelar
+                  </Button>
+                  <Button type="button" variant="primary" onClick={handleCreateLeadAutomation} style={{ flex: 1 }}>
+                    Criar Regra
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Create Automation Modal */}
       <AnimatePresence>
@@ -1381,6 +2294,191 @@ function AutomationCard({
                       </span>
                     </div>
                   ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
+function LeadAutomationCard({
+  automation,
+  index,
+}: {
+  automation: LeadAutomation
+  index: number
+}) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const colors = leadAutomationTypeColors[automation.type]
+
+  const getTriggerDescription = () => {
+    switch (automation.type) {
+      case 'lead_remarketing':
+        return `Leads perdidos ha ${automation.trigger.lostDaysAgo || 30} dias`
+      case 'lead_inactivity':
+        return `Leads inativos por ${automation.trigger.inactiveDays || 7} dias`
+      case 'lead_status_change':
+        return `Mudanca de ${leadStatusLabels[automation.trigger.fromStatus || 'NEW']} para ${leadStatusLabels[automation.trigger.toStatus || 'REMARKETING']}`
+      default:
+        return 'Gatilho configurado'
+    }
+  }
+
+  const getActionDescription = () => {
+    switch (automation.action.type) {
+      case 'change_status':
+        return `Alterar para ${leadStatusLabels[automation.action.newStatus || 'REMARKETING']}`
+      case 'send_message':
+        return `Enviar ${automation.action.messageChannel === 'whatsapp' ? 'WhatsApp' : automation.action.messageChannel === 'email' ? 'Email' : 'SMS'}`
+      case 'create_task':
+        return automation.action.taskTitle || 'Criar tarefa'
+      case 'notify':
+        return automation.action.notificationMessage || 'Enviar notificacao'
+      default:
+        return 'Acao configurada'
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      style={{
+        borderRadius: '16px',
+        backgroundColor: 'rgba(18, 18, 26, 0.8)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        overflow: 'hidden',
+        transition: 'all 0.2s',
+      }}
+    >
+      {/* Main Content */}
+      <div
+        onClick={() => setIsExpanded(!isExpanded)}
+        style={{
+          padding: '20px',
+          cursor: 'pointer',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{
+              padding: '12px',
+              borderRadius: '12px',
+              backgroundColor: colors.bg,
+              color: colors.color,
+            }}>
+              <RefreshCw size={20} />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+                <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>
+                  {automation.name}
+                </h3>
+                <Badge variant={automation.status === 'active' ? 'success' : 'warning'}>
+                  {automation.status === 'active' ? 'Ativo' : 'Pausado'}
+                </Badge>
+                <span style={{
+                  fontSize: '12px',
+                  padding: '2px 8px',
+                  borderRadius: '9999px',
+                  backgroundColor: colors.bg,
+                  color: colors.color,
+                }}>
+                  {leadAutomationTypeLabels[automation.type]}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '12px', color: '#6B6B7B' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Activity size={12} />
+                  {automation.executionCount || 0} execucoes
+                </span>
+                {automation.lastExecutedAt && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Clock size={12} />
+                    Ultimo: {new Date(automation.lastExecutedAt).toLocaleString('pt-BR')}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+            style={{
+              padding: '6px',
+              borderRadius: '8px',
+              background: 'none',
+              border: 'none',
+              color: '#6B6B7B',
+              cursor: 'pointer',
+            }}
+          >
+            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Expanded Content */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            style={{
+              borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Trigger */}
+              <div>
+                <h4 style={{ fontSize: '12px', fontWeight: 500, color: '#6B6B7B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+                  Gatilho
+                </h4>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                }}>
+                  <Target size={14} style={{ color: '#A855F7' }} />
+                  <span style={{ fontSize: '14px', color: '#FFFFFF' }}>
+                    {getTriggerDescription()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action */}
+              <div>
+                <h4 style={{ fontSize: '12px', fontWeight: 500, color: '#6B6B7B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+                  Acao
+                </h4>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                  border: '1px solid rgba(16, 185, 129, 0.2)',
+                }}>
+                  <div style={{
+                    padding: '6px',
+                    borderRadius: '8px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    color: '#10B981',
+                  }}>
+                    {leadActionIcons[automation.action.type] || <Zap size={14} />}
+                  </div>
+                  <span style={{ fontSize: '14px', color: '#FFFFFF' }}>
+                    {getActionDescription()}
+                  </span>
                 </div>
               </div>
             </div>
