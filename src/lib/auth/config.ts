@@ -65,38 +65,43 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Email e senha são obrigatórios')
-        }
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error('Email e senha são obrigatórios')
+          }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email.toLowerCase() },
-        })
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email.toLowerCase() },
+          })
 
-        if (!user || !user.passwordHash) {
-          throw new Error('Credenciais inválidas')
-        }
+          if (!user || !user.passwordHash) {
+            throw new Error('Credenciais inválidas')
+          }
 
-        if (!user.isActive) {
-          throw new Error('Conta desativada')
-        }
+          if (!user.isActive) {
+            throw new Error('Conta desativada')
+          }
 
-        const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
-        if (!isValid) {
-          throw new Error('Credenciais inválidas')
-        }
+          const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
+          if (!isValid) {
+            throw new Error('Credenciais inválidas')
+          }
 
-        // Atualizar ultimo login
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { lastLoginAt: new Date() },
-        })
+          // Atualizar ultimo login
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLoginAt: new Date() },
+          })
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          avatar: user.avatar,
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            avatar: user.avatar,
+          }
+        } catch (error) {
+          console.error('[NextAuth] Erro no authorize:', error)
+          return null
         }
       },
     }),

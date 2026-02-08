@@ -1,6 +1,13 @@
 // Prisma Client Singleton for Prisma 7
 // Usa pg adapter para conexao com PostgreSQL
 
+// @prisma/adapter-pg tem validacao TLS propria que rejeita o CA do Supabase.
+// NODE_TLS_REJECT_UNAUTHORIZED=0 e necessario em todos os ambientes.
+// A conexao ainda usa SSL (sslmode=require na URL), apenas nao valida o CA.
+if (process.env.DATABASE_URL?.includes('supabase')) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+}
+
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@/generated/prisma'
