@@ -150,6 +150,55 @@ export function withAuth(
 }
 
 /**
+ * Context para rotas de superadmin
+ */
+export interface SuperAdminContext {
+  userId: string
+  email: string
+}
+
+/**
+ * Wrapper para API routes de superadmin
+ */
+export function withSuperAdmin(
+  handler: (req: NextRequest, ctx: SuperAdminContext) => Promise<NextResponse>
+) {
+  return async (req: NextRequest) => {
+    try {
+      const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+
+      if (!token || !token.id) {
+        return NextResponse.json(
+          { error: 'Autenticacao necessaria' },
+          { status: 401 }
+        )
+      }
+
+      // Verificar flag de superadmin diretamente no banco
+      const user = await prisma.user.findUnique({
+        where: { id: token.id },
+        select: { id: true, email: true, isSuperAdmin: true, isActive: true },
+      })
+
+      if (!user || !user.isActive || !user.isSuperAdmin) {
+        return NextResponse.json(
+          { error: 'Acesso restrito a superadministradores' },
+          { status: 403 }
+        )
+      }
+
+      return handler(req, { userId: user.id, email: user.email })
+    } catch (error) {
+      console.error('Erro no middleware de superadmin:', error)
+      return NextResponse.json(
+        { error: 'Erro interno de autenticacao' },
+        { status: 500 }
+      )
+    }
+  }
+}
+
+/**
  * Verificar se organizacao pode adicionar mais recursos
  */
 export async function checkResourceLimit(

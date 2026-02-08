@@ -3,7 +3,7 @@
 import NextLink from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import {
   LayoutDashboard,
   Megaphone,
@@ -26,6 +26,7 @@ import {
   Link2,
   Brain,
   ShoppingBag,
+  Shield,
 } from 'lucide-react'
 import { PlatformIcon } from '@/components/ui'
 import { useApp } from '@/contexts'
@@ -65,6 +66,8 @@ interface SidebarProps {
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const { data: session } = useSession()
+  const isSuperAdmin = (session?.user as any)?.isSuperAdmin === true
   const { setIsConnectAccountsModalOpen, showToast } = useApp()
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(true)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
@@ -364,6 +367,59 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             )
           })}
         </div>
+
+        {/* Superadmin */}
+        {isSuperAdmin && (
+          <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
+            {!isCollapsed && (
+              <span style={{ fontSize: '10px', fontWeight: 600, color: '#4B4B5B', textTransform: 'uppercase', letterSpacing: '0.1em', padding: '4px 12px', display: 'block' }}>
+                Admin Global
+              </span>
+            )}
+            <NextLink href="/superadmin" style={{ textDecoration: 'none' }}>
+              <motion.div
+                style={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderRadius: '12px',
+                  padding: isCollapsed ? '12px' : '10px 12px',
+                  justifyContent: isCollapsed ? 'center' : 'flex-start',
+                  gap: isCollapsed ? 0 : '12px',
+                  backgroundColor: pathname === '/superadmin' ? 'rgba(168, 85, 247, 0.1)' : 'transparent',
+                  color: pathname === '/superadmin' ? '#FFFFFF' : '#8B8B9B',
+                  cursor: 'pointer',
+                }}
+                title={isCollapsed ? 'Superadmin' : undefined}
+              >
+                {pathname === '/superadmin' && (
+                  <motion.div
+                    layoutId="activeIndicator"
+                    style={{
+                      position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                      width: '4px', height: '32px',
+                      background: 'linear-gradient(to bottom, #A855F7, #C084FC)',
+                      borderRadius: '0 4px 4px 0',
+                    }}
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: '36px', height: '36px', borderRadius: '8px',
+                  backgroundColor: pathname === '/superadmin' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
+                }}>
+                  <Shield size={20} style={{ color: pathname === '/superadmin' ? '#A855F7' : '#6B6B7B' }} />
+                </div>
+                {!isCollapsed && (
+                  <span style={{ fontSize: '14px', fontWeight: 500, color: pathname === '/superadmin' ? '#FFFFFF' : '#8B8B9B' }}>
+                    Superadmin
+                  </span>
+                )}
+              </motion.div>
+            </NextLink>
+          </div>
+        )}
       </nav>
 
       {/* Footer */}

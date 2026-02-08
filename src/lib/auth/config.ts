@@ -20,6 +20,7 @@ declare module 'next-auth' {
       organizationSlug?: string
       organizationName?: string
       role?: string
+      isSuperAdmin?: boolean
     }
   }
 
@@ -39,6 +40,7 @@ declare module 'next-auth/jwt' {
     organizationSlug?: string
     organizationName?: string
     role?: string
+    isSuperAdmin?: boolean
   }
 }
 
@@ -146,6 +148,13 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         token.email = user.email!
+
+        // Buscar flag de superadmin
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { isSuperAdmin: true },
+        })
+        token.isSuperAdmin = dbUser?.isSuperAdmin ?? false
       }
 
       // Update session - quando o usuario atualiza dados
@@ -198,6 +207,7 @@ export const authOptions: NextAuthOptions = {
         organizationSlug: token.organizationSlug,
         organizationName: token.organizationName,
         role: token.role,
+        isSuperAdmin: token.isSuperAdmin,
       }
       return session
     },
