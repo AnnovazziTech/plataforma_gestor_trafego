@@ -10,10 +10,16 @@ import bcrypt from 'bcryptjs'
 // Criar pool de conexao PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DIRECT_URL,
+  max: 10,
+  idleTimeoutMillis: 20000,
+  connectionTimeoutMillis: 10000,
+  ssl: process.env.DIRECT_URL?.includes('supabase') ? { rejectUnauthorized: false } : undefined,
 })
 
 // Criar adapter
-const adapter = new PrismaPg(pool)
+const adapter = new PrismaPg(pool, {
+  schema: 'sistema_gestor',
+})
 
 // Criar PrismaClient com adapter
 const prisma = new PrismaClient({ adapter })

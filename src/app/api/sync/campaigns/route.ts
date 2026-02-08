@@ -1,6 +1,8 @@
 // API Route: Sincronizacao de Campanhas
 // POST - Sincronizar campanhas de uma integracao
 
+export const maxDuration = 60
+
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/db/prisma'

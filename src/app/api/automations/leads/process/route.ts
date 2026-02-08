@@ -1,6 +1,8 @@
 // API Route: Processar Automacoes de Leads
 // POST - Executar regras de remarketing pendentes
 
+export const maxDuration = 30
+
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db/prisma'
 import { withAuth, createAuditLog } from '@/lib/api/middleware'

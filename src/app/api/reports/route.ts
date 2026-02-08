@@ -2,6 +2,8 @@
 // GET - Listar relatorios
 // POST - Criar relatorio
 
+export const maxDuration = 30
+
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/db/prisma'

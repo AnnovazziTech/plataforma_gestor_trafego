@@ -1,6 +1,8 @@
 // API Route: Dashboard
 // GET - Buscar metricas agregadas do dashboard
 
+export const maxDuration = 30
+
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db/prisma'
 import { withAuth } from '@/lib/api/middleware'

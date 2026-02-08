@@ -18,8 +18,16 @@ function createPrismaClient() {
     throw new Error('DATABASE_URL nao configurado')
   }
 
-  const pool = new Pool({ connectionString })
-  const adapter = new PrismaPg(pool)
+  const pool = new Pool({
+    connectionString,
+    max: 10,
+    idleTimeoutMillis: 20000,
+    connectionTimeoutMillis: 10000,
+    ssl: connectionString.includes('supabase') ? { rejectUnauthorized: false } : undefined,
+  })
+  const adapter = new PrismaPg(pool, {
+    schema: 'sistema_gestor',
+  })
 
   return new PrismaClient({ adapter })
 }
