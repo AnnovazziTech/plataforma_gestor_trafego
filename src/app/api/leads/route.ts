@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
 import { withAuth, checkResourceLimit, createAuditLog } from '@/lib/api/middleware'
+import { sendConversionEvent, extractClientIp, extractUserAgent } from '@/lib/meta/conversions-api'
 
 // GET - Listar leads
 export const GET = withAuth(async (req, ctx) => {
@@ -195,6 +196,22 @@ export const POST = withAuth(async (req, ctx) => {
       entityId: lead.id,
       newData: data,
       request: req,
+    })
+
+    // Meta Conversions API: Lead
+    sendConversionEvent({
+      event_name: 'Lead',
+      user_data: {
+        em: data.email || undefined,
+        ph: data.phone || undefined,
+        fn: data.name,
+        client_ip_address: extractClientIp(req),
+        client_user_agent: extractUserAgent(req),
+      },
+      custom_data: {
+        content_name: data.source,
+        value: data.value,
+      },
     })
 
     return NextResponse.json({ lead }, { status: 201 })

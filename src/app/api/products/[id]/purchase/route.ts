@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { sendConversionEvent, extractClientIp, extractUserAgent } from '@/lib/meta/conversions-api'
 
 export async function POST(
   request: NextRequest,
@@ -53,6 +54,21 @@ export async function POST(
     await prisma.product.update({
       where: { id },
       data: { downloadCount: { increment: 1 } },
+    })
+
+    // Meta Conversions API: Purchase
+    sendConversionEvent({
+      event_name: 'Purchase',
+      user_data: {
+        em: session.user.email ?? undefined,
+        client_ip_address: extractClientIp(request),
+        client_user_agent: extractUserAgent(request),
+      },
+      custom_data: {
+        currency: 'BRL',
+        value: Number(product.price),
+        content_ids: [id],
+      },
     })
 
     return NextResponse.json(purchase, { status: 201 })

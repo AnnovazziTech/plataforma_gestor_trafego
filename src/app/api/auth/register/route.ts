@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
+import { sendConversionEvent, extractClientIp, extractUserAgent } from '@/lib/meta/conversions-api'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -169,6 +170,19 @@ export async function POST(request: NextRequest) {
       }
 
       return { user, organization: null }
+    })
+
+    // Meta Conversions API: CompleteRegistration
+    sendConversionEvent({
+      event_name: 'CompleteRegistration',
+      user_data: {
+        em: validatedData.email,
+        client_ip_address: extractClientIp(request),
+        client_user_agent: extractUserAgent(request),
+      },
+      custom_data: {
+        content_name: 'Registro TrafficPro',
+      },
     })
 
     return NextResponse.json({
