@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withSuperAdmin } from '@/lib/api/middleware'
 import prisma from '@/lib/db/prisma'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const showAll = req.nextUrl.searchParams.get('all') === 'true'
     const posts = await prisma.newsPost.findMany({
-      where: { isPublished: true },
+      where: showAll ? {} : { isPublished: true },
       include: { author: { select: { id: true, name: true } } },
       orderBy: { createdAt: 'desc' },
     })

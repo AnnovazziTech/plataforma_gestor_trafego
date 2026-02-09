@@ -8,8 +8,8 @@ import {
   Shield, Building2, Users, CreditCard, FileSearch,
   BarChart3, TrendingUp, Activity, CheckCircle, XCircle,
   Edit3, ChevronLeft, ChevronRight, Search, Filter,
-  Plus, X, Save, Eye, Zap, Layers, ToggleLeft, ToggleRight,
-  GripVertical, Lock, Unlock,
+  Plus, X, Save, Eye, EyeOff, Zap, Layers, ToggleLeft, ToggleRight,
+  GripVertical, Lock, Unlock, Newspaper, Trash2, ImageIcon, Calendar,
 } from 'lucide-react'
 
 // ===== TYPES =====
@@ -90,6 +90,18 @@ interface SystemModule {
   sortOrder: number
 }
 
+interface NewsPost {
+  id: string
+  title: string
+  content: string
+  imageUrl: string | null
+  isPublished: boolean
+  authorId: string | null
+  createdAt: string
+  updatedAt: string
+  author: { id: string; name: string | null } | null
+}
+
 interface AuditLog {
   id: string
   action: string
@@ -108,7 +120,7 @@ interface Pagination {
   pages: number
 }
 
-type Tab = 'overview' | 'organizations' | 'users' | 'plans' | 'modules' | 'audit-logs'
+type Tab = 'overview' | 'organizations' | 'users' | 'plans' | 'modules' | 'news' | 'audit-logs'
 
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE: '#22C55E',
@@ -166,6 +178,12 @@ export default function SuperadminPage() {
   // Modules state
   const [sysModules, setSysModules] = useState<SystemModule[]>([])
   const [loadingModules, setLoadingModules] = useState(false)
+
+  // News state
+  const [newsPosts, setNewsPosts] = useState<NewsPost[]>([])
+  const [loadingNews, setLoadingNews] = useState(false)
+  const [showNewsModal, setShowNewsModal] = useState(false)
+  const [editingNews, setEditingNews] = useState<NewsPost | null>(null)
 
   // All plans for org dropdown
   const [allPlans, setAllPlans] = useState<{ id: string; name: string }[]>([])
@@ -267,6 +285,47 @@ export default function SuperadminPage() {
     if (res.ok) fetchSysModules()
   }
 
+  const fetchNews = useCallback(async () => {
+    setLoadingNews(true)
+    try {
+      const res = await fetch('/api/news?all=true')
+      if (res.ok) {
+        const data = await res.json()
+        setNewsPosts(data.posts)
+      }
+    } catch (e) { console.error(e) }
+    setLoadingNews(false)
+  }, [])
+
+  const saveNews = async (data: { title: string; content: string; imageUrl: string; isPublished: boolean }) => {
+    const isEdit = !!editingNews
+    const url = isEdit ? `/api/news/${editingNews!.id}` : '/api/news'
+    const res = await fetch(url, {
+      method: isEdit ? 'PATCH' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (res.ok) {
+      setShowNewsModal(false)
+      setEditingNews(null)
+      fetchNews()
+    }
+  }
+
+  const toggleNewsPublished = async (id: string, isPublished: boolean) => {
+    const res = await fetch(`/api/news/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isPublished: !isPublished }),
+    })
+    if (res.ok) fetchNews()
+  }
+
+  const deleteNews = async (id: string) => {
+    const res = await fetch(`/api/news/${id}`, { method: 'DELETE' })
+    if (res.ok) fetchNews()
+  }
+
   // Tab change -> fetch data
   useEffect(() => {
     if (status !== 'authenticated' || !(session?.user as any)?.isSuperAdmin) return
@@ -275,8 +334,9 @@ export default function SuperadminPage() {
     if (activeTab === 'users') fetchUsers()
     if (activeTab === 'plans') fetchPlans()
     if (activeTab === 'modules') fetchSysModules()
+    if (activeTab === 'news') fetchNews()
     if (activeTab === 'audit-logs') fetchAuditLogs()
-  }, [activeTab, status, session, fetchStats, fetchOrganizations, fetchUsers, fetchPlans, fetchSysModules, fetchAuditLogs])
+  }, [activeTab, status, session, fetchStats, fetchOrganizations, fetchUsers, fetchPlans, fetchSysModules, fetchNews, fetchAuditLogs])
 
   // Actions
   const toggleOrgActive = async (id: string, isActive: boolean) => {
@@ -349,6 +409,7 @@ export default function SuperadminPage() {
     { id: 'users', label: 'Usuarios', icon: Users },
     { id: 'plans', label: 'Planos', icon: CreditCard },
     { id: 'modules', label: 'Modulos', icon: Layers },
+    { id: 'news', label: 'Noticias', icon: Newspaper },
     { id: 'audit-logs', label: 'Audit Logs', icon: FileSearch },
   ]
 
@@ -420,6 +481,16 @@ export default function SuperadminPage() {
           onToggleEnabled={toggleModuleEnabled}
         />
       )}
+      {activeTab === 'news' && (
+        <NewsTab
+          posts={newsPosts} loading={loadingNews}
+          onEdit={(p) => { setEditingNews(p); setShowNewsModal(true) }}
+          onCreate={() => { setEditingNews(null); setShowNewsModal(true) }}
+          onTogglePublished={toggleNewsPublished}
+          onDelete={deleteNews}
+          formatDate={formatDate}
+        />
+      )}
       {activeTab === 'audit-logs' && (
         <AuditLogsTab
           logs={auditLogs} pagination={logPagination} loading={loadingLogs}
@@ -433,6 +504,15 @@ export default function SuperadminPage() {
           plan={editingPlan}
           onSave={savePlan}
           onClose={() => { setShowPlanModal(false); setEditingPlan(null) }}
+        />
+      )}
+
+      {/* News Modal */}
+      {showNewsModal && (
+        <NewsModal
+          post={editingNews}
+          onSave={saveNews}
+          onClose={() => { setShowNewsModal(false); setEditingNews(null) }}
         />
       )}
     </div>
@@ -967,6 +1047,249 @@ function ModulesTab({ modules, loading, onToggleEnabled }: { modules: SystemModu
               )}
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ===== TAB: NEWS =====
+function NewsTab({ posts, loading, onEdit, onCreate, onTogglePublished, onDelete, formatDate }: {
+  posts: NewsPost[]; loading: boolean;
+  onEdit: (p: NewsPost) => void; onCreate: () => void;
+  onTogglePublished: (id: string, isPublished: boolean) => void;
+  onDelete: (id: string) => void; formatDate: (d: string | null) => string;
+}) {
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const published = posts.filter(p => p.isPublished)
+  const drafts = posts.filter(p => !p.isPublished)
+
+  if (loading) return <div style={{ color: '#6B6B7B', padding: '40px', textAlign: 'center' }}>Carregando noticias...</div>
+
+  return (
+    <div>
+      {/* Summary */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
+        <MetricBox label="Total Noticias" value={posts.length} icon={Newspaper} color="#3B82F6" />
+        <MetricBox label="Publicadas" value={published.length} icon={Eye} color="#22C55E" />
+        <MetricBox label="Rascunhos" value={drafts.length} icon={EyeOff} color="#F59E0B" />
+      </div>
+
+      {/* Actions */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+        <button onClick={onCreate} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', border: 'none', backgroundColor: '#A855F7', color: '#FFFFFF', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
+          <Plus size={16} /> Nova Noticia
+        </button>
+      </div>
+
+      {/* Posts list */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {posts.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px', color: '#6B6B7B', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <Newspaper size={40} style={{ margin: '0 auto 12px', display: 'block', opacity: 0.3 }} />
+            Nenhuma noticia criada. Clique em "Nova Noticia" para comecar.
+          </div>
+        ) : posts.map(post => (
+          <motion.div
+            key={post.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              display: 'flex', gap: '16px',
+              background: 'rgba(255,255,255,0.02)', borderRadius: '12px',
+              border: '1px solid rgba(255,255,255,0.06)', padding: '16px 20px',
+              alignItems: 'flex-start',
+            }}
+          >
+            {/* Image thumbnail */}
+            {post.imageUrl ? (
+              <div style={{
+                width: '80px', height: '60px', borderRadius: '8px', flexShrink: 0,
+                backgroundImage: `url(${post.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center',
+                border: '1px solid rgba(255,255,255,0.06)',
+              }} />
+            ) : (
+              <div style={{
+                width: '80px', height: '60px', borderRadius: '8px', flexShrink: 0,
+                backgroundColor: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: '1px solid rgba(255,255,255,0.06)',
+              }}>
+                <ImageIcon size={20} style={{ color: '#4B4B5B' }} />
+              </div>
+            )}
+
+            {/* Content */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <h4 style={{ fontSize: '15px', fontWeight: 600, color: '#FFFFFF', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {post.title}
+                </h4>
+                <span style={{
+                  padding: '2px 8px', fontSize: '10px', fontWeight: 600, borderRadius: '9999px', flexShrink: 0,
+                  backgroundColor: post.isPublished ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)',
+                  color: post.isPublished ? '#22C55E' : '#F59E0B',
+                }}>
+                  {post.isPublished ? 'Publicada' : 'Rascunho'}
+                </span>
+              </div>
+              <p style={{ fontSize: '13px', color: '#8B8B9B', margin: '0 0 8px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {post.content.length > 120 ? post.content.substring(0, 120) + '...' : post.content}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '11px', color: '#6B6B7B' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Calendar size={12} /> {formatDate(post.createdAt)}
+                </span>
+                {post.author && (
+                  <span>por {post.author.name || 'Admin'}</span>
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+              <button
+                onClick={() => onTogglePublished(post.id, post.isPublished)}
+                title={post.isPublished ? 'Despublicar' : 'Publicar'}
+                style={{ ...btnSmall, fontSize: '11px' }}
+              >
+                {post.isPublished ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
+              <button
+                onClick={() => onEdit(post)}
+                title="Editar"
+                style={{ ...btnSmall, fontSize: '11px' }}
+              >
+                <Edit3 size={14} />
+              </button>
+              {confirmDelete === post.id ? (
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <button
+                    onClick={() => { onDelete(post.id); setConfirmDelete(null) }}
+                    style={{ ...btnSmall, fontSize: '11px', color: '#EF4444', borderColor: 'rgba(239,68,68,0.3)' }}
+                  >
+                    Confirmar
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(null)}
+                    style={{ ...btnSmall, fontSize: '11px' }}
+                  >
+                    Nao
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmDelete(post.id)}
+                  title="Excluir"
+                  style={{ ...btnSmall, fontSize: '11px', color: '#EF4444' }}
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ===== NEWS MODAL =====
+function NewsModal({ post, onSave, onClose }: {
+  post: NewsPost | null;
+  onSave: (data: { title: string; content: string; imageUrl: string; isPublished: boolean }) => void;
+  onClose: () => void;
+}) {
+  const [form, setForm] = useState({
+    title: post?.title || '',
+    content: post?.content || '',
+    imageUrl: post?.imageUrl || '',
+    isPublished: post?.isPublished ?? true,
+  })
+
+  const set = (key: string, value: any) => setForm(prev => ({ ...prev, [key]: value }))
+  const canSave = form.title.trim() && form.content.trim()
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.7)' }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#1A1A24', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', padding: '32px', width: '640px', maxHeight: '85vh', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <h2 style={{ color: '#FFFFFF', fontSize: '20px', fontWeight: 700, margin: 0 }}>
+            {post ? 'Editar Noticia' : 'Nova Noticia'}
+          </h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}><X size={20} /></button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Title */}
+          <div>
+            <label style={labelStyle}>Titulo *</label>
+            <input
+              value={form.title}
+              onChange={e => set('title', e.target.value)}
+              placeholder="Titulo da noticia"
+              style={inputStyle}
+            />
+          </div>
+
+          {/* Image URL */}
+          <div>
+            <label style={labelStyle}>URL da Imagem (opcional)</label>
+            <input
+              value={form.imageUrl}
+              onChange={e => set('imageUrl', e.target.value)}
+              placeholder="https://exemplo.com/imagem.jpg"
+              style={inputStyle}
+            />
+            {form.imageUrl && (
+              <div style={{
+                marginTop: '8px', width: '100%', height: '160px', borderRadius: '8px',
+                backgroundImage: `url(${form.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center',
+                border: '1px solid rgba(255,255,255,0.06)',
+              }} />
+            )}
+          </div>
+
+          {/* Content */}
+          <div>
+            <label style={labelStyle}>Conteudo *</label>
+            <textarea
+              value={form.content}
+              onChange={e => set('content', e.target.value)}
+              placeholder="Escreva o conteudo da noticia..."
+              rows={10}
+              style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', lineHeight: '1.6' }}
+            />
+          </div>
+
+          {/* Published toggle */}
+          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#CACADB', fontSize: '14px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={form.isPublished}
+              onChange={e => set('isPublished', e.target.checked)}
+              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+            />
+            Publicar imediatamente
+            {!form.isPublished && (
+              <span style={{ fontSize: '11px', color: '#F59E0B' }}>(sera salva como rascunho)</span>
+            )}
+          </label>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <button onClick={onClose} style={{ ...btnSmall, padding: '10px 20px' }}>Cancelar</button>
+          <button
+            onClick={() => canSave && onSave(form)}
+            disabled={!canSave}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px',
+              borderRadius: '10px', border: 'none', fontSize: '13px', fontWeight: 600, cursor: canSave ? 'pointer' : 'not-allowed',
+              backgroundColor: canSave ? '#A855F7' : '#4B4B5B', color: '#FFFFFF',
+              opacity: canSave ? 1 : 0.5,
+            }}
+          >
+            <Save size={16} /> {post ? 'Salvar' : 'Criar Noticia'}
+          </button>
         </div>
       </div>
     </div>
