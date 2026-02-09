@@ -41,6 +41,8 @@ const mapPlatformName = (platform: string): Platform => {
 interface HeaderProps {
   title: string
   subtitle?: string
+  /** 'full' shows all campaign controls; 'simple' shows only title + notifications */
+  variant?: 'full' | 'simple'
   showCreateButton?: boolean
   onCreateClick?: () => void
   createButtonText?: string
@@ -53,6 +55,7 @@ interface HeaderProps {
 export function Header({
   title,
   subtitle,
+  variant = 'full',
   showCreateButton = true,
   onCreateClick,
   createButtonText = 'Nova Campanha',
@@ -178,7 +181,8 @@ export function Header({
 
         {/* Lado Direito - Ações */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {/* Campo de Busca */}
+          {/* Campo de Busca (campaign only) */}
+          {variant === 'full' && (
           <form onSubmit={handleSearch} className="hidden lg:block">
             <div style={{ position: 'relative', width: '220px' }}>
               <input
@@ -212,8 +216,10 @@ export function Header({
               />
             </div>
           </form>
+          )}
 
-          {/* Seletor de Período */}
+          {/* Seletor de Período (campaign only) */}
+          {variant === 'full' && (
           <div style={{ position: 'relative' }} className="hidden md:block">
             <button
               onClick={() => setShowDatePicker(!showDatePicker)}
@@ -296,8 +302,10 @@ export function Header({
               )}
             </AnimatePresence>
           </div>
+          )}
 
-          {/* Seletor de Conta */}
+          {/* Seletor de Conta (campaign only) */}
+          {variant === 'full' && (
           <div style={{ position: 'relative' }} className="hidden md:block">
             <button
               onClick={() => setShowAccountPicker(!showAccountPicker)}
@@ -428,6 +436,7 @@ export function Header({
               )}
             </AnimatePresence>
           </div>
+          )}
 
           {/* Botão Atualizar */}
           <button
@@ -645,8 +654,8 @@ export function Header({
             </button>
           )}
 
-          {/* Botão Principal */}
-          {showCreateButton && (
+          {/* Botão Principal (campaign only) */}
+          {variant === 'full' && showCreateButton && (
             <button
               onClick={handleCreateClick}
               className="hidden sm:flex"

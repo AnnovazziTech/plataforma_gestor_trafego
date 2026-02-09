@@ -81,7 +81,7 @@ export default function ControleAdsPage() {
   if (isLoading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Header title="Controle ADS" subtitle="Gerencie orcamentos e estrategias" />
+        <Header title="Controle ADS" subtitle="Gerencie orcamentos e estrategias" variant="simple" />
         <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Loader2 size={48} style={{ color: '#3B82F6', animation: 'spin 1s linear infinite' }} />
         </main>
@@ -91,7 +91,7 @@ export default function ControleAdsPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header title="Controle ADS" subtitle="Gerencie orcamentos e estrategias" />
+      <Header title="Controle ADS" subtitle="Gerencie orcamentos e estrategias" variant="simple" />
 
       <main style={{ flex: 1, padding: '24px', overflowX: 'hidden' }}>
         {/* Filters & Actions */}

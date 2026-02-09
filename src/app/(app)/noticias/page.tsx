@@ -15,7 +15,7 @@ export default function NoticiasPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header title="Noticias" subtitle="Fique por dentro das novidades" />
+      <Header title="Noticias" subtitle="Fique por dentro das novidades" variant="simple" />
 
       <main style={{ flex: 1, padding: '24px', overflowX: 'hidden' }}>
         {newsPostsLoading ? (
