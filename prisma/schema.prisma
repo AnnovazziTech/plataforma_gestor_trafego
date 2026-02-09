@@ -82,6 +82,10 @@ model Organization {
   clients              Client[]
   expenses             Expense[]
   quotes               Quote[]
+  financialEntries     FinancialEntry[]
+  clientTasks          ClientTask[]
+  budgetStrategies     BudgetStrategy[]
+  budgetCampaigns      BudgetCampaign[]
 
   @@map("organizations")
   @@schema("sistema_gestor")
@@ -100,9 +104,14 @@ model User {
   lastLoginAt   DateTime?
   createdAt     DateTime             @default(now())
   updatedAt     DateTime             @updatedAt
-  accounts      Account[]
-  memberships   OrganizationMember[]
-  sessions      Session[]
+  accounts         Account[]
+  memberships      OrganizationMember[]
+  sessions         Session[]
+  financialEntries FinancialEntry[]
+  clientTasks      ClientTask[]
+  budgetStrategies BudgetStrategy[]
+  budgetCampaigns  BudgetCampaign[]
+  newsPosts        NewsPost[]
 
   @@map("users")
   @@schema("sistema_gestor")
@@ -1217,14 +1226,19 @@ model Client {
   email          String?
   phone          String?
   company        String?
-  contractValue  Float?
-  startDate      DateTime?
-  status         ClientStatus @default(ACTIVE)
-  notes          String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  expenses       Expense[]
+  contractValue    Float?
+  monthlyValue     Float?
+  startDate        DateTime?
+  status           ClientStatus @default(ACTIVE)
+  notes            String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  expenses         Expense[]
+  financialEntries FinancialEntry[]
+  tasks            ClientTask[]
+  budgetStrategies BudgetStrategy[]
+  budgetCampaigns  BudgetCampaign[]
 
   @@index([organizationId, status])
   @@map("clients")
@@ -1235,6 +1249,7 @@ enum ClientStatus {
   ACTIVE
   INACTIVE
   PAUSED
+  TESTING
 
   @@schema("sistema_gestor")
 }
@@ -1295,5 +1310,144 @@ enum QuoteStatus {
   REJECTED
   EXPIRED
 
+  @@schema("sistema_gestor")
+}
+
+// ==========================================
+// MODULOS GRATUITOS - Financial Pro
+// ==========================================
+
+model SystemModule {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  icon        String?
+  route       String
+  isEnabled   Boolean  @default(true)
+  isFree      Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_modules")
+  @@schema("sistema_gestor")
+}
+
+model FinancialEntry {
+  id             String             @id @default(cuid())
+  organizationId String
+  userId         String
+  type           FinancialEntryType
+  amount         Float
+  description    String?
+  date           DateTime
+  clientId       String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client       Client?      @relation(fields: [clientId], references: [id])
+
+  @@index([organizationId, type])
+  @@index([organizationId, date])
+  @@map("financial_entries")
+  @@schema("sistema_gestor")
+}
+
+enum FinancialEntryType {
+  INCOME
+  EXPENSE
+  ASSET
+
+  @@schema("sistema_gestor")
+}
+
+model ClientTask {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  clientId       String
+  description    String
+  date           DateTime
+  completed      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, clientId])
+  @@index([organizationId, completed])
+  @@map("client_tasks")
+  @@schema("sistema_gestor")
+}
+
+model BudgetStrategy {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  clientId       String
+  name           String
+  totalBudget    Float
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client       Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  campaigns    BudgetCampaign[]
+
+  @@index([organizationId, clientId])
+  @@map("budget_strategies")
+  @@schema("sistema_gestor")
+}
+
+model BudgetCampaign {
+  id               String    @id @default(cuid())
+  organizationId   String
+  userId           String
+  clientId         String
+  strategyId       String
+  name             String
+  maxMeta          Float     @default(0)
+  maxGoogle        Float     @default(0)
+  dailyBudget      Float     @default(0)
+  startDate        DateTime
+  spentMeta        Float     @default(0)
+  spentGoogle      Float     @default(0)
+  previousLeadCost Float?
+  currentLeadCost  Float?
+  previousDate     DateTime?
+  currentDate      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client       Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  strategy     BudgetStrategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, clientId])
+  @@index([organizationId, strategyId])
+  @@map("budget_campaigns")
+  @@schema("sistema_gestor")
+}
+
+model NewsPost {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  imageUrl    String?
+  isPublished Boolean  @default(true)
+  authorId    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author User? @relation(fields: [authorId], references: [id])
+
+  @@map("news_posts")
   @@schema("sistema_gestor")
 }

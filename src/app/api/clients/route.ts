@@ -50,7 +50,9 @@ export async function POST(request: NextRequest) {
         phone: data.phone,
         company: data.company,
         contractValue: data.contractValue,
+        monthlyValue: data.monthlyValue,
         startDate: data.startDate ? new Date(data.startDate) : null,
+        status: data.status || 'ACTIVE',
         notes: data.notes,
       },
     })

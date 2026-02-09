@@ -138,6 +138,80 @@ interface Conversation {
   createdAt: string
 }
 
+interface FinancialEntry {
+  id: string
+  type: 'INCOME' | 'EXPENSE' | 'ASSET'
+  amount: number
+  description?: string
+  date: string
+  clientId?: string
+  client?: { id: string; name: string }
+  createdAt: string
+}
+
+interface ClientTask {
+  id: string
+  clientId: string
+  description: string
+  date: string
+  completed: boolean
+  client?: { id: string; name: string }
+  createdAt: string
+}
+
+interface BudgetStrategyItem {
+  id: string
+  clientId: string
+  name: string
+  totalBudget: number
+  client?: { id: string; name: string }
+  campaigns: BudgetCampaignItem[]
+  createdAt: string
+}
+
+interface BudgetCampaignItem {
+  id: string
+  clientId: string
+  strategyId: string
+  name: string
+  maxMeta: number
+  maxGoogle: number
+  dailyBudget: number
+  startDate: string
+  spentMeta: number
+  spentGoogle: number
+  previousLeadCost?: number
+  currentLeadCost?: number
+  previousDate?: string
+  currentDate?: string
+  client?: { id: string; name: string }
+  strategy?: { id: string; name: string; totalBudget: number }
+  createdAt: string
+}
+
+interface NewsPostItem {
+  id: string
+  title: string
+  content: string
+  imageUrl?: string
+  isPublished: boolean
+  authorId?: string
+  author?: { id: string; name: string }
+  createdAt: string
+}
+
+interface SystemModuleItem {
+  id: string
+  slug: string
+  name: string
+  description?: string
+  icon?: string
+  route: string
+  isEnabled: boolean
+  isFree: boolean
+  sortOrder: number
+}
+
 interface Toast {
   id: string
   message: string
@@ -242,6 +316,46 @@ interface AppContextType {
 
   // Sync
   syncCampaigns: (integrationId: string) => Promise<void>
+
+  // Financial Entries
+  financialEntries: FinancialEntry[]
+  financialEntriesLoading: boolean
+  fetchFinancialEntries: (filters?: any) => Promise<void>
+  addFinancialEntry: (data: any) => Promise<FinancialEntry | null>
+  removeFinancialEntry: (id: string) => Promise<void>
+
+  // Client Tasks
+  clientTasks: ClientTask[]
+  clientTasksLoading: boolean
+  fetchClientTasks: (clientId?: string) => Promise<void>
+  addClientTask: (data: any) => Promise<ClientTask | null>
+  toggleClientTask: (id: string) => Promise<void>
+  removeClientTask: (id: string) => Promise<void>
+
+  // Budget Strategies
+  budgetStrategies: BudgetStrategyItem[]
+  budgetStrategiesLoading: boolean
+  fetchBudgetStrategies: (clientId?: string) => Promise<void>
+  addBudgetStrategy: (data: any) => Promise<BudgetStrategyItem | null>
+  removeBudgetStrategy: (id: string) => Promise<void>
+
+  // Budget Campaigns
+  budgetCampaigns: BudgetCampaignItem[]
+  budgetCampaignsLoading: boolean
+  fetchBudgetCampaigns: (filters?: any) => Promise<void>
+  addBudgetCampaign: (data: any) => Promise<BudgetCampaignItem | null>
+  updateBudgetCampaign: (id: string, data: any) => Promise<void>
+  removeBudgetCampaign: (id: string) => Promise<void>
+
+  // News
+  newsPosts: NewsPostItem[]
+  newsPostsLoading: boolean
+  fetchNewsPosts: () => Promise<void>
+
+  // Modules
+  modules: SystemModuleItem[]
+  modulesLoading: boolean
+  fetchModules: () => Promise<void>
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -286,6 +400,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [conversationsLoading, setConversationsLoading] = useState(false)
+
+  const [financialEntries, setFinancialEntries] = useState<FinancialEntry[]>([])
+  const [financialEntriesLoading, setFinancialEntriesLoading] = useState(false)
+
+  const [clientTasks, setClientTasks] = useState<ClientTask[]>([])
+  const [clientTasksLoading, setClientTasksLoading] = useState(false)
+
+  const [budgetStrategies, setBudgetStrategies] = useState<BudgetStrategyItem[]>([])
+  const [budgetStrategiesLoading, setBudgetStrategiesLoading] = useState(false)
+
+  const [budgetCampaigns, setBudgetCampaigns] = useState<BudgetCampaignItem[]>([])
+  const [budgetCampaignsLoading, setBudgetCampaignsLoading] = useState(false)
+
+  const [newsPosts, setNewsPosts] = useState<NewsPostItem[]>([])
+  const [newsPostsLoading, setNewsPostsLoading] = useState(false)
+
+  const [modules, setModules] = useState<SystemModuleItem[]>([])
+  const [modulesLoading, setModulesLoading] = useState(false)
 
   const [dateRange, setDateRange] = useState('Ultimos 30 dias')
   const [selectedAccount, setSelectedAccount] = useState<string>('all')
@@ -842,6 +974,226 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [api, showToast])
 
+  // === FINANCIAL ENTRIES ===
+  const fetchFinancialEntries = useCallback(async (filters?: any) => {
+    if (!isAuthenticated) return
+    setFinancialEntriesLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (filters?.type) params.append('type', filters.type)
+      if (filters?.clientId) params.append('clientId', filters.clientId)
+      if (filters?.startDate) params.append('startDate', filters.startDate)
+      if (filters?.endDate) params.append('endDate', filters.endDate)
+      const data = await api(`/api/financial-entries?${params.toString()}`)
+      setFinancialEntries(data.entries || [])
+    } catch (error: any) {
+      console.error('Erro ao buscar lancamentos:', error)
+    } finally {
+      setFinancialEntriesLoading(false)
+    }
+  }, [api, isAuthenticated])
+
+  const addFinancialEntry = useCallback(async (entryData: any): Promise<FinancialEntry | null> => {
+    try {
+      const data = await api('/api/financial-entries', {
+        method: 'POST',
+        body: JSON.stringify(entryData),
+      })
+      setFinancialEntries(prev => [data.entry, ...prev])
+      showToast('Lancamento criado com sucesso!', 'success')
+      return data.entry
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao criar lancamento', 'error')
+      return null
+    }
+  }, [api, showToast])
+
+  const removeFinancialEntry = useCallback(async (id: string) => {
+    try {
+      await api(`/api/financial-entries/${id}`, { method: 'DELETE' })
+      setFinancialEntries(prev => prev.filter(e => e.id !== id))
+      showToast('Lancamento removido!', 'success')
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao remover lancamento', 'error')
+    }
+  }, [api, showToast])
+
+  // === CLIENT TASKS ===
+  const fetchClientTasks = useCallback(async (clientId?: string) => {
+    if (!isAuthenticated) return
+    setClientTasksLoading(true)
+    try {
+      const params = clientId ? `?clientId=${clientId}` : ''
+      const data = await api(`/api/client-tasks${params}`)
+      setClientTasks(data.tasks || [])
+    } catch (error: any) {
+      console.error('Erro ao buscar tarefas:', error)
+    } finally {
+      setClientTasksLoading(false)
+    }
+  }, [api, isAuthenticated])
+
+  const addClientTask = useCallback(async (taskData: any): Promise<ClientTask | null> => {
+    try {
+      const data = await api('/api/client-tasks', {
+        method: 'POST',
+        body: JSON.stringify(taskData),
+      })
+      setClientTasks(prev => [data.task, ...prev])
+      showToast('Tarefa criada com sucesso!', 'success')
+      return data.task
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao criar tarefa', 'error')
+      return null
+    }
+  }, [api, showToast])
+
+  const toggleClientTask = useCallback(async (id: string) => {
+    const task = clientTasks.find(t => t.id === id)
+    if (!task) return
+    try {
+      await api(`/api/client-tasks/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ completed: !task.completed }),
+      })
+      setClientTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t))
+      showToast(task.completed ? 'Tarefa reaberta' : 'Tarefa concluida!', 'info')
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao atualizar tarefa', 'error')
+    }
+  }, [api, clientTasks, showToast])
+
+  const removeClientTask = useCallback(async (id: string) => {
+    try {
+      await api(`/api/client-tasks/${id}`, { method: 'DELETE' })
+      setClientTasks(prev => prev.filter(t => t.id !== id))
+      showToast('Tarefa removida!', 'success')
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao remover tarefa', 'error')
+    }
+  }, [api, showToast])
+
+  // === BUDGET STRATEGIES ===
+  const fetchBudgetStrategies = useCallback(async (clientId?: string) => {
+    if (!isAuthenticated) return
+    setBudgetStrategiesLoading(true)
+    try {
+      const params = clientId ? `?clientId=${clientId}` : ''
+      const data = await api(`/api/budget-strategies${params}`)
+      setBudgetStrategies(data.strategies || [])
+    } catch (error: any) {
+      console.error('Erro ao buscar estrategias:', error)
+    } finally {
+      setBudgetStrategiesLoading(false)
+    }
+  }, [api, isAuthenticated])
+
+  const addBudgetStrategy = useCallback(async (strategyData: any): Promise<BudgetStrategyItem | null> => {
+    try {
+      const data = await api('/api/budget-strategies', {
+        method: 'POST',
+        body: JSON.stringify(strategyData),
+      })
+      setBudgetStrategies(prev => [data.strategy, ...prev])
+      showToast('Estrategia criada com sucesso!', 'success')
+      return data.strategy
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao criar estrategia', 'error')
+      return null
+    }
+  }, [api, showToast])
+
+  const removeBudgetStrategy = useCallback(async (id: string) => {
+    try {
+      await api(`/api/budget-strategies/${id}`, { method: 'DELETE' })
+      setBudgetStrategies(prev => prev.filter(s => s.id !== id))
+      showToast('Estrategia removida!', 'success')
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao remover estrategia', 'error')
+    }
+  }, [api, showToast])
+
+  // === BUDGET CAMPAIGNS ===
+  const fetchBudgetCampaigns = useCallback(async (filters?: any) => {
+    if (!isAuthenticated) return
+    setBudgetCampaignsLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (filters?.clientId) params.append('clientId', filters.clientId)
+      if (filters?.strategyId) params.append('strategyId', filters.strategyId)
+      const data = await api(`/api/budget-campaigns?${params.toString()}`)
+      setBudgetCampaigns(data.campaigns || [])
+    } catch (error: any) {
+      console.error('Erro ao buscar campanhas de orcamento:', error)
+    } finally {
+      setBudgetCampaignsLoading(false)
+    }
+  }, [api, isAuthenticated])
+
+  const addBudgetCampaign = useCallback(async (campaignData: any): Promise<BudgetCampaignItem | null> => {
+    try {
+      const data = await api('/api/budget-campaigns', {
+        method: 'POST',
+        body: JSON.stringify(campaignData),
+      })
+      setBudgetCampaigns(prev => [data.campaign, ...prev])
+      showToast('Campanha de orcamento criada!', 'success')
+      return data.campaign
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao criar campanha', 'error')
+      return null
+    }
+  }, [api, showToast])
+
+  const updateBudgetCampaign = useCallback(async (id: string, updates: any) => {
+    try {
+      const data = await api(`/api/budget-campaigns/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      })
+      setBudgetCampaigns(prev => prev.map(c => c.id === id ? data.campaign : c))
+      showToast('Campanha atualizada!', 'success')
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao atualizar campanha', 'error')
+    }
+  }, [api, showToast])
+
+  const removeBudgetCampaign = useCallback(async (id: string) => {
+    try {
+      await api(`/api/budget-campaigns/${id}`, { method: 'DELETE' })
+      setBudgetCampaigns(prev => prev.filter(c => c.id !== id))
+      showToast('Campanha removida!', 'success')
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao remover campanha', 'error')
+    }
+  }, [api, showToast])
+
+  // === NEWS POSTS ===
+  const fetchNewsPosts = useCallback(async () => {
+    setNewsPostsLoading(true)
+    try {
+      const data = await api('/api/news')
+      setNewsPosts(data.posts || [])
+    } catch (error: any) {
+      console.error('Erro ao buscar noticias:', error)
+    } finally {
+      setNewsPostsLoading(false)
+    }
+  }, [api])
+
+  // === MODULES ===
+  const fetchModules = useCallback(async () => {
+    setModulesLoading(true)
+    try {
+      const data = await api('/api/modules')
+      setModules(data.modules || [])
+    } catch (error: any) {
+      console.error('Erro ao buscar modulos:', error)
+    } finally {
+      setModulesLoading(false)
+    }
+  }, [api])
+
   // === INITIAL DATA LOAD ===
   useEffect(() => {
     if (isAuthenticated) {
@@ -851,13 +1203,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         fetchIntegrations(),
         fetchNotifications(),
         fetchLeads(),
+        fetchModules(),
       ]).finally(() => {
         setIsLoading(false)
       })
     } else {
       setIsLoading(false)
     }
-  }, [isAuthenticated, fetchCampaigns, fetchIntegrations, fetchNotifications, fetchLeads])
+  }, [isAuthenticated, fetchCampaigns, fetchIntegrations, fetchNotifications, fetchLeads, fetchModules])
 
   return (
     <AppContext.Provider value={{
@@ -929,6 +1282,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
       showToast,
       toasts,
       syncCampaigns,
+      financialEntries,
+      financialEntriesLoading,
+      fetchFinancialEntries,
+      addFinancialEntry,
+      removeFinancialEntry,
+      clientTasks,
+      clientTasksLoading,
+      fetchClientTasks,
+      addClientTask,
+      toggleClientTask,
+      removeClientTask,
+      budgetStrategies,
+      budgetStrategiesLoading,
+      fetchBudgetStrategies,
+      addBudgetStrategy,
+      removeBudgetStrategy,
+      budgetCampaigns,
+      budgetCampaignsLoading,
+      fetchBudgetCampaigns,
+      addBudgetCampaign,
+      updateBudgetCampaign,
+      removeBudgetCampaign,
+      newsPosts,
+      newsPostsLoading,
+      fetchNewsPosts,
+      modules,
+      modulesLoading,
+      fetchModules,
     }}>
       {children}
     </AppContext.Provider>

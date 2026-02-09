@@ -5,11 +5,22 @@ import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { signOut, useSession } from 'next-auth/react'
 import {
-  LayoutDashboard,
-  Megaphone,
+  DollarSign,
+  Users,
+  Target,
+  Image,
+  Newspaper,
   BarChart3,
+  TrendingUp,
   FileText,
+  Share2,
+  MessageSquare,
   Zap,
+  Search,
+  ShoppingBag,
+  GraduationCap,
+  Link as LinkIcon,
+  Brain,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -17,38 +28,19 @@ import {
   Crown,
   Sparkles,
   X,
-  Briefcase,
-  Share2,
-  MessageCircle,
-  Palette,
-  Search,
-  GraduationCap,
-  Link2,
-  Brain,
-  ShoppingBag,
   Shield,
+  LucideIcon,
 } from 'lucide-react'
 import { PlatformIcon } from '@/components/ui'
 import { useApp } from '@/contexts'
 import { useState } from 'react'
 
-const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', badge: null },
-  { icon: Megaphone, label: 'Campanhas', href: '/campaigns', badge: '12' },
-  { icon: BarChart3, label: 'Analytics', href: '/analytics', badge: null },
-  { icon: FileText, label: 'Relatorios', href: '/reports', badge: null },
-  { icon: Briefcase, label: 'Administracao', href: '/admin', badge: null },
-  { icon: Share2, label: 'Redes Sociais', href: '/social', badge: null },
-  { icon: MessageCircle, label: 'Mensagens', href: '/mensagens', badge: null },
-  { icon: Palette, label: 'Criativos', href: '/criativos', badge: null },
-  { icon: Zap, label: 'Automacao', href: '/automation', badge: null },
-  { icon: Search, label: 'Prospecção', href: '/prospeccao', badge: 'Novo' },
-  { icon: ShoppingBag, label: 'Marketplace', href: '/marketplace', badge: 'Novo' },
-  { icon: GraduationCap, label: 'Cursos', href: '/cursos', badge: 'Novo' },
-  { icon: Link2, label: 'Meu Link', href: '/meu-link', badge: 'Novo' },
-  { icon: Brain, label: 'Meu Pensamento', href: '/meu-pensamento', badge: 'Novo' },
-  { icon: Settings, label: 'Configuracoes', href: '/settings', badge: null },
-]
+// Map icon names to components
+const iconMap: Record<string, LucideIcon> = {
+  DollarSign, Users, Target, Image, Newspaper,
+  BarChart3, TrendingUp, FileText, Share2, MessageSquare,
+  Zap, Search, ShoppingBag, GraduationCap, Link: LinkIcon, Brain,
+}
 
 const platforms = [
   { id: 'meta', connected: true },
@@ -68,7 +60,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const router = useRouter()
   const { data: session } = useSession()
   const isSuperAdmin = (session?.user as any)?.isSuperAdmin === true
-  const { setIsConnectAccountsModalOpen, showToast } = useApp()
+  const { setIsConnectAccountsModalOpen, showToast, modules } = useApp()
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(true)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
@@ -82,7 +74,6 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
   const handleUpgrade = () => {
     router.push('/settings')
-    // Scroll to billing section after navigation
     setTimeout(() => {
       const billingTab = document.querySelector('[data-tab="billing"]')
       if (billingTab) (billingTab as HTMLElement).click()
@@ -93,6 +84,20 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     setShowLogoutConfirm(false)
     await signOut({ callbackUrl: '/login' })
   }
+
+  // Build menu from modules
+  const menuItems = modules.map(mod => {
+    const IconComp = iconMap[mod.icon || ''] || DollarSign
+    return {
+      icon: IconComp,
+      label: mod.name,
+      href: mod.route,
+      badge: mod.isFree ? null : null,
+    }
+  })
+
+  // Always add Settings at the end
+  menuItems.push({ icon: Settings, label: 'Configuracoes', href: '/settings', badge: null })
 
   return (
     <aside
@@ -160,25 +165,11 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <h1
-                  style={{
-                    fontSize: '18px',
-                    fontWeight: 700,
-                    color: '#FFFFFF',
-                    margin: 0,
-                  }}
-                >
+                <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
                   TrafficPro
                 </h1>
-                <p
-                  style={{
-                    fontSize: '11px',
-                    color: '#6B6B7B',
-                    fontWeight: 500,
-                    margin: 0,
-                  }}
-                >
-                  Plataforma de Marketing
+                <p style={{ fontSize: '11px', color: '#6B6B7B', fontWeight: 500, margin: 0 }}>
+                  Gestao de Trafego
                 </p>
               </div>
             </motion.div>
@@ -296,7 +287,6 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                   }}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  {/* Active indicator */}
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicator"
@@ -353,8 +343,8 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                             fontSize: '10px',
                             fontWeight: 600,
                             borderRadius: '9999px',
-                            backgroundColor: item.badge === 'Novo' ? 'rgba(250, 204, 21, 0.2)' : 'rgba(59, 130, 246, 0.2)',
-                            color: item.badge === 'Novo' ? '#FACC15' : '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            color: '#3B82F6',
                           }}
                         >
                           {item.badge}
@@ -516,55 +506,29 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                   border: '1px solid rgba(59, 130, 246, 0.2)',
                 }}
               >
-                {/* Close button */}
                 <button
                   onClick={() => setShowUpgradeBanner(false)}
                   style={{
-                    position: 'absolute',
-                    top: '8px',
-                    right: '8px',
-                    padding: '4px',
-                    borderRadius: '6px',
-                    color: 'rgba(255, 255, 255, 0.4)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
+                    position: 'absolute', top: '8px', right: '8px', padding: '4px', borderRadius: '6px',
+                    color: 'rgba(255, 255, 255, 0.4)', background: 'none', border: 'none', cursor: 'pointer',
                   }}
                 >
                   <X size={12} />
                 </button>
-
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                   <Crown style={{ width: '16px', height: '16px', color: '#FACC15' }} />
                   <span style={{ fontSize: '12px', fontWeight: 600, color: '#FACC15' }}>PRO</span>
                 </div>
-                <p
-                  style={{
-                    fontSize: '11px',
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    marginBottom: '8px',
-                    paddingRight: '16px',
-                    margin: 0,
-                  }}
-                >
+                <p style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', paddingRight: '16px', margin: 0 }}>
                   Recursos avancados de automacao
                 </p>
                 <button
                   onClick={handleUpgrade}
                   style={{
-                    width: '100%',
-                    padding: '6px 12px',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: '#FFFFFF',
-                    background: 'linear-gradient(to right, #3B82F6, #2563EB)',
-                    borderRadius: '8px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
+                    width: '100%', padding: '6px 12px', fontSize: '11px', fontWeight: 600,
+                    color: '#FFFFFF', background: 'linear-gradient(to right, #3B82F6, #2563EB)',
+                    borderRadius: '8px', border: 'none', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                   }}
                 >
                   <Sparkles style={{ width: '12px', height: '12px' }} />
@@ -596,59 +560,29 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             <div style={{ position: 'relative', flexShrink: 0 }}>
               <div
                 style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '12px',
+                  width: '36px', height: '36px', borderRadius: '12px',
                   background: 'linear-gradient(to bottom right, #3B82F6, #8B5CF6, #EC4899)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  color: '#FFFFFF',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '12px', fontWeight: 700, color: '#FFFFFF',
                 }}
               >
-                JS
+                {(session?.user?.name || 'U').charAt(0).toUpperCase()}
               </div>
               <div
                 style={{
-                  position: 'absolute',
-                  bottom: '-2px',
-                  right: '-2px',
-                  width: '10px',
-                  height: '10px',
-                  backgroundColor: '#22C55E',
-                  borderRadius: '50%',
-                  border: '2px solid #0A0A0F',
+                  position: 'absolute', bottom: '-2px', right: '-2px',
+                  width: '10px', height: '10px', backgroundColor: '#22C55E',
+                  borderRadius: '50%', border: '2px solid #0A0A0F',
                 }}
               />
             </div>
             {!isCollapsed && (
               <>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p
-                    style={{
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      color: '#FFFFFF',
-                      margin: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    Joao Silva
+                  <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {session?.user?.name || 'Usuario'}
                   </p>
-                  <p
-                    style={{
-                      fontSize: '10px',
-                      color: '#6B6B7B',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      margin: 0,
-                    }}
-                  >
+                  <p style={{ fontSize: '10px', color: '#6B6B7B', display: 'flex', alignItems: 'center', gap: '4px', margin: 0 }}>
                     <Crown style={{ width: '12px', height: '12px', color: '#FACC15' }} />
                     Administrador
                   </p>
@@ -656,14 +590,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 <button
                   onClick={() => setShowLogoutConfirm(true)}
                   title="Sair"
-                  style={{
-                    padding: '6px',
-                    borderRadius: '8px',
-                    color: '#6B6B7B',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
+                  style={{ padding: '6px', borderRadius: '8px', color: '#6B6B7B', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
                   <LogOut size={14} />
                 </button>
@@ -682,18 +609,9 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             exit={{ opacity: 0 }}
             onClick={() => setShowLogoutConfirm(false)}
             style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.6)',
-              backdropFilter: 'blur(4px)',
-              zIndex: 9999,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '20px',
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)',
+              zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
             }}
           >
             <motion.div
@@ -702,50 +620,33 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               exit={{ opacity: 0, scale: 0.95 }}
               onClick={(e) => e.stopPropagation()}
               style={{
-                width: '100%',
-                maxWidth: '400px',
-                backgroundColor: '#12121A',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '16px',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-                padding: '24px',
+                width: '100%', maxWidth: '400px', backgroundColor: '#12121A',
+                border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', padding: '24px',
               }}
             >
               <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                <div
-                  style={{
-                    width: '56px',
-                    height: '56px',
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 16px',
-                  }}
-                >
+                <div style={{
+                  width: '56px', height: '56px', borderRadius: '50%',
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
+                }}>
                   <LogOut style={{ width: '24px', height: '24px', color: '#EF4444' }} />
                 </div>
                 <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', marginBottom: '8px' }}>
                   Sair da Conta
                 </h3>
                 <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>
-                  Tem certeza que deseja sair? Você precisará fazer login novamente.
+                  Tem certeza que deseja sair? Voce precisara fazer login novamente.
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '12px' }}>
                 <button
                   onClick={() => setShowLogoutConfirm(false)}
                   style={{
-                    flex: 1,
-                    padding: '12px 24px',
-                    borderRadius: '12px',
+                    flex: 1, padding: '12px 24px', borderRadius: '12px',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
-                    backgroundColor: 'transparent',
-                    color: '#FFFFFF',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
+                    backgroundColor: 'transparent', color: '#FFFFFF', fontSize: '14px', fontWeight: 500, cursor: 'pointer',
                   }}
                 >
                   Cancelar
@@ -753,15 +654,8 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 <button
                   onClick={handleLogout}
                   style={{
-                    flex: 1,
-                    padding: '12px 24px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    backgroundColor: '#EF4444',
-                    color: '#FFFFFF',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
+                    flex: 1, padding: '12px 24px', borderRadius: '12px', border: 'none',
+                    backgroundColor: '#EF4444', color: '#FFFFFF', fontSize: '14px', fontWeight: 500, cursor: 'pointer',
                   }}
                 >
                   Sair

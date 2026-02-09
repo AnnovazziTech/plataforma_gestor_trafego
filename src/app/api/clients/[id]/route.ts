@@ -27,6 +27,7 @@ export async function PUT(
         phone: data.phone,
         company: data.company,
         contractValue: data.contractValue,
+        monthlyValue: data.monthlyValue,
         startDate: data.startDate ? new Date(data.startDate) : undefined,
         status: data.status,
         notes: data.notes,

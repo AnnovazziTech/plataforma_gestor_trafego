@@ -8,7 +8,8 @@ import {
   Shield, Building2, Users, CreditCard, FileSearch,
   BarChart3, TrendingUp, Activity, CheckCircle, XCircle,
   Edit3, ChevronLeft, ChevronRight, Search, Filter,
-  Plus, X, Save, Eye, Zap,
+  Plus, X, Save, Eye, Zap, Layers, ToggleLeft, ToggleRight,
+  GripVertical, Lock, Unlock,
 } from 'lucide-react'
 
 // ===== TYPES =====
@@ -77,6 +78,18 @@ interface Plan {
   organizationCount: number
 }
 
+interface SystemModule {
+  id: string
+  slug: string
+  name: string
+  description: string | null
+  icon: string | null
+  route: string
+  isEnabled: boolean
+  isFree: boolean
+  sortOrder: number
+}
+
 interface AuditLog {
   id: string
   action: string
@@ -95,7 +108,7 @@ interface Pagination {
   pages: number
 }
 
-type Tab = 'overview' | 'organizations' | 'users' | 'plans' | 'audit-logs'
+type Tab = 'overview' | 'organizations' | 'users' | 'plans' | 'modules' | 'audit-logs'
 
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE: '#22C55E',
@@ -149,6 +162,10 @@ export default function SuperadminPage() {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
   const [logPagination, setLogPagination] = useState<Pagination>({ page: 1, limit: 50, total: 0, pages: 0 })
   const [loadingLogs, setLoadingLogs] = useState(false)
+
+  // Modules state
+  const [sysModules, setSysModules] = useState<SystemModule[]>([])
+  const [loadingModules, setLoadingModules] = useState(false)
 
   // All plans for org dropdown
   const [allPlans, setAllPlans] = useState<{ id: string; name: string }[]>([])
@@ -229,6 +246,27 @@ export default function SuperadminPage() {
     setLoadingLogs(false)
   }, [])
 
+  const fetchSysModules = useCallback(async () => {
+    setLoadingModules(true)
+    try {
+      const res = await fetch('/api/superadmin/modules')
+      if (res.ok) {
+        const data = await res.json()
+        setSysModules(data.modules)
+      }
+    } catch (e) { console.error(e) }
+    setLoadingModules(false)
+  }, [])
+
+  const toggleModuleEnabled = async (id: string, isEnabled: boolean) => {
+    const res = await fetch('/api/superadmin/modules', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, isEnabled: !isEnabled }),
+    })
+    if (res.ok) fetchSysModules()
+  }
+
   // Tab change -> fetch data
   useEffect(() => {
     if (status !== 'authenticated' || !(session?.user as any)?.isSuperAdmin) return
@@ -236,8 +274,9 @@ export default function SuperadminPage() {
     if (activeTab === 'organizations') { fetchOrganizations(); fetchPlans() }
     if (activeTab === 'users') fetchUsers()
     if (activeTab === 'plans') fetchPlans()
+    if (activeTab === 'modules') fetchSysModules()
     if (activeTab === 'audit-logs') fetchAuditLogs()
-  }, [activeTab, status, session, fetchStats, fetchOrganizations, fetchUsers, fetchPlans, fetchAuditLogs])
+  }, [activeTab, status, session, fetchStats, fetchOrganizations, fetchUsers, fetchPlans, fetchSysModules, fetchAuditLogs])
 
   // Actions
   const toggleOrgActive = async (id: string, isActive: boolean) => {
@@ -309,6 +348,7 @@ export default function SuperadminPage() {
     { id: 'organizations', label: 'Organizacoes', icon: Building2 },
     { id: 'users', label: 'Usuarios', icon: Users },
     { id: 'plans', label: 'Planos', icon: CreditCard },
+    { id: 'modules', label: 'Modulos', icon: Layers },
     { id: 'audit-logs', label: 'Audit Logs', icon: FileSearch },
   ]
 
@@ -372,6 +412,12 @@ export default function SuperadminPage() {
           onToggleActive={togglePlanActive}
           onCreate={() => { setEditingPlan(null); setShowPlanModal(true) }}
           formatCurrency={formatCurrency}
+        />
+      )}
+      {activeTab === 'modules' && (
+        <ModulesTab
+          modules={sysModules} loading={loadingModules}
+          onToggleEnabled={toggleModuleEnabled}
         />
       )}
       {activeTab === 'audit-logs' && (
@@ -792,6 +838,138 @@ function FeatureTag({ label }: { label: string }) {
     <span style={{ padding: '2px 6px', fontSize: '10px', fontWeight: 600, borderRadius: '4px', backgroundColor: 'rgba(59,130,246,0.15)', color: '#3B82F6' }}>
       {label}
     </span>
+  )
+}
+
+// ===== TAB: MODULES =====
+function ModulesTab({ modules, loading, onToggleEnabled }: { modules: SystemModule[]; loading: boolean; onToggleEnabled: (id: string, isEnabled: boolean) => void }) {
+  const freeModules = modules.filter(m => m.isFree)
+  const paidModules = modules.filter(m => !m.isFree)
+
+  if (loading) return <div style={{ color: '#6B6B7B', padding: '40px', textAlign: 'center' }}>Carregando modulos...</div>
+
+  return (
+    <div>
+      {/* Summary */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
+        <MetricBox label="Total Modulos" value={modules.length} icon={Layers} color="#3B82F6" />
+        <MetricBox label="Modulos Ativos" value={modules.filter(m => m.isEnabled).length} icon={CheckCircle} color="#22C55E" />
+        <MetricBox label="Modulos Pagos" value={paidModules.length} icon={Lock} color="#A855F7" />
+      </div>
+
+      {/* Free Modules */}
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+          <Unlock size={18} style={{ color: '#22C55E' }} />
+          <h3 style={{ color: '#FFFFFF', fontSize: '16px', fontWeight: 600, margin: 0 }}>Modulos Gratuitos</h3>
+          <span style={{ fontSize: '12px', color: '#6B6B7B' }}>({freeModules.length})</span>
+        </div>
+        <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={thStyle}>Ordem</th>
+                <th style={thStyle}>Modulo</th>
+                <th style={thStyle}>Rota</th>
+                <th style={thStyle}>Descricao</th>
+                <th style={thStyle}>Status</th>
+                <th style={thStyle}>Acao</th>
+              </tr>
+            </thead>
+            <tbody>
+              {freeModules.map(mod => (
+                <tr key={mod.id}>
+                  <td style={tdStyle}>
+                    <span style={{ color: '#6B6B7B', fontFamily: 'monospace' }}>{mod.sortOrder}</span>
+                  </td>
+                  <td style={tdStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontWeight: 600, color: '#FFFFFF' }}>{mod.name}</span>
+                      <span style={{ padding: '2px 6px', fontSize: '10px', fontWeight: 600, borderRadius: '4px', backgroundColor: 'rgba(34,197,94,0.15)', color: '#22C55E' }}>FREE</span>
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#6B6B7B' }}>{mod.slug}</div>
+                  </td>
+                  <td style={tdStyle}><span style={{ fontFamily: 'monospace', fontSize: '12px', color: '#A0A0B0' }}>{mod.route}</span></td>
+                  <td style={tdStyle}><span style={{ color: '#8B8B9B', fontSize: '12px' }}>{mod.description || '-'}</span></td>
+                  <td style={tdStyle}><ActiveBadge active={mod.isEnabled} /></td>
+                  <td style={tdStyle}>
+                    <button
+                      onClick={() => onToggleEnabled(mod.id, mod.isEnabled)}
+                      style={{
+                        ...btnSmall, fontSize: '11px',
+                        color: mod.isEnabled ? '#EF4444' : '#22C55E',
+                        borderColor: mod.isEnabled ? 'rgba(239,68,68,0.3)' : 'rgba(34,197,94,0.3)',
+                      }}
+                    >
+                      {mod.isEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                      {mod.isEnabled ? 'Desativar' : 'Ativar'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Paid Modules */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+          <Lock size={18} style={{ color: '#A855F7' }} />
+          <h3 style={{ color: '#FFFFFF', fontSize: '16px', fontWeight: 600, margin: 0 }}>Modulos Pagos</h3>
+          <span style={{ fontSize: '12px', color: '#6B6B7B' }}>({paidModules.length})</span>
+        </div>
+        <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={thStyle}>Ordem</th>
+                <th style={thStyle}>Modulo</th>
+                <th style={thStyle}>Rota</th>
+                <th style={thStyle}>Descricao</th>
+                <th style={thStyle}>Status</th>
+                <th style={thStyle}>Acao</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paidModules.map(mod => (
+                <tr key={mod.id}>
+                  <td style={tdStyle}>
+                    <span style={{ color: '#6B6B7B', fontFamily: 'monospace' }}>{mod.sortOrder}</span>
+                  </td>
+                  <td style={tdStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontWeight: 600, color: '#FFFFFF' }}>{mod.name}</span>
+                      <span style={{ padding: '2px 6px', fontSize: '10px', fontWeight: 600, borderRadius: '4px', backgroundColor: 'rgba(168,85,247,0.15)', color: '#A855F7' }}>PRO</span>
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#6B6B7B' }}>{mod.slug}</div>
+                  </td>
+                  <td style={tdStyle}><span style={{ fontFamily: 'monospace', fontSize: '12px', color: '#A0A0B0' }}>{mod.route}</span></td>
+                  <td style={tdStyle}><span style={{ color: '#8B8B9B', fontSize: '12px' }}>{mod.description || '-'}</span></td>
+                  <td style={tdStyle}><ActiveBadge active={mod.isEnabled} /></td>
+                  <td style={tdStyle}>
+                    <button
+                      onClick={() => onToggleEnabled(mod.id, mod.isEnabled)}
+                      style={{
+                        ...btnSmall, fontSize: '11px',
+                        color: mod.isEnabled ? '#EF4444' : '#22C55E',
+                        borderColor: mod.isEnabled ? 'rgba(239,68,68,0.3)' : 'rgba(34,197,94,0.3)',
+                      }}
+                    >
+                      {mod.isEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                      {mod.isEnabled ? 'Desativar' : 'Ativar'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {paidModules.length === 0 && (
+                <tr><td colSpan={6} style={{ ...tdStyle, textAlign: 'center', color: '#6B6B7B', padding: '40px' }}>Nenhum modulo pago cadastrado</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   )
 }
 
