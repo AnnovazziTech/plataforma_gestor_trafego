@@ -143,7 +143,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               <img
                 src="/logo-trafficpro.svg"
                 alt="TrafficPro"
-                style={{ height: '40px', width: 'auto', objectFit: 'contain' }}
+                style={{ height: '36px', width: '100%', maxWidth: '220px', objectFit: 'contain', objectPosition: 'left center' }}
               />
             </motion.div>
           ) : (
@@ -547,8 +547,13 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     {session?.user?.name || 'Usuario'}
                   </p>
                   <p style={{ fontSize: '10px', color: '#6B6B7B', display: 'flex', alignItems: 'center', gap: '4px', margin: 0 }}>
-                    <Crown style={{ width: '12px', height: '12px', color: '#FACC15' }} />
-                    Administrador
+                    {(() => {
+                      const role = (session?.user as any)?.role
+                      if (isSuperAdmin) return <><Crown style={{ width: '12px', height: '12px', color: '#FACC15' }} />Super Admin</>
+                      if (role === 'OWNER') return <><Crown style={{ width: '12px', height: '12px', color: '#FACC15' }} />Proprietario</>
+                      if (role === 'ADMIN') return <><Crown style={{ width: '12px', height: '12px', color: '#A855F7' }} />Administrador</>
+                      return <>Membro</>
+                    })()}
                   </p>
                 </div>
                 <button
