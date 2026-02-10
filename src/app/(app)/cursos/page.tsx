@@ -30,7 +30,7 @@ interface Course {
   instructor: string
   instructorAvatar: string
   category: string
-  level: 'iniciante' | 'intermediario' | 'avancado'
+  level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
   duration: string
   lessons: number
   students: number
@@ -54,11 +54,13 @@ interface Lesson {
 
 const categories = ['Todos', 'Facebook Ads', 'Google Ads', 'TikTok Ads', 'Copywriting', 'Analytics', 'Vendas']
 
-const levelConfig = {
-  iniciante: { label: 'Iniciante', color: '#10B981', bg: 'rgba(16, 185, 129, 0.1)' },
-  intermediario: { label: 'Intermediario', color: '#FACC15', bg: 'rgba(250, 204, 21, 0.1)' },
-  avancado: { label: 'Avancado', color: '#EF4444', bg: 'rgba(239, 68, 68, 0.1)' },
+const levelConfig: Record<string, { label: string; color: string; bg: string }> = {
+  BEGINNER: { label: 'Iniciante', color: '#10B981', bg: 'rgba(16, 185, 129, 0.1)' },
+  INTERMEDIATE: { label: 'Intermediário', color: '#FACC15', bg: 'rgba(250, 204, 21, 0.1)' },
+  ADVANCED: { label: 'Avançado', color: '#EF4444', bg: 'rgba(239, 68, 68, 0.1)' },
 }
+
+const defaultLevelStyle = { label: 'Desconhecido', color: '#6B6B7B', bg: 'transparent' }
 
 const thumbnailGradients: Record<string, string> = {
   'gradient-blue': 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
@@ -139,7 +141,7 @@ export default function CursosPage() {
     <div style={{ minHeight: '100vh' }}>
       <Header
         title="Cursos"
-        subtitle="Aprimore suas habilidades como gestor de trafego"
+        subtitle="Aprimore suas habilidades como gestor de tráfego"
         showCreateButton={false}
       />
 
@@ -161,7 +163,7 @@ export default function CursosPage() {
                 <BookOpen size={20} style={{ color: '#3B82F6' }} />
               </div>
               <div>
-                <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Cursos Disponiveis</p>
+                <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Cursos Disponíveis</p>
                 <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{courses.length}</p>
               </div>
             </div>
@@ -205,7 +207,7 @@ export default function CursosPage() {
                 <Award size={20} style={{ color: '#10B981' }} />
               </div>
               <div>
-                <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Concluidos</p>
+                <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Concluídos</p>
                 <p style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>{completedCourses.length}</p>
               </div>
             </div>
@@ -280,7 +282,7 @@ export default function CursosPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                       <span style={{ fontSize: '12px', color: '#6B6B7B' }}>{course.instructor}</span>
                       <span style={{ fontSize: '12px', color: '#6B6B7B' }}>•</span>
-                      <span style={{ fontSize: '12px', color: '#6B6B7B' }}>{course.progress}% concluido</span>
+                      <span style={{ fontSize: '12px', color: '#6B6B7B' }}>{course.progress}% concluído</span>
                     </div>
                     <div style={{ width: '100%', height: '4px', borderRadius: '2px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
                       <div
@@ -414,8 +416,8 @@ export default function CursosPage() {
               {/* Content */}
               <div style={{ padding: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                  <Badge variant="default" style={{ backgroundColor: levelConfig[course.level].bg, color: levelConfig[course.level].color }}>
-                    {levelConfig[course.level].label}
+                  <Badge variant="default" style={{ backgroundColor: (levelConfig[course.level] || defaultLevelStyle).bg, color: (levelConfig[course.level] || defaultLevelStyle).color }}>
+                    {(levelConfig[course.level] || defaultLevelStyle).label}
                   </Badge>
                   <span style={{ fontSize: '12px', color: '#6B6B7B' }}>{course.category}</span>
                 </div>

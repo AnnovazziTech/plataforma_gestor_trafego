@@ -32,10 +32,10 @@ const objectiveToApi: Record<Objective, string> = {
 
 const objectiveLabels: Record<Objective, string> = {
   awareness: 'Reconhecimento',
-  traffic: 'Trafego',
+  traffic: 'Tráfego',
   engagement: 'Engajamento',
-  leads: 'Geracao de Leads',
-  app_installs: 'Instalacoes de App',
+  leads: 'Geração de Leads',
+  app_installs: 'Instalações de App',
   sales: 'Vendas',
 }
 
@@ -57,7 +57,7 @@ export function CreateCampaignModal() {
     }
 
     if (!budget || parseFloat(budget) <= 0) {
-      showToast('Por favor, informe um orcamento valido', 'error')
+      showToast('Por favor, informe um orçamento válido', 'error')
       return
     }
 
@@ -273,7 +273,7 @@ export function CreateCampaignModal() {
 
               <div>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
-                  Orcamento Diario (R$) *
+                  Orçamento Diário (R$) *
                 </label>
                 <input
                   type="number"

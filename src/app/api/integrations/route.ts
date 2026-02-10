@@ -1,6 +1,6 @@
-// API Route: Integracoes
-// GET - Listar integracoes da organizacao
-// POST - Iniciar nova integracao
+// API Route: Integrações
+// GET - Listar integrações da organização
+// POST - Iniciar nova integração
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -8,7 +8,7 @@ import prisma from '@/lib/db/prisma'
 import { withAuth, checkResourceLimit, createAuditLog } from '@/lib/api/middleware'
 import { decrypt } from '@/lib/crypto/encryption'
 
-// GET - Listar integracoes
+// GET - Listar integrações
 export const GET = withAuth(async (req, ctx) => {
   try {
     const integrations = await prisma.integration.findMany({
@@ -39,15 +39,15 @@ export const GET = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ integrations })
   } catch (error) {
-    console.error('Erro ao listar integracoes:', error)
+    console.error('Erro ao listar integrações:', error)
     return NextResponse.json(
-      { error: 'Erro ao listar integracoes' },
+      { error: 'Erro ao listar integrações' },
       { status: 500 }
     )
   }
 }, { requiredPermissions: ['canManageIntegrations'] })
 
-// POST - Iniciar nova integracao
+// POST - Iniciar nova integração
 const createIntegrationSchema = z.object({
   platform: z.enum(['META', 'GOOGLE', 'TIKTOK', 'WHATSAPP']),
   returnUrl: z.string().url().optional(),
@@ -58,7 +58,7 @@ export const POST = withAuth(async (req, ctx) => {
     const body = await req.json()
     const { platform, returnUrl } = createIntegrationSchema.parse(body)
 
-    // Verificar limite de integracoes
+    // Verificar limite de integrações
     const limit = await checkResourceLimit(ctx.organizationId, 'integrations')
     if (!limit.allowed) {
       return NextResponse.json(
@@ -100,16 +100,16 @@ export const POST = withAuth(async (req, ctx) => {
         break
 
       case 'WHATSAPP':
-        // WhatsApp nao usa OAuth tradicional, retornar instrucoes
+        // WhatsApp não usa OAuth tradicional, retornar instruções
         return NextResponse.json({
           platform: 'WHATSAPP',
           type: 'manual',
-          message: 'Configure o WhatsApp em Configuracoes > Integracoes > WhatsApp',
+          message: 'Configure o WhatsApp em Configurações > Integrações > WhatsApp',
         })
 
       default:
         return NextResponse.json(
-          { error: 'Plataforma nao suportada' },
+          { error: 'Plataforma não suportada' },
           { status: 400 }
         )
     }
@@ -129,7 +129,7 @@ export const POST = withAuth(async (req, ctx) => {
       redirectUri,
     })
   } catch (error) {
-    console.error('Erro ao iniciar integracao:', error)
+    console.error('Erro ao iniciar integração:', error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -139,7 +139,7 @@ export const POST = withAuth(async (req, ctx) => {
     }
 
     return NextResponse.json(
-      { error: 'Erro ao iniciar integracao' },
+      { error: 'Erro ao iniciar integração' },
       { status: 500 }
     )
   }

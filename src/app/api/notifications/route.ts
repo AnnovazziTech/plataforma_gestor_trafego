@@ -1,6 +1,6 @@
-// API Route: Notificacoes
-// GET - Listar notificacoes
-// POST - Criar notificacao
+// API Route: Notificações
+// GET - Listar notificações
+// POST - Criar notificação
 // PATCH - Marcar como lida
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -8,7 +8,7 @@ import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
 import { withAuth } from '@/lib/api/middleware'
 
-// GET - Listar notificacoes (do audit log)
+// GET - Listar notificações (do audit log)
 export const GET = withAuth(async (req, ctx) => {
   try {
     const { searchParams } = new URL(req.url)
@@ -17,7 +17,7 @@ export const GET = withAuth(async (req, ctx) => {
     const limit = parseInt(searchParams.get('limit') || '20')
     const skip = (page - 1) * limit
 
-    // Buscar acoes importantes do audit log
+    // Buscar ações importantes do audit log
     const importantActions = [
       'campaign.created',
       'campaign.updated',
@@ -45,7 +45,7 @@ export const GET = withAuth(async (req, ctx) => {
       prisma.auditLog.count({ where }),
     ])
 
-    // Formatar notificacoes
+    // Formatar notificações
     const formattedNotifications = notifications.map((n) => {
       let title = ''
       let message = ''
@@ -73,18 +73,18 @@ export const GET = withAuth(async (req, ctx) => {
           type = 'info'
           break
         case 'integration.connected':
-          title = 'Integracao conectada'
-          message = `Nova integracao conectada com sucesso`
+          title = 'Integração conectada'
+          message = `Nova integração conectada com sucesso`
           type = 'success'
           break
         case 'automation.executed':
-          title = 'Automacao executada'
-          message = `Automacao "${(n.newData as any)?.name || ''}" foi executada`
+          title = 'Automação executada'
+          message = `Automação "${(n.newData as any)?.name || ''}" foi executada`
           type = 'info'
           break
         default:
           title = n.action.replace('.', ' ').replace('_', ' ')
-          message = `Acao realizada: ${n.action}`
+          message = `Ação realizada: ${n.action}`
       }
 
       return {
@@ -97,11 +97,11 @@ export const GET = withAuth(async (req, ctx) => {
         entityId: n.entityId,
         data: n.newData,
         createdAt: n.createdAt,
-        read: false, // Por enquanto todas sao nao lidas
+        read: false, // Por enquanto todas são não lidas
       }
     })
 
-    // Contar nao lidas (ultimas 24h)
+    // Contar não lidas (últimas 24h)
     const unreadCount = await prisma.auditLog.count({
       where: {
         ...where,
@@ -122,9 +122,9 @@ export const GET = withAuth(async (req, ctx) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao listar notificacoes:', error)
+    console.error('Erro ao listar notificações:', error)
     return NextResponse.json(
-      { error: 'Erro ao listar notificacoes' },
+      { error: 'Erro ao listar notificações' },
       { status: 500 }
     )
   }

@@ -59,7 +59,7 @@ interface Goal {
 
 // Dados serao carregados do banco de dados via API
 
-const categories = ['Todas', 'Estrategia', 'Copywriting', 'Processos', 'Criativos', 'Publicos', 'Metricas']
+const categories = ['Todas', 'Estratégia', 'Copywriting', 'Processos', 'Criativos', 'Públicos', 'Métricas']
 
 const statusConfig = {
   new: { label: 'Nova', color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.1)' },
@@ -79,8 +79,8 @@ export default function MeuPensamentoPage() {
   const [showNoteModal, setShowNoteModal] = useState(false)
   const [showIdeaModal, setShowIdeaModal] = useState(false)
   const [editingNote, setEditingNote] = useState<Note | null>(null)
-  const [newNote, setNewNote] = useState({ title: '', content: '', category: 'Estrategia', tags: '' })
-  const [newIdea, setNewIdea] = useState({ content: '', category: 'Estrategia' })
+  const [newNote, setNewNote] = useState({ title: '', content: '', category: 'Estratégia', tags: '' })
+  const [newIdea, setNewIdea] = useState({ content: '', category: 'Estratégia' })
   const [isLoading, setIsLoading] = useState(true)
 
   // Carregar dados da API
@@ -128,7 +128,7 @@ export default function MeuPensamentoPage() {
 
   const handleSaveNote = async () => {
     if (!newNote.title.trim()) {
-      showToast('Informe o titulo da nota', 'error')
+      showToast('Informe o título da nota', 'error')
       return
     }
 
@@ -161,7 +161,7 @@ export default function MeuPensamentoPage() {
 
       setShowNoteModal(false)
       setEditingNote(null)
-      setNewNote({ title: '', content: '', category: 'Estrategia', tags: '' })
+      setNewNote({ title: '', content: '', category: 'Estratégia', tags: '' })
     } catch (error) {
       console.error('Erro ao salvar nota:', error)
       showToast('Erro ao salvar nota', 'error')
@@ -185,7 +185,7 @@ export default function MeuPensamentoPage() {
         const idea = await response.json()
         setIdeas(prev => [idea, ...prev])
         setShowIdeaModal(false)
-        setNewIdea({ content: '', category: 'Estrategia' })
+        setNewIdea({ content: '', category: 'Estratégia' })
         showToast('Ideia salva!', 'success')
       }
     } catch (error) {
@@ -268,7 +268,7 @@ export default function MeuPensamentoPage() {
     <div style={{ minHeight: '100vh' }}>
       <Header
         title="Meu Pensamento"
-        subtitle="Anote suas ideias, estrategias e metas"
+        subtitle="Anote suas ideias, estratégias e metas"
         showCreateButton={false}
       />
 
@@ -590,7 +590,7 @@ export default function MeuPensamentoPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => { setShowNoteModal(false); setEditingNote(null); setNewNote({ title: '', content: '', category: 'Estrategia', tags: '' }) }}
+            onClick={() => { setShowNoteModal(false); setEditingNote(null); setNewNote({ title: '', content: '', category: 'Estratégia', tags: '' }) }}
             style={{
               position: 'fixed',
               inset: 0,
@@ -629,18 +629,18 @@ export default function MeuPensamentoPage() {
 
               <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Titulo</label>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Título</label>
                   <input
                     type="text"
                     value={newNote.title}
                     onChange={(e) => setNewNote(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Titulo da nota"
+                    placeholder="Título da nota"
                     style={{ width: '100%', height: '44px', padding: '0 16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#FFFFFF', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Conteudo</label>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Conteúdo</label>
                   <textarea
                     value={newNote.content}
                     onChange={(e) => setNewNote(prev => ({ ...prev, content: e.target.value }))}
@@ -664,7 +664,7 @@ export default function MeuPensamentoPage() {
                     </select>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Tags (separadas por virgula)</label>
+                    <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Tags (separadas por vírgula)</label>
                     <input
                       type="text"
                       value={newNote.tags}
@@ -681,7 +681,7 @@ export default function MeuPensamentoPage() {
                   </Button>
                   <Button variant="primary" onClick={handleSaveNote} style={{ flex: 1 }}>
                     <Save size={16} style={{ marginRight: '6px' }} />
-                    {editingNote ? 'Salvar Alteracoes' : 'Criar Nota'}
+                    {editingNote ? 'Salvar Alterações' : 'Criar Nota'}
                   </Button>
                 </div>
               </div>

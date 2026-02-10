@@ -1,4 +1,4 @@
-// API Route: Automacoes de Leads / Remarketing
+// API Route: Automações de Leads / Remarketing
 // GET - Listar regras de remarketing
 // POST - Criar regra de remarketing
 
@@ -9,7 +9,7 @@ import { withAuth, createAuditLog } from '@/lib/api/middleware'
 
 // Schema para regras de remarketing
 const leadAutomationSchema = z.object({
-  name: z.string().min(1, 'Nome obrigatorio'),
+  name: z.string().min(1, 'Nome obrigatório'),
   type: z.enum(['lead_status_change', 'lead_inactivity', 'lead_remarketing']),
   status: z.enum(['active', 'paused']).default('active'),
   trigger: z.object({
@@ -49,7 +49,7 @@ export const GET = withAuth(async (req, ctx) => {
     const status = searchParams.get('status')
     const type = searchParams.get('type')
 
-    // Buscar automacoes de leads do audit log
+    // Buscar automações de leads do audit log
     const where: any = {
       organizationId: ctx.organizationId,
       action: 'lead_automation.created',
@@ -60,7 +60,7 @@ export const GET = withAuth(async (req, ctx) => {
       orderBy: { createdAt: 'desc' },
     })
 
-    // Converter para formato de automacao
+    // Converter para formato de automação
     let automations = automationLogs.map((log) => {
       const data = log.newData as any
       return {
@@ -78,7 +78,7 @@ export const GET = withAuth(async (req, ctx) => {
       automations = automations.filter((a) => a.type === type)
     }
 
-    // Buscar estatisticas de execucoes
+    // Buscar estatísticas de execuções
     const executionLogs = await prisma.auditLog.findMany({
       where: {
         organizationId: ctx.organizationId,
@@ -97,7 +97,7 @@ export const GET = withAuth(async (req, ctx) => {
       },
     })
 
-    // Contar leads perdidos recuperaveis (LOST nos ultimos 90 dias)
+    // Contar leads perdidos recuperáveis (LOST nos últimos 90 dias)
     const recoverableLeads = await prisma.lead.count({
       where: {
         organizationId: ctx.organizationId,
@@ -122,9 +122,9 @@ export const GET = withAuth(async (req, ctx) => {
       stats,
     })
   } catch (error) {
-    console.error('Erro ao listar automacoes de leads:', error)
+    console.error('Erro ao listar automações de leads:', error)
     return NextResponse.json(
-      { error: 'Erro ao listar automacoes de leads' },
+      { error: 'Erro ao listar automações de leads' },
       { status: 500 }
     )
   }
@@ -136,7 +136,7 @@ export const POST = withAuth(async (req, ctx) => {
     const body = await req.json()
     const data = leadAutomationSchema.parse(body)
 
-    // Verificar se organizacao tem feature de automacao
+    // Verificar se organização tem feature de automação
     const org = await prisma.organization.findUnique({
       where: { id: ctx.organizationId },
       include: { plan: true },
@@ -144,12 +144,12 @@ export const POST = withAuth(async (req, ctx) => {
 
     if (!org?.plan.hasAutomation) {
       return NextResponse.json(
-        { error: 'Seu plano nao inclui automacoes. Faca upgrade para usar esta funcionalidade.' },
+        { error: 'Seu plano não inclui automações. Faça upgrade para usar esta funcionalidade.' },
         { status: 403 }
       )
     }
 
-    // Criar automacao de lead
+    // Criar automação de lead
     const automationData = {
       ...data,
       organizationId: ctx.organizationId,
@@ -173,7 +173,7 @@ export const POST = withAuth(async (req, ctx) => {
       automation: automationData,
     }, { status: 201 })
   } catch (error) {
-    console.error('Erro ao criar automacao de lead:', error)
+    console.error('Erro ao criar automação de lead:', error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -183,7 +183,7 @@ export const POST = withAuth(async (req, ctx) => {
     }
 
     return NextResponse.json(
-      { error: 'Erro ao criar automacao de lead' },
+      { error: 'Erro ao criar automação de lead' },
       { status: 500 }
     )
   }

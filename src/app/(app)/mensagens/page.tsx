@@ -209,7 +209,7 @@ export default function MensagensPage() {
     lastMessageTime: c.lastMessageAt ? new Date(c.lastMessageAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
     unreadCount: c.unreadCount,
     status: 'offline' as const,
-    source: c.tags?.[0] || 'Organico',
+    source: c.tags?.[0] || 'Orgânico',
   }))
 
   // Função para mapear source para plataforma
@@ -366,7 +366,7 @@ export default function MensagensPage() {
 
       <main style={{ flex: 1, padding: '24px 32px', paddingBottom: '48px' }}>
         {!hasConnectedAccounts ? (
-          /* Tela de Conexao */
+          /* Tela de Conexão */
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -434,7 +434,7 @@ export default function MensagensPage() {
               </Button>
 
               <p style={{ fontSize: '12px', color: '#6B6B7B', marginTop: '16px' }}>
-                Voce precisara do acesso ao WhatsApp Business do cliente
+                Você precisará do acesso ao WhatsApp Business do cliente
               </p>
             </div>
           </motion.div>
@@ -557,14 +557,14 @@ export default function MensagensPage() {
                       delay={0}
                     />
                     <StatCard
-                      label="Conversoes"
+                      label="Conversões"
                       value={totalConversions}
                       icon={ShoppingCart}
                       color="yellow"
                       delay={0.1}
                     />
                     <StatCard
-                      label="Ticket Medio"
+                      label="Ticket Médio"
                       value={`R$ ${avgTicket.toFixed(0)}`}
                       icon={TrendingUp}
                       color="blue"
@@ -580,7 +580,7 @@ export default function MensagensPage() {
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', marginBottom: '24px' }}>
-                    {/* Grafico de Vendas */}
+                    {/* Gráfico de Vendas */}
                     <div
                       style={{
                         padding: '24px',
@@ -589,7 +589,7 @@ export default function MensagensPage() {
                         border: '1px solid rgba(255, 255, 255, 0.05)',
                       }}
                     >
-                      <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '20px' }}>Vendas por WhatsApp (Ultimos 7 dias)</h3>
+                      <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '20px' }}>Vendas por WhatsApp (Últimos 7 dias)</h3>
                       <div style={{ height: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         <TrendingUp size={32} style={{ color: '#3B3B4B', marginBottom: '12px' }} />
                         <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Nenhuma venda registrada</p>
@@ -597,7 +597,7 @@ export default function MensagensPage() {
                       </div>
                     </div>
 
-                    {/* Conversoes por Fonte */}
+                    {/* Conversões por Fonte */}
                     <div
                       style={{
                         padding: '24px',
@@ -606,7 +606,7 @@ export default function MensagensPage() {
                         border: '1px solid rgba(255, 255, 255, 0.05)',
                       }}
                     >
-                      <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '20px' }}>Conversoes por Fonte de Trafego</h3>
+                      <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '20px' }}>Conversões por Fonte de Tráfego</h3>
                       <div style={{ height: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         <Target size={32} style={{ color: '#3B3B4B', marginBottom: '12px' }} />
                         <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Nenhuma conversão registrada</p>
@@ -625,7 +625,7 @@ export default function MensagensPage() {
                       marginBottom: '24px',
                     }}
                   >
-                    <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '20px' }}>ROI por Fonte de Trafego</h3>
+                    <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '20px' }}>ROI por Fonte de Tráfego</h3>
                     <ROIGrid
                       data={[]}
                       variant="default"
@@ -643,7 +643,7 @@ export default function MensagensPage() {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-                      <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Ultimas Vendas via WhatsApp</h3>
+                      <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Últimas Vendas via WhatsApp</h3>
                       <Button variant="secondary" size="sm" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <ExternalLink size={14} />
                         Ver Todas
@@ -721,7 +721,7 @@ export default function MensagensPage() {
                           align: 'center',
                           render: (sale) => (
                             <Badge variant={sale.status === 'completed' ? 'success' : sale.status === 'pending' ? 'warning' : 'error'}>
-                              {sale.status === 'completed' ? 'Concluida' : sale.status === 'pending' ? 'Pendente' : 'Cancelada'}
+                              {sale.status === 'completed' ? 'Concluída' : sale.status === 'pending' ? 'Pendente' : 'Cancelada'}
                             </Badge>
                           ),
                         },
@@ -1093,7 +1093,7 @@ export default function MensagensPage() {
                       <p style={{ fontSize: '14px', color: '#6B6B7B', textAlign: 'center', maxWidth: '400px' }}>
                         {activePlatform !== 'all'
                           ? `Nenhum lead encontrado para ${platformIcons[activePlatform].label}. Tente selecionar outra plataforma.`
-                          : 'Conecte suas campanhas para comecar a receber leads automaticamente.'}
+                          : 'Conecte suas campanhas para começar a receber leads automaticamente.'}
                       </p>
                     </div>
                   ) : (
@@ -1310,7 +1310,7 @@ export default function MensagensPage() {
         )}
       </main>
 
-      {/* Modal de Conexao */}
+      {/* Modal de Conexão */}
       <AnimatePresence>
         {showConnectModal && (
           <motion.div
@@ -1491,14 +1491,14 @@ export default function MensagensPage() {
                     <p style={{ fontSize: '12px', color: '#6B6B7B', margin: '0 0 4px' }}>Telefone</p>
                     <p style={{ fontSize: '14px', color: '#FFFFFF', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <Phone size={14} />
-                      {selectedLead.phone || 'Nao informado'}
+                      {selectedLead.phone || 'Não informado'}
                     </p>
                   </div>
                   <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
                     <p style={{ fontSize: '12px', color: '#6B6B7B', margin: '0 0 4px' }}>Email</p>
                     <p style={{ fontSize: '14px', color: '#FFFFFF', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <Send size={14} />
-                      {selectedLead.email || 'Nao informado'}
+                      {selectedLead.email || 'Não informado'}
                     </p>
                   </div>
                   <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
@@ -1508,7 +1508,7 @@ export default function MensagensPage() {
                   <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
                     <p style={{ fontSize: '12px', color: '#6B6B7B', margin: '0 0 4px' }}>Valor Potencial</p>
                     <p style={{ fontSize: '14px', color: '#34D399', margin: 0, fontWeight: 600 }}>
-                      {selectedLead.value ? `R$ ${selectedLead.value.toLocaleString('pt-BR')}` : 'Nao informado'}
+                      {selectedLead.value ? `R$ ${selectedLead.value.toLocaleString('pt-BR')}` : 'Não informado'}
                     </p>
                   </div>
                 </div>
@@ -1590,7 +1590,7 @@ export default function MensagensPage() {
                   <textarea
                     value={leadNote}
                     onChange={(e) => setLeadNote(e.target.value)}
-                    placeholder="Adicione observacoes sobre este lead..."
+                    placeholder="Adicione observações sobre este lead..."
                     style={{
                       width: '100%',
                       height: '100px',
@@ -1609,7 +1609,7 @@ export default function MensagensPage() {
                 {/* History */}
                 {selectedLead.history && selectedLead.history.length > 0 && (
                   <div>
-                    <h4 style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>Historico</h4>
+                    <h4 style={{ fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>Histórico</h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {selectedLead.history.map((entry, idx) => (
                         <div

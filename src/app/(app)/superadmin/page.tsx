@@ -136,7 +136,7 @@ const STATUS_LABELS: Record<string, string> = {
   TRIALING: 'Trial',
   PAST_DUE: 'Atrasado',
   CANCELED: 'Cancelado',
-  UNPAID: 'Nao Pago',
+  UNPAID: 'Não Pago',
   INCOMPLETE: 'Incompleto',
 }
 
@@ -405,11 +405,11 @@ export default function SuperadminPage() {
   // ===== TABS =====
   const tabs: { id: Tab; label: string; icon: any }[] = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
-    { id: 'organizations', label: 'Organizacoes', icon: Building2 },
-    { id: 'users', label: 'Usuarios', icon: Users },
+    { id: 'organizations', label: 'Organizações', icon: Building2 },
+    { id: 'users', label: 'Usuários', icon: Users },
     { id: 'plans', label: 'Planos', icon: CreditCard },
-    { id: 'modules', label: 'Modulos', icon: Layers },
-    { id: 'news', label: 'Noticias', icon: Newspaper },
+    { id: 'modules', label: 'Módulos', icon: Layers },
+    { id: 'news', label: 'Notícias', icon: Newspaper },
     { id: 'audit-logs', label: 'Audit Logs', icon: FileSearch },
   ]
 
@@ -421,7 +421,7 @@ export default function SuperadminPage() {
           <Shield size={28} style={{ color: '#A855F7' }} />
           <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>Painel Superadmin</h1>
         </div>
-        <p style={{ color: '#6B6B7B', fontSize: '14px', margin: 0 }}>Gestao global da plataforma TrafficPro</p>
+        <p style={{ color: '#6B6B7B', fontSize: '14px', margin: 0 }}>Gestão global da plataforma TrafficPro</p>
       </div>
 
       {/* Tabs */}
@@ -570,14 +570,14 @@ function PaginationBar({ pagination, onPageChange }: { pagination: Pagination; o
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0' }}>
       <span style={{ color: '#6B6B7B', fontSize: '13px' }}>
-        {pagination.total} registros | Pagina {pagination.page} de {pagination.pages}
+        {pagination.total} registros | Página {pagination.page} de {pagination.pages}
       </span>
       <div style={{ display: 'flex', gap: '8px' }}>
         <button onClick={() => onPageChange(pagination.page - 1)} disabled={pagination.page <= 1} style={{ ...btnSmall, opacity: pagination.page <= 1 ? 0.3 : 1 }}>
           <ChevronLeft size={16} /> Anterior
         </button>
         <button onClick={() => onPageChange(pagination.page + 1)} disabled={pagination.page >= pagination.pages} style={{ ...btnSmall, opacity: pagination.page >= pagination.pages ? 0.3 : 1 }}>
-          Proximo <ChevronRight size={16} />
+          Próximo <ChevronRight size={16} />
         </button>
       </div>
     </div>
@@ -616,14 +616,14 @@ const selectStyle: React.CSSProperties = {
 
 // ===== TAB: OVERVIEW =====
 function OverviewTab({ stats, loading, formatCurrency }: { stats: Stats | null; loading: boolean; formatCurrency: (v: number) => string }) {
-  if (loading || !stats) return <div style={{ color: '#6B6B7B', padding: '40px', textAlign: 'center' }}>Carregando metricas...</div>
+  if (loading || !stats) return <div style={{ color: '#6B6B7B', padding: '40px', textAlign: 'center' }}>Carregando métricas...</div>
 
   const m = stats.metrics
   return (
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
-        <MetricBox label="Total Organizacoes" value={m.totalOrganizations} icon={Building2} color="#3B82F6" />
-        <MetricBox label="Usuarios Ativos" value={m.activeUsers} icon={Users} color="#22C55E" />
+        <MetricBox label="Total Organizações" value={m.totalOrganizations} icon={Building2} color="#3B82F6" />
+        <MetricBox label="Usuários Ativos" value={m.activeUsers} icon={Users} color="#22C55E" />
         <MetricBox label="MRR" value={formatCurrency(m.mrr)} icon={TrendingUp} color="#A855F7" />
         <MetricBox label="Total Campanhas" value={m.totalCampaigns} icon={Zap} color="#F59E0B" />
         <MetricBox label="Total Leads" value={m.totalLeads.toLocaleString('pt-BR')} icon={Activity} color="#06B6D4" />
@@ -633,7 +633,7 @@ function OverviewTab({ stats, loading, formatCurrency }: { stats: Stats | null; 
       {/* Distribution charts */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
         <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '24px' }}>
-          <h3 style={{ color: '#FFFFFF', fontSize: '16px', fontWeight: 600, margin: '0 0 20px 0' }}>Distribuicao por Plano</h3>
+          <h3 style={{ color: '#FFFFFF', fontSize: '16px', fontWeight: 600, margin: '0 0 20px 0' }}>Distribuição por Plano</h3>
           {stats.planDistribution.map((item, i) => {
             const total = stats.planDistribution.reduce((s, p) => s + p.count, 0)
             const pct = total > 0 ? (item.count / total) * 100 : 0
@@ -684,7 +684,7 @@ function OrganizationsTab({ organizations, pagination, loading, search, setSearc
         <div style={{ position: 'relative', flex: 1, maxWidth: '320px' }}>
           <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6B6B7B' }} />
           <input
-            placeholder="Buscar organizacao..."
+            placeholder="Buscar organização..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && onSearch()}
@@ -708,7 +708,7 @@ function OrganizationsTab({ organizations, pagination, loading, search, setSearc
             <table style={tableStyle}>
               <thead>
                 <tr>
-                  <th style={thStyle}>Organizacao</th>
+                  <th style={thStyle}>Organização</th>
                   <th style={thStyle}>Plano</th>
                   <th style={thStyle}>Membros</th>
                   <th style={thStyle}>Campanhas</th>
@@ -716,7 +716,7 @@ function OrganizationsTab({ organizations, pagination, loading, search, setSearc
                   <th style={thStyle}>Status</th>
                   <th style={thStyle}>Ativo</th>
                   <th style={thStyle}>Criado em</th>
-                  <th style={thStyle}>Acoes</th>
+                  <th style={thStyle}>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -769,7 +769,7 @@ function UsersTab({ users, pagination, loading, search, setSearch, activeFilter,
         <div style={{ position: 'relative', flex: 1, maxWidth: '320px' }}>
           <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6B6B7B' }} />
           <input
-            placeholder="Buscar usuario..."
+            placeholder="Buscar usuário..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && onSearch()}
@@ -791,13 +791,13 @@ function UsersTab({ users, pagination, loading, search, setSearch, activeFilter,
             <table style={tableStyle}>
               <thead>
                 <tr>
-                  <th style={thStyle}>Usuario</th>
+                  <th style={thStyle}>Usuário</th>
                   <th style={thStyle}>Ativo</th>
                   <th style={thStyle}>Superadmin</th>
-                  <th style={thStyle}>Organizacoes</th>
-                  <th style={thStyle}>Ultimo Login</th>
+                  <th style={thStyle}>Organizações</th>
+                  <th style={thStyle}>Último Login</th>
                   <th style={thStyle}>Criado em</th>
-                  <th style={thStyle}>Acoes</th>
+                  <th style={thStyle}>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -860,13 +860,13 @@ function PlansTab({ plans, loading, onEdit, onToggleActive, onCreate, formatCurr
             <thead>
               <tr>
                 <th style={thStyle}>Plano</th>
-                <th style={thStyle}>Preco Mensal</th>
-                <th style={thStyle}>Preco Anual</th>
+                <th style={thStyle}>Preço Mensal</th>
+                <th style={thStyle}>Preço Anual</th>
                 <th style={thStyle}>Orgs</th>
                 <th style={thStyle}>Limites</th>
                 <th style={thStyle}>Features</th>
                 <th style={thStyle}>Ativo</th>
-                <th style={thStyle}>Acoes</th>
+                <th style={thStyle}>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -926,22 +926,22 @@ function ModulesTab({ modules, loading, onToggleEnabled }: { modules: SystemModu
   const freeModules = modules.filter(m => m.isFree)
   const paidModules = modules.filter(m => !m.isFree)
 
-  if (loading) return <div style={{ color: '#6B6B7B', padding: '40px', textAlign: 'center' }}>Carregando modulos...</div>
+  if (loading) return <div style={{ color: '#6B6B7B', padding: '40px', textAlign: 'center' }}>Carregando módulos...</div>
 
   return (
     <div>
       {/* Summary */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
-        <MetricBox label="Total Modulos" value={modules.length} icon={Layers} color="#3B82F6" />
-        <MetricBox label="Modulos Ativos" value={modules.filter(m => m.isEnabled).length} icon={CheckCircle} color="#22C55E" />
-        <MetricBox label="Modulos Pagos" value={paidModules.length} icon={Lock} color="#A855F7" />
+        <MetricBox label="Total Módulos" value={modules.length} icon={Layers} color="#3B82F6" />
+        <MetricBox label="Módulos Ativos" value={modules.filter(m => m.isEnabled).length} icon={CheckCircle} color="#22C55E" />
+        <MetricBox label="Módulos Pagos" value={paidModules.length} icon={Lock} color="#A855F7" />
       </div>
 
       {/* Free Modules */}
       <div style={{ marginBottom: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
           <Unlock size={18} style={{ color: '#22C55E' }} />
-          <h3 style={{ color: '#FFFFFF', fontSize: '16px', fontWeight: 600, margin: 0 }}>Modulos Gratuitos</h3>
+          <h3 style={{ color: '#FFFFFF', fontSize: '16px', fontWeight: 600, margin: 0 }}>Módulos Gratuitos</h3>
           <span style={{ fontSize: '12px', color: '#6B6B7B' }}>({freeModules.length})</span>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
@@ -949,11 +949,11 @@ function ModulesTab({ modules, loading, onToggleEnabled }: { modules: SystemModu
             <thead>
               <tr>
                 <th style={thStyle}>Ordem</th>
-                <th style={thStyle}>Modulo</th>
+                <th style={thStyle}>Módulo</th>
                 <th style={thStyle}>Rota</th>
-                <th style={thStyle}>Descricao</th>
+                <th style={thStyle}>Descrição</th>
                 <th style={thStyle}>Status</th>
-                <th style={thStyle}>Acao</th>
+                <th style={thStyle}>Ação</th>
               </tr>
             </thead>
             <tbody>
@@ -996,7 +996,7 @@ function ModulesTab({ modules, loading, onToggleEnabled }: { modules: SystemModu
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
           <Lock size={18} style={{ color: '#A855F7' }} />
-          <h3 style={{ color: '#FFFFFF', fontSize: '16px', fontWeight: 600, margin: 0 }}>Modulos Pagos</h3>
+          <h3 style={{ color: '#FFFFFF', fontSize: '16px', fontWeight: 600, margin: 0 }}>Módulos Pagos</h3>
           <span style={{ fontSize: '12px', color: '#6B6B7B' }}>({paidModules.length})</span>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
@@ -1004,11 +1004,11 @@ function ModulesTab({ modules, loading, onToggleEnabled }: { modules: SystemModu
             <thead>
               <tr>
                 <th style={thStyle}>Ordem</th>
-                <th style={thStyle}>Modulo</th>
+                <th style={thStyle}>Módulo</th>
                 <th style={thStyle}>Rota</th>
-                <th style={thStyle}>Descricao</th>
+                <th style={thStyle}>Descrição</th>
                 <th style={thStyle}>Status</th>
-                <th style={thStyle}>Acao</th>
+                <th style={thStyle}>Ação</th>
               </tr>
             </thead>
             <tbody>
@@ -1043,7 +1043,7 @@ function ModulesTab({ modules, loading, onToggleEnabled }: { modules: SystemModu
                 </tr>
               ))}
               {paidModules.length === 0 && (
-                <tr><td colSpan={6} style={{ ...tdStyle, textAlign: 'center', color: '#6B6B7B', padding: '40px' }}>Nenhum modulo pago cadastrado</td></tr>
+                <tr><td colSpan={6} style={{ ...tdStyle, textAlign: 'center', color: '#6B6B7B', padding: '40px' }}>Nenhum módulo pago cadastrado</td></tr>
               )}
             </tbody>
           </table>
@@ -1064,13 +1064,13 @@ function NewsTab({ posts, loading, onEdit, onCreate, onTogglePublished, onDelete
   const published = posts.filter(p => p.isPublished)
   const drafts = posts.filter(p => !p.isPublished)
 
-  if (loading) return <div style={{ color: '#6B6B7B', padding: '40px', textAlign: 'center' }}>Carregando noticias...</div>
+  if (loading) return <div style={{ color: '#6B6B7B', padding: '40px', textAlign: 'center' }}>Carregando notícias...</div>
 
   return (
     <div>
       {/* Summary */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
-        <MetricBox label="Total Noticias" value={posts.length} icon={Newspaper} color="#3B82F6" />
+        <MetricBox label="Total Notícias" value={posts.length} icon={Newspaper} color="#3B82F6" />
         <MetricBox label="Publicadas" value={published.length} icon={Eye} color="#22C55E" />
         <MetricBox label="Rascunhos" value={drafts.length} icon={EyeOff} color="#F59E0B" />
       </div>
@@ -1078,7 +1078,7 @@ function NewsTab({ posts, loading, onEdit, onCreate, onTogglePublished, onDelete
       {/* Actions */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
         <button onClick={onCreate} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', border: 'none', backgroundColor: '#A855F7', color: '#FFFFFF', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
-          <Plus size={16} /> Nova Noticia
+          <Plus size={16} /> Nova Notícia
         </button>
       </div>
 
@@ -1087,7 +1087,7 @@ function NewsTab({ posts, loading, onEdit, onCreate, onTogglePublished, onDelete
         {posts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px', color: '#6B6B7B', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
             <Newspaper size={40} style={{ margin: '0 auto 12px', display: 'block', opacity: 0.3 }} />
-            Nenhuma noticia criada. Clique em "Nova Noticia" para comecar.
+            Nenhuma notícia criada. Clique em "Nova Notícia" para começar.
           </div>
         ) : posts.map(post => (
           <motion.div
@@ -1173,7 +1173,7 @@ function NewsTab({ posts, loading, onEdit, onCreate, onTogglePublished, onDelete
                     onClick={() => setConfirmDelete(null)}
                     style={{ ...btnSmall, fontSize: '11px' }}
                   >
-                    Nao
+                    Não
                   </button>
                 </div>
               ) : (
@@ -1214,7 +1214,7 @@ function NewsModal({ post, onSave, onClose }: {
       <div onClick={e => e.stopPropagation()} style={{ background: '#1A1A24', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', padding: '32px', width: '640px', maxHeight: '85vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <h2 style={{ color: '#FFFFFF', fontSize: '20px', fontWeight: 700, margin: 0 }}>
-            {post ? 'Editar Noticia' : 'Nova Noticia'}
+            {post ? 'Editar Notícia' : 'Nova Notícia'}
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}><X size={20} /></button>
         </div>
@@ -1222,11 +1222,11 @@ function NewsModal({ post, onSave, onClose }: {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Title */}
           <div>
-            <label style={labelStyle}>Titulo *</label>
+            <label style={labelStyle}>Título *</label>
             <input
               value={form.title}
               onChange={e => set('title', e.target.value)}
-              placeholder="Titulo da noticia"
+              placeholder="Título da notícia"
               style={inputStyle}
             />
           </div>
@@ -1251,11 +1251,11 @@ function NewsModal({ post, onSave, onClose }: {
 
           {/* Content */}
           <div>
-            <label style={labelStyle}>Conteudo *</label>
+            <label style={labelStyle}>Conteúdo *</label>
             <textarea
               value={form.content}
               onChange={e => set('content', e.target.value)}
-              placeholder="Escreva o conteudo da noticia..."
+              placeholder="Escreva o conteúdo da notícia..."
               rows={10}
               style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', lineHeight: '1.6' }}
             />
@@ -1271,7 +1271,7 @@ function NewsModal({ post, onSave, onClose }: {
             />
             Publicar imediatamente
             {!form.isPublished && (
-              <span style={{ fontSize: '11px', color: '#F59E0B' }}>(sera salva como rascunho)</span>
+              <span style={{ fontSize: '11px', color: '#F59E0B' }}>(será salva como rascunho)</span>
             )}
           </label>
         </div>
@@ -1288,7 +1288,7 @@ function NewsModal({ post, onSave, onClose }: {
               opacity: canSave ? 1 : 0.5,
             }}
           >
-            <Save size={16} /> {post ? 'Salvar' : 'Criar Noticia'}
+            <Save size={16} /> {post ? 'Salvar' : 'Criar Notícia'}
           </button>
         </div>
       </div>
@@ -1309,9 +1309,9 @@ function AuditLogsTab({ logs, pagination, loading, onPageChange, formatDate }: a
               <thead>
                 <tr>
                   <th style={thStyle}>Data</th>
-                  <th style={thStyle}>Acao</th>
-                  <th style={thStyle}>Usuario</th>
-                  <th style={thStyle}>Organizacao</th>
+                  <th style={thStyle}>Ação</th>
+                  <th style={thStyle}>Usuário</th>
+                  <th style={thStyle}>Organização</th>
                   <th style={thStyle}>Entidade</th>
                   <th style={thStyle}>ID</th>
                 </tr>
@@ -1384,15 +1384,15 @@ function PlanModal({ plan, onSave, onClose }: { plan: Plan | null; onSave: (data
             <input value={form.slug} onChange={e => set('slug', e.target.value)} style={inputStyle} disabled={!!plan} />
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
-            <label style={labelStyle}>Descricao</label>
+            <label style={labelStyle}>Descrição</label>
             <input value={form.description} onChange={e => set('description', e.target.value)} style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Preco Mensal (R$)</label>
+            <label style={labelStyle}>Preço Mensal (R$)</label>
             <input type="number" value={form.priceMonthly} onChange={e => set('priceMonthly', Number(e.target.value))} style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Preco Anual (R$)</label>
+            <label style={labelStyle}>Preço Anual (R$)</label>
             <input type="number" value={form.priceYearly} onChange={e => set('priceYearly', Number(e.target.value))} style={inputStyle} />
           </div>
 
@@ -1400,7 +1400,7 @@ function PlanModal({ plan, onSave, onClose }: { plan: Plan | null; onSave: (data
             <p style={{ color: '#6B6B7B', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 12px 0' }}>Limites</p>
           </div>
           <div>
-            <label style={labelStyle}>Max Usuarios</label>
+            <label style={labelStyle}>Max Usuários</label>
             <input type="number" value={form.maxUsers} onChange={e => set('maxUsers', Number(e.target.value))} style={inputStyle} />
           </div>
           <div>
@@ -1412,7 +1412,7 @@ function PlanModal({ plan, onSave, onClose }: { plan: Plan | null; onSave: (data
             <input type="number" value={form.maxLeads} onChange={e => set('maxLeads', Number(e.target.value))} style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Max Integracoes</label>
+            <label style={labelStyle}>Max Integrações</label>
             <input type="number" value={form.maxIntegrations} onChange={e => set('maxIntegrations', Number(e.target.value))} style={inputStyle} />
           </div>
           <div>

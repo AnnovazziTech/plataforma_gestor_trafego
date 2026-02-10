@@ -1,5 +1,5 @@
-// API Route: Superadmin - Usuario individual
-// PATCH - Ativar/desativar usuario
+// API Route: Superadmin - Usuário individual
+// PATCH - Ativar/desativar usuário
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -14,7 +14,7 @@ export const PATCH = withSuperAdmin(async (req, ctx) => {
   try {
     const id = req.url.split('/users/')[1]?.split('?')[0]
     if (!id) {
-      return NextResponse.json({ error: 'ID nao fornecido' }, { status: 400 })
+      return NextResponse.json({ error: 'ID não fornecido' }, { status: 400 })
     }
 
     const body = await req.json()
@@ -22,13 +22,13 @@ export const PATCH = withSuperAdmin(async (req, ctx) => {
 
     const user = await prisma.user.findUnique({ where: { id } })
     if (!user) {
-      return NextResponse.json({ error: 'Usuario nao encontrado' }, { status: 404 })
+      return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
     }
 
-    // Nao permitir desativar a si mesmo
+    // Não permitir desativar a si mesmo
     if (id === ctx.userId && data.isActive === false) {
       return NextResponse.json(
-        { error: 'Voce nao pode desativar sua propria conta' },
+        { error: 'Você não pode desativar sua própria conta' },
         { status: 400 }
       )
     }
@@ -42,9 +42,9 @@ export const PATCH = withSuperAdmin(async (req, ctx) => {
     return NextResponse.json({ user: updated })
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Dados invalidos', details: error.issues }, { status: 400 })
+      return NextResponse.json({ error: 'Dados inválidos', details: error.issues }, { status: 400 })
     }
-    console.error('Erro ao atualizar usuario:', error)
-    return NextResponse.json({ error: 'Erro ao atualizar usuario' }, { status: 500 })
+    console.error('Erro ao atualizar usuário:', error)
+    return NextResponse.json({ error: 'Erro ao atualizar usuário' }, { status: 500 })
   }
 })

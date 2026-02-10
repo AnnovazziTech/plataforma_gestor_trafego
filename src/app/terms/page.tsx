@@ -48,45 +48,45 @@ export default function TermsPage() {
         }}>
           <section>
             <h2 style={{ color: '#FFFFFF', fontSize: '20px', marginBottom: '12px' }}>
-              1. Aceitacao dos Termos
+              1. Aceitação dos Termos
             </h2>
             <p>
-              Ao acessar e usar a Plataforma Gestor de Trafego, voce concorda em cumprir
-              e estar vinculado a estes Termos de Uso. Se voce nao concordar com qualquer
-              parte destes termos, nao podera acessar o servico.
+              Ao acessar e usar a Plataforma Gestor de Tráfego, você concorda em cumprir
+              e estar vinculado a estes Termos de Uso. Se você não concordar com qualquer
+              parte destes termos, não poderá acessar o serviço.
             </p>
           </section>
 
           <section>
             <h2 style={{ color: '#FFFFFF', fontSize: '20px', marginBottom: '12px' }}>
-              2. Descricao do Servico
+              2. Descrição do Serviço
             </h2>
             <p>
-              A Plataforma Gestor de Trafego e uma ferramenta de gestao de campanhas
-              de marketing digital que permite aos usuarios gerenciar, analisar e
-              otimizar suas campanhas de trafego pago em diversas plataformas.
+              A Plataforma Gestor de Tráfego é uma ferramenta de gestão de campanhas
+              de marketing digital que permite aos usuários gerenciar, analisar e
+              otimizar suas campanhas de tráfego pago em diversas plataformas.
             </p>
           </section>
 
           <section>
             <h2 style={{ color: '#FFFFFF', fontSize: '20px', marginBottom: '12px' }}>
-              3. Conta do Usuario
+              3. Conta do Usuário
             </h2>
             <p>
-              Voce e responsavel por manter a confidencialidade de sua conta e senha,
-              e por restringir o acesso ao seu computador. Voce concorda em aceitar
+              Você é responsável por manter a confidencialidade de sua conta e senha,
+              e por restringir o acesso ao seu computador. Você concorda em aceitar
               a responsabilidade por todas as atividades que ocorram sob sua conta.
             </p>
           </section>
 
           <section>
             <h2 style={{ color: '#FFFFFF', fontSize: '20px', marginBottom: '12px' }}>
-              4. Uso Aceitavel
+              4. Uso Aceitável
             </h2>
             <p>
-              Voce concorda em nao usar o servico para qualquer finalidade ilegal ou
-              proibida por estes termos. Voce nao pode usar o servico de qualquer
-              maneira que possa danificar, desabilitar ou sobrecarregar o servico.
+              Você concorda em não usar o serviço para qualquer finalidade ilegal ou
+              proibida por estes termos. Você não pode usar o serviço de qualquer
+              maneira que possa danificar, desabilitar ou sobrecarregar o serviço.
             </p>
           </section>
 
@@ -95,18 +95,18 @@ export default function TermsPage() {
               5. Privacidade
             </h2>
             <p>
-              Sua privacidade e importante para nos. Nossa Politica de Privacidade
-              explica como coletamos, usamos e protegemos suas informacoes pessoais.
+              Sua privacidade é importante para nós. Nossa Política de Privacidade
+              explica como coletamos, usamos e protegemos suas informações pessoais.
             </p>
           </section>
 
           <section>
             <h2 style={{ color: '#FFFFFF', fontSize: '20px', marginBottom: '12px' }}>
-              6. Modificacoes
+              6. Modificações
             </h2>
             <p>
               Reservamo-nos o direito de modificar estes termos a qualquer momento.
-              Alteracoes significativas serao notificadas atraves do servico ou por
+              Alterações significativas serão notificadas através do serviço ou por
               e-mail.
             </p>
           </section>
@@ -116,8 +116,8 @@ export default function TermsPage() {
               7. Contato
             </h2>
             <p>
-              Se voce tiver duvidas sobre estes Termos de Uso, entre em contato
-              conosco atraves do suporte da plataforma.
+              Se você tiver dúvidas sobre estes Termos de Uso, entre em contato
+              conosco através do suporte da plataforma.
             </p>
           </section>
         </div>
@@ -127,7 +127,7 @@ export default function TermsPage() {
           color: '#6B6B7B',
           fontSize: '14px',
         }}>
-          Ultima atualizacao: Dezembro de 2024
+          Última atualização: Dezembro de 2024
         </p>
       </div>
     </div>

@@ -136,7 +136,7 @@ const metricCategories = [
   { key: 'Retorno', color: '#22C55E' },
 ]
 
-// Dados históricos serao carregados da API quando disponíveis
+// Dados históricos serão carregados da API quando disponíveis
 
 export default function CampaignsPage() {
   const searchParams = useSearchParams()
@@ -249,20 +249,20 @@ export default function CampaignsPage() {
 
         // Gerar análise de IA baseada nos dados reais
         const trendText = data.analysis.trend === 'improving'
-          ? 'em tendencia de crescimento'
+          ? 'em tendência de crescimento'
           : data.analysis.trend === 'declining'
-            ? 'em tendencia de queda'
-            : 'estavel'
+            ? 'em tendência de queda'
+            : 'estável'
 
         const recommendationMap: Record<string, string> = {
-          scale: 'Recomendacao: ESCALAR - Aumentar orcamento em 20-30%',
-          maintain: 'Recomendacao: MANTER - Performance consistente',
-          optimize: 'Recomendacao: OTIMIZAR - Testar novos criativos e segmentacoes',
-          pause: 'Recomendacao: PAUSAR - Revisar estrategia antes de continuar'
+          scale: 'Recomendação: ESCALAR - Aumentar orçamento em 20-30%',
+          maintain: 'Recomendação: MANTER - Performance consistente',
+          optimize: 'Recomendação: OTIMIZAR - Testar novos criativos e segmentações',
+          pause: 'Recomendação: PAUSAR - Revisar estratégia antes de continuar'
         }
-        const recommendationText = recommendationMap[data.analysis.recommendation] || 'Analise em andamento'
+        const recommendationText = recommendationMap[data.analysis.recommendation] || 'Análise em andamento'
 
-        const analysisText = `A campanha "${campaignName}" esta ${trendText}. ${recommendationText}. ${data.analysis.insights.slice(0, 2).join('. ')}.`
+        const analysisText = `A campanha "${campaignName}" está ${trendText}. ${recommendationText}. ${data.analysis.insights.slice(0, 2).join('. ')}.`
 
         setAiAnalysis({
           campaignId,
@@ -273,16 +273,16 @@ export default function CampaignsPage() {
         setWeeklyData([])
         setAiAnalysis({
           campaignId,
-          analysis: `Dados historicos da campanha "${campaignName}" nao disponiveis. Sincronize as campanhas para obter dados atualizados.`
+          analysis: `Dados históricos da campanha "${campaignName}" não disponíveis. Sincronize as campanhas para obter dados atualizados.`
         })
       }
     } catch (error) {
-      console.error('Erro ao buscar comparacao:', error)
+      console.error('Erro ao buscar comparação:', error)
       // Erro ao carregar - mostrar estado vazio
       setWeeklyData([])
       setAiAnalysis({
         campaignId,
-        analysis: `Nao foi possivel carregar dados historicos da campanha "${campaignName}". Verifique a conexao e tente novamente.`
+        analysis: `Não foi possível carregar dados históricos da campanha "${campaignName}". Verifique a conexão e tente novamente.`
       })
     } finally {
       setComparisonLoading(false)
@@ -375,7 +375,7 @@ export default function CampaignsPage() {
     <div style={{ minHeight: '100vh' }}>
       <Header
         title="Campanhas"
-        subtitle="Gerencie todas as suas campanhas de trafego pago"
+        subtitle="Gerencie todas as suas campanhas de tráfego pago"
       />
 
       <main style={{ padding: '24px 32px', paddingBottom: '80px' }}>
@@ -474,7 +474,7 @@ export default function CampaignsPage() {
             </div>
           </div>
 
-          {/* Modo de Visualizacao e Métricas */}
+          {/* Modo de Visualização e Métricas */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {/* Botão de Métricas */}
             <button
@@ -553,7 +553,7 @@ export default function CampaignsPage() {
             delay={0.2}
           />
           <StatCard
-            label="ROAS Medio"
+            label="ROAS Médio"
             value={`${(campaigns.reduce((acc, c) => acc + (c.metrics?.roas || 0), 0) / Math.max(campaigns.length, 1)).toFixed(2)}x`}
             icon={TrendingUp}
             color="yellow"
@@ -625,7 +625,7 @@ export default function CampaignsPage() {
             )}
           </div>
 
-          {/* Quadro de Analise da IA */}
+          {/* Quadro de Análise da IA */}
           <div>
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -659,7 +659,7 @@ export default function CampaignsPage() {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
                       <span style={{ fontSize: '12px', fontWeight: 500, color: '#3B82F6', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Sparkles size={12} />
-                        Analise Gerada
+                        Análise Gerada
                       </span>
                       <button
                         onClick={() => {
@@ -699,7 +699,7 @@ export default function CampaignsPage() {
                           : '#EF4444',
                         marginBottom: '4px',
                         margin: 0
-                      }}>Recomendacao</p>
+                      }}>Recomendação</p>
                       <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>
                         {comparisonAnalysis?.recommendation === 'scale' ? 'Escalar'
                           : comparisonAnalysis?.recommendation === 'maintain' ? 'Manter'
@@ -726,10 +726,10 @@ export default function CampaignsPage() {
                           : '#EF4444',
                         marginBottom: '4px',
                         margin: 0
-                      }}>Tendencia</p>
+                      }}>Tendência</p>
                       <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>
                         {comparisonAnalysis?.trend === 'improving' ? 'Crescendo'
-                          : comparisonAnalysis?.trend === 'stable' ? 'Estavel'
+                          : comparisonAnalysis?.trend === 'stable' ? 'Estável'
                           : comparisonAnalysis?.trend === 'declining' ? 'Declinando'
                           : 'Analisando...'}
                       </p>
@@ -741,9 +741,9 @@ export default function CampaignsPage() {
                   <div style={{ width: '64px', height: '64px', margin: '0 auto 16px', borderRadius: '9999px', backgroundColor: 'rgba(255, 255, 255, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Sparkles style={{ width: '32px', height: '32px', color: '#6B6B7B' }} />
                   </div>
-                  <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px', margin: 0 }}>Nenhuma analise selecionada</p>
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '8px', margin: 0 }}>Nenhuma análise selecionada</p>
                   <p style={{ fontSize: '12px', color: '#4B4B5B', margin: 0 }}>
-                    Clique no icone <span style={{ color: '#FACC15' }}>✨</span> em uma campanha para solicitar analise da IA
+                    Clique no ícone <span style={{ color: '#FACC15' }}>✨</span> em uma campanha para solicitar análise da IA
                   </p>
                 </div>
               )}
@@ -809,7 +809,7 @@ export default function CampaignsPage() {
                         borderRadius: '50%',
                         animation: 'spin 1s linear infinite',
                       }} />
-                      <p style={{ fontSize: '14px', color: '#6B6B7B' }}>Carregando dados das ultimas 4 semanas...</p>
+                      <p style={{ fontSize: '14px', color: '#6B6B7B' }}>Carregando dados das últimas 4 semanas...</p>
                       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                     </div>
                   </div>
@@ -1142,11 +1142,11 @@ export default function CampaignsPage() {
                 </div>
                 <div>
                   <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Excluir Campanha</h2>
-                  <p style={{ fontSize: '14px', color: '#6B6B7B', margin: '4px 0 0' }}>Esta acao nao pode ser desfeita</p>
+                  <p style={{ fontSize: '14px', color: '#6B6B7B', margin: '4px 0 0' }}>Esta ação não pode ser desfeita</p>
                 </div>
               </div>
               <p style={{ fontSize: '14px', color: '#A0A0B0', marginBottom: '24px', lineHeight: '1.6' }}>
-                Tem certeza que deseja excluir esta campanha? Todos os dados relacionados serao perdidos permanentemente.
+                Tem certeza que deseja excluir esta campanha? Todos os dados relacionados serão perdidos permanentemente.
               </p>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                 <Button
@@ -1259,7 +1259,7 @@ export default function CampaignsPage() {
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Orcamento Diario</label>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '8px' }}>Orçamento Diário</label>
                   <input
                     type="number"
                     value={editingCampaign.budget}
@@ -1326,7 +1326,7 @@ export default function CampaignsPage() {
                   Cancelar
                 </Button>
                 <Button variant="primary" onClick={() => handleSaveEdit(editingCampaign)}>
-                  Salvar Alteracoes
+                  Salvar Alterações
                 </Button>
               </div>
             </motion.div>
@@ -1974,7 +1974,7 @@ function CampaignTable({
                 )
               })}
               <th style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>Devan</th>
-              <th style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>Acoes</th>
+              <th style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#A0A0B0', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '16px' }}>Ações</th>
             </tr>
           </thead>
           <tbody>

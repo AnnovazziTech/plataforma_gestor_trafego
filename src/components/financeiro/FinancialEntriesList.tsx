@@ -21,14 +21,14 @@ interface Props {
 const typeConfig = {
   INCOME: { label: 'Receita', icon: <DollarSign size={16} />, color: '#10B981', bg: 'rgba(16,185,129,0.1)' },
   EXPENSE: { label: 'Despesa', icon: <TrendingDown size={16} />, color: '#EF4444', bg: 'rgba(239,68,68,0.1)' },
-  ASSET: { label: 'Patrimonio', icon: <Building2 size={16} />, color: '#3B82F6', bg: 'rgba(59,130,246,0.1)' },
+  ASSET: { label: 'Patrimônio', icon: <Building2 size={16} />, color: '#3B82F6', bg: 'rgba(59,130,246,0.1)' },
 }
 
 export function FinancialEntriesList({ entries, onRemove }: Props) {
   if (entries.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '40px', color: '#6B6B7B' }}>
-        Nenhum lancamento encontrado
+        Nenhum lançamento encontrado
       </div>
     )
   }

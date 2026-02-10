@@ -10,18 +10,18 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "TrafficPro - Gestao de Trafego Pago",
-  description: "Plataforma completa para gestao de campanhas de trafego pago em todas as plataformas",
+  title: "TrafficPro - Gestão de Tráfego Pago",
+  description: "Plataforma completa para gestão de campanhas de tráfego pago em todas as plataformas",
   openGraph: {
-    title: "TrafficPro - Gestao de Trafego Pago",
-    description: "Plataforma completa para gestao de campanhas de trafego pago em todas as plataformas",
+    title: "TrafficPro - Gestão de Tráfego Pago",
+    description: "Plataforma completa para gestão de campanhas de tráfego pago em todas as plataformas",
     siteName: "TrafficPro",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "TrafficPro - Gestao de Trafego Pago",
-    description: "Plataforma completa para gestao de campanhas de trafego pago em todas as plataformas",
+    title: "TrafficPro - Gestão de Tráfego Pago",
+    description: "Plataforma completa para gestão de campanhas de tráfego pago em todas as plataformas",
   },
 };
 

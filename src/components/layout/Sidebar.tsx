@@ -102,7 +102,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   })
 
   // Always add Settings at the end
-  menuItems.push({ icon: Settings, label: 'Configuracoes', href: '/settings', badge: null })
+  menuItems.push({ icon: Settings, label: 'Configurações', href: '/settings', badge: null })
 
   return (
     <aside
@@ -463,7 +463,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                   <span style={{ fontSize: '12px', fontWeight: 600, color: '#FACC15' }}>PRO</span>
                 </div>
                 <p style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', paddingRight: '16px', margin: 0 }}>
-                  Recursos avancados de automacao
+                  Recursos avançados de automação
                 </p>
                 <button
                   onClick={handleUpgrade}
@@ -523,13 +523,13 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               <>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {session?.user?.name || 'Usuario'}
+                    {session?.user?.name || 'Usuário'}
                   </p>
                   <p style={{ fontSize: '10px', color: '#6B6B7B', display: 'flex', alignItems: 'center', gap: '4px', margin: 0 }}>
                     {(() => {
                       const role = (session?.user as any)?.role
                       if (isSuperAdmin) return <><Crown style={{ width: '12px', height: '12px', color: '#FACC15' }} />Super Admin</>
-                      if (role === 'OWNER') return <><Crown style={{ width: '12px', height: '12px', color: '#FACC15' }} />Proprietario</>
+                      if (role === 'OWNER') return <><Crown style={{ width: '12px', height: '12px', color: '#FACC15' }} />Proprietário</>
                       if (role === 'ADMIN') return <><Crown style={{ width: '12px', height: '12px', color: '#A855F7' }} />Administrador</>
                       return <>Membro</>
                     })()}
@@ -585,7 +585,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                   Sair da Conta
                 </h3>
                 <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>
-                  Tem certeza que deseja sair? Voce precisara fazer login novamente.
+                  Tem certeza que deseja sair? Você precisará fazer login novamente.
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '12px' }}>

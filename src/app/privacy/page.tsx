@@ -36,7 +36,7 @@ export default function PrivacyPage() {
           fontWeight: 700,
           marginBottom: '32px',
         }}>
-          Politica de Privacidade
+          Política de Privacidade
         </h1>
 
         <div style={{
@@ -48,23 +48,23 @@ export default function PrivacyPage() {
         }}>
           <section>
             <h2 style={{ color: '#FFFFFF', fontSize: '20px', marginBottom: '12px' }}>
-              1. Informacoes que Coletamos
+              1. Informações que Coletamos
             </h2>
             <p>
-              Coletamos informacoes que voce nos fornece diretamente, como nome, e-mail,
-              e dados de pagamento. Tambem coletamos dados automaticamente, como informacoes
+              Coletamos informações que você nos fornece diretamente, como nome, e-mail,
+              e dados de pagamento. Também coletamos dados automaticamente, como informações
               de uso e dados de campanhas conectadas.
             </p>
           </section>
 
           <section>
             <h2 style={{ color: '#FFFFFF', fontSize: '20px', marginBottom: '12px' }}>
-              2. Como Usamos suas Informacoes
+              2. Como Usamos suas Informações
             </h2>
             <p>
-              Utilizamos suas informacoes para fornecer, manter e melhorar nossos servicos,
-              processar transacoes, enviar comunicacoes relacionadas ao servico e personalizar
-              sua experiencia na plataforma.
+              Utilizamos suas informações para fornecer, manter e melhorar nossos serviços,
+              processar transações, enviar comunicações relacionadas ao serviço e personalizar
+              sua experiência na plataforma.
             </p>
           </section>
 
@@ -73,20 +73,20 @@ export default function PrivacyPage() {
               3. Compartilhamento de Dados
             </h2>
             <p>
-              Nao vendemos suas informacoes pessoais. Compartilhamos dados apenas com
-              provedores de servicos que nos ajudam a operar a plataforma, sempre sob
+              Não vendemos suas informações pessoais. Compartilhamos dados apenas com
+              provedores de serviços que nos ajudam a operar a plataforma, sempre sob
               acordos de confidencialidade.
             </p>
           </section>
 
           <section>
             <h2 style={{ color: '#FFFFFF', fontSize: '20px', marginBottom: '12px' }}>
-              4. Seguranca dos Dados
+              4. Segurança dos Dados
             </h2>
             <p>
-              Implementamos medidas de seguranca tecnicas e organizacionais para proteger
-              suas informacoes contra acesso nao autorizado, alteracao, divulgacao ou
-              destruicao.
+              Implementamos medidas de segurança técnicas e organizacionais para proteger
+              suas informações contra acesso não autorizado, alteração, divulgação ou
+              destruição.
             </p>
           </section>
 
@@ -95,8 +95,8 @@ export default function PrivacyPage() {
               5. Seus Direitos
             </h2>
             <p>
-              Voce tem o direito de acessar, corrigir ou excluir seus dados pessoais.
-              Tambem pode solicitar a portabilidade dos dados ou retirar seu consentimento
+              Você tem o direito de acessar, corrigir ou excluir seus dados pessoais.
+              Também pode solicitar a portabilidade dos dados ou retirar seu consentimento
               a qualquer momento.
             </p>
           </section>
@@ -106,20 +106,20 @@ export default function PrivacyPage() {
               6. Cookies
             </h2>
             <p>
-              Utilizamos cookies e tecnologias similares para melhorar sua experiencia,
-              analisar o uso do servico e personalizar conteudo. Voce pode gerenciar suas
-              preferencias de cookies nas configuracoes do navegador.
+              Utilizamos cookies e tecnologias similares para melhorar sua experiência,
+              analisar o uso do serviço e personalizar conteúdo. Você pode gerenciar suas
+              preferências de cookies nas configurações do navegador.
             </p>
           </section>
 
           <section>
             <h2 style={{ color: '#FFFFFF', fontSize: '20px', marginBottom: '12px' }}>
-              7. Retencao de Dados
+              7. Retenção de Dados
             </h2>
             <p>
-              Mantemos suas informacoes pelo tempo necessario para fornecer os servicos
-              ou conforme exigido por lei. Apos o encerramento da conta, seus dados serao
-              excluidos em ate 30 dias.
+              Mantemos suas informações pelo tempo necessário para fornecer os serviços
+              ou conforme exigido por lei. Após o encerramento da conta, seus dados serão
+              excluídos em até 30 dias.
             </p>
           </section>
 
@@ -128,7 +128,7 @@ export default function PrivacyPage() {
               8. Contato
             </h2>
             <p>
-              Para questoes sobre privacidade, entre em contato conosco atraves do
+              Para questões sobre privacidade, entre em contato conosco através do
               suporte da plataforma.
             </p>
           </section>
@@ -139,7 +139,7 @@ export default function PrivacyPage() {
           color: '#6B6B7B',
           fontSize: '14px',
         }}>
-          Ultima atualizacao: Dezembro de 2024
+          Última atualização: Dezembro de 2024
         </p>
       </div>
     </div>

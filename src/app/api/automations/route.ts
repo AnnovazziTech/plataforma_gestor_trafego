@@ -1,17 +1,17 @@
-// API Route: Automacoes
-// GET - Listar automacoes
-// POST - Criar automacao
+// API Route: Automações
+// GET - Listar automações
+// POST - Criar automação
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
 import { withAuth, createAuditLog } from '@/lib/api/middleware'
 
-// Automacoes sao armazenadas como JSON no auditLog por enquanto
-// Em producao, criar tabela dedicada
+// Automações são armazenadas como JSON no auditLog por enquanto
+// Em produção, criar tabela dedicada
 
 const automationSchema = z.object({
-  name: z.string().min(1, 'Nome obrigatorio'),
+  name: z.string().min(1, 'Nome obrigatório'),
   type: z.enum(['rule', 'schedule', 'trigger']),
   status: z.enum(['active', 'paused']).default('active'),
   condition: z.object({
@@ -26,7 +26,7 @@ const automationSchema = z.object({
   campaignIds: z.array(z.string()).optional(),
 })
 
-// GET - Listar automacoes
+// GET - Listar automações
 export const GET = withAuth(async (req, ctx) => {
   try {
     const { searchParams } = new URL(req.url)
@@ -35,7 +35,7 @@ export const GET = withAuth(async (req, ctx) => {
     const limit = parseInt(searchParams.get('limit') || '20')
     const skip = (page - 1) * limit
 
-    // Buscar automacoes do audit log
+    // Buscar automações do audit log
     const where: any = {
       organizationId: ctx.organizationId,
       action: 'automation.created',
@@ -51,7 +51,7 @@ export const GET = withAuth(async (req, ctx) => {
       prisma.auditLog.count({ where }),
     ])
 
-    // Converter para formato de automacao
+    // Converter para formato de automação
     const automations = automationLogs.map((log) => {
       const data = log.newData as any
       return {
@@ -61,12 +61,12 @@ export const GET = withAuth(async (req, ctx) => {
       }
     })
 
-    // Filtrar por status se necessario
+    // Filtrar por status se necessário
     const filteredAutomations = status
       ? automations.filter((a) => a.status === status)
       : automations
 
-    // Buscar estatisticas de execucoes
+    // Buscar estatísticas de execuções
     const executionLogs = await prisma.auditLog.findMany({
       where: {
         organizationId: ctx.organizationId,
@@ -95,21 +95,21 @@ export const GET = withAuth(async (req, ctx) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao listar automacoes:', error)
+    console.error('Erro ao listar automações:', error)
     return NextResponse.json(
-      { error: 'Erro ao listar automacoes' },
+      { error: 'Erro ao listar automações' },
       { status: 500 }
     )
   }
 }, { requiredPermissions: ['canManageCampaigns'] })
 
-// POST - Criar automacao
+// POST - Criar automação
 export const POST = withAuth(async (req, ctx) => {
   try {
     const body = await req.json()
     const data = automationSchema.parse(body)
 
-    // Verificar se organizacao tem feature de automacao
+    // Verificar se organização tem feature de automação
     const org = await prisma.organization.findUnique({
       where: { id: ctx.organizationId },
       include: { plan: true },
@@ -117,12 +117,12 @@ export const POST = withAuth(async (req, ctx) => {
 
     if (!org?.plan.hasAutomation) {
       return NextResponse.json(
-        { error: 'Seu plano nao inclui automacoes. Faca upgrade para usar esta funcionalidade.' },
+        { error: 'Seu plano não inclui automações. Faça upgrade para usar esta funcionalidade.' },
         { status: 403 }
       )
     }
 
-    // Criar automacao (salvar no audit log)
+    // Criar automação (salvar no audit log)
     const automationData = {
       ...data,
       organizationId: ctx.organizationId,
@@ -146,7 +146,7 @@ export const POST = withAuth(async (req, ctx) => {
       automation: automationData,
     }, { status: 201 })
   } catch (error) {
-    console.error('Erro ao criar automacao:', error)
+    console.error('Erro ao criar automação:', error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -156,7 +156,7 @@ export const POST = withAuth(async (req, ctx) => {
     }
 
     return NextResponse.json(
-      { error: 'Erro ao criar automacao' },
+      { error: 'Erro ao criar automação' },
       { status: 500 }
     )
   }

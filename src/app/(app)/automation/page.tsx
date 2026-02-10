@@ -110,14 +110,14 @@ const leadStatusLabels: Record<string, string> = {
   CONTACTED: 'Contatado',
   QUALIFIED: 'Qualificado',
   PROPOSAL: 'Proposta',
-  NEGOTIATION: 'Negociacao',
+  NEGOTIATION: 'Negociação',
   WON: 'Ganho',
   LOST: 'Perdido',
   REMARKETING: 'Remarketing',
 }
 
 const leadAutomationTypeLabels: Record<string, string> = {
-  lead_status_change: 'Mudanca de Status',
+  lead_status_change: 'Mudança de Status',
   lead_inactivity: 'Inatividade',
   lead_remarketing: 'Remarketing',
 }
@@ -219,7 +219,7 @@ export default function AutomationPage() {
         })
       }
     } catch (error) {
-      console.error('Erro ao buscar automacoes de leads:', error)
+      console.error('Erro ao buscar automações de leads:', error)
     } finally {
       setLeadAutomationsLoading(false)
     }
@@ -228,7 +228,7 @@ export default function AutomationPage() {
   // Create lead automation
   const handleCreateLeadAutomation = async () => {
     if (!leadFormData.name) {
-      showToast('Nome obrigatorio', 'error')
+      showToast('Nome obrigatório', 'error')
       return
     }
 
@@ -270,16 +270,16 @@ export default function AutomationPage() {
       })
 
       if (response.ok) {
-        showToast('Automacao de leads criada com sucesso!', 'success')
+        showToast('Automação de leads criada com sucesso!', 'success')
         setShowLeadModal(false)
         resetLeadForm()
         fetchLeadAutomations()
       } else {
         const error = await response.json()
-        showToast(error.error || 'Erro ao criar automacao', 'error')
+        showToast(error.error || 'Erro ao criar automação', 'error')
       }
     } catch (error) {
-      showToast('Erro ao criar automacao de leads', 'error')
+      showToast('Erro ao criar automação de leads', 'error')
     }
   }
 
@@ -294,13 +294,13 @@ export default function AutomationPage() {
 
       if (response.ok) {
         const data = await response.json()
-        showToast(`Processadas ${data.processedLeads} leads, ${data.executedActions} acoes executadas`, 'success')
+        showToast(`Processadas ${data.processedLeads} leads, ${data.executedActions} ações executadas`, 'success')
         fetchLeadAutomations()
       } else {
-        showToast('Erro ao processar automacoes', 'error')
+        showToast('Erro ao processar automações', 'error')
       }
     } catch (error) {
-      showToast('Erro ao processar automacoes de leads', 'error')
+      showToast('Erro ao processar automações de leads', 'error')
     }
   }
 
@@ -469,8 +469,8 @@ export default function AutomationPage() {
   return (
     <div style={{ minHeight: '100vh' }}>
       <Header
-        title="Automacao"
-        subtitle="Configure regras e gatilhos automaticos para campanhas e leads"
+        title="Automação"
+        subtitle="Configure regras e gatilhos automáticos para campanhas e leads"
       />
 
       <main style={{ padding: '24px 32px', paddingBottom: '80px' }}>
@@ -540,7 +540,7 @@ export default function AutomationPage() {
             {/* Quick Stats */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
               <StatCard
-                label="Automacoes Ativas"
+                label="Automações Ativas"
                 value={activeAutomations}
                 icon={Zap}
                 color="blue"
@@ -571,11 +571,11 @@ export default function AutomationPage() {
 
             {/* Action Bar */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Automacoes de Campanhas</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Automações de Campanhas</h2>
               <Button variant="primary" onClick={() => setShowCreateModal(true)}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Plus size={18} />
-                  Nova Automacao
+                  Nova Automação
                 </span>
               </Button>
             </div>
@@ -588,7 +588,7 @@ export default function AutomationPage() {
             {/* Lead Stats */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
               <StatCard
-                label="Automacoes Ativas"
+                label="Automações Ativas"
                 value={leadAutomations.filter(a => a.status === 'active').length}
                 icon={RefreshCw}
                 color="blue"
@@ -602,14 +602,14 @@ export default function AutomationPage() {
                 delay={0.1}
               />
               <StatCard
-                label="Leads Recuperaveis"
+                label="Leads Recuperáveis"
                 value={leadStats.recoverableLeads}
                 icon={UserX}
                 color="blue"
                 delay={0.2}
               />
               <StatCard
-                label="Taxa de Recuperacao"
+                label="Taxa de Recuperação"
                 value={leadStats.recoverableLeads > 0 ? `${Math.round((leadStats.remarketingLeads / leadStats.recoverableLeads) * 100)}%` : '0%'}
                 icon={TrendingUp}
                 color="yellow"
@@ -619,7 +619,7 @@ export default function AutomationPage() {
 
             {/* Action Bar */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Automacoes de Leads</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Automações de Leads</h2>
               <div style={{ display: 'flex', gap: '12px' }}>
                 <Button variant="secondary" onClick={handleProcessLeadAutomations}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -649,7 +649,7 @@ export default function AutomationPage() {
                     borderRadius: '50%',
                     animation: 'spin 1s linear infinite',
                   }} />
-                  <p style={{ fontSize: '14px', color: '#6B6B7B' }}>Carregando automacoes...</p>
+                  <p style={{ fontSize: '14px', color: '#6B6B7B' }}>Carregando automações...</p>
                 </div>
               ) : leadAutomations.length === 0 ? (
                 <motion.div
@@ -676,7 +676,7 @@ export default function AutomationPage() {
                     <RefreshCw size={32} style={{ color: '#A855F7' }} />
                   </div>
                   <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', marginBottom: '8px' }}>
-                    Nenhuma automacao de leads
+                    Nenhuma automação de leads
                   </h3>
                   <p style={{ fontSize: '14px', color: '#6B6B7B', marginBottom: '24px', maxWidth: '400px', margin: '0 auto 24px' }}>
                     Crie regras para mover leads automaticamente para remarketing, enviar mensagens de follow-up e recuperar vendas perdidas.
@@ -706,7 +706,7 @@ export default function AutomationPage() {
                 {[
                   {
                     title: 'Recuperar Leads Perdidos',
-                    description: 'Move leads perdidos ha 30 dias para remarketing automaticamente',
+                    description: 'Move leads perdidos há 30 dias para remarketing automaticamente',
                     icon: RefreshCw,
                     color: 'purple',
                     type: 'lead_remarketing',
@@ -720,10 +720,10 @@ export default function AutomationPage() {
                     color: 'orange',
                     type: 'lead_inactivity',
                     trigger: { inactiveDays: 7 },
-                    action: { type: 'notify', notificationMessage: 'Lead inativo ha 7 dias' },
+                    action: { type: 'notify', notificationMessage: 'Lead inativo há 7 dias' },
                   },
                   {
-                    title: 'Follow-up Automatico',
+                    title: 'Follow-up Automático',
                     description: 'Envia mensagem quando lead muda para Proposta',
                     icon: MessageSquare,
                     color: 'blue',
@@ -1081,7 +1081,7 @@ export default function AutomationPage() {
                   </div>
                   <div>
                     <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>Nova Regra de Remarketing</h2>
-                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Configure automacao para leads</p>
+                    <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Configure automação para leads</p>
                   </div>
                 </div>
                 <button
@@ -1135,7 +1135,7 @@ export default function AutomationPage() {
                     {[
                       { id: 'lead_remarketing', label: 'Remarketing', icon: RefreshCw, description: 'Leads perdidos' },
                       { id: 'lead_inactivity', label: 'Inatividade', icon: Clock, description: 'Sem atividade' },
-                      { id: 'lead_status_change', label: 'Status', icon: Target, description: 'Mudanca de status' },
+                      { id: 'lead_status_change', label: 'Status', icon: Target, description: 'Mudança de status' },
                     ].map((type) => (
                       <button
                         key={type.id}
@@ -1165,12 +1165,12 @@ export default function AutomationPage() {
                 {/* Trigger Configuration */}
                 <div>
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
-                    Configuracao do Gatilho
+                    Configuração do Gatilho
                   </label>
 
                   {leadFormData.type === 'lead_remarketing' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ color: '#A0A0B0', fontSize: '14px' }}>Leads perdidos ha</span>
+                      <span style={{ color: '#A0A0B0', fontSize: '14px' }}>Leads perdidos há</span>
                       <input
                         type="number"
                         value={leadFormData.triggerLostDaysAgo}
@@ -1263,7 +1263,7 @@ export default function AutomationPage() {
                 {/* Action Configuration */}
                 <div>
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#A0A0B0', marginBottom: '8px' }}>
-                    Acao a Executar
+                    Ação a Executar
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '16px' }}>
                     {[
@@ -1365,7 +1365,7 @@ export default function AutomationPage() {
                   {leadFormData.actionType === 'create_task' && (
                     <input
                       type="text"
-                      placeholder="Titulo da tarefa..."
+                      placeholder="Título da tarefa..."
                       value={leadFormData.actionTaskTitle}
                       onChange={(e) => setLeadFormData({ ...leadFormData, actionTaskTitle: e.target.value })}
                       style={{
@@ -1386,7 +1386,7 @@ export default function AutomationPage() {
                   {leadFormData.actionType === 'notify' && (
                     <input
                       type="text"
-                      placeholder="Mensagem da notificacao..."
+                      placeholder="Mensagem da notificação..."
                       value={leadFormData.actionNotificationMessage}
                       onChange={(e) => setLeadFormData({ ...leadFormData, actionNotificationMessage: e.target.value })}
                       style={{
@@ -2317,11 +2317,11 @@ function LeadAutomationCard({
   const getTriggerDescription = () => {
     switch (automation.type) {
       case 'lead_remarketing':
-        return `Leads perdidos ha ${automation.trigger.lostDaysAgo || 30} dias`
+        return `Leads perdidos há ${automation.trigger.lostDaysAgo || 30} dias`
       case 'lead_inactivity':
         return `Leads inativos por ${automation.trigger.inactiveDays || 7} dias`
       case 'lead_status_change':
-        return `Mudanca de ${leadStatusLabels[automation.trigger.fromStatus || 'NEW']} para ${leadStatusLabels[automation.trigger.toStatus || 'REMARKETING']}`
+        return `Mudança de ${leadStatusLabels[automation.trigger.fromStatus || 'NEW']} para ${leadStatusLabels[automation.trigger.toStatus || 'REMARKETING']}`
       default:
         return 'Gatilho configurado'
     }
@@ -2336,9 +2336,9 @@ function LeadAutomationCard({
       case 'create_task':
         return automation.action.taskTitle || 'Criar tarefa'
       case 'notify':
-        return automation.action.notificationMessage || 'Enviar notificacao'
+        return automation.action.notificationMessage || 'Enviar notificação'
       default:
-        return 'Acao configurada'
+        return 'Ação configurada'
     }
   }
 
@@ -2394,12 +2394,12 @@ function LeadAutomationCard({
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '12px', color: '#6B6B7B' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Activity size={12} />
-                  {automation.executionCount || 0} execucoes
+                  {automation.executionCount || 0} execuções
                 </span>
                 {automation.lastExecutedAt && (
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <Clock size={12} />
-                    Ultimo: {new Date(automation.lastExecutedAt).toLocaleString('pt-BR')}
+                    Último: {new Date(automation.lastExecutedAt).toLocaleString('pt-BR')}
                   </span>
                 )}
               </div>
@@ -2457,7 +2457,7 @@ function LeadAutomationCard({
               {/* Action */}
               <div>
                 <h4 style={{ fontSize: '12px', fontWeight: 500, color: '#6B6B7B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
-                  Acao
+                  Ação
                 </h4>
                 <div style={{
                   display: 'flex',

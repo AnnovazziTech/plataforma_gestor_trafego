@@ -46,7 +46,7 @@ interface Product {
 
 // Dados serao carregados do banco de dados via API
 
-const categories = ['Todos', 'Copys', 'Templates', 'Planilhas', 'Scripts', 'Automacao', 'Videos']
+const categories = ['Todos', 'Copys', 'Templates', 'Planilhas', 'Scripts', 'Automação', 'Vídeos']
 
 const iconMap: Record<string, any> = {
   FileText,
@@ -138,7 +138,7 @@ export default function MarketplacePage() {
     <div style={{ minHeight: '100vh' }}>
       <Header
         title="Marketplace"
-        subtitle="Recursos e ferramentas para gestores de trafego"
+        subtitle="Recursos e ferramentas para gestores de tráfego"
         showCreateButton={false}
       />
 
@@ -159,10 +159,10 @@ export default function MarketplacePage() {
             <div>
               <Badge variant="info" style={{ marginBottom: '12px' }}>Destaque</Badge>
               <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: '0 0 8px' }}>
-                Pack Completo do Gestor de Trafego
+                Pack Completo do Gestor de Tráfego
               </h2>
               <p style={{ fontSize: '16px', color: '#A0A0B0', margin: '0 0 16px', maxWidth: '500px' }}>
-                Todos os recursos que voce precisa em um unico pack: copys, templates, planilhas e scripts
+                Todos os recursos que você precisa em um único pack: copys, templates, planilhas e scripts
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <span style={{ fontSize: '32px', fontWeight: 700, color: '#FFFFFF' }}>R$ 197</span>
@@ -242,7 +242,7 @@ export default function MarketplacePage() {
           >
             <option value="popular" style={{ backgroundColor: '#12121A' }}>Mais Populares</option>
             <option value="recent" style={{ backgroundColor: '#12121A' }}>Mais Recentes</option>
-            <option value="price" style={{ backgroundColor: '#12121A' }}>Menor Preco</option>
+            <option value="price" style={{ backgroundColor: '#12121A' }}>Menor Preço</option>
           </select>
         </div>
 
@@ -332,7 +332,7 @@ export default function MarketplacePage() {
                         {product.rating}
                       </span>
                       <span style={{ fontSize: '13px', color: '#6B6B7B' }}>
-                        {product.reviews} avaliacoes
+                        {product.reviews} avaliações
                       </span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: '#6B6B7B' }}>
                         <Download size={14} />

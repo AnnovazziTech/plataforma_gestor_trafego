@@ -49,7 +49,7 @@ export function ExportFinancialModal({ isOpen, onClose, entries }: Props) {
     const totalAssets = filtered.filter(e => e.type === 'ASSET').reduce((s, e) => s + e.amount, 0)
     const balance = totalIncome - totalExpenses
 
-    const typeLabels: Record<string, string> = { INCOME: 'Receita', EXPENSE: 'Despesa', ASSET: 'Patrimonio' }
+    const typeLabels: Record<string, string> = { INCOME: 'Receita', EXPENSE: 'Despesa', ASSET: 'Patrimônio' }
     const typeColors: Record<string, string> = { INCOME: '#10B981', EXPENSE: '#EF4444', ASSET: '#3B82F6' }
 
     const rows = filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).map(e => `
@@ -63,7 +63,7 @@ export function ExportFinancialModal({ isOpen, onClose, entries }: Props) {
     `).join('')
 
     const html = `
-      <html><head><title>Relatorio Financeiro</title>
+      <html><head><title>Relatório Financeiro</title>
       <style>body{font-family:Arial,sans-serif;padding:40px;color:#333}
       h1{text-align:center;font-size:24px;margin-bottom:4px}
       .sub{text-align:center;color:#666;font-size:13px;margin-bottom:30px}
@@ -74,8 +74,8 @@ export function ExportFinancialModal({ isOpen, onClose, entries }: Props) {
       th{padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;background:#f5f5f5;border-bottom:2px solid #ddd}
       th.right{text-align:right}
       </style></head><body>
-      <h1>Relatorio Financeiro</h1>
-      <div class="sub">Periodo: ${formatDate(startDate)} a ${formatDate(endDate)}<br>Gerado em: ${formatDate(new Date().toISOString())} as ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+      <h1>Relatório Financeiro</h1>
+      <div class="sub">Período: ${formatDate(startDate)} a ${formatDate(endDate)}<br>Gerado em: ${formatDate(new Date().toISOString())} às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
       <div class="summary">
         <div class="summary-box" style="background:#10B981"><span class="summary-label">Total Receitas</span>${formatCurrency(totalIncome)}</div>
         <div class="summary-box" style="background:#EF4444"><span class="summary-label">Total Despesas</span>${formatCurrency(totalExpenses)}</div>
@@ -84,12 +84,12 @@ export function ExportFinancialModal({ isOpen, onClose, entries }: Props) {
       <table>
         <thead><tr>
           <th>Data</th><th>Tipo</th><th class="right">Valor</th>
-          ${includeDescriptions ? '<th>Descricao</th>' : ''}
+          ${includeDescriptions ? '<th>Descrição</th>' : ''}
           <th>Cliente</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
-      ${filtered.length === 0 ? '<p style="text-align:center;color:#999;padding:40px">Nenhum lancamento no periodo selecionado.</p>' : ''}
+      ${filtered.length === 0 ? '<p style="text-align:center;color:#999;padding:40px">Nenhum lançamento no período selecionado.</p>' : ''}
       </body></html>
     `
 
@@ -140,9 +140,9 @@ export function ExportFinancialModal({ isOpen, onClose, entries }: Props) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div>
                 <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFF', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <FileDown size={20} /> Exportar Relatorio Financeiro
+                  <FileDown size={20} /> Exportar Relatório Financeiro
                 </h2>
-                <p style={{ fontSize: '12px', color: '#6B6B7B', marginTop: '4px' }}>Configure os filtros para gerar o relatorio em PDF.</p>
+                <p style={{ fontSize: '12px', color: '#6B6B7B', marginTop: '4px' }}>Configure os filtros para gerar o relatório em PDF.</p>
               </div>
               <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
                 <X size={20} />
@@ -151,7 +151,7 @@ export function ExportFinancialModal({ isOpen, onClose, entries }: Props) {
 
             {/* Period */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block', fontWeight: 600 }}>Periodo</label>
+              <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block', fontWeight: 600 }}>Período</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '11px', color: '#6B6B7B', display: 'block', marginBottom: '4px' }}>Data Inicial</label>
@@ -166,11 +166,11 @@ export function ExportFinancialModal({ isOpen, onClose, entries }: Props) {
 
             {/* Checkboxes */}
             <div style={{ marginBottom: '24px' }}>
-              <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '10px', display: 'block', fontWeight: 600 }}>Incluir no relatorio</label>
+              <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '10px', display: 'block', fontWeight: 600 }}>Incluir no relatório</label>
               {[
                 { label: 'Receitas', checked: includeIncome, onChange: setIncludeIncome },
                 { label: 'Despesas', checked: includeExpenses, onChange: setIncludeExpenses },
-                { label: 'Descricoes detalhadas', checked: includeDescriptions, onChange: setIncludeDescriptions },
+                { label: 'Descrições detalhadas', checked: includeDescriptions, onChange: setIncludeDescriptions },
               ].map(item => (
                 <label key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', cursor: 'pointer', color: '#CACADB', fontSize: '14px' }}>
                   <div style={{

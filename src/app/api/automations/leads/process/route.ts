@@ -1,4 +1,4 @@
-// API Route: Processar Automacoes de Leads
+// API Route: Processar Automações de Leads
 // POST - Executar regras de remarketing pendentes
 
 export const maxDuration = 30
@@ -35,13 +35,13 @@ interface LeadAutomation {
   organizationId: string
 }
 
-// POST - Processar automacoes
+// POST - Processar automações
 export const POST = withAuth(async (req, ctx) => {
   try {
     const body = await req.json()
-    const { automationId } = body // Opcional: processar apenas uma automacao especifica
+    const { automationId } = body // Opcional: processar apenas uma automação específica
 
-    // Buscar automacoes ativas
+    // Buscar automações ativas
     const where: any = {
       organizationId: ctx.organizationId,
       action: 'lead_automation.created',
@@ -87,9 +87,9 @@ export const POST = withAuth(async (req, ctx) => {
       results,
     })
   } catch (error) {
-    console.error('Erro ao processar automacoes de leads:', error)
+    console.error('Erro ao processar automações de leads:', error)
     return NextResponse.json(
-      { error: 'Erro ao processar automacoes de leads' },
+      { error: 'Erro ao processar automações de leads' },
       { status: 500 }
     )
   }
@@ -126,7 +126,7 @@ async function processAutomation(
 
     switch (automation.type) {
       case 'lead_inactivity':
-        // Buscar leads sem atividade por X dias
+        // Buscar leads sem atividade por X dias (inatividade)
         if (automation.trigger.inactiveDays) {
           const inactiveDate = new Date()
           inactiveDate.setDate(inactiveDate.getDate() - automation.trigger.inactiveDays)
@@ -143,7 +143,7 @@ async function processAutomation(
         break
 
       case 'lead_remarketing':
-        // Buscar leads perdidos ha X dias para remarketing
+        // Buscar leads perdidos há X dias para remarketing
         if (automation.trigger.lostDaysAgo) {
           const lostDate = new Date()
           lostDate.setDate(lostDate.getDate() - automation.trigger.lostDaysAgo)
@@ -160,11 +160,11 @@ async function processAutomation(
         break
 
       case 'lead_status_change':
-        // Este tipo e tratado via webhook/trigger quando status muda
+        // Este tipo é tratado via webhook/trigger quando status muda
         // Aqui buscamos leads que mudaram recentemente
         if (automation.trigger.toStatus) {
           const recentDate = new Date()
-          recentDate.setHours(recentDate.getHours() - 1) // Ultima hora
+          recentDate.setHours(recentDate.getHours() - 1) // Última hora
 
           const recentChanges = await prisma.leadHistory.findMany({
             where: {
@@ -176,7 +176,7 @@ async function processAutomation(
             take: 100,
           })
 
-          // Filtrar apenas leads da organizacao
+          // Filtrar apenas leads da organização
           const filteredChanges = recentChanges.filter(
             (h) => h.lead.organizationId === automation.organizationId
           )
@@ -187,17 +187,17 @@ async function processAutomation(
 
     processedLeads = leads.length
 
-    // Executar acoes para cada lead
+    // Executar ações para cada lead
     for (const lead of leads) {
       try {
         await executeAction(automation, lead, ctx)
         executedActions++
       } catch (e) {
-        console.error(`Erro ao executar acao para lead ${lead.id}:`, e)
+        console.error(`Erro ao executar ação para lead ${lead.id}:`, e)
       }
     }
 
-    // Registrar execucao
+    // Registrar execução
     await prisma.auditLog.create({
       data: {
         organizationId: automation.organizationId,
@@ -216,7 +216,7 @@ async function processAutomation(
 
     return { processedLeads, executedActions, error: null }
   } catch (error) {
-    console.error(`Erro ao processar automacao ${automation.id}:`, error)
+    console.error(`Erro ao processar automação ${automation.id}:`, error)
     return { processedLeads, executedActions, error: String(error) }
   }
 }
@@ -241,13 +241,13 @@ async function executeAction(
           },
         })
 
-        // Criar historico
+        // Criar histórico
         await prisma.leadHistory.create({
           data: {
             leadId: lead.id,
             fromStatus: lead.status,
             toStatus: action.newStatus as any,
-            note: `Alterado automaticamente por regra: ${automation.name}`,
+            note: `Alterado automaticamente pela regra: ${automation.name}`,
             changedById: ctx.userId,
           },
         })
@@ -256,7 +256,7 @@ async function executeAction(
 
     case 'send_message':
       // TODO: Integrar com sistema de mensagens (WhatsApp, Email, SMS)
-      // Por enquanto, apenas registra a intencao
+      // Por enquanto, apenas registra a intenção
       await prisma.auditLog.create({
         data: {
           organizationId: ctx.organizationId,
@@ -297,7 +297,7 @@ async function executeAction(
       break
 
     case 'notify':
-      // Criar notificacao como audit log (TODO: integrar com sistema de notificacoes)
+      // Criar notificação como audit log (TODO: integrar com sistema de notificações)
       await prisma.auditLog.create({
         data: {
           organizationId: ctx.organizationId,
@@ -308,8 +308,8 @@ async function executeAction(
           entityId: lead.id,
           newData: {
             type: 'AUTOMATION',
-            title: `Automacao: ${automation.name}`,
-            message: action.notificationMessage || `Lead ${lead.name} processado pela regra de automacao`,
+            title: `Automação: ${automation.name}`,
+            message: action.notificationMessage || `Lead ${lead.name} processado pela regra de automação`,
             leadId: lead.id,
             leadName: lead.name,
             automationId: automation.id,

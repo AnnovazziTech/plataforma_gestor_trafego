@@ -64,7 +64,7 @@ export default function OrcamentoPage() {
         setQuotes(Array.isArray(data) ? data : [])
       }
     } catch (error) {
-      console.error('Erro ao buscar orcamentos:', error)
+      console.error('Erro ao buscar orçamentos:', error)
     } finally {
       setIsLoading(false)
     }
@@ -138,7 +138,7 @@ export default function OrcamentoPage() {
           body: JSON.stringify(payload),
         })
         if (res.ok) {
-          showToast('Orcamento atualizado!', 'success')
+          showToast('Orçamento atualizado!', 'success')
           setShowModal(false)
           resetForm()
           fetchQuotes()
@@ -152,7 +152,7 @@ export default function OrcamentoPage() {
           body: JSON.stringify(payload),
         })
         if (res.ok) {
-          showToast('Orcamento criado!', 'success')
+          showToast('Orçamento criado!', 'success')
           setShowModal(false)
           resetForm()
           fetchQuotes()
@@ -161,7 +161,7 @@ export default function OrcamentoPage() {
         }
       }
     } catch {
-      showToast('Erro ao salvar orcamento', 'error')
+      showToast('Erro ao salvar orçamento', 'error')
     } finally {
       setSaving(false)
     }
@@ -172,7 +172,7 @@ export default function OrcamentoPage() {
       const res = await fetch(`/api/quotes/${id}`, { method: 'DELETE' })
       if (res.ok) {
         setQuotes(prev => prev.filter(q => q.id !== id))
-        showToast('Orcamento removido!', 'success')
+        showToast('Orçamento removido!', 'success')
       }
     } catch {
       showToast('Erro ao remover', 'error')
@@ -201,7 +201,7 @@ export default function OrcamentoPage() {
     const disc = sub - quote.totalValue
 
     const html = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Orcamento - ${quote.clientName}</title>
+<html><head><meta charset="utf-8"><title>Orçamento - ${quote.clientName}</title>
 <style>
   body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 40px; color: #333; }
   .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #3B82F6; }
@@ -227,8 +227,8 @@ export default function OrcamentoPage() {
 </style></head><body>
   <div class="header">
     <div>
-      <div class="title">Orcamento</div>
-      <div class="subtitle">Data: ${formatDate(quote.createdAt)}${quote.validUntil ? ` | Valido ate: ${formatDate(quote.validUntil)}` : ''}</div>
+      <div class="title">Orçamento</div>
+      <div class="subtitle">Data: ${formatDate(quote.createdAt)}${quote.validUntil ? ` | Válido até: ${formatDate(quote.validUntil)}` : ''}</div>
     </div>
     <div class="client-info">
       <div class="client-name">${quote.clientName}</div>
@@ -241,7 +241,7 @@ export default function OrcamentoPage() {
       ${services.map((s: ServiceItem) => `
         <tr>
           <td>${s.description}</td>
-          <td><span class="type-badge type-${s.type}">${s.type === 'servico' ? 'Servico' : 'Campanha'}</span></td>
+          <td><span class="type-badge type-${s.type}">${s.type === 'servico' ? 'Serviço' : 'Campanha'}</span></td>
           <td style="text-align:right;font-weight:500">${formatCurrency(s.value)}</td>
         </tr>
       `).join('')}
@@ -252,7 +252,7 @@ export default function OrcamentoPage() {
     ${disc > 0 ? `<div style="color:#10B981">Desconto: <strong>-${formatCurrency(disc)}</strong></div>` : ''}
     <div class="total-final">Total: ${formatCurrency(quote.totalValue)}</div>
   </div>
-  ${quote.notes ? `<div class="notes"><div class="notes-title">Observacoes</div><div class="notes-text">${quote.notes}</div></div>` : ''}
+  ${quote.notes ? `<div class="notes"><div class="notes-title">Observações</div><div class="notes-text">${quote.notes}</div></div>` : ''}
   <div class="footer">Documento gerado automaticamente | TrafficPro</div>
 </body></html>`
 
@@ -263,7 +263,7 @@ export default function OrcamentoPage() {
   if (isLoading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Header title="Orcamento" subtitle="Propostas e orcamentos" variant="simple" />
+        <Header title="Orçamento" subtitle="Propostas e orçamentos" variant="simple" />
         <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Loader2 size={48} style={{ color: '#3B82F6', animation: 'spin 1s linear infinite' }} />
         </main>
@@ -273,7 +273,7 @@ export default function OrcamentoPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header title="Orcamento" subtitle="Propostas e orcamentos" variant="simple" />
+      <Header title="Orçamento" subtitle="Propostas e orçamentos" variant="simple" />
 
       <main style={{ flex: 1, padding: '24px', overflowX: 'hidden' }}>
         {/* Top bar */}
@@ -303,7 +303,7 @@ export default function OrcamentoPage() {
               color: '#FFF', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
             }}
           >
-            <Plus size={16} /> Novo Orcamento
+            <Plus size={16} /> Novo Orçamento
           </button>
         </div>
 
@@ -315,8 +315,8 @@ export default function OrcamentoPage() {
             border: '1px solid rgba(255,255,255,0.06)',
           }}>
             <Receipt size={48} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
-            <p style={{ fontSize: '16px', fontWeight: 500 }}>Nenhum orcamento</p>
-            <p style={{ fontSize: '13px', marginTop: '8px' }}>Crie seu primeiro orcamento clicando em "Novo Orcamento".</p>
+            <p style={{ fontSize: '16px', fontWeight: 500 }}>Nenhum orçamento</p>
+            <p style={{ fontSize: '13px', marginTop: '8px' }}>Crie seu primeiro orçamento clicando em "Novo Orçamento".</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -348,7 +348,7 @@ export default function OrcamentoPage() {
                       </div>
                       <div style={{ fontSize: '12px', color: '#6B6B7B', marginBottom: '4px' }}>
                         {services.length} ite{services.length !== 1 ? 'ns' : 'm'} | Criado em {formatDate(quote.createdAt)}
-                        {quote.validUntil && ` | Valido ate ${formatDate(quote.validUntil)}`}
+                        {quote.validUntil && ` | Válido até ${formatDate(quote.validUntil)}`}
                       </div>
                       {quote.clientEmail && (
                         <div style={{ fontSize: '12px', color: '#6B6B7B' }}>{quote.clientEmail}</div>
@@ -413,7 +413,7 @@ export default function OrcamentoPage() {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFF' }}>Orcamento</h2>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFF' }}>Orçamento</h2>
                 <button onClick={() => setViewQuote(null)} style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
                   <X size={20} />
                 </button>
@@ -438,7 +438,7 @@ export default function OrcamentoPage() {
                         backgroundColor: item.type === 'servico' ? 'rgba(59,130,246,0.15)' : 'rgba(245,158,11,0.15)',
                         color: item.type === 'servico' ? '#3B82F6' : '#F59E0B',
                       }}>
-                        {item.type === 'servico' ? 'Servico' : 'Campanha'}
+                        {item.type === 'servico' ? 'Serviço' : 'Campanha'}
                       </span>
                     </div>
                     <span style={{ fontSize: '14px', fontWeight: 600, color: '#FFF' }}>{formatCurrency(item.value)}</span>
@@ -457,7 +457,7 @@ export default function OrcamentoPage() {
                   marginTop: '16px', padding: '12px', borderRadius: '10px',
                   backgroundColor: 'rgba(255,255,255,0.03)',
                 }}>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#A0A0B0', marginBottom: '4px' }}>Observacoes</div>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#A0A0B0', marginBottom: '4px' }}>Observações</div>
                   <div style={{ fontSize: '13px', color: '#FFF', whiteSpace: 'pre-wrap' }}>{viewQuote.notes}</div>
                 </div>
               )}
@@ -506,7 +506,7 @@ export default function OrcamentoPage() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFF' }}>
-                  {editingQuote ? 'Editar Orcamento' : 'Novo Orcamento'}
+                  {editingQuote ? 'Editar Orçamento' : 'Novo Orçamento'}
                 </h2>
                 <button onClick={() => { setShowModal(false); resetForm() }} style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
                   <X size={20} />
@@ -534,7 +534,7 @@ export default function OrcamentoPage() {
                       <input
                         value={item.description}
                         onChange={e => updateItem(i, 'description', e.target.value)}
-                        placeholder="Descricao do item"
+                        placeholder="Descrição do item"
                         style={{ ...inputStyle, flex: 2 }}
                       />
                       <select
@@ -542,7 +542,7 @@ export default function OrcamentoPage() {
                         onChange={e => updateItem(i, 'type', e.target.value)}
                         style={{ ...inputStyle, flex: 0, width: '120px' }}
                       >
-                        <option value="servico">Servico</option>
+                        <option value="servico">Serviço</option>
                         <option value="campanha">Campanha</option>
                       </select>
                       <input
@@ -591,20 +591,20 @@ export default function OrcamentoPage() {
                     />
                   </div>
                   <div>
-                    <label style={labelStyle}>Valido ate</label>
+                    <label style={labelStyle}>Válido até</label>
                     <input type="date" value={validUntil} onChange={e => setValidUntil(e.target.value)} style={inputStyle} />
                   </div>
                 </div>
 
                 {/* Notes */}
                 <div style={{ marginBottom: '16px' }}>
-                  <label style={labelStyle}>Observacoes</label>
+                  <label style={labelStyle}>Observações</label>
                   <textarea
                     value={notes}
                     onChange={e => setNotes(e.target.value)}
                     rows={3}
                     style={{ ...inputStyle, resize: 'vertical' }}
-                    placeholder="Condicoes, formas de pagamento, etc."
+                    placeholder="Condições, formas de pagamento, etc."
                   />
                 </div>
 
@@ -639,7 +639,7 @@ export default function OrcamentoPage() {
                     opacity: saving ? 0.7 : 1,
                   }}
                 >
-                  {saving ? 'Salvando...' : editingQuote ? 'Salvar Alteracoes' : 'Criar Orcamento'}
+                  {saving ? 'Salvando...' : editingQuote ? 'Salvar Alterações' : 'Criar Orçamento'}
                 </button>
               </form>
             </motion.div>

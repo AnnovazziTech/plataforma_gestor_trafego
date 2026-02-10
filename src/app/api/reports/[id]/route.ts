@@ -1,30 +1,30 @@
-// API Route: Relatorio Individual
-// GET - Buscar relatorio por ID
-// PATCH - Atualizar relatorio
-// DELETE - Remover relatorio
+// API Route: Relatório Individual
+// GET - Buscar relatório por ID
+// PATCH - Atualizar relatório
+// DELETE - Remover relatório
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
 import { withAuth, createAuditLog } from '@/lib/api/middleware'
 
-// Schema para atualizar relatorio
+// Schema para atualizar relatório
 const updateReportSchema = z.object({
-  name: z.string().min(1, 'Nome obrigatorio').optional(),
+  name: z.string().min(1, 'Nome obrigatório').optional(),
   status: z.enum(['ACTIVE', 'PAUSED', 'ARCHIVED']).optional(),
   frequency: z.enum(['ONCE', 'DAILY', 'WEEKLY', 'MONTHLY', 'CUSTOM']).optional(),
   recipients: z.array(z.string()).optional(),
   sendMethod: z.enum(['EMAIL', 'WHATSAPP', 'DOWNLOAD']).optional(),
 })
 
-// GET - Buscar relatorio por ID
+// GET - Buscar relatório por ID
 export const GET = withAuth(async (req, ctx) => {
   try {
     const id = req.url.split('/reports/')[1]?.split('?')[0]
 
     if (!id) {
       return NextResponse.json(
-        { error: 'ID do relatorio obrigatorio' },
+        { error: 'ID do relatório obrigatório' },
         { status: 400 }
       )
     }
@@ -39,7 +39,7 @@ export const GET = withAuth(async (req, ctx) => {
 
     if (!report) {
       return NextResponse.json(
-        { error: 'Relatorio nao encontrado' },
+        { error: 'Relatório não encontrado' },
         { status: 404 }
       )
     }
@@ -68,22 +68,22 @@ export const GET = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ report: formattedReport })
   } catch (error) {
-    console.error('Erro ao buscar relatorio:', error)
+    console.error('Erro ao buscar relatório:', error)
     return NextResponse.json(
-      { error: 'Erro ao buscar relatorio' },
+      { error: 'Erro ao buscar relatório' },
       { status: 500 }
     )
   }
 }, { requiredPermissions: ['canViewReports'] })
 
-// PATCH - Atualizar relatorio
+// PATCH - Atualizar relatório
 export const PATCH = withAuth(async (req, ctx) => {
   try {
     const id = req.url.split('/reports/')[1]?.split('?')[0]
 
     if (!id) {
       return NextResponse.json(
-        { error: 'ID do relatorio obrigatorio' },
+        { error: 'ID do relatório obrigatório' },
         { status: 400 }
       )
     }
@@ -91,7 +91,7 @@ export const PATCH = withAuth(async (req, ctx) => {
     const body = await req.json()
     const data = updateReportSchema.parse(body)
 
-    // Verificar se o relatorio existe
+    // Verificar se o relatório existe
     const existing = await prisma.report.findFirst({
       where: {
         id,
@@ -102,7 +102,7 @@ export const PATCH = withAuth(async (req, ctx) => {
 
     if (!existing) {
       return NextResponse.json(
-        { error: 'Relatorio nao encontrado' },
+        { error: 'Relatório não encontrado' },
         { status: 404 }
       )
     }
@@ -115,7 +115,7 @@ export const PATCH = withAuth(async (req, ctx) => {
     if (data.recipients) updateData.recipients = data.recipients
     if (data.sendMethod) updateData.sendMethod = data.sendMethod
 
-    // Atualizar relatorio
+    // Atualizar relatório
     const report = await prisma.report.update({
       where: { id },
       data: updateData,
@@ -160,7 +160,7 @@ export const PATCH = withAuth(async (req, ctx) => {
       report: formattedReport,
     })
   } catch (error) {
-    console.error('Erro ao atualizar relatorio:', error)
+    console.error('Erro ao atualizar relatório:', error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -170,25 +170,25 @@ export const PATCH = withAuth(async (req, ctx) => {
     }
 
     return NextResponse.json(
-      { error: 'Erro ao atualizar relatorio' },
+      { error: 'Erro ao atualizar relatório' },
       { status: 500 }
     )
   }
 }, { requiredPermissions: ['canViewReports'] })
 
-// DELETE - Remover relatorio (soft delete)
+// DELETE - Remover relatório (soft delete)
 export const DELETE = withAuth(async (req, ctx) => {
   try {
     const id = req.url.split('/reports/')[1]?.split('?')[0]
 
     if (!id) {
       return NextResponse.json(
-        { error: 'ID do relatorio obrigatorio' },
+        { error: 'ID do relatório obrigatório' },
         { status: 400 }
       )
     }
 
-    // Verificar se o relatorio existe
+    // Verificar se o relatório existe
     const existing = await prisma.report.findFirst({
       where: {
         id,
@@ -199,7 +199,7 @@ export const DELETE = withAuth(async (req, ctx) => {
 
     if (!existing) {
       return NextResponse.json(
-        { error: 'Relatorio nao encontrado' },
+        { error: 'Relatório não encontrado' },
         { status: 404 }
       )
     }
@@ -224,12 +224,12 @@ export const DELETE = withAuth(async (req, ctx) => {
 
     return NextResponse.json({
       success: true,
-      message: 'Relatorio removido com sucesso',
+      message: 'Relatório removido com sucesso',
     })
   } catch (error) {
-    console.error('Erro ao remover relatorio:', error)
+    console.error('Erro ao remover relatório:', error)
     return NextResponse.json(
-      { error: 'Erro ao remover relatorio' },
+      { error: 'Erro ao remover relatório' },
       { status: 500 }
     )
   }

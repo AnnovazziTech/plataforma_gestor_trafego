@@ -1,5 +1,5 @@
 // NextAuth Configuration
-// Autenticacao com credenciais + OAuth providers
+// Autenticação com credenciais + OAuth providers
 
 import { NextAuthOptions } from 'next-auth'
 import { PrismaAdapter } from '@auth/prisma-adapter'
@@ -89,7 +89,7 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Credenciais inválidas')
           }
 
-          // Atualizar ultimo login
+          // Atualizar último login
           await prisma.user.update({
             where: { id: user.id },
             data: { lastLoginAt: new Date() },
@@ -122,14 +122,14 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async signIn({ user, account }) {
-      // Para OAuth, verificar se usuario ja existe
+      // Para OAuth, verificar se usuário já existe
       if (account?.provider !== 'credentials') {
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email! },
         })
 
         if (!existingUser) {
-          // Criar usuario automaticamente
+          // Criar usuário automaticamente
           await prisma.user.create({
             data: {
               email: user.email!.toLowerCase(),
@@ -144,7 +144,7 @@ export const authOptions: NextAuthOptions = {
     },
 
     async jwt({ token, user, trigger, session }) {
-      // Primeiro login - adicionar dados do usuario ao token
+      // Primeiro login - adicionar dados do usuário ao token
       if (user) {
         token.id = user.id
         token.email = user.email!
@@ -157,7 +157,7 @@ export const authOptions: NextAuthOptions = {
         token.isSuperAdmin = dbUser?.isSuperAdmin ?? false
       }
 
-      // Update session - quando o usuario atualiza dados
+      // Update session - quando o usuário atualiza dados
       if (trigger === 'update' && session) {
         token.organizationId = session.organizationId
         token.organizationSlug = session.organizationSlug
@@ -165,7 +165,7 @@ export const authOptions: NextAuthOptions = {
         token.role = session.role
       }
 
-      // Buscar organizacao ativa do usuario (se nao tiver no token)
+      // Buscar organização ativa do usuário (se não tiver no token)
       if (token.id && !token.organizationId) {
         const membership = await prisma.organizationMember.findFirst({
           where: {
@@ -216,8 +216,8 @@ export const authOptions: NextAuthOptions = {
   events: {
     async signIn({ user, isNewUser }) {
       if (isNewUser) {
-        // Log de novo usuario
-        console.log(`Novo usuario cadastrado: ${user.email}`)
+        // Log de novo usuário
+        console.log(`Novo usuário cadastrado: ${user.email}`)
       }
     },
   },

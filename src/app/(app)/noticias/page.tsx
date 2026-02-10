@@ -15,7 +15,7 @@ export default function NoticiasPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header title="Noticias" subtitle="Fique por dentro das novidades" variant="simple" />
+      <Header title="Notícias" subtitle="Fique por dentro das novidades" variant="simple" />
 
       <main style={{ flex: 1, padding: '24px', overflowX: 'hidden' }}>
         {newsPostsLoading ? (
@@ -30,10 +30,10 @@ export default function NoticiasPage() {
           }}>
             <Newspaper size={48} style={{ color: '#6B6B7B', margin: '0 auto 16px' }} />
             <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#FFF', marginBottom: '8px' }}>
-              Nenhuma noticia publicada
+              Nenhuma notícia publicada
             </h3>
             <p style={{ color: '#6B6B7B', fontSize: '14px' }}>
-              As noticias serao exibidas aqui quando publicadas pelo administrador.
+              As notícias serão exibidas aqui quando publicadas pelo administrador.
             </p>
           </div>
         ) : (

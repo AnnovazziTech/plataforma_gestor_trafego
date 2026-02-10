@@ -58,8 +58,8 @@ export default function LoginPage() {
 
   const features = [
     { icon: BarChart3, text: 'Analytics em tempo real' },
-    { icon: Target, text: 'Gestao de campanhas' },
-    { icon: TrendingUp, text: 'Otimizacao de ROAS' },
+    { icon: Target, text: 'Gestão de campanhas' },
+    { icon: TrendingUp, text: 'Otimização de ROAS' },
     { icon: Users, text: 'CRM integrado' },
   ]
 

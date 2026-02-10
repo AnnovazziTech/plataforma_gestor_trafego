@@ -36,7 +36,7 @@ export function FinanceChart({ data }: Props) {
       }}
     >
       <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFF', marginBottom: '20px' }}>
-        Evolucao Financeira
+        Evolução Financeira
       </h3>
 
       {/* Legend */}
@@ -44,7 +44,7 @@ export function FinanceChart({ data }: Props) {
         {[
           { label: 'Receita', color: '#10B981' },
           { label: 'Despesas', color: '#EF4444' },
-          { label: 'Patrimonio', color: '#3B82F6' },
+          { label: 'Patrimônio', color: '#3B82F6' },
         ].map(item => (
           <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <div style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: item.color }} />

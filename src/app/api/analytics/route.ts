@@ -45,7 +45,7 @@ export const GET = withAuth(async (req, ctx) => {
       campaignWhere.integrationId = accountId
     }
 
-    // Buscar dados de serie temporal
+    // Buscar dados de série temporal
     const timeSeriesData = await prisma.campaignDailyMetrics.groupBy({
       by: ['date'],
       where: {
@@ -62,7 +62,7 @@ export const GET = withAuth(async (req, ctx) => {
       orderBy: { date: 'asc' },
     })
 
-    // Buscar metricas por plataforma
+    // Buscar métricas por plataforma
     const platformMetrics = await prisma.campaign.groupBy({
       by: ['platform'],
       where: campaignWhere,
@@ -72,7 +72,7 @@ export const GET = withAuth(async (req, ctx) => {
       _count: true,
     })
 
-    // Calcular metricas agregadas por plataforma
+    // Calcular métricas agregadas por plataforma
     const platformDetails = await Promise.all(
       platformMetrics.map(async (p) => {
         const platformFilter = { ...campaignWhere, platform: p.platform }
@@ -108,13 +108,13 @@ export const GET = withAuth(async (req, ctx) => {
       })
     )
 
-    // Dados de audiencia - requerem integracao com APIs de plataformas
-    // Retornando arrays vazios ate que dados reais sejam sincronizados
+    // Dados de audiência - requerem integração com APIs de plataformas
+    // Retornando arrays vazios até que dados reais sejam sincronizados
     const audienceByDevice: { device: string; value: number }[] = []
     const audienceByAge: { age: string; value: number }[] = []
     const audienceByGender: { gender: string; value: number }[] = []
 
-    // Performance por hora - calculado a partir de metricas diarias quando disponiveis
+    // Performance por hora - calculado a partir de métricas diárias quando disponíveis
     // Por hora requer dados granulares das APIs das plataformas
     const hourlyPerformance: { hour: number; impressions: number; clicks: number; conversions: number }[] = []
 

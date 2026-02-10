@@ -72,10 +72,10 @@ export default function RegisterPage() {
 
   const benefits = [
     '5 campanhas ativas',
-    '100 leads por mes',
-    '1 integracao',
+    '100 leads por mês',
+    '1 integração',
     'Dashboard completo',
-    'Relatorios basicos',
+    'Relatórios básicos',
     '14 dias trial Pro',
   ]
 
@@ -157,7 +157,7 @@ export default function RegisterPage() {
               Crie sua conta
             </h2>
             <p style={{ fontSize: '16px', color: '#6B6B7B' }}>
-              Comece gratis e faca upgrade quando precisar
+              Comece grátis e faça upgrade quando precisar
             </p>
           </div>
 
@@ -321,7 +321,7 @@ export default function RegisterPage() {
                     type="text"
                     value={organizationName}
                     onChange={(e) => setOrganizationName(e.target.value)}
-                    placeholder="Minha Agencia"
+                    placeholder="Minha Agência"
                     required
                     style={{
                       width: '100%',
@@ -370,7 +370,7 @@ export default function RegisterPage() {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Minimo 8 caracteres"
+                    placeholder="Mínimo 8 caracteres"
                     required
                     minLength={8}
                     style={{
@@ -468,7 +468,7 @@ export default function RegisterPage() {
                         fontWeight: privacyAccepted ? 600 : 400,
                       }}
                     >
-                      Politica de Privacidade {privacyAccepted && '✓'}
+                      Política de Privacidade {privacyAccepted && '✓'}
                     </button>
                   </span>
                 </div>
@@ -530,7 +530,7 @@ export default function RegisterPage() {
 
           {/* Login Link */}
           <p style={{ marginTop: '32px', textAlign: 'center', fontSize: '15px', color: '#6B6B7B' }}>
-            Ja tem uma conta?{' '}
+            Já tem uma conta?{' '}
             <Link href="/login" style={{ color: '#00F5FF', textDecoration: 'none', fontWeight: 500 }}>
               Entrar
             </Link>
@@ -653,7 +653,7 @@ export default function RegisterPage() {
               </span>
             </h1>
             <p style={{ fontSize: '18px', color: '#8B8B9B', maxWidth: '420px', lineHeight: 1.6 }}>
-              Crie sua conta gratuita e tenha acesso a todas as funcionalidades basicas para comecar.
+              Crie sua conta gratuita e tenha acesso a todas as funcionalidades básicas para começar.
             </p>
           </motion.div>
 
@@ -741,11 +741,11 @@ export default function RegisterPage() {
               </div>
               <div>
                 <h4 style={{ fontWeight: 600, color: 'white', fontSize: '16px' }}>Plano Pro</h4>
-                <p style={{ fontSize: '13px', color: '#6B6B7B' }}>R$197/mes</p>
+                <p style={{ fontSize: '13px', color: '#6B6B7B' }}>R$197/mês</p>
               </div>
             </div>
             <p style={{ fontSize: '14px', color: '#8B8B9B', lineHeight: 1.5 }}>
-              Desbloqueie campanhas ilimitadas, analise com IA, automacoes avancadas e muito mais.
+              Desbloqueie campanhas ilimitadas, análise com IA, automações avançadas e muito mais.
             </p>
           </motion.div>
         </div>

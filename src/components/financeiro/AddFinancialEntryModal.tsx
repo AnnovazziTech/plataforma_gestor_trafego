@@ -43,7 +43,7 @@ export function AddFinancialEntryModal({ isOpen, onClose, clients }: Props) {
   const typeOptions = [
     { value: 'INCOME', label: 'Receita', icon: <DollarSign size={16} />, color: '#10B981' },
     { value: 'EXPENSE', label: 'Despesa', icon: <TrendingDown size={16} />, color: '#EF4444' },
-    { value: 'ASSET', label: 'Patrimonio', icon: <Building2 size={16} />, color: '#3B82F6' },
+    { value: 'ASSET', label: 'Patrimônio', icon: <Building2 size={16} />, color: '#3B82F6' },
   ]
 
   return (
@@ -72,7 +72,7 @@ export function AddFinancialEntryModal({ isOpen, onClose, clients }: Props) {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFF' }}>Novo Lancamento</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFF' }}>Novo Lançamento</h2>
               <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
@@ -120,7 +120,7 @@ export function AddFinancialEntryModal({ isOpen, onClose, clients }: Props) {
 
               {/* Description */}
               <div style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>Descricao</label>
+                <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>Descrição</label>
                 <input
                   type="text"
                   value={description}
@@ -130,7 +130,7 @@ export function AddFinancialEntryModal({ isOpen, onClose, clients }: Props) {
                     backgroundColor: '#0A0A0F', border: '1px solid rgba(255,255,255,0.1)',
                     color: '#FFF', fontSize: '14px', outline: 'none',
                   }}
-                  placeholder="Descricao do lancamento"
+                  placeholder="Descrição do lançamento"
                 />
               </div>
 
@@ -180,7 +180,7 @@ export function AddFinancialEntryModal({ isOpen, onClose, clients }: Props) {
                   opacity: loading ? 0.7 : 1,
                 }}
               >
-                {loading ? 'Salvando...' : 'Adicionar Lancamento'}
+                {loading ? 'Salvando...' : 'Adicionar Lançamento'}
               </button>
             </form>
           </motion.div>

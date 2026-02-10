@@ -42,7 +42,7 @@ export const GET = withAuth(async (req, ctx) => {
     // Campanhas sempre devem ser visíveis, apenas as métricas são filtradas por data
     // Os parâmetros startDate/endDate são usados apenas para filtrar métricas no Dashboard/Analytics
 
-    // Buscar campanhas com metricas
+    // Buscar campanhas com métricas
     const [campaigns, total] = await Promise.all([
       prisma.campaign.findMany({
         where,
@@ -109,7 +109,7 @@ export const GET = withAuth(async (req, ctx) => {
 
 // POST - Criar campanha manual
 const createCampaignSchema = z.object({
-  name: z.string().min(1, 'Nome obrigatorio'),
+  name: z.string().min(1, 'Nome obrigatório'),
   platform: z.enum(['META', 'GOOGLE', 'TIKTOK', 'LINKEDIN', 'TWITTER']),
   objective: z.enum([
     'AWARENESS', 'TRAFFIC', 'ENGAGEMENT', 'LEADS',
@@ -136,7 +136,7 @@ export const POST = withAuth(async (req, ctx) => {
       )
     }
 
-    // Verificar integracao se fornecida
+    // Verificar integração se fornecida
     if (data.integrationId) {
       const integration = await prisma.integration.findFirst({
         where: {
@@ -149,7 +149,7 @@ export const POST = withAuth(async (req, ctx) => {
 
       if (!integration) {
         return NextResponse.json(
-          { error: 'Integracao invalida ou nao conectada' },
+          { error: 'Integração inválida ou não conectada' },
           { status: 400 }
         )
       }

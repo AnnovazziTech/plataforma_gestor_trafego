@@ -31,9 +31,9 @@ interface PerformanceChartProps {
 }
 
 const metrics: { key: MetricKey; label: string; color: string; icon: any }[] = [
-  { key: 'impressions', label: 'Impressoes', color: '#3B82F6', icon: Eye },
+  { key: 'impressions', label: 'Impressões', color: '#3B82F6', icon: Eye },
   { key: 'clicks', label: 'Cliques', color: '#60A5FA', icon: MousePointer },
-  { key: 'conversions', label: 'Conversoes', color: '#FACC15', icon: Activity },
+  { key: 'conversions', label: 'Conversões', color: '#FACC15', icon: Activity },
   { key: 'spent', label: 'Investido', color: '#1D4ED8', icon: DollarSign },
   { key: 'revenue', label: 'Receita', color: '#FDE047', icon: DollarSign },
 ]
@@ -154,7 +154,7 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
       <CardHeader>
         <div>
           <CardTitle>Performance ao Longo do Tempo</CardTitle>
-          <p style={{ fontSize: '12px', color: '#6B6B7B', marginTop: '4px', margin: 0 }}>Acompanhe a evolucao das suas metricas principais</p>
+          <p style={{ fontSize: '12px', color: '#6B6B7B', marginTop: '4px', margin: 0 }}>Acompanhe a evolução das suas métricas principais</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           {metrics.map((metric) => {

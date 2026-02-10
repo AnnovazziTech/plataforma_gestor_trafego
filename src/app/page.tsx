@@ -77,7 +77,7 @@ export default function Home() {
           transition={{ delay: 0.3 }}
           className="text-xl text-[#A0A0B0] mb-12"
         >
-          Plataforma de Gestao de Trafego Pago
+          Plataforma de Gestão de Tráfego Pago
         </motion.p>
 
         <motion.div

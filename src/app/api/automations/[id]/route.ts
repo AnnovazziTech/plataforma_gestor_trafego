@@ -1,7 +1,7 @@
-// API Route: Automacao Individual
-// GET - Buscar automacao
-// PATCH - Atualizar automacao
-// DELETE - Deletar automacao
+// API Route: Automação Individual
+// GET - Buscar automação
+// PATCH - Atualizar automação
+// DELETE - Deletar automação
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -21,14 +21,14 @@ const updateAutomationSchema = z.object({
   actionValue: z.number().optional(),
 })
 
-// GET - Buscar automacao
+// GET - Buscar automação
 export const GET = withAuth(async (req, ctx) => {
   try {
     const id = req.url.split('/automations/')[1]?.split('?')[0]
 
     if (!id) {
       return NextResponse.json(
-        { error: 'ID da automacao obrigatorio' },
+        { error: 'ID da automação obrigatório' },
         { status: 400 }
       )
     }
@@ -43,12 +43,12 @@ export const GET = withAuth(async (req, ctx) => {
 
     if (!automationLog) {
       return NextResponse.json(
-        { error: 'Automacao nao encontrada' },
+        { error: 'Automação não encontrada' },
         { status: 404 }
       )
     }
 
-    // Buscar execucoes
+    // Buscar execuções
     const executions = await prisma.auditLog.findMany({
       where: {
         organizationId: ctx.organizationId,
@@ -72,22 +72,22 @@ export const GET = withAuth(async (req, ctx) => {
       })),
     })
   } catch (error) {
-    console.error('Erro ao buscar automacao:', error)
+    console.error('Erro ao buscar automação:', error)
     return NextResponse.json(
-      { error: 'Erro ao buscar automacao' },
+      { error: 'Erro ao buscar automação' },
       { status: 500 }
     )
   }
 }, { requiredPermissions: ['canManageCampaigns'] })
 
-// PATCH - Atualizar automacao
+// PATCH - Atualizar automação
 export const PATCH = withAuth(async (req, ctx) => {
   try {
     const id = req.url.split('/automations/')[1]?.split('?')[0]
 
     if (!id) {
       return NextResponse.json(
-        { error: 'ID da automacao obrigatorio' },
+        { error: 'ID da automação obrigatório' },
         { status: 400 }
       )
     }
@@ -95,7 +95,7 @@ export const PATCH = withAuth(async (req, ctx) => {
     const body = await req.json()
     const data = updateAutomationSchema.parse(body)
 
-    // Buscar automacao existente
+    // Buscar automação existente
     const existingLog = await prisma.auditLog.findFirst({
       where: {
         id,
@@ -106,7 +106,7 @@ export const PATCH = withAuth(async (req, ctx) => {
 
     if (!existingLog) {
       return NextResponse.json(
-        { error: 'Automacao nao encontrada' },
+        { error: 'Automação não encontrada' },
         { status: 404 }
       )
     }
@@ -140,7 +140,7 @@ export const PATCH = withAuth(async (req, ctx) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao atualizar automacao:', error)
+    console.error('Erro ao atualizar automação:', error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -150,25 +150,25 @@ export const PATCH = withAuth(async (req, ctx) => {
     }
 
     return NextResponse.json(
-      { error: 'Erro ao atualizar automacao' },
+      { error: 'Erro ao atualizar automação' },
       { status: 500 }
     )
   }
 }, { requiredPermissions: ['canManageCampaigns'] })
 
-// DELETE - Deletar automacao
+// DELETE - Deletar automação
 export const DELETE = withAuth(async (req, ctx) => {
   try {
     const id = req.url.split('/automations/')[1]?.split('?')[0]
 
     if (!id) {
       return NextResponse.json(
-        { error: 'ID da automacao obrigatorio' },
+        { error: 'ID da automação obrigatório' },
         { status: 400 }
       )
     }
 
-    // Buscar automacao existente
+    // Buscar automação existente
     const existingLog = await prisma.auditLog.findFirst({
       where: {
         id,
@@ -179,12 +179,12 @@ export const DELETE = withAuth(async (req, ctx) => {
 
     if (!existingLog) {
       return NextResponse.json(
-        { error: 'Automacao nao encontrada' },
+        { error: 'Automação não encontrada' },
         { status: 404 }
       )
     }
 
-    // Criar log de delecao
+    // Criar log de deleção
     await createAuditLog({
       organizationId: ctx.organizationId,
       userId: ctx.userId,
@@ -198,9 +198,9 @@ export const DELETE = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Erro ao deletar automacao:', error)
+    console.error('Erro ao deletar automação:', error)
     return NextResponse.json(
-      { error: 'Erro ao deletar automacao' },
+      { error: 'Erro ao deletar automação' },
       { status: 500 }
     )
   }

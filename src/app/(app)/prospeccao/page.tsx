@@ -49,7 +49,7 @@ interface Prospect {
     facebook?: string
     linkedin?: string
   }
-  status: 'new' | 'contacted' | 'qualified' | 'proposal' | 'won' | 'lost'
+  status: 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'PROPOSAL' | 'WON' | 'LOST'
   score: number
   notes: string
   isFavorite: boolean
@@ -57,18 +57,20 @@ interface Prospect {
   lastContact?: string
 }
 
-// Dados serao carregados do banco de dados via API
+// Dados serão carregados do banco de dados via API
 
-const statusConfig = {
-  new: { label: 'Novo', color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.1)' },
-  contacted: { label: 'Contatado', color: '#FACC15', bg: 'rgba(250, 204, 21, 0.1)' },
-  qualified: { label: 'Qualificado', color: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.1)' },
-  proposal: { label: 'Proposta', color: '#F97316', bg: 'rgba(249, 115, 22, 0.1)' },
-  won: { label: 'Ganho', color: '#10B981', bg: 'rgba(16, 185, 129, 0.1)' },
-  lost: { label: 'Perdido', color: '#EF4444', bg: 'rgba(239, 68, 68, 0.1)' },
+const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
+  NEW: { label: 'Novo', color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.1)' },
+  CONTACTED: { label: 'Contatado', color: '#FACC15', bg: 'rgba(250, 204, 21, 0.1)' },
+  QUALIFIED: { label: 'Qualificado', color: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.1)' },
+  PROPOSAL: { label: 'Proposta', color: '#F97316', bg: 'rgba(249, 115, 22, 0.1)' },
+  WON: { label: 'Ganho', color: '#10B981', bg: 'rgba(16, 185, 129, 0.1)' },
+  LOST: { label: 'Perdido', color: '#EF4444', bg: 'rgba(239, 68, 68, 0.1)' },
 }
 
-const industries = ['Todas', 'Tecnologia', 'E-commerce', 'Alimentacao', 'Saude', 'Educacao', 'Servicos']
+const defaultStatusStyle = { label: 'Desconhecido', color: '#6B6B7B', bg: 'transparent' }
+
+const industries = ['Todas', 'Tecnologia', 'E-commerce', 'Alimentação', 'Saúde', 'Educação', 'Serviços']
 
 export default function ProspeccaoPage() {
   const { showToast } = useApp()
@@ -201,15 +203,15 @@ export default function ProspeccaoPage() {
 
   const stats = {
     total: prospects.length,
-    new: prospects.filter(p => p.status === 'new').length,
-    qualified: prospects.filter(p => p.status === 'qualified').length,
-    won: prospects.filter(p => p.status === 'won').length,
+    new: prospects.filter(p => p.status === 'NEW').length,
+    qualified: prospects.filter(p => p.status === 'QUALIFIED').length,
+    won: prospects.filter(p => p.status === 'WON').length,
   }
 
   return (
     <div style={{ minHeight: '100vh' }}>
       <Header
-        title="Prospeccao"
+        title="Prospecção"
         subtitle="Encontre e gerencie potenciais clientes"
         showCreateButton={false}
       />
@@ -334,8 +336,8 @@ export default function ProspeccaoPage() {
                       <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>
                         {prospect.companyName}
                       </h3>
-                      <Badge variant="default" style={{ backgroundColor: statusConfig[prospect.status].bg, color: statusConfig[prospect.status].color }}>
-                        {statusConfig[prospect.status].label}
+                      <Badge variant="default" style={{ backgroundColor: (statusConfig[prospect.status] || defaultStatusStyle).bg, color: (statusConfig[prospect.status] || defaultStatusStyle).color }}>
+                        {(statusConfig[prospect.status] || defaultStatusStyle).label}
                       </Badge>
                       <button
                         onClick={() => toggleFavorite(prospect.id)}
@@ -582,7 +584,7 @@ export default function ProspeccaoPage() {
                     type="text"
                     value={newProspect.contactName}
                     onChange={(e) => setNewProspect(prev => ({ ...prev, contactName: e.target.value }))}
-                    placeholder="Ex: Joao Silva"
+                    placeholder="Ex: João Silva"
                     style={{ width: '100%', height: '44px', padding: '0 16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#FFFFFF', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
@@ -611,22 +613,22 @@ export default function ProspeccaoPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Localizacao</label>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Localização</label>
                   <input
                     type="text"
                     value={newProspect.location}
                     onChange={(e) => setNewProspect(prev => ({ ...prev, location: e.target.value }))}
-                    placeholder="Ex: Sao Paulo, SP"
+                    placeholder="Ex: São Paulo, SP"
                     style={{ width: '100%', height: '44px', padding: '0 16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#FFFFFF', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Observacoes</label>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Observações</label>
                   <textarea
                     value={newProspect.notes}
                     onChange={(e) => setNewProspect(prev => ({ ...prev, notes: e.target.value }))}
-                    placeholder="Informacoes adicionais sobre o prospecto..."
+                    placeholder="Informações adicionais sobre o prospecto..."
                     rows={3}
                     style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#FFFFFF', fontSize: '14px', outline: 'none', boxSizing: 'border-box', resize: 'none' }}
                   />

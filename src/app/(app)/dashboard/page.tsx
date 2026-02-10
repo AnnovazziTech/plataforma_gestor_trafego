@@ -79,7 +79,7 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Header title="Dashboard Financeiro" subtitle="Gestao financeira completa" variant="simple" />
+        <Header title="Dashboard Financeiro" subtitle="Gestão financeira completa" variant="simple" />
         <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center' }}>
             <Loader2 size={48} style={{ color: '#3B82F6', animation: 'spin 1s linear infinite' }} />
@@ -99,7 +99,7 @@ export default function DashboardPage() {
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header
         title="Dashboard Financeiro"
-        subtitle="Gestao financeira completa"
+        subtitle="Gestão financeira completa"
         variant="simple"
         onRefresh={handleRefresh}
       />
@@ -124,7 +124,7 @@ export default function DashboardPage() {
             delay={0.1}
           />
           <MetricCard
-            title="Patrimonio"
+            title="Patrimônio"
             value={data.totalAssets}
             format="currency"
             icon={<Building2 size={20} />}
@@ -152,7 +152,7 @@ export default function DashboardPage() {
           backgroundColor: '#12121A', border: '1px solid rgba(255,255,255,0.06)',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFF' }}>Lancamentos</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFF' }}>Lançamentos</h3>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 onClick={() => setShowExportModal(true)}
@@ -174,7 +174,7 @@ export default function DashboardPage() {
                   color: '#FFF', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
                 }}
               >
-                <Plus size={16} /> Novo Lancamento
+                <Plus size={16} /> Novo Lançamento
               </button>
             </div>
           </div>

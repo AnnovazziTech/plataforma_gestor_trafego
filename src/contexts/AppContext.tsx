@@ -450,8 +450,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Erro de conexao' }))
-      throw new Error(error.error || 'Erro na requisicao')
+      const error = await response.json().catch(() => ({ error: 'Erro de conexão' }))
+      throw new Error(error.error || 'Erro na requisição')
     }
 
     return response.json()
@@ -596,7 +596,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api('/api/reports')
       setReports(data.reports || [])
     } catch (error: any) {
-      console.error('Erro ao buscar relatorios:', error)
+      console.error('Erro ao buscar relatórios:', error)
     } finally {
       setReportsLoading(false)
     }
@@ -608,11 +608,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         method: 'POST',
         body: JSON.stringify(reportData),
       })
-      showToast('Relatorio gerado com sucesso!', 'success')
+      showToast('Relatório gerado com sucesso!', 'success')
       await fetchReports()
       return data.report
     } catch (error: any) {
-      showToast(error.message || 'Erro ao gerar relatorio', 'error')
+      showToast(error.message || 'Erro ao gerar relatório', 'error')
       return null
     }
   }, [api, fetchReports, showToast])
@@ -621,9 +621,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       await api(`/api/reports/${id}`, { method: 'DELETE' })
       setReports(prev => prev.filter(r => r.id !== id))
-      showToast('Relatorio removido!', 'info')
+      showToast('Relatório removido!', 'info')
     } catch (error: any) {
-      showToast(error.message || 'Erro ao remover relatorio', 'error')
+      showToast(error.message || 'Erro ao remover relatório', 'error')
     }
   }, [api, showToast])
 
@@ -635,7 +635,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api('/api/automations')
       setAutomations(data.automations || [])
     } catch (error: any) {
-      console.error('Erro ao buscar automacoes:', error)
+      console.error('Erro ao buscar automações:', error)
     } finally {
       setAutomationsLoading(false)
     }
@@ -648,9 +648,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(automationData),
       })
       setAutomations(prev => [data.automation, ...prev])
-      showToast('Automacao criada com sucesso!', 'success')
+      showToast('Automação criada com sucesso!', 'success')
     } catch (error: any) {
-      showToast(error.message || 'Erro ao criar automacao', 'error')
+      showToast(error.message || 'Erro ao criar automação', 'error')
     }
   }, [api, showToast])
 
@@ -661,9 +661,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(updates),
       })
       setAutomations(prev => prev.map(a => a.id === id ? data.automation : a))
-      showToast('Automacao atualizada!', 'success')
+      showToast('Automação atualizada!', 'success')
     } catch (error: any) {
-      showToast(error.message || 'Erro ao atualizar automacao', 'error')
+      showToast(error.message || 'Erro ao atualizar automação', 'error')
     }
   }, [api, showToast])
 
@@ -671,9 +671,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       await api(`/api/automations/${id}`, { method: 'DELETE' })
       setAutomations(prev => prev.filter(a => a.id !== id))
-      showToast('Automacao removida!', 'success')
+      showToast('Automação removida!', 'success')
     } catch (error: any) {
-      showToast(error.message || 'Erro ao remover automacao', 'error')
+      showToast(error.message || 'Erro ao remover automação', 'error')
     }
   }, [api, showToast])
 
@@ -688,7 +688,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ status: newStatus }),
       })
       setAutomations(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a))
-      showToast('Status da automacao alterado!', 'info')
+      showToast('Status da automação alterado!', 'info')
     } catch (error: any) {
       showToast(error.message || 'Erro ao alterar status', 'error')
     }
@@ -703,7 +703,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setNotifications(data.notifications || [])
       setUnreadCount(data.unreadCount || 0)
     } catch (error: any) {
-      console.error('Erro ao buscar notificacoes:', error)
+      console.error('Erro ao buscar notificações:', error)
     } finally {
       setNotificationsLoading(false)
     }
@@ -717,7 +717,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const markAllNotificationsAsRead = useCallback(() => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
     setUnreadCount(0)
-    showToast('Todas notificacoes marcadas como lidas!', 'info')
+    showToast('Todas notificações marcadas como lidas!', 'info')
   }, [showToast])
 
   const clearNotification = useCallback((id: string) => {
@@ -742,7 +742,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }))
       setConnectedAccounts(accounts)
     } catch (error: any) {
-      console.error('Erro ao buscar integracoes:', error)
+      console.error('Erro ao buscar integrações:', error)
     } finally {
       setIntegrationsLoading(false)
     }
@@ -770,7 +770,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return data.authUrl
       }
 
-      showToast('Redirecionando para autenticacao...', 'info')
+      showToast('Redirecionando para autenticação...', 'info')
       return null
     } catch (error: any) {
       showToast(error.message || 'Erro ao conectar conta', 'error')
@@ -988,7 +988,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api(`/api/financial-entries?${params.toString()}`)
       setFinancialEntries(data.entries || [])
     } catch (error: any) {
-      console.error('Erro ao buscar lancamentos:', error)
+      console.error('Erro ao buscar lançamentos:', error)
     } finally {
       setFinancialEntriesLoading(false)
     }
@@ -1001,10 +1001,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(entryData),
       })
       setFinancialEntries(prev => [data.entry, ...prev])
-      showToast('Lancamento criado com sucesso!', 'success')
+      showToast('Lançamento criado com sucesso!', 'success')
       return data.entry
     } catch (error: any) {
-      showToast(error.message || 'Erro ao criar lancamento', 'error')
+      showToast(error.message || 'Erro ao criar lançamento', 'error')
       return null
     }
   }, [api, showToast])
@@ -1013,9 +1013,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       await api(`/api/financial-entries/${id}`, { method: 'DELETE' })
       setFinancialEntries(prev => prev.filter(e => e.id !== id))
-      showToast('Lancamento removido!', 'success')
+      showToast('Lançamento removido!', 'success')
     } catch (error: any) {
-      showToast(error.message || 'Erro ao remover lancamento', 'error')
+      showToast(error.message || 'Erro ao remover lançamento', 'error')
     }
   }, [api, showToast])
 
@@ -1058,7 +1058,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ completed: !task.completed }),
       })
       setClientTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t))
-      showToast(task.completed ? 'Tarefa reaberta' : 'Tarefa concluida!', 'info')
+      showToast(task.completed ? 'Tarefa reaberta' : 'Tarefa concluída!', 'info')
     } catch (error: any) {
       showToast(error.message || 'Erro ao atualizar tarefa', 'error')
     }
@@ -1083,7 +1083,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api(`/api/budget-strategies${params}`)
       setBudgetStrategies(data.strategies || [])
     } catch (error: any) {
-      console.error('Erro ao buscar estrategias:', error)
+      console.error('Erro ao buscar estratégias:', error)
     } finally {
       setBudgetStrategiesLoading(false)
     }
@@ -1096,10 +1096,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(strategyData),
       })
       setBudgetStrategies(prev => [data.strategy, ...prev])
-      showToast('Estrategia criada com sucesso!', 'success')
+      showToast('Estratégia criada com sucesso!', 'success')
       return data.strategy
     } catch (error: any) {
-      showToast(error.message || 'Erro ao criar estrategia', 'error')
+      showToast(error.message || 'Erro ao criar estratégia', 'error')
       return null
     }
   }, [api, showToast])
@@ -1111,9 +1111,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(updateData),
       })
       setBudgetStrategies(prev => prev.map(s => s.id === id ? data.strategy : s))
-      showToast('Estrategia atualizada!', 'success')
+      showToast('Estratégia atualizada!', 'success')
     } catch (error: any) {
-      showToast(error.message || 'Erro ao atualizar estrategia', 'error')
+      showToast(error.message || 'Erro ao atualizar estratégia', 'error')
     }
   }, [api, showToast])
 
@@ -1121,9 +1121,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       await api(`/api/budget-strategies/${id}`, { method: 'DELETE' })
       setBudgetStrategies(prev => prev.filter(s => s.id !== id))
-      showToast('Estrategia removida!', 'success')
+      showToast('Estratégia removida!', 'success')
     } catch (error: any) {
-      showToast(error.message || 'Erro ao remover estrategia', 'error')
+      showToast(error.message || 'Erro ao remover estratégia', 'error')
     }
   }, [api, showToast])
 
@@ -1138,7 +1138,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api(`/api/budget-campaigns?${params.toString()}`)
       setBudgetCampaigns(data.campaigns || [])
     } catch (error: any) {
-      console.error('Erro ao buscar campanhas de orcamento:', error)
+      console.error('Erro ao buscar campanhas de orçamento:', error)
     } finally {
       setBudgetCampaignsLoading(false)
     }
@@ -1151,7 +1151,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(campaignData),
       })
       setBudgetCampaigns(prev => [data.campaign, ...prev])
-      showToast('Campanha de orcamento criada!', 'success')
+      showToast('Campanha de orçamento criada!', 'success')
       return data.campaign
     } catch (error: any) {
       showToast(error.message || 'Erro ao criar campanha', 'error')
@@ -1189,7 +1189,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api('/api/news')
       setNewsPosts(data.posts || [])
     } catch (error: any) {
-      console.error('Erro ao buscar noticias:', error)
+      console.error('Erro ao buscar notícias:', error)
     } finally {
       setNewsPostsLoading(false)
     }
@@ -1202,7 +1202,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api('/api/modules')
       setModules(data.modules || [])
     } catch (error: any) {
-      console.error('Erro ao buscar modulos:', error)
+      console.error('Erro ao buscar módulos:', error)
     } finally {
       setModulesLoading(false)
     }

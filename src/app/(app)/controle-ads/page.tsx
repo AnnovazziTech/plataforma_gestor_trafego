@@ -143,7 +143,7 @@ export default function ControleAdsPage() {
     `).join('')
 
     const html = `
-      <html><head><title>Relatorio Controle ADS</title>
+      <html><head><title>Relatório Controle ADS</title>
       <style>body{font-family:Arial,sans-serif;padding:40px;color:#333}
       h1{text-align:center;font-size:24px;margin-bottom:4px}
       .sub{text-align:center;color:#666;font-size:13px;margin-bottom:30px}
@@ -154,18 +154,18 @@ export default function ControleAdsPage() {
       th{padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;background:#f5f5f5;border-bottom:2px solid #ddd}
       th.right{text-align:right}
       </style></head><body>
-      <h1>Relatorio Controle ADS</h1>
-      <div class="sub">Gerado em: ${formatDate(new Date().toISOString())} as ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+      <h1>Relatório Controle ADS</h1>
+      <div class="sub">Gerado em: ${formatDate(new Date().toISOString())} às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
       <div class="summary">
         <div class="summary-box" style="background:#0081FB"><span class="summary-label">Gasto Meta</span>${formatCurrency(totalMeta)}</div>
         <div class="summary-box" style="background:#4285F4"><span class="summary-label">Gasto Google</span>${formatCurrency(totalGoogle)}</div>
-        <div class="summary-box" style="background:#3B82F6"><span class="summary-label">Orcamento Total</span>${formatCurrency(totalBudget)}</div>
+        <div class="summary-box" style="background:#3B82F6"><span class="summary-label">Orçamento Total</span>${formatCurrency(totalBudget)}</div>
       </div>
       <table>
         <thead><tr>
           <th>Campanha</th><th class="right">Max Meta</th><th class="right">Max Google</th>
           <th class="right">Gasto Meta</th><th class="right">Gasto Google</th>
-          <th class="right">Diario</th><th class="right">Custo/Lead</th><th>Inicio</th>
+          <th class="right">Diário</th><th class="right">Custo/Lead</th><th>Início</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -189,7 +189,7 @@ export default function ControleAdsPage() {
   if (isLoading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Header title="Controle ADS" subtitle="Gerencie orcamentos e estrategias" variant="simple" />
+        <Header title="Controle ADS" subtitle="Gerencie orçamentos e estratégias" variant="simple" />
         <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Loader2 size={48} style={{ color: '#3B82F6', animation: 'spin 1s linear infinite' }} />
         </main>
@@ -199,7 +199,7 @@ export default function ControleAdsPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header title="Controle ADS" subtitle="Gerencie orcamentos e estrategias" variant="simple" />
+      <Header title="Controle ADS" subtitle="Gerencie orçamentos e estratégias" variant="simple" />
 
       <main style={{ flex: 1, padding: '24px', overflowX: 'hidden' }}>
         {/* Filters & Actions */}
@@ -239,7 +239,7 @@ export default function ControleAdsPage() {
                 color: '#3B82F6', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
               }}
             >
-              <Plus size={14} /> Estrategia
+              <Plus size={14} /> Estratégia
             </button>
             <button
               onClick={() => { setCampaignForm(emptyCampaignForm); setShowCampaignModal(true); }}
@@ -257,7 +257,7 @@ export default function ControleAdsPage() {
 
         {/* Strategies (horizontal scroll) */}
         <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#A0A0B0', marginBottom: '12px' }}>Estrategias</h3>
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#A0A0B0', marginBottom: '12px' }}>Estratégias</h3>
           {filteredStrategies.length > 0 ? (
             <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
               {filteredStrategies.map(s => (
@@ -277,7 +277,7 @@ export default function ControleAdsPage() {
               border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center',
             }}>
               <Target size={32} style={{ color: '#6B6B7B', margin: '0 auto 8px' }} />
-              <p style={{ color: '#6B6B7B', fontSize: '13px' }}>Nenhuma estrategia criada</p>
+              <p style={{ color: '#6B6B7B', fontSize: '13px' }}>Nenhuma estratégia criada</p>
             </div>
           )}
         </div>
@@ -288,7 +288,7 @@ export default function ControleAdsPage() {
           backgroundColor: '#12121A', border: '1px solid rgba(255,255,255,0.06)',
         }}>
           <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFF', marginBottom: '16px' }}>
-            Campanhas de Orcamento ({filteredCampaigns.length})
+            Campanhas de Orçamento ({filteredCampaigns.length})
           </h3>
           <BudgetCampaignsTable
             campaigns={filteredCampaigns}
@@ -320,7 +320,7 @@ export default function ControleAdsPage() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFF' }}>
-                  {editingStrategy ? 'Editar Estrategia' : 'Nova Estrategia'}
+                  {editingStrategy ? 'Editar Estratégia' : 'Nova Estratégia'}
                 </h2>
                 <button onClick={() => setShowStrategyModal(false)} style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}><X size={20} /></button>
               </div>
@@ -339,11 +339,11 @@ export default function ControleAdsPage() {
                   <input required type="text" value={strategyForm.name} onChange={e => setStrategyForm(p => ({ ...p, name: e.target.value }))} style={inputStyle} placeholder="Ex: Campanha Janeiro" />
                 </div>
                 <div style={{ marginBottom: '20px' }}>
-                  <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>Orcamento Total (R$) *</label>
+                  <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>Orçamento Total (R$) *</label>
                   <input required type="number" step="0.01" value={strategyForm.totalBudget} onChange={e => setStrategyForm(p => ({ ...p, totalBudget: e.target.value }))} style={inputStyle} placeholder="0.00" />
                 </div>
                 <button type="submit" style={{ width: '100%', padding: '12px', borderRadius: '12px', border: 'none', background: 'linear-gradient(to right, #3B82F6, #2563EB)', color: '#FFF', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>
-                  {editingStrategy ? 'Salvar Alteracoes' : 'Criar Estrategia'}
+                  {editingStrategy ? 'Salvar Alterações' : 'Criar Estratégia'}
                 </button>
               </form>
             </motion.div>
@@ -381,7 +381,7 @@ export default function ControleAdsPage() {
                   </select>
                 </div>
                 <div style={{ marginBottom: '12px' }}>
-                  <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>Estrategia *</label>
+                  <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>Estratégia *</label>
                   <select required value={campaignForm.strategyId} onChange={e => setCampaignForm(p => ({ ...p, strategyId: e.target.value }))} style={inputStyle}>
                     <option value="">Selecione...</option>
                     {budgetStrategies.filter(s => !campaignForm.clientId || s.clientId === campaignForm.clientId).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -399,11 +399,11 @@ export default function ControleAdsPage() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                   <div>
-                    <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>Orcamento Diario (R$)</label>
+                    <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>Orçamento Diário (R$)</label>
                     <input type="number" step="0.01" value={campaignForm.dailyBudget} onChange={e => setCampaignForm(p => ({ ...p, dailyBudget: e.target.value }))} style={inputStyle} placeholder="0.00" />
                   </div>
                   <div>
-                    <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>Data Inicio *</label>
+                    <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>Data Início *</label>
                     <input required type="date" value={campaignForm.startDate} onChange={e => setCampaignForm(p => ({ ...p, startDate: e.target.value }))} style={inputStyle} />
                   </div>
                 </div>

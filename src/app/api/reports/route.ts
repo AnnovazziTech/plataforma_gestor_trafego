@@ -1,6 +1,6 @@
-// API Route: Relatorios
-// GET - Listar relatorios
-// POST - Criar relatorio
+// API Route: Relatórios
+// GET - Listar relatórios
+// POST - Criar relatório
 
 export const maxDuration = 30
 
@@ -9,13 +9,13 @@ import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
 import { withAuth, createAuditLog } from '@/lib/api/middleware'
 
-// Schema para criar relatorio
+// Schema para criar relatório
 const createReportSchema = z.object({
-  name: z.string().min(1, 'Nome obrigatorio'),
+  name: z.string().min(1, 'Nome obrigatório'),
   type: z.enum(['PERFORMANCE', 'AUDIENCE', 'CREATIVE', 'CUSTOM']).default('PERFORMANCE'),
   frequency: z.enum(['ONCE', 'DAILY', 'WEEKLY', 'MONTHLY', 'CUSTOM']).default('ONCE'),
   platforms: z.array(z.enum(['META', 'GOOGLE', 'TIKTOK', 'LINKEDIN', 'TWITTER', 'WHATSAPP'])).min(1, 'Selecione pelo menos uma plataforma'),
-  metrics: z.array(z.string()).min(1, 'Selecione pelo menos uma metrica'),
+  metrics: z.array(z.string()).min(1, 'Selecione pelo menos uma métrica'),
   dateRange: z.object({
     start: z.string(),
     end: z.string(),
@@ -24,7 +24,7 @@ const createReportSchema = z.object({
   sendMethod: z.enum(['EMAIL', 'WHATSAPP', 'DOWNLOAD']).optional(),
 })
 
-// GET - Listar relatorios
+// GET - Listar relatórios
 export const GET = withAuth(async (req, ctx) => {
   try {
     const { searchParams } = new URL(req.url)
@@ -48,7 +48,7 @@ export const GET = withAuth(async (req, ctx) => {
       where.type = type.toUpperCase()
     }
 
-    // Buscar relatorios
+    // Buscar relatórios
     const [reports, total] = await Promise.all([
       prisma.report.findMany({
         where,
@@ -59,7 +59,7 @@ export const GET = withAuth(async (req, ctx) => {
       prisma.report.count({ where }),
     ])
 
-    // Buscar estatisticas
+    // Buscar estatísticas
     const stats = await prisma.report.groupBy({
       by: ['status'],
       where: {
@@ -107,15 +107,15 @@ export const GET = withAuth(async (req, ctx) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao listar relatorios:', error)
+    console.error('Erro ao listar relatórios:', error)
     return NextResponse.json(
-      { error: 'Erro ao listar relatorios' },
+      { error: 'Erro ao listar relatórios' },
       { status: 500 }
     )
   }
 }, { requiredPermissions: ['canViewReports'] })
 
-// POST - Criar relatorio
+// POST - Criar relatório
 export const POST = withAuth(async (req, ctx) => {
   try {
     const body = await req.json()
@@ -124,7 +124,7 @@ export const POST = withAuth(async (req, ctx) => {
     const startDate = new Date(data.dateRange.start)
     const endDate = new Date(data.dateRange.end)
 
-    // Criar o relatorio no banco
+    // Criar o relatório no banco
     const report = await prisma.report.create({
       data: {
         organizationId: ctx.organizationId,
@@ -141,7 +141,7 @@ export const POST = withAuth(async (req, ctx) => {
       },
     })
 
-    // Gerar dados do relatorio baseado nas campanhas
+    // Gerar dados do relatório baseado nas campanhas
     const campaignWhere: any = {
       organizationId: ctx.organizationId,
       isActive: true,
@@ -173,7 +173,7 @@ export const POST = withAuth(async (req, ctx) => {
       },
     })
 
-    // Agregar metricas
+    // Agregar métricas
     const aggregatedMetrics = {
       totalSpent: 0,
       totalImpressions: 0,
@@ -207,7 +207,7 @@ export const POST = withAuth(async (req, ctx) => {
         campaignClicks += metric.clicks
         campaignConversions += metric.conversions
 
-        // Adicionar a dados diarios
+        // Adicionar a dados diários
         const dateStr = metric.date.toISOString().split('T')[0]
         const existing = dailyData.find((d) => d.date === dateStr)
         if (existing) {
@@ -240,7 +240,7 @@ export const POST = withAuth(async (req, ctx) => {
       })
     })
 
-    // Calcular metricas derivadas
+    // Calcular métricas derivadas
     if (aggregatedMetrics.totalImpressions > 0) {
       aggregatedMetrics.ctr = (aggregatedMetrics.totalClicks / aggregatedMetrics.totalImpressions) * 100
       aggregatedMetrics.cpm = (aggregatedMetrics.totalSpent / aggregatedMetrics.totalImpressions) * 1000
@@ -252,7 +252,7 @@ export const POST = withAuth(async (req, ctx) => {
       aggregatedMetrics.roas = (aggregatedMetrics.totalConversions * 100) / aggregatedMetrics.totalSpent
     }
 
-    // Ordenar dados diarios
+    // Ordenar dados diários
     dailyData.sort((a, b) => a.date.localeCompare(b.date))
 
     const reportData = {
@@ -263,7 +263,7 @@ export const POST = withAuth(async (req, ctx) => {
       generatedAt: new Date().toISOString(),
     }
 
-    // Atualizar o relatorio com os dados gerados
+    // Atualizar o relatório com os dados gerados
     await prisma.report.update({
       where: { id: report.id },
       data: {
@@ -311,7 +311,7 @@ export const POST = withAuth(async (req, ctx) => {
       report: formattedReport,
     })
   } catch (error) {
-    console.error('Erro ao criar relatorio:', error)
+    console.error('Erro ao criar relatório:', error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -321,7 +321,7 @@ export const POST = withAuth(async (req, ctx) => {
     }
 
     return NextResponse.json(
-      { error: 'Erro ao criar relatorio' },
+      { error: 'Erro ao criar relatório' },
       { status: 500 }
     )
   }

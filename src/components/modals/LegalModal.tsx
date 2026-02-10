@@ -13,82 +13,82 @@ interface LegalModalProps {
 
 const termsContent = [
   {
-    title: '1. Aceitacao dos Termos',
-    text: 'Ao acessar e usar o TrafficPro, voce concorda em cumprir e estar vinculado a estes Termos de Uso. Se voce nao concordar com qualquer parte destes termos, nao podera acessar o servico.',
+    title: '1. Aceitação dos Termos',
+    text: 'Ao acessar e usar o TrafficPro, você concorda em cumprir e estar vinculado a estes Termos de Uso. Se você não concordar com qualquer parte destes termos, não poderá acessar o serviço.',
   },
   {
-    title: '2. Descricao do Servico',
-    text: 'O TrafficPro e uma plataforma de gestao de campanhas de marketing digital que permite aos usuarios gerenciar, analisar e otimizar suas campanhas de trafego pago em diversas plataformas, alem de oferecer ferramentas de gestao financeira, controle de clientes e orcamentos.',
+    title: '2. Descrição do Serviço',
+    text: 'O TrafficPro é uma plataforma de gestão de campanhas de marketing digital que permite aos usuários gerenciar, analisar e otimizar suas campanhas de tráfego pago em diversas plataformas, além de oferecer ferramentas de gestão financeira, controle de clientes e orçamentos.',
   },
   {
-    title: '3. Conta do Usuario',
-    text: 'Voce e responsavel por manter a confidencialidade de sua conta e senha, e por restringir o acesso ao seu computador. Voce concorda em aceitar a responsabilidade por todas as atividades que ocorram sob sua conta.',
+    title: '3. Conta do Usuário',
+    text: 'Você é responsável por manter a confidencialidade de sua conta e senha, e por restringir o acesso ao seu computador. Você concorda em aceitar a responsabilidade por todas as atividades que ocorram sob sua conta.',
   },
   {
-    title: '4. Uso Aceitavel',
-    text: 'Voce concorda em nao usar o servico para qualquer finalidade ilegal ou proibida por estes termos. Voce nao pode usar o servico de qualquer maneira que possa danificar, desabilitar ou sobrecarregar o servico.',
+    title: '4. Uso Aceitável',
+    text: 'Você concorda em não usar o serviço para qualquer finalidade ilegal ou proibida por estes termos. Você não pode usar o serviço de qualquer maneira que possa danificar, desabilitar ou sobrecarregar o serviço.',
   },
   {
     title: '5. Propriedade Intelectual',
-    text: 'Todo o conteudo, funcionalidades e tecnologia do TrafficPro sao protegidos por direitos autorais e propriedade intelectual. E proibida a reproducao, distribuicao ou modificacao sem autorizacao previa.',
+    text: 'Todo o conteúdo, funcionalidades e tecnologia do TrafficPro são protegidos por direitos autorais e propriedade intelectual. É proibida a reprodução, distribuição ou modificação sem autorização prévia.',
   },
   {
     title: '6. Privacidade',
-    text: 'Sua privacidade e importante para nos. Nossa Politica de Privacidade explica como coletamos, usamos e protegemos suas informacoes pessoais.',
+    text: 'Sua privacidade é importante para nós. Nossa Política de Privacidade explica como coletamos, usamos e protegemos suas informações pessoais.',
   },
   {
-    title: '7. Limitacao de Responsabilidade',
-    text: 'O TrafficPro nao se responsabiliza por perdas financeiras decorrentes de decisoes tomadas com base nos dados exibidos na plataforma. Os dados de campanhas sao obtidos diretamente das APIs das plataformas de anuncio.',
+    title: '7. Limitação de Responsabilidade',
+    text: 'O TrafficPro não se responsabiliza por perdas financeiras decorrentes de decisões tomadas com base nos dados exibidos na plataforma. Os dados de campanhas são obtidos diretamente das APIs das plataformas de anúncio.',
   },
   {
-    title: '8. Modificacoes',
-    text: 'Reservamo-nos o direito de modificar estes termos a qualquer momento. Alteracoes significativas serao notificadas atraves do servico ou por e-mail.',
+    title: '8. Modificações',
+    text: 'Reservamo-nos o direito de modificar estes termos a qualquer momento. Alterações significativas serão notificadas através do serviço ou por e-mail.',
   },
   {
     title: '9. Contato',
-    text: 'Se voce tiver duvidas sobre estes Termos de Uso, entre em contato conosco atraves do suporte da plataforma.',
+    text: 'Se você tiver dúvidas sobre estes Termos de Uso, entre em contato conosco através do suporte da plataforma.',
   },
 ]
 
 const privacyContent = [
   {
-    title: '1. Informacoes que Coletamos',
-    text: 'Coletamos informacoes que voce nos fornece diretamente, como nome, e-mail e dados de pagamento. Tambem coletamos dados automaticamente, como informacoes de uso, dados de campanhas conectadas e metricas de desempenho.',
+    title: '1. Informações que Coletamos',
+    text: 'Coletamos informações que você nos fornece diretamente, como nome, e-mail e dados de pagamento. Também coletamos dados automaticamente, como informações de uso, dados de campanhas conectadas e métricas de desempenho.',
   },
   {
-    title: '2. Como Usamos suas Informacoes',
-    text: 'Utilizamos suas informacoes para fornecer, manter e melhorar nossos servicos, processar transacoes, enviar comunicacoes relacionadas ao servico e personalizar sua experiencia na plataforma.',
+    title: '2. Como Usamos suas Informações',
+    text: 'Utilizamos suas informações para fornecer, manter e melhorar nossos serviços, processar transações, enviar comunicações relacionadas ao serviço e personalizar sua experiência na plataforma.',
   },
   {
     title: '3. Compartilhamento de Dados',
-    text: 'Nao vendemos suas informacoes pessoais. Compartilhamos dados apenas com provedores de servicos que nos ajudam a operar a plataforma, sempre sob acordos de confidencialidade.',
+    text: 'Não vendemos suas informações pessoais. Compartilhamos dados apenas com provedores de serviços que nos ajudam a operar a plataforma, sempre sob acordos de confidencialidade.',
   },
   {
-    title: '4. Seguranca dos Dados',
-    text: 'Implementamos medidas de seguranca tecnicas e organizacionais para proteger suas informacoes contra acesso nao autorizado, alteracao, divulgacao ou destruicao. Utilizamos criptografia e protocolos seguros.',
+    title: '4. Segurança dos Dados',
+    text: 'Implementamos medidas de segurança técnicas e organizacionais para proteger suas informações contra acesso não autorizado, alteração, divulgação ou destruição. Utilizamos criptografia e protocolos seguros.',
   },
   {
     title: '5. Seus Direitos',
-    text: 'Voce tem o direito de acessar, corrigir ou excluir seus dados pessoais. Tambem pode solicitar a portabilidade dos dados ou retirar seu consentimento a qualquer momento.',
+    text: 'Você tem o direito de acessar, corrigir ou excluir seus dados pessoais. Também pode solicitar a portabilidade dos dados ou retirar seu consentimento a qualquer momento.',
   },
   {
     title: '6. Cookies e Rastreamento',
-    text: 'Utilizamos cookies e tecnologias similares para melhorar sua experiencia, analisar o uso do servico e personalizar conteudo. Voce pode gerenciar suas preferencias de cookies nas configuracoes do navegador.',
+    text: 'Utilizamos cookies e tecnologias similares para melhorar sua experiência, analisar o uso do serviço e personalizar conteúdo. Você pode gerenciar suas preferências de cookies nas configurações do navegador.',
   },
   {
-    title: '7. Retencao de Dados',
-    text: 'Mantemos suas informacoes pelo tempo necessario para fornecer os servicos ou conforme exigido por lei. Apos o encerramento da conta, seus dados serao excluidos em ate 30 dias.',
+    title: '7. Retenção de Dados',
+    text: 'Mantemos suas informações pelo tempo necessário para fornecer os serviços ou conforme exigido por lei. Após o encerramento da conta, seus dados serão excluídos em até 30 dias.',
   },
   {
     title: '8. Contato',
-    text: 'Para questoes sobre privacidade, entre em contato conosco atraves do suporte da plataforma.',
+    text: 'Para questões sobre privacidade, entre em contato conosco através do suporte da plataforma.',
   },
 ]
 
 export function LegalModal({ isOpen, onClose, onAccept, type }: LegalModalProps) {
   const isTerms = type === 'terms'
   const content = isTerms ? termsContent : privacyContent
-  const title = isTerms ? 'Termos de Uso' : 'Politica de Privacidade'
+  const title = isTerms ? 'Termos de Uso' : 'Política de Privacidade'
   const Icon = isTerms ? FileText : Shield
 
   useEffect(() => {
@@ -242,7 +242,7 @@ export function LegalModal({ isOpen, onClose, onAccept, type }: LegalModalProps)
                   marginTop: '8px',
                 }}
               >
-                Ultima atualizacao: Fevereiro de 2025
+                Última atualização: Fevereiro de 2025
               </p>
             </div>
 

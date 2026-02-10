@@ -129,13 +129,13 @@ export default function ResumoPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header title="Resumo" subtitle="Visao geral por cliente" variant="simple" />
+      <Header title="Resumo" subtitle="Visão geral por cliente" variant="simple" />
 
       <main style={{ flex: 1, padding: '24px', overflowX: 'hidden' }}>
         {/* Global metrics */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
           <MetricBox icon={<Users size={18} />} label="Clientes c/ Campanhas" value={String(summaries.length)} color="#3B82F6" />
-          <MetricBox icon={<DollarSign size={18} />} label="Orcamento Total" value={formatCurrency(totalBudget)} color="#10B981" />
+          <MetricBox icon={<DollarSign size={18} />} label="Orçamento Total" value={formatCurrency(totalBudget)} color="#10B981" />
           <MetricBox icon={<BarChart3 size={18} />} label="Total Gasto" value={formatCurrency(totalSpent)} color="#F59E0B" />
           <MetricBox icon={<Target size={18} />} label="Saldo Restante" value={formatCurrency(totalRemaining)} color="#8B5CF6" />
         </div>
@@ -230,7 +230,7 @@ function ClientSummaryCard({ summary, index }: { summary: CampaignSummary; index
           display: 'flex', alignItems: 'center', gap: '4px',
         }}>
           <Clock size={12} />
-          {summary.finalizaEm === Infinity ? 'Sem previsao' : `${summary.finalizaEm}d restantes`}
+          {summary.finalizaEm === Infinity ? 'Sem previsão' : `${summary.finalizaEm}d restantes`}
         </div>
       </div>
 
@@ -252,10 +252,10 @@ function ClientSummaryCard({ summary, index }: { summary: CampaignSummary; index
 
       {/* Metrics grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-        <InfoItem label="Orcamento" value={formatCurrency(summary.totalMaxBudget)} icon={<DollarSign size={14} />} />
+        <InfoItem label="Orçamento" value={formatCurrency(summary.totalMaxBudget)} icon={<DollarSign size={14} />} />
         <InfoItem label="Gasto" value={formatCurrency(summary.totalSpent)} icon={<BarChart3 size={14} />} />
         <InfoItem label="Saldo Restante" value={formatCurrency(summary.remaining)} icon={<Target size={14} />} color={summary.remaining < 0 ? '#EF4444' : '#10B981'} />
-        <InfoItem label="Diario" value={formatCurrency(summary.dailyBudget)} icon={<Clock size={14} />} />
+        <InfoItem label="Diário" value={formatCurrency(summary.dailyBudget)} icon={<Clock size={14} />} />
 
         {/* Lead cost */}
         {summary.currentLeadCost != null && (
@@ -294,7 +294,7 @@ function ClientSummaryCard({ summary, index }: { summary: CampaignSummary; index
         {summary.earliestStart && (
           <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '6px', color: '#6B6B7B', fontSize: '12px' }}>
             <CalendarDays size={14} />
-            Inicio: {formatDate(summary.earliestStart)}
+            Início: {formatDate(summary.earliestStart)}
           </div>
         )}
       </div>

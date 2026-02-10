@@ -25,7 +25,7 @@ export const POST = withAuth(async (req: NextRequest, ctx) => {
   const data = await req.json()
 
   if (!data.clientId || !data.name || data.totalBudget == null) {
-    return NextResponse.json({ error: 'Cliente, nome e orcamento total sao obrigatorios' }, { status: 400 })
+    return NextResponse.json({ error: 'Cliente, nome e orçamento total são obrigatórios' }, { status: 400 })
   }
 
   const strategy = await prisma.budgetStrategy.create({

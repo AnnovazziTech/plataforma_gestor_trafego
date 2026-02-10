@@ -8,7 +8,7 @@ export async function GET() {
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.organizationId) {
-      return NextResponse.json({ error: 'Nao autenticado' }, { status: 401 })
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
     }
 
     const organizationId = session.user.organizationId
@@ -42,7 +42,7 @@ export async function GET() {
       let description = ''
       let platform: string | undefined
 
-      // Determinar tipo baseado na acao
+      // Determinar tipo baseado na ação
       switch (log.action) {
         case 'CAMPAIGN_CREATED':
           type = 'campaign_created'
@@ -52,13 +52,13 @@ export async function GET() {
         case 'CAMPAIGN_UPDATED':
           type = 'campaign_edited'
           title = 'Campanha atualizada'
-          description = log.entity || 'Configuracoes alteradas'
+          description = log.entity || 'Configurações alteradas'
           break
         case 'CAMPAIGN_STARTED':
         case 'CAMPAIGN_ACTIVATED':
           type = 'campaign_started'
           title = 'Campanha iniciada'
-          description = log.entity ? `${log.entity} esta ativa` : 'Campanha ativada'
+          description = log.entity ? `${log.entity} está ativa` : 'Campanha ativada'
           break
         case 'CAMPAIGN_PAUSED':
           type = 'campaign_paused'
@@ -67,7 +67,7 @@ export async function GET() {
           break
         case 'CAMPAIGN_DELETED':
           type = 'alert'
-          title = 'Campanha excluida'
+          title = 'Campanha excluída'
           description = log.entity || 'Campanha removida'
           break
         case 'BUDGET_UPDATED':
@@ -79,12 +79,12 @@ export async function GET() {
         case 'ALERT_TRIGGERED':
           type = 'alert'
           title = 'Alerta disparado'
-          description = log.entity || 'Verificar metricas'
+          description = log.entity || 'Verificar métricas'
           break
         case 'MILESTONE_REACHED':
           type = 'milestone_reached'
           title = 'Meta atingida'
-          description = log.entity || 'Meta alcancada'
+          description = log.entity || 'Meta alcançada'
           break
         default:
           type = 'campaign_edited'
@@ -110,7 +110,7 @@ export async function GET() {
       }
     })
 
-    // Se nao houver logs suficientes, gerar atividades das campanhas recentes
+    // Se não houver logs suficientes, gerar atividades das campanhas recentes
     if (activities.length < 5) {
       const campaignActivities = recentCampaigns.map((campaign) => {
         const isRecent = (new Date().getTime() - campaign.createdAt.getTime()) < 86400000 * 7 // 7 dias

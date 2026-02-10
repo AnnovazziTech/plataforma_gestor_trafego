@@ -98,8 +98,8 @@ export const GET = withAuth(async (req, ctx) => {
 const sendMessageSchema = z.object({
   conversationId: z.string().optional(),
   integrationId: z.string(),
-  to: z.string().min(1, 'Numero de destino obrigatorio'),
-  message: z.string().min(1, 'Mensagem obrigatoria'),
+  to: z.string().min(1, 'Número de destino obrigatório'),
+  message: z.string().min(1, 'Mensagem obrigatória'),
   leadId: z.string().optional(),
 })
 
@@ -108,7 +108,7 @@ export const POST = withAuth(async (req, ctx) => {
     const body = await req.json()
     const data = sendMessageSchema.parse(body)
 
-    // Buscar integracao
+    // Buscar integração
     const integration = await prisma.integration.findFirst({
       where: {
         id: data.integrationId,
@@ -120,15 +120,15 @@ export const POST = withAuth(async (req, ctx) => {
 
     if (!integration) {
       return NextResponse.json(
-        { error: 'Integracao WhatsApp nao encontrada ou nao conectada' },
+        { error: 'Integração WhatsApp não encontrada ou não conectada' },
         { status: 400 }
       )
     }
 
-    // Formatar numero
+    // Formatar número
     const formattedPhone = formatPhoneNumber(data.to)
 
-    // Enviar mensagem baseado no tipo de integracao
+    // Enviar mensagem baseado no tipo de integração
     let result: { success: boolean; messageId?: string; error?: string }
 
     if (integration.whatsappPhoneId) {
@@ -149,7 +149,7 @@ export const POST = withAuth(async (req, ctx) => {
       )
     } else {
       return NextResponse.json(
-        { error: 'Configuracao de WhatsApp invalida' },
+        { error: 'Configuração de WhatsApp inválida' },
         { status: 400 }
       )
     }

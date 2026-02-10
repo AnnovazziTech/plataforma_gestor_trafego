@@ -81,7 +81,7 @@ export default function MeuLinkPage() {
   const [links, setLinks] = useState<LinkItem[]>([])
   const [pageConfig, setPageConfig] = useState<PageConfig>({
     username: 'gestor-trafego',
-    displayName: 'Gestor de Trafego',
+    displayName: 'Gestor de Tráfego',
     bio: 'Especialista em Facebook Ads, Google Ads e TikTok Ads. Ajudo empresas a escalar seus resultados.',
     avatar: '',
     theme: 'dark',
@@ -128,7 +128,7 @@ export default function MeuLinkPage() {
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(`https://${pageUrl}`)
-    showToast('Link copiado para a area de transferencia!', 'success')
+    showToast('Link copiado para a área de transferência!', 'success')
   }
 
   const handleAddLink = async () => {
@@ -233,7 +233,7 @@ export default function MeuLinkPage() {
     <div style={{ minHeight: '100vh' }}>
       <Header
         title="Meu Link"
-        subtitle="Crie sua pagina de links personalizada"
+        subtitle="Crie sua página de links personalizada"
         showCreateButton={false}
       />
 
@@ -281,7 +281,7 @@ export default function MeuLinkPage() {
                   border: '1px solid rgba(255, 255, 255, 0.05)',
                 }}
               >
-                <p style={{ fontSize: '12px', color: '#6B6B7B', margin: '0 0 4px' }}>CTR Medio</p>
+                <p style={{ fontSize: '12px', color: '#6B6B7B', margin: '0 0 4px' }}>CTR Médio</p>
                 <p style={{ fontSize: '28px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>-</p>
               </motion.div>
             </div>
@@ -333,12 +333,12 @@ export default function MeuLinkPage() {
               }}
             >
               <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', marginBottom: '20px' }}>
-                Configuracoes do Perfil
+                Configurações do Perfil
               </h3>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Nome de Usuario</label>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Nome de Usuário</label>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '14px', color: '#6B6B7B' }}>trafficpro.link/</span>
                     <input
@@ -361,7 +361,7 @@ export default function MeuLinkPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Nome de Exibicao</label>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Nome de Exibição</label>
                   <input
                     type="text"
                     value={pageConfig.displayName}
@@ -423,7 +423,7 @@ export default function MeuLinkPage() {
                 </div>
 
                 <Button variant="primary" onClick={savePageConfig} style={{ marginTop: '8px' }}>
-                  Salvar Configuracoes
+                  Salvar Configurações
                 </Button>
               </div>
             </motion.div>
@@ -670,7 +670,7 @@ export default function MeuLinkPage() {
 
               <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Titulo</label>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Título</label>
                   <input
                     type="text"
                     value={newLink.title}
@@ -692,7 +692,7 @@ export default function MeuLinkPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Icone</label>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#A0A0B0', marginBottom: '8px' }}>Ícone</label>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {Object.keys(iconMap).map(iconName => {
                       const IconComp = iconMap[iconName]
