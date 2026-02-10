@@ -21,6 +21,9 @@ import {
   GraduationCap,
   Link as LinkIcon,
   Brain,
+  LayoutDashboard,
+  CalendarDays,
+  Receipt,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -40,6 +43,7 @@ const iconMap: Record<string, LucideIcon> = {
   DollarSign, Users, Target, Image, Newspaper,
   BarChart3, TrendingUp, FileText, Share2, MessageSquare,
   Zap, Search, ShoppingBag, GraduationCap, Link: LinkIcon, Brain,
+  LayoutDashboard, CalendarDays, Receipt,
 }
 
 const platforms = [
@@ -136,42 +140,11 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               transition={{ duration: 0.2 }}
               style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}
             >
-              <div style={{ position: 'relative', flexShrink: 0 }}>
-                <div
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '12px',
-                    background: 'linear-gradient(to bottom right, #3B82F6, #2563EB, #1D4ED8)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
-                  }}
-                >
-                  <Zap style={{ width: '20px', height: '20px', color: '#FFFFFF' }} />
-                </div>
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '-4px',
-                    right: '-4px',
-                    width: '12px',
-                    height: '12px',
-                    backgroundColor: '#22C55E',
-                    borderRadius: '50%',
-                    border: '2px solid #0A0A0F',
-                  }}
-                />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
-                  TrafficPro
-                </h1>
-                <p style={{ fontSize: '11px', color: '#6B6B7B', fontWeight: 500, margin: 0 }}>
-                  Gestao de Trafego
-                </p>
-              </div>
+              <img
+                src="/logo-trafficpro.svg"
+                alt="TrafficPro"
+                style={{ height: '40px', width: 'auto', objectFit: 'contain' }}
+              />
             </motion.div>
           ) : (
             <motion.div
@@ -182,20 +155,11 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}
             >
               <div style={{ position: 'relative' }}>
-                <div
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '12px',
-                    background: 'linear-gradient(to bottom right, #3B82F6, #2563EB, #1D4ED8)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
-                  }}
-                >
-                  <Zap style={{ width: '20px', height: '20px', color: '#FFFFFF' }} />
-                </div>
+                <img
+                  src="/logo-128.png"
+                  alt="TrafficPro"
+                  style={{ width: '40px', height: '40px', borderRadius: '12px' }}
+                />
                 <div
                   style={{
                     position: 'absolute',

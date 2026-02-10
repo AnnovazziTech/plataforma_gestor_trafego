@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
-  Zap,
   Mail,
   Lock,
   Eye,
@@ -143,22 +142,11 @@ export default function RegisterPage() {
         >
           {/* Mobile Logo */}
           <div className="lg:hidden" style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '56px',
-                height: '56px',
-                borderRadius: '16px',
-                background: 'linear-gradient(135deg, #00F5FF, #BF00FF, #FF00E5)',
-                marginBottom: '16px',
-                boxShadow: '0 8px 32px rgba(191, 0, 255, 0.3)',
-              }}
-            >
-              <Zap style={{ width: '28px', height: '28px', color: 'white' }} />
-            </div>
-            <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>TrafficPro</h1>
+            <img
+              src="/logo-trafficpro.svg"
+              alt="TrafficPro"
+              style={{ height: '56px', width: 'auto', objectFit: 'contain', margin: '0 auto' }}
+            />
           </div>
 
           {/* Form Header */}
@@ -583,21 +571,11 @@ export default function RegisterPage() {
             transition={{ duration: 0.6 }}
             style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '64px' }}
           >
-            <div
-              style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, #00F5FF, #BF00FF, #FF00E5)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 8px 32px rgba(191, 0, 255, 0.3)',
-              }}
-            >
-              <Zap style={{ width: '24px', height: '24px', color: 'white' }} />
-            </div>
-            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>TrafficPro</span>
+            <img
+              src="/logo-trafficpro.svg"
+              alt="TrafficPro"
+              style={{ height: '48px', width: 'auto', objectFit: 'contain' }}
+            />
           </motion.div>
 
           {/* Headline */}
