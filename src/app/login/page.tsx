@@ -245,7 +245,7 @@ export default function LoginPage() {
           style={{ width: '100%', maxWidth: '400px' }}
         >
           {/* Mobile Logo */}
-          <div className="lg:hidden" style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+          <div className="lg:hidden" style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
             <Logo size="lg" />
           </div>
 
