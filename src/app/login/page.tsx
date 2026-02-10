@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Logo } from '@/components/ui'
+import { LegalModal } from '@/components/modals/LegalModal'
 import {
   Mail,
   Lock,
@@ -27,6 +28,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showTermsModal, setShowTermsModal] = useState(false)
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -498,16 +501,38 @@ export default function LoginPage() {
           {/* Footer */}
           <p style={{ marginTop: '32px', textAlign: 'center', fontSize: '12px', color: '#4A4A5A' }}>
             Ao entrar, voce concorda com nossos{' '}
-            <Link href="/terms" style={{ color: '#6B6B7B', textDecoration: 'underline' }}>
+            <button
+              type="button"
+              onClick={() => setShowTermsModal(true)}
+              style={{ background: 'none', border: 'none', color: '#6B6B7B', textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: '12px' }}
+            >
               Termos
-            </Link>{' '}
+            </button>{' '}
             e{' '}
-            <Link href="/privacy" style={{ color: '#6B6B7B', textDecoration: 'underline' }}>
+            <button
+              type="button"
+              onClick={() => setShowPrivacyModal(true)}
+              style={{ background: 'none', border: 'none', color: '#6B6B7B', textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: '12px' }}
+            >
               Privacidade
-            </Link>
+            </button>
           </p>
         </motion.div>
       </div>
+
+      {/* Legal Modals */}
+      <LegalModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAccept={() => setShowTermsModal(false)}
+        type="terms"
+      />
+      <LegalModal
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+        onAccept={() => setShowPrivacyModal(false)}
+        type="privacy"
+      />
     </div>
   )
 }

@@ -305,6 +305,11 @@ export default function AnalyticsPage() {
                       borderRadius: '12px',
                     }}
                     labelStyle={{ color: '#fff' }}
+                    labelFormatter={(value) => new Date(value).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    formatter={(value: number, name: string) => {
+                      const labels: Record<string, string> = { impressions: 'Impressões', clicks: 'Cliques', conversions: 'Conversões' }
+                      return [formatCompactNumber(value), labels[name] || name]
+                    }}
                   />
                   <Area
                     type="monotone"
@@ -390,6 +395,7 @@ export default function AnalyticsPage() {
                             border: '1px solid rgba(59, 130, 246, 0.2)',
                             borderRadius: '12px',
                           }}
+                          formatter={(value: number) => [formatCompactNumber(value), 'Usuários']}
                         />
                       </PieChart>
                     </ResponsiveContainer>
@@ -532,6 +538,11 @@ export default function AnalyticsPage() {
                         border: '1px solid rgba(59, 130, 246, 0.2)',
                         borderRadius: '12px',
                       }}
+                      labelFormatter={(value) => `${value}h`}
+                      formatter={(value: number, name: string) => {
+                        const labels: Record<string, string> = { impressions: 'Impressões', clicks: 'Cliques', conversions: 'Conversões' }
+                        return [formatCompactNumber(value), labels[name] || name]
+                      }}
                     />
                     <Legend />
                     <Line type="monotone" dataKey="impressions" stroke="#3B82F6" strokeWidth={2} dot={false} name="Impressões" />
@@ -570,6 +581,10 @@ export default function AnalyticsPage() {
                       backgroundColor: '#1A1A25',
                       border: '1px solid rgba(59, 130, 246, 0.2)',
                       borderRadius: '12px',
+                    }}
+                    formatter={(value: number, name: string) => {
+                      const labels: Record<string, string> = { conversions: 'Conversões', campaigns: 'Campanhas' }
+                      return [formatCompactNumber(value), labels[name] || name]
                     }}
                   />
                 </RadarChart>
