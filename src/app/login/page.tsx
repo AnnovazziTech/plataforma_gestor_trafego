@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { Logo } from '@/components/ui'
 import {
   Mail,
   Lock,
@@ -134,11 +135,7 @@ export default function LoginPage() {
             transition={{ duration: 0.6 }}
             style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '64px' }}
           >
-            <img
-              src="/logo-trafficpro.svg"
-              alt="TrafficPro"
-              style={{ height: '48px', width: 'auto', objectFit: 'contain' }}
-            />
+            <Logo size="lg" />
           </motion.div>
 
           {/* Headline */}
@@ -248,12 +245,8 @@ export default function LoginPage() {
           style={{ width: '100%', maxWidth: '400px' }}
         >
           {/* Mobile Logo */}
-          <div className="lg:hidden" style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <img
-              src="/logo-trafficpro.svg"
-              alt="TrafficPro"
-              style={{ height: '56px', width: 'auto', objectFit: 'contain', margin: '0 auto' }}
-            />
+          <div className="lg:hidden" style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+            <Logo size="lg" />
           </div>
 
           {/* Form Header */}

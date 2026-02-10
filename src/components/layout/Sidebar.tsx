@@ -4,6 +4,7 @@ import NextLink from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { signOut, useSession } from 'next-auth/react'
+import { Logo } from '@/components/ui'
 import {
   DollarSign,
   Users,
@@ -140,11 +141,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               transition={{ duration: 0.2 }}
               style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}
             >
-              <img
-                src="/logo-trafficpro.svg"
-                alt="TrafficPro"
-                style={{ height: '36px', width: '100%', maxWidth: '220px', objectFit: 'contain', objectPosition: 'left center' }}
-              />
+              <Logo size="md" />
             </motion.div>
           ) : (
             <motion.div
@@ -154,25 +151,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               transition={{ duration: 0.2 }}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}
             >
-              <div style={{ position: 'relative' }}>
-                <img
-                  src="/logo-128.png"
-                  alt="TrafficPro"
-                  style={{ width: '40px', height: '40px', borderRadius: '12px' }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '-4px',
-                    right: '-4px',
-                    width: '12px',
-                    height: '12px',
-                    backgroundColor: '#22C55E',
-                    borderRadius: '50%',
-                    border: '2px solid #0A0A0F',
-                  }}
-                />
-              </div>
+              <Logo size="md" showText={false} />
             </motion.div>
           )}
         </AnimatePresence>
