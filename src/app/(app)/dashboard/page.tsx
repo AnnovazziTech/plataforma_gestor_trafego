@@ -6,6 +6,7 @@ import { MetricCard } from '@/components/ui'
 import { FinanceChart } from '@/components/charts/FinanceChart'
 import { FinancialEntriesList } from '@/components/financeiro/FinancialEntriesList'
 import { AddFinancialEntryModal } from '@/components/financeiro/AddFinancialEntryModal'
+import { ExportFinancialModal } from '@/components/financeiro/ExportFinancialModal'
 import { useApp } from '@/contexts'
 import {
   DollarSign,
@@ -13,6 +14,7 @@ import {
   Building2,
   Wallet,
   Plus,
+  FileDown,
   Loader2,
 } from 'lucide-react'
 
@@ -41,6 +43,7 @@ export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showExportModal, setShowExportModal] = useState(false)
   const [clients, setClients] = useState<Array<{ id: string; name: string }>>([])
 
   const fetchDashboard = async () => {
@@ -97,6 +100,7 @@ export default function DashboardPage() {
       <Header
         title="Dashboard Financeiro"
         subtitle="Gestao financeira completa"
+        variant="simple"
         onRefresh={handleRefresh}
       />
 
@@ -149,17 +153,30 @@ export default function DashboardPage() {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFF' }}>Lancamentos</h3>
-            <button
-              onClick={() => setShowAddModal(true)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
-                borderRadius: '10px', border: 'none',
-                background: 'linear-gradient(to right, #3B82F6, #2563EB)',
-                color: '#FFF', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
-              }}
-            >
-              <Plus size={16} /> Novo Lancamento
-            </button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => setShowExportModal(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
+                  borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)',
+                  backgroundColor: 'transparent',
+                  color: '#A0A0B0', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+                }}
+              >
+                <FileDown size={16} /> Exportar
+              </button>
+              <button
+                onClick={() => setShowAddModal(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
+                  borderRadius: '10px', border: 'none',
+                  background: 'linear-gradient(to right, #3B82F6, #2563EB)',
+                  color: '#FFF', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+                }}
+              >
+                <Plus size={16} /> Novo Lancamento
+              </button>
+            </div>
           </div>
           <FinancialEntriesList entries={financialEntries} onRemove={removeFinancialEntry} />
         </div>
@@ -167,8 +184,14 @@ export default function DashboardPage() {
 
       <AddFinancialEntryModal
         isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
+        onClose={() => { setShowAddModal(false); fetchDashboard(); }}
         clients={clients}
+      />
+
+      <ExportFinancialModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        entries={financialEntries}
       />
     </div>
   )
