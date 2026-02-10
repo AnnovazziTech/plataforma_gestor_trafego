@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Trash2, Target } from 'lucide-react'
+import { Trash2, Target, Edit3 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/financial'
 
 interface Strategy {
@@ -17,9 +17,10 @@ interface Props {
   isSelected: boolean
   onClick: () => void
   onRemove: () => void
+  onEdit: () => void
 }
 
-export function StrategyCard({ strategy, isSelected, onClick, onRemove }: Props) {
+export function StrategyCard({ strategy, isSelected, onClick, onRemove, onEdit }: Props) {
   const totalSpent = strategy.campaigns.reduce((sum: number, c: any) => sum + (c.spentMeta || 0) + (c.spentGoogle || 0), 0)
   const remaining = strategy.totalBudget - totalSpent
   const percentUsed = strategy.totalBudget > 0 ? (totalSpent / strategy.totalBudget) * 100 : 0
@@ -50,12 +51,22 @@ export function StrategyCard({ strategy, isSelected, onClick, onRemove }: Props)
             )}
           </div>
         </div>
-        <button
-          onClick={e => { e.stopPropagation(); onRemove(); }}
-          style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer', padding: '2px' }}
-        >
-          <Trash2 size={14} />
-        </button>
+        <div style={{ display: 'flex', gap: '2px' }}>
+          <button
+            onClick={e => { e.stopPropagation(); onEdit(); }}
+            style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer', padding: '2px' }}
+            title="Editar estrategia"
+          >
+            <Edit3 size={14} />
+          </button>
+          <button
+            onClick={e => { e.stopPropagation(); onRemove(); }}
+            style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer', padding: '2px' }}
+            title="Remover estrategia"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
 
       {/* Budget bar */}

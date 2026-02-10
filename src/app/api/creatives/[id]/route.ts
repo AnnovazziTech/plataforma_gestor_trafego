@@ -53,7 +53,7 @@ export const GET = withAuth(async (req, ctx) => {
       { status: 500 }
     )
   }
-}, { requiredPermissions: ['canManageCampaigns'] })
+})
 
 // PATCH - Atualizar criativo
 export const PATCH = withAuth(async (req, ctx) => {
@@ -117,7 +117,7 @@ export const PATCH = withAuth(async (req, ctx) => {
       { status: 500 }
     )
   }
-}, { requiredPermissions: ['canManageCampaigns'] })
+})
 
 // DELETE - Deletar criativo
 export const DELETE = withAuth(async (req, ctx) => {
@@ -168,4 +168,4 @@ export const DELETE = withAuth(async (req, ctx) => {
       { status: 500 }
     )
   }
-}, { requiredPermissions: ['canManageCampaigns'] })
+})

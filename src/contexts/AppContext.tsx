@@ -337,6 +337,7 @@ interface AppContextType {
   budgetStrategiesLoading: boolean
   fetchBudgetStrategies: (clientId?: string) => Promise<void>
   addBudgetStrategy: (data: any) => Promise<BudgetStrategyItem | null>
+  updateBudgetStrategy: (id: string, data: any) => Promise<void>
   removeBudgetStrategy: (id: string) => Promise<void>
 
   // Budget Campaigns
@@ -1103,6 +1104,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [api, showToast])
 
+  const updateBudgetStrategy = useCallback(async (id: string, updateData: any) => {
+    try {
+      const data = await api(`/api/budget-strategies/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updateData),
+      })
+      setBudgetStrategies(prev => prev.map(s => s.id === id ? data.strategy : s))
+      showToast('Estrategia atualizada!', 'success')
+    } catch (error: any) {
+      showToast(error.message || 'Erro ao atualizar estrategia', 'error')
+    }
+  }, [api, showToast])
+
   const removeBudgetStrategy = useCallback(async (id: string) => {
     try {
       await api(`/api/budget-strategies/${id}`, { method: 'DELETE' })
@@ -1297,6 +1311,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       budgetStrategiesLoading,
       fetchBudgetStrategies,
       addBudgetStrategy,
+      updateBudgetStrategy,
       removeBudgetStrategy,
       budgetCampaigns,
       budgetCampaignsLoading,

@@ -20,6 +20,39 @@ export const GET = withAuth(async (req: NextRequest, ctx) => {
   return NextResponse.json({ strategy })
 })
 
+export const PATCH = withAuth(async (req: NextRequest, ctx) => {
+  const id = req.url.split('/budget-strategies/')[1]?.split('?')[0]
+  const data = await req.json()
+
+  const existing = await prisma.budgetStrategy.findFirst({
+    where: { id, organizationId: ctx.organizationId },
+  })
+
+  if (!existing) {
+    return NextResponse.json({ error: 'Estrategia nao encontrada' }, { status: 404 })
+  }
+
+  const updateData: any = {}
+  if (data.name) updateData.name = data.name
+  if (data.totalBudget != null) updateData.totalBudget = data.totalBudget
+
+  const strategy = await prisma.budgetStrategy.update({
+    where: { id },
+    data: updateData,
+    include: {
+      client: { select: { id: true, name: true } },
+      campaigns: {
+        include: {
+          client: { select: { id: true, name: true } },
+          strategy: { select: { id: true, name: true, totalBudget: true } },
+        },
+      },
+    },
+  })
+
+  return NextResponse.json({ strategy })
+})
+
 export const DELETE = withAuth(async (req: NextRequest, ctx) => {
   const id = req.url.split('/budget-strategies/')[1]?.split('?')[0]
 

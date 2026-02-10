@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Header } from '@/components/layout'
 import { MetricCard } from '@/components/ui'
 import { ClientTasksSection } from '@/components/clientes/ClientTasksSection'
+import { ClientsRevenueChart } from '@/components/charts/ClientsRevenueChart'
 import { useApp } from '@/contexts'
 import { formatCurrency, calculateTotalRevenue } from '@/lib/utils/financial'
 import {
@@ -25,16 +26,20 @@ interface Client {
   notes?: string
 }
 
+const emptyForm = {
+  name: '', email: '', phone: '', company: '',
+  contractValue: '', monthlyValue: '', startDate: '', status: 'ACTIVE', notes: '',
+}
+
 export default function ClientesPage() {
-  const { fetchClientTasks, clientTasks, showToast } = useApp()
+  const { fetchClientTasks, showToast } = useApp()
   const [clients, setClients] = useState<Client[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
-  const [showAddModal, setShowAddModal] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '', email: '', phone: '', company: '',
-    contractValue: '', monthlyValue: '', startDate: '', status: 'ACTIVE', notes: '',
-  })
+  const [showModal, setShowModal] = useState(false)
+  const [editingClient, setEditingClient] = useState<Client | null>(null)
+  const [formData, setFormData] = useState(emptyForm)
+  const [saving, setSaving] = useState(false)
 
   const fetchClients = useCallback(async () => {
     try {
@@ -65,27 +70,76 @@ export default function ClientesPage() {
     return sum
   }, 0)
 
-  const handleAddClient = async (e: React.FormEvent) => {
+  const openAddModal = () => {
+    setEditingClient(null)
+    setFormData(emptyForm)
+    setShowModal(true)
+  }
+
+  const openEditModal = (client: Client) => {
+    setEditingClient(client)
+    setFormData({
+      name: client.name,
+      email: client.email || '',
+      phone: client.phone || '',
+      company: client.company || '',
+      contractValue: client.contractValue?.toString() || '',
+      monthlyValue: client.monthlyValue?.toString() || '',
+      startDate: client.startDate ? client.startDate.split('T')[0] : '',
+      status: client.status,
+      notes: client.notes || '',
+    })
+    setShowModal(true)
+  }
+
+  const closeModal = () => {
+    setShowModal(false)
+    setEditingClient(null)
+    setFormData(emptyForm)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSaving(true)
     try {
-      const res = await fetch('/api/clients', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          contractValue: formData.contractValue ? parseFloat(formData.contractValue) : null,
-          monthlyValue: formData.monthlyValue ? parseFloat(formData.monthlyValue) : null,
-          startDate: formData.startDate || null,
-        }),
-      })
-      if (res.ok) {
-        showToast('Cliente criado com sucesso!', 'success')
-        setShowAddModal(false)
-        setFormData({ name: '', email: '', phone: '', company: '', contractValue: '', monthlyValue: '', startDate: '', status: 'ACTIVE', notes: '' })
-        fetchClients()
+      const payload = {
+        ...formData,
+        contractValue: formData.contractValue ? parseFloat(formData.contractValue) : null,
+        monthlyValue: formData.monthlyValue ? parseFloat(formData.monthlyValue) : null,
+        startDate: formData.startDate || null,
       }
-    } catch (error) {
-      showToast('Erro ao criar cliente', 'error')
+
+      if (editingClient) {
+        const res = await fetch(`/api/clients/${editingClient.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+        if (res.ok) {
+          showToast('Cliente atualizado com sucesso!', 'success')
+          closeModal()
+          fetchClients()
+        } else {
+          showToast('Erro ao atualizar cliente', 'error')
+        }
+      } else {
+        const res = await fetch('/api/clients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+        if (res.ok) {
+          showToast('Cliente criado com sucesso!', 'success')
+          closeModal()
+          fetchClients()
+        } else {
+          showToast('Erro ao criar cliente', 'error')
+        }
+      }
+    } catch {
+      showToast('Erro ao salvar cliente', 'error')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -97,7 +151,7 @@ export default function ClientesPage() {
         if (selectedClient?.id === id) setSelectedClient(null)
         showToast('Cliente removido!', 'success')
       }
-    } catch (error) {
+    } catch {
       showToast('Erro ao remover cliente', 'error')
     }
   }
@@ -126,6 +180,11 @@ export default function ClientesPage() {
           <MetricCard title="Receita Acumulada" value={totalAccumulatedRevenue} format="currency" icon={<DollarSign size={20} />} color="purple" delay={0.3} />
         </div>
 
+        {/* Revenue Chart */}
+        <div style={{ marginBottom: '24px' }}>
+          <ClientsRevenueChart clients={clients} />
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: selectedClient ? '1fr 1fr' : '1fr', gap: '24px' }}>
           {/* Client list */}
           <div style={{
@@ -137,7 +196,7 @@ export default function ClientesPage() {
                 Clientes ({clients.length})
               </h3>
               <button
-                onClick={() => setShowAddModal(true)}
+                onClick={openAddModal}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
                   borderRadius: '10px', border: 'none',
@@ -194,12 +253,22 @@ export default function ClientesPage() {
                       </div>
                     )}
                   </div>
-                  <button
-                    onClick={e => { e.stopPropagation(); handleDeleteClient(client.id); }}
-                    style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer', padding: '4px' }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <button
+                      onClick={e => { e.stopPropagation(); openEditModal(client); }}
+                      style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer', padding: '4px' }}
+                      title="Editar cliente"
+                    >
+                      <Edit3 size={14} />
+                    </button>
+                    <button
+                      onClick={e => { e.stopPropagation(); handleDeleteClient(client.id); }}
+                      style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer', padding: '4px' }}
+                      title="Remover cliente"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </motion.div>
               ))}
               {clients.length === 0 && (
@@ -217,14 +286,14 @@ export default function ClientesPage() {
         </div>
       </main>
 
-      {/* Add Client Modal */}
+      {/* Add/Edit Client Modal */}
       <AnimatePresence>
-        {showAddModal && (
+        {showModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowAddModal(false)}
+            onClick={closeModal}
             style={{
               position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)',
               backdropFilter: 'blur(4px)', zIndex: 9999,
@@ -244,12 +313,14 @@ export default function ClientesPage() {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFF' }}>Novo Cliente</h2>
-                <button onClick={() => setShowAddModal(false)} style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFF' }}>
+                  {editingClient ? 'Editar Cliente' : 'Novo Cliente'}
+                </h2>
+                <button onClick={closeModal} style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
                   <X size={20} />
                 </button>
               </div>
-              <form onSubmit={handleAddClient}>
+              <form onSubmit={handleSubmit}>
                 {[
                   { label: 'Nome *', key: 'name', type: 'text', required: true },
                   { label: 'Email', key: 'email', type: 'email' },
@@ -263,7 +334,7 @@ export default function ClientesPage() {
                     <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>{field.label}</label>
                     <input
                       type={field.type}
-                      value={(formData as any)[field.key]}
+                      value={(formData as Record<string, string>)[field.key]}
                       onChange={e => setFormData(prev => ({ ...prev, [field.key]: e.target.value }))}
                       required={field.required}
                       step={field.type === 'number' ? '0.01' : undefined}
@@ -309,13 +380,15 @@ export default function ClientesPage() {
                 </div>
                 <button
                   type="submit"
+                  disabled={saving}
                   style={{
                     width: '100%', padding: '12px', borderRadius: '12px', border: 'none',
                     background: 'linear-gradient(to right, #3B82F6, #2563EB)',
                     color: '#FFF', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+                    opacity: saving ? 0.7 : 1,
                   }}
                 >
-                  Criar Cliente
+                  {saving ? 'Salvando...' : editingClient ? 'Salvar Alteracoes' : 'Criar Cliente'}
                 </button>
               </form>
             </motion.div>

@@ -101,7 +101,7 @@ export const GET = withAuth(async (req, ctx) => {
       { status: 500 }
     )
   }
-}, { requiredPermissions: ['canManageCampaigns'] })
+})
 
 // POST - Criar criativo
 export const POST = withAuth(async (req, ctx) => {
@@ -160,4 +160,4 @@ export const POST = withAuth(async (req, ctx) => {
       { status: 500 }
     )
   }
-}, { requiredPermissions: ['canManageCampaigns'] })
+})
