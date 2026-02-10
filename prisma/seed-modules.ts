@@ -24,6 +24,9 @@ const modules = [
   { slug: 'controle-ads', name: 'Controle ADS', icon: 'Target', route: '/controle-ads', sortOrder: 2, isEnabled: true, isFree: true, description: 'Controle de orcamento de campanhas' },
   { slug: 'criativos-free', name: 'Criativos', icon: 'Image', route: '/criativos', sortOrder: 3, isEnabled: true, isFree: true, description: 'Biblioteca de criativos' },
   { slug: 'noticias', name: 'Noticias', icon: 'Newspaper', route: '/noticias', sortOrder: 4, isEnabled: true, isFree: true, description: 'Feed de noticias da plataforma' },
+  { slug: 'resumo', name: 'Resumo', icon: 'LayoutDashboard', route: '/resumo', sortOrder: 5, isEnabled: true, isFree: true, description: 'Resumo por cliente com metricas' },
+  { slug: 'agenda', name: 'Agenda', icon: 'CalendarDays', route: '/agenda', sortOrder: 6, isEnabled: true, isFree: true, description: 'Agenda de tarefas e compromissos' },
+  { slug: 'orcamento', name: 'Orcamento', icon: 'Receipt', route: '/orcamento', sortOrder: 7, isEnabled: true, isFree: true, description: 'Propostas e orcamentos para clientes' },
 
   // Modulos PAGOS (isEnabled: false, isFree: false)
   { slug: 'campanhas', name: 'Campanhas', icon: 'BarChart3', route: '/campaigns', sortOrder: 10, isEnabled: false, isFree: false, description: 'Dashboard de campanhas com metricas' },
