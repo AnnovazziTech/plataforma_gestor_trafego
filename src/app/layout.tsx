@@ -12,6 +12,17 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "TrafficPro - Gestao de Trafego Pago",
   description: "Plataforma completa para gestao de campanhas de trafego pago em todas as plataformas",
+  openGraph: {
+    title: "TrafficPro - Gestao de Trafego Pago",
+    description: "Plataforma completa para gestao de campanhas de trafego pago em todas as plataformas",
+    siteName: "TrafficPro",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TrafficPro - Gestao de Trafego Pago",
+    description: "Plataforma completa para gestao de campanhas de trafego pago em todas as plataformas",
+  },
 };
 
 export default function RootLayout({
