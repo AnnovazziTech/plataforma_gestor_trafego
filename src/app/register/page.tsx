@@ -152,7 +152,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Form Header */}
-          <div style={{ marginBottom: '32px' }}>
+          <div style={{ marginBottom: '32px', textAlign: 'center' }}>
             <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>
               Crie sua conta
             </h2>
