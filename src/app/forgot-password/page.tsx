@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
             lineHeight: 1.6,
           }}>
             Se existe uma conta com o e-mail <strong style={{ color: '#FFFFFF' }}>{email}</strong>,
-            voce recebera um link para redefinir sua senha.
+            você receberá um link para redefinir sua senha.
           </p>
 
           <Link href="/login">
@@ -188,7 +188,7 @@ export default function ForgotPasswordPage() {
             disabled={loading}
             style={{ width: '100%', height: '48px' }}
           >
-            {loading ? 'Enviando...' : 'Enviar link de recuperacao'}
+            {loading ? 'Enviando...' : 'Enviar link de recuperação'}
           </Button>
         </form>
       </div>

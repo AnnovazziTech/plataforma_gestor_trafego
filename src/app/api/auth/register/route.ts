@@ -8,7 +8,7 @@ import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/api/rate-limit'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  email: z.string().email('Email invalido'),
+  email: z.string().email('Email inválido'),
   password: z.string().min(8, 'Senha deve ter pelo menos 8 caracteres'),
   organizationName: z.string().min(2, 'Nome da empresa deve ter pelo menos 2 caracteres').optional(),
 })
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'Este email ja esta cadastrado' },
+        { error: 'Este email já está cadastrado' },
         { status: 400 }
       )
     }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
         data: {
           name: 'Starter',
           slug: 'starter',
-          description: 'Plano inicial gratuito para comecar',
+          description: 'Plano inicial gratuito para começar',
           priceMonthly: 0,
           priceYearly: 0,
           maxUsers: 1,
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
           {
             name: 'Enterprise',
             slug: 'enterprise',
-            description: 'Para agencias e grandes equipes',
+            description: 'Para agências e grandes equipes',
             priceMonthly: 497,
             priceYearly: 4970,
             maxUsers: 20,

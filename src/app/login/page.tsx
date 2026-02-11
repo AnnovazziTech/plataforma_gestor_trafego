@@ -157,11 +157,11 @@ export default function LoginPage() {
                   WebkitTextFillColor: 'transparent',
                 }}
               >
-                em um so lugar
+                em um só lugar
               </span>
             </h1>
             <p style={{ fontSize: '18px', color: '#8B8B9B', maxWidth: '420px', lineHeight: 1.6 }}>
-              Meta Ads, Google Ads, TikTok Ads e mais. Todas as suas plataformas integradas em um unico dashboard.
+              Meta Ads, Google Ads, TikTok Ads e mais. Todas as suas plataformas integradas em um único dashboard.
             </p>
           </motion.div>
 
@@ -224,7 +224,7 @@ export default function LoginPage() {
             </div>
             <div>
               <div style={{ fontSize: '32px', fontWeight: 'bold', color: 'white' }}>500+</div>
-              <div style={{ fontSize: '14px', color: '#6B6B7B' }}>Agencias ativas</div>
+              <div style={{ fontSize: '14px', color: '#6B6B7B' }}>Agências ativas</div>
             </div>
           </motion.div>
         </div>
@@ -489,7 +489,7 @@ export default function LoginPage() {
 
           {/* Register Link */}
           <p style={{ marginTop: '32px', textAlign: 'center', fontSize: '15px', color: '#6B6B7B' }}>
-            Nao tem uma conta?{' '}
+            Não tem uma conta?{' '}
             <Link
               href="/register"
               style={{ color: '#00F5FF', textDecoration: 'none', fontWeight: 500 }}
@@ -500,7 +500,7 @@ export default function LoginPage() {
 
           {/* Footer */}
           <p style={{ marginTop: '32px', textAlign: 'center', fontSize: '12px', color: '#4A4A5A' }}>
-            Ao entrar, voce concorda com nossos{' '}
+            Ao entrar, você concorda com nossos{' '}
             <button
               type="button"
               onClick={() => setShowTermsModal(true)}
