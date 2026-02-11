@@ -2,12 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { canAccessModule } from '@/lib/stripe/access-control'
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const hasAccess = await canAccessModule(session.user.organizationId, 'prospeccao')
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'Faca upgrade para acessar este modulo', moduleSlug: 'prospeccao' }, { status: 403 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -55,6 +61,11 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.organizationId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const hasAccess = await canAccessModule(session.user.organizationId, 'prospeccao')
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'Faca upgrade para acessar este modulo', moduleSlug: 'prospeccao' }, { status: 403 })
     }
 
     const data = await request.json()

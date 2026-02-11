@@ -33,6 +33,7 @@ import {
   Sparkles,
   X,
   Shield,
+  Lock,
   LucideIcon,
 } from 'lucide-react'
 import { PlatformIcon } from '@/components/ui'
@@ -65,9 +66,14 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const router = useRouter()
   const { data: session } = useSession()
   const isSuperAdmin = (session?.user as any)?.isSuperAdmin === true
-  const { setIsConnectAccountsModalOpen, showToast, modules } = useApp()
+  const { setIsConnectAccountsModalOpen, showToast, modules, accessibleModules } = useApp()
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(true)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+
+  // Check if all paid modules are accessible (has bundle or all individual packages)
+  const allPaidModulesAccessible = modules
+    .filter(m => !m.isFree)
+    .every(m => accessibleModules.includes(m.slug))
 
   const handlePlatformClick = (platformId: string, connected: boolean) => {
     if (connected) {
@@ -78,11 +84,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   }
 
   const handleUpgrade = () => {
-    router.push('/settings')
-    setTimeout(() => {
-      const billingTab = document.querySelector('[data-tab="billing"]')
-      if (billingTab) (billingTab as HTMLElement).click()
-    }, 100)
+    router.push('/planos')
   }
 
   const handleLogout = async () => {
@@ -93,16 +95,18 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   // Build menu from modules
   const menuItems = modules.map(mod => {
     const IconComp = iconMap[mod.icon || ''] || DollarSign
+    const isLocked = !mod.isFree && !accessibleModules.includes(mod.slug)
     return {
       icon: IconComp,
       label: mod.name,
-      href: mod.route,
-      badge: mod.isFree ? null : null,
+      href: isLocked ? '/planos' : mod.route,
+      badge: null as string | null,
+      isLocked,
     }
   })
 
   // Always add Settings at the end
-  menuItems.push({ icon: Settings, label: 'Configurações', href: '/settings', badge: null })
+  menuItems.push({ icon: Settings, label: 'Configurações', href: '/settings', badge: null, isLocked: false })
 
   return (
     <aside
@@ -273,11 +277,15 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                           fontSize: '14px',
                           fontWeight: 500,
                           flex: 1,
-                          color: isActive ? '#FFFFFF' : '#8B8B9B',
+                          color: item.isLocked ? '#4B4B5B' : isActive ? '#FFFFFF' : '#8B8B9B',
                         }}
                       >
                         {item.label}
                       </span>
+
+                      {item.isLocked && (
+                        <Lock size={14} style={{ color: '#4B4B5B' }} />
+                      )}
 
                       {item.badge && (
                         <span
@@ -433,7 +441,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
         {/* Upgrade Banner */}
         <AnimatePresence>
-          {!isCollapsed && showUpgradeBanner && (
+          {!isCollapsed && showUpgradeBanner && !allPaidModulesAccessible && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
@@ -463,7 +471,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                   <span style={{ fontSize: '12px', fontWeight: 600, color: '#FACC15' }}>PRO</span>
                 </div>
                 <p style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px', paddingRight: '16px', margin: 0 }}>
-                  Recursos avançados de automação
+                  Desbloqueie recursos avancados
                 </p>
                 <button
                   onClick={handleUpgrade}

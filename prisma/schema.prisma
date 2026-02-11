@@ -86,6 +86,7 @@ model Organization {
   clientTasks          ClientTask[]
   budgetStrategies     BudgetStrategy[]
   budgetCampaigns      BudgetCampaign[]
+  packages             OrganizationPackage[]
 
   @@map("organizations")
   @@schema("sistema_gestor")
@@ -1449,5 +1450,51 @@ model NewsPost {
   author User? @relation(fields: [authorId], references: [id])
 
   @@map("news_posts")
+  @@schema("sistema_gestor")
+}
+
+// ==========================================
+// PACOTES - Sistema de Assinatura Modular
+// ==========================================
+
+model Package {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  description     String?
+  priceMonthly    Float
+  currency        String   @default("BRL")
+  stripePriceId   String?  @unique
+  stripeProductId String?
+  modulesSlugs    String[]
+  isBundle        Boolean  @default(false)
+  isFree          Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  organizationPackages OrganizationPackage[]
+
+  @@map("packages")
+  @@schema("sistema_gestor")
+}
+
+model OrganizationPackage {
+  id                   String             @id @default(cuid())
+  organizationId       String
+  packageId            String
+  stripeSubscriptionId String?            @unique
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  organization         Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  package              Package            @relation(fields: [packageId], references: [id])
+
+  @@unique([organizationId, packageId])
+  @@index([stripeSubscriptionId])
+  @@map("organization_packages")
   @@schema("sistema_gestor")
 }

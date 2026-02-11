@@ -5,10 +5,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
-import { withAuth, createAuditLog } from '@/lib/api/middleware'
+import { withAuth, withModuleAccess, createAuditLog } from '@/lib/api/middleware'
 
 // GET - Listar posts agendados
-export const GET = withAuth(async (req, ctx) => {
+export const GET = withModuleAccess('social', async (req, ctx) => {
   try {
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
@@ -122,7 +122,7 @@ const createPostSchema = z.object({
   mediaType: z.enum(['IMAGE', 'VIDEO']).optional(),
 })
 
-export const POST = withAuth(async (req, ctx) => {
+export const POST = withModuleAccess('social', async (req, ctx) => {
   try {
     const body = await req.json()
     const data = createPostSchema.parse(body)

@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
-import { withAuth, createAuditLog } from '@/lib/api/middleware'
+import { withAuth, withModuleAccess, createAuditLog } from '@/lib/api/middleware'
 import { decrypt } from '@/lib/crypto/encryption'
 import {
   sendEvolutionMessage,
@@ -14,7 +14,7 @@ import {
 } from '@/lib/integrations/whatsapp'
 
 // GET - Listar conversas
-export const GET = withAuth(async (req, ctx) => {
+export const GET = withModuleAccess('mensagens', async (req, ctx) => {
   try {
     const { searchParams } = new URL(req.url)
     const integrationId = searchParams.get('integrationId')
@@ -102,7 +102,7 @@ const sendMessageSchema = z.object({
   leadId: z.string().optional(),
 })
 
-export const POST = withAuth(async (req, ctx) => {
+export const POST = withModuleAccess('mensagens', async (req, ctx) => {
   try {
     const body = await req.json()
     const data = sendMessageSchema.parse(body)

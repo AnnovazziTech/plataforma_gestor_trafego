@@ -5,10 +5,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
-import { withAuth, checkResourceLimit, createAuditLog } from '@/lib/api/middleware'
+import { withAuth, withModuleAccess, checkResourceLimit, createAuditLog } from '@/lib/api/middleware'
 
 // GET - Listar campanhas
-export const GET = withAuth(async (req, ctx) => {
+export const GET = withModuleAccess('campanhas', async (req, ctx) => {
   try {
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
@@ -121,7 +121,7 @@ const createCampaignSchema = z.object({
   integrationId: z.string().optional(),
 })
 
-export const POST = withAuth(async (req, ctx) => {
+export const POST = withModuleAccess('campanhas', async (req, ctx) => {
   try {
     const body = await req.json()
     const data = createCampaignSchema.parse(body)

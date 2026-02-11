@@ -177,6 +177,33 @@ export async function POST(request: NextRequest) {
           },
         })
 
+        // Criar OrganizationPackage para o pacote Starter
+        let starterPackage = await tx.package.findFirst({
+          where: { isFree: true, isActive: true },
+        })
+        // Se tabela Package ainda nao foi populada, criar Starter minimo
+        if (!starterPackage) {
+          starterPackage = await tx.package.create({
+            data: {
+              name: 'Starter',
+              slug: 'starter',
+              description: 'Pacote inicial gratuito',
+              priceMonthly: 0,
+              isFree: true,
+              isActive: true,
+              sortOrder: 0,
+              modulesSlugs: ['financeiro', 'clientes', 'controle-ads', 'criativos-free', 'noticias', 'resumo', 'agenda', 'orcamento'],
+            },
+          })
+        }
+        await tx.organizationPackage.create({
+          data: {
+            organizationId: organization.id,
+            packageId: starterPackage.id,
+            status: 'ACTIVE',
+          },
+        })
+
         return { user, organization }
       }
 

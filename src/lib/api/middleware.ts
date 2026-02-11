@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import prisma from '@/lib/db/prisma'
 import { hashApiKey } from '@/lib/crypto/encryption'
+import { canAccessModule } from '@/lib/stripe/access-control'
 
 export interface AuthContext {
   userId: string
@@ -275,4 +276,26 @@ export async function createAuditLog(params: {
     })
   } catch (error) {
   }
+}
+
+/**
+ * Wrapper para API routes que requerem acesso a um módulo específico
+ */
+export function withModuleAccess(
+  moduleSlug: string,
+  handler: (req: NextRequest, ctx: AuthContext) => Promise<NextResponse>,
+  options?: {
+    requiredPermissions?: Permission[]
+  }
+) {
+  return withAuth(async (req: NextRequest, ctx: AuthContext) => {
+    const hasAccess = await canAccessModule(ctx.organizationId, moduleSlug)
+    if (!hasAccess) {
+      return NextResponse.json(
+        { error: 'Faca upgrade para acessar este modulo', moduleSlug },
+        { status: 403 }
+      )
+    }
+    return handler(req, ctx)
+  }, options)
 }

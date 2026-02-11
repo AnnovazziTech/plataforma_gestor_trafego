@@ -210,6 +210,7 @@ interface SystemModuleItem {
   isEnabled: boolean
   isFree: boolean
   sortOrder: number
+  isAccessible?: boolean
 }
 
 interface Toast {
@@ -357,6 +358,9 @@ interface AppContextType {
   modules: SystemModuleItem[]
   modulesLoading: boolean
   fetchModules: () => Promise<void>
+
+  // Accessible modules (based on packages)
+  accessibleModules: string[]
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -419,6 +423,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const [modules, setModules] = useState<SystemModuleItem[]>([])
   const [modulesLoading, setModulesLoading] = useState(false)
+  const [accessibleModules, setAccessibleModules] = useState<string[]>([])
 
   const [dateRange, setDateRange] = useState('Ultimos 30 dias')
   const [selectedAccount, setSelectedAccount] = useState<string>('all')
@@ -1186,7 +1191,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setModulesLoading(true)
     try {
       const data = await api('/api/modules')
-      setModules(data.modules || [])
+      const mods = data.modules || []
+      setModules(mods)
+      // Extract accessible module slugs from isAccessible flag
+      const accessible = mods
+        .filter((m: SystemModuleItem) => m.isAccessible)
+        .map((m: SystemModuleItem) => m.slug)
+      setAccessibleModules(accessible)
     } catch (error: any) {
     } finally {
       setModulesLoading(false)
@@ -1310,6 +1321,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       modules,
       modulesLoading,
       fetchModules,
+      accessibleModules,
     }}>
       {children}
     </AppContext.Provider>

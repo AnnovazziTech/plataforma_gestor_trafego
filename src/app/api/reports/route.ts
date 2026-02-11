@@ -7,7 +7,7 @@ export const maxDuration = 30
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
-import { withAuth, createAuditLog } from '@/lib/api/middleware'
+import { withAuth, withModuleAccess, createAuditLog } from '@/lib/api/middleware'
 
 // Schema para criar relatório
 const createReportSchema = z.object({
@@ -25,7 +25,7 @@ const createReportSchema = z.object({
 })
 
 // GET - Listar relatórios
-export const GET = withAuth(async (req, ctx) => {
+export const GET = withModuleAccess('relatorios', async (req, ctx) => {
   try {
     const { searchParams } = new URL(req.url)
     const page = parseInt(searchParams.get('page') || '1')
@@ -115,7 +115,7 @@ export const GET = withAuth(async (req, ctx) => {
 }, { requiredPermissions: ['canViewReports'] })
 
 // POST - Criar relatório
-export const POST = withAuth(async (req, ctx) => {
+export const POST = withModuleAccess('relatorios', async (req, ctx) => {
   try {
     const body = await req.json()
     const data = createReportSchema.parse(body)

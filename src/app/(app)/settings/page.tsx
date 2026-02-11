@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSession, signOut } from 'next-auth/react'
 import { Header } from '@/components/layout'
@@ -31,6 +31,9 @@ import {
   Palette,
   RefreshCw,
   Camera,
+  ExternalLink,
+  Package as PackageIcon,
+  Loader2,
 } from 'lucide-react'
 import { Platform } from '@/types'
 
@@ -1178,6 +1181,52 @@ function SecuritySection({ showToast }: { showToast: (msg: string, type: any) =>
 }
 
 function BillingSection({ showToast }: { showToast: (msg: string, type: any) => void }) {
+  const [subscriptions, setSubscriptions] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [portalLoading, setPortalLoading] = useState(false)
+
+  const fetchSubscriptions = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/stripe/subscriptions')
+      const data = await res.json()
+      setSubscriptions(data.subscriptions || [])
+    } catch {
+      // silently fail
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchSubscriptions()
+  }, [fetchSubscriptions])
+
+  const handlePortal = async () => {
+    setPortalLoading(true)
+    try {
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        showToast(data.error || 'Erro ao abrir portal', 'error')
+        return
+      }
+      if (data.url) {
+        window.location.href = data.url
+      }
+    } catch {
+      showToast('Erro ao abrir portal', 'error')
+    } finally {
+      setPortalLoading(false)
+    }
+  }
+
+  const activeSubs = subscriptions.filter(s => s.status === 'ACTIVE' || s.status === 'TRIALING')
+  const totalMonthly = activeSubs.reduce((sum: number, s: any) => sum + (s.isFree ? 0 : s.priceMonthly), 0)
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -1201,66 +1250,90 @@ function BillingSection({ showToast }: { showToast: (msg: string, type: any) => 
         </div>
         <div>
           <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFFFFF', margin: 0 }}>Assinatura</h2>
-          <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Gerencie seu plano e pagamentos</p>
+          <p style={{ fontSize: '14px', color: '#6B6B7B', margin: 0 }}>Gerencie seus pacotes e pagamentos</p>
         </div>
       </div>
 
-      {/* Current Plan */}
-      <div style={{
-        padding: '24px',
-        borderRadius: '12px',
-        background: 'linear-gradient(to right, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2))',
-        border: '1px solid rgba(59, 130, 246, 0.3)',
-        marginBottom: '24px',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+          <Loader2 size={24} style={{ color: '#3B82F6', animation: 'spin 1s linear infinite' }} />
+        </div>
+      ) : (
+        <>
+          {/* Summary */}
+          <div style={{
+            padding: '24px',
+            borderRadius: '12px',
+            background: 'linear-gradient(to right, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2))',
+            border: '1px solid rgba(59, 130, 246, 0.3)',
+            marginBottom: '24px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <Badge variant="info">{activeSubs.length} pacote{activeSubs.length !== 1 ? 's' : ''} ativo{activeSubs.length !== 1 ? 's' : ''}</Badge>
+                </div>
+                <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: '0 0 4px' }}>
+                  {totalMonthly > 0 ? `R$ ${totalMonthly}/mes` : 'Gratuito'}
+                </h3>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                {activeSubs.some((s: any) => !s.isFree) && (
+                  <Button variant="secondary" onClick={handlePortal} disabled={portalLoading}>
+                    {portalLoading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <ExternalLink size={16} />}
+                    {' '}Gerenciar no Stripe
+                  </Button>
+                )}
+                <Button variant="primary" onClick={() => window.location.href = '/planos'}>
+                  <PackageIcon size={16} />{' '}Adicionar pacote
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Active Packages */}
           <div>
-            <Badge variant="info">Plano Pro</Badge>
-            <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#FFFFFF', margin: '12px 0 4px' }}>R$ 197/mês</h3>
-            <p style={{ fontSize: '14px', color: '#A0A0B0', margin: 0 }}>Renovação em 15/03/2024</p>
-          </div>
-          <Button variant="secondary" onClick={() => window.open('mailto:suporte@trafficpro.com.br?subject=Upgrade de Plano', '_blank')}>
-            Fazer Upgrade
-          </Button>
-        </div>
-      </div>
-
-      {/* Features */}
-      <div style={{ marginBottom: '24px' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px' }}>Recursos do Plano</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-          {[
-            'Contas de anúncios ilimitadas',
-            'Relatórios automatizados',
-            'Automações avançadas',
-            'Suporte prioritário',
-            'API Access',
-            'White Label',
-          ].map((feature) => (
-            <div key={feature} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Check size={14} style={{ color: '#10B981' }} />
-              <span style={{ fontSize: '14px', color: '#A0A0B0' }}>{feature}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Payment Method */}
-      <div style={{ paddingTop: '24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px' }}>Método de Pagamento</h3>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
-              <CreditCard size={20} style={{ color: '#FFFFFF' }} />
-            </div>
-            <div>
-              <p style={{ fontSize: '14px', color: '#FFFFFF', marginBottom: '2px' }}>•••• •••• •••• 4242</p>
-              <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>Expira 12/26</p>
+            <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', marginBottom: '16px' }}>Pacotes ativos</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {activeSubs.length === 0 ? (
+                <p style={{ fontSize: '14px', color: '#6B6B7B' }}>Nenhum pacote ativo. Visite a pagina de planos para assinar.</p>
+              ) : (
+                activeSubs.map((sub: any) => (
+                  <div key={sub.id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '16px', borderRadius: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.06)',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{
+                        padding: '8px', borderRadius: '8px',
+                        backgroundColor: sub.isFree ? 'rgba(34, 197, 94, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+                      }}>
+                        <PackageIcon size={18} style={{ color: sub.isFree ? '#22C55E' : '#3B82F6' }} />
+                      </div>
+                      <div>
+                        <p style={{ fontSize: '14px', fontWeight: 600, color: '#FFFFFF', margin: '0 0 2px' }}>
+                          {sub.packageName}
+                          {sub.isBundle && <span style={{ marginLeft: '8px', fontSize: '10px', color: '#FACC15', fontWeight: 700 }}>COMPLETO</span>}
+                        </p>
+                        <p style={{ fontSize: '12px', color: '#6B6B7B', margin: 0 }}>
+                          {sub.isFree ? 'Gratuito' : `R$ ${sub.priceMonthly}/mes`}
+                          {sub.currentPeriodEnd && !sub.isFree && ` - Renova em ${new Date(sub.currentPeriodEnd).toLocaleDateString('pt-BR')}`}
+                          {sub.cancelAtPeriodEnd && ' (cancela ao fim do periodo)'}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant={sub.status === 'ACTIVE' ? 'success' : 'warning'}>
+                      {sub.status === 'ACTIVE' ? 'Ativo' : sub.status}
+                    </Badge>
+                  </div>
+                ))
+              )}
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => window.open('mailto:suporte@trafficpro.com.br?subject=Alteração de Método de Pagamento', '_blank')}>Alterar</Button>
-        </div>
-      </div>
+        </>
+      )}
     </motion.div>
   )
 }

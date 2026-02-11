@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
-import { withAuth, createAuditLog } from '@/lib/api/middleware'
+import { withAuth, withModuleAccess, createAuditLog } from '@/lib/api/middleware'
 
 // Automações são armazenadas como JSON no auditLog por enquanto
 // Em produção, criar tabela dedicada
@@ -27,7 +27,7 @@ const automationSchema = z.object({
 })
 
 // GET - Listar automações
-export const GET = withAuth(async (req, ctx) => {
+export const GET = withModuleAccess('automacao', async (req, ctx) => {
   try {
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
@@ -103,23 +103,12 @@ export const GET = withAuth(async (req, ctx) => {
 }, { requiredPermissions: ['canManageCampaigns'] })
 
 // POST - Criar automação
-export const POST = withAuth(async (req, ctx) => {
+export const POST = withModuleAccess('automacao', async (req, ctx) => {
   try {
     const body = await req.json()
     const data = automationSchema.parse(body)
 
-    // Verificar se organização tem feature de automação
-    const org = await prisma.organization.findUnique({
-      where: { id: ctx.organizationId },
-      include: { plan: true },
-    })
-
-    if (!org?.plan.hasAutomation) {
-      return NextResponse.json(
-        { error: 'Seu plano não inclui automações. Faça upgrade para usar esta funcionalidade.' },
-        { status: 403 }
-      )
-    }
+    // Acesso já verificado pelo withModuleAccess('automacao')
 
     // Criar automação (salvar no audit log)
     const automationData = {

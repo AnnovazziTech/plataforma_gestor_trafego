@@ -5,10 +5,10 @@ export const maxDuration = 30
 
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db/prisma'
-import { withAuth } from '@/lib/api/middleware'
+import { withModuleAccess } from '@/lib/api/middleware'
 
 // GET - Buscar dados de analytics
-export const GET = withAuth(async (req, ctx) => {
+export const GET = withModuleAccess('analytics', async (req, ctx) => {
   try {
     const { searchParams } = new URL(req.url)
     const startDateParam = searchParams.get('startDate')

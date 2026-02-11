@@ -35,9 +35,20 @@ export const GET = withSuperAdmin(async (req, ctx) => {
           logo: true,
           isActive: true,
           subscriptionStatus: true,
+          stripeCustomerId: true,
           trialEndsAt: true,
           createdAt: true,
           plan: { select: { id: true, name: true, priceMonthly: true } },
+          packages: {
+            select: {
+              id: true,
+              status: true,
+              currentPeriodEnd: true,
+              cancelAtPeriodEnd: true,
+              package: { select: { name: true, slug: true, priceMonthly: true, isFree: true, isBundle: true } },
+            },
+            orderBy: { package: { sortOrder: 'asc' } },
+          },
           _count: {
             select: {
               members: true,
