@@ -22,7 +22,6 @@ export const GET = withSuperAdmin(async (req, ctx) => {
       })),
     })
   } catch (error) {
-    console.error('Erro ao buscar planos:', error)
     return NextResponse.json({ error: 'Erro ao buscar planos' }, { status: 500 })
   }
 })
@@ -67,7 +66,6 @@ export const POST = withSuperAdmin(async (req, ctx) => {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Dados invalidos', details: error.issues }, { status: 400 })
     }
-    console.error('Erro ao criar plano:', error)
     return NextResponse.json({ error: 'Erro ao criar plano' }, { status: 500 })
   }
 })

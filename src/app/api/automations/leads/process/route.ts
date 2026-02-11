@@ -87,7 +87,6 @@ export const POST = withAuth(async (req, ctx) => {
       results,
     })
   } catch (error) {
-    console.error('Erro ao processar automações de leads:', error)
     return NextResponse.json(
       { error: 'Erro ao processar automações de leads' },
       { status: 500 }
@@ -193,7 +192,6 @@ async function processAutomation(
         await executeAction(automation, lead, ctx)
         executedActions++
       } catch (e) {
-        console.error(`Erro ao executar ação para lead ${lead.id}:`, e)
       }
     }
 
@@ -216,7 +214,6 @@ async function processAutomation(
 
     return { processedLeads, executedActions, error: null }
   } catch (error) {
-    console.error(`Erro ao processar automação ${automation.id}:`, error)
     return { processedLeads, executedActions, error: String(error) }
   }
 }

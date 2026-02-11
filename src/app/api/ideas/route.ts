@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(ideas)
   } catch (error) {
-    console.error('Error fetching ideas:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -55,7 +54,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(idea, { status: 201 })
   } catch (error) {
-    console.error('Error creating idea:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

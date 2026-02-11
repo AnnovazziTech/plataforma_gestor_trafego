@@ -92,7 +92,6 @@ export default function CursosPage() {
         setCourses(data)
       }
     } catch (error) {
-      console.error('Erro ao carregar cursos:', error)
     } finally {
       setIsLoading(false)
     }
@@ -132,7 +131,6 @@ export default function CursosPage() {
         showToast('Erro ao iniciar curso', 'error')
       }
     } catch (error) {
-      console.error('Erro ao iniciar curso:', error)
       showToast('Erro ao iniciar curso', 'error')
     }
   }

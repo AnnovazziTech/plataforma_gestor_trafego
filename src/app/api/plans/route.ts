@@ -36,7 +36,6 @@ export async function GET() {
 
     return NextResponse.json({ plans })
   } catch (error) {
-    console.error('Erro ao listar planos:', error)
     return NextResponse.json(
       { error: 'Erro ao listar planos' },
       { status: 500 }

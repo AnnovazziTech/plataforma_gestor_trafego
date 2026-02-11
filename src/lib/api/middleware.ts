@@ -140,7 +140,6 @@ export function withAuth(
         { status: 401 }
       )
     } catch (error) {
-      console.error('Erro no middleware de autenticacao:', error)
       return NextResponse.json(
         { error: 'Erro interno de autenticacao' },
         { status: 500 }
@@ -189,7 +188,6 @@ export function withSuperAdmin(
 
       return handler(req, { userId: user.id, email: user.email })
     } catch (error) {
-      console.error('Erro no middleware de superadmin:', error)
       return NextResponse.json(
         { error: 'Erro interno de autenticacao' },
         { status: 500 }
@@ -276,6 +274,5 @@ export async function createAuditLog(params: {
       },
     })
   } catch (error) {
-    console.error('Erro ao criar log de auditoria:', error)
   }
 }

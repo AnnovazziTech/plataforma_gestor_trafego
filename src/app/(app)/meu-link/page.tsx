@@ -118,7 +118,6 @@ export default function MeuLinkPage() {
         }
       }
     } catch (error) {
-      console.error('Erro ao carregar página de links:', error)
     } finally {
       setIsLoading(false)
     }
@@ -160,7 +159,6 @@ export default function MeuLinkPage() {
         showToast('Erro ao adicionar link', 'error')
       }
     } catch (error) {
-      console.error('Erro ao adicionar link:', error)
       showToast('Erro ao adicionar link', 'error')
     }
   }
@@ -180,7 +178,6 @@ export default function MeuLinkPage() {
         showToast('Erro ao remover link', 'error')
       }
     } catch (error) {
-      console.error('Erro ao remover link:', error)
       showToast('Erro ao remover link', 'error')
     }
   }
@@ -202,7 +199,6 @@ export default function MeuLinkPage() {
         showToast('Erro ao atualizar link', 'error')
       }
     } catch (error) {
-      console.error('Erro ao atualizar link:', error)
       showToast('Erro ao atualizar link', 'error')
     }
   }
@@ -221,7 +217,6 @@ export default function MeuLinkPage() {
         showToast('Erro ao salvar configurações', 'error')
       }
     } catch (error) {
-      console.error('Erro ao salvar configurações:', error)
       showToast('Erro ao salvar configurações', 'error')
     }
   }

@@ -139,7 +139,6 @@ export async function GET() {
 
     return NextResponse.json(activities.slice(0, 10))
   } catch (error) {
-    console.error('Erro ao buscar atividades:', error)
     return NextResponse.json({ error: 'Erro ao buscar atividades' }, { status: 500 })
   }
 }

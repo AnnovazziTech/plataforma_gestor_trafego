@@ -43,7 +43,6 @@ export default function CriativosPage() {
         setCreatives(data.creatives || [])
       }
     } catch (error) {
-      console.error('Erro ao buscar criativos:', error)
     } finally {
       setIsLoading(false)
     }

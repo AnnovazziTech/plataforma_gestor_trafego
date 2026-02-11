@@ -213,7 +213,6 @@ export const GET = withAuth(async (req, ctx) => {
 
     return NextResponse.json(response)
   } catch (error) {
-    console.error('Erro ao buscar comparacao:', error)
     return NextResponse.json(
       { error: 'Erro ao buscar comparacao de campanha' },
       { status: 500 }

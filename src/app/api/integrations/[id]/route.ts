@@ -71,7 +71,6 @@ export const GET = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ integration: safeIntegration })
   } catch (error) {
-    console.error('Erro ao buscar integracao:', error)
     return NextResponse.json(
       { error: 'Erro ao buscar integracao' },
       { status: 500 }
@@ -134,8 +133,6 @@ export const PATCH = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ integration })
   } catch (error) {
-    console.error('Erro ao atualizar integracao:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },
@@ -216,7 +213,6 @@ export const DELETE = withAuth(async (req, ctx) => {
       message: 'Integracao desconectada com sucesso',
     })
   } catch (error) {
-    console.error('Erro ao desconectar integracao:', error)
     return NextResponse.json(
       { error: 'Erro ao desconectar integracao' },
       { status: 500 }

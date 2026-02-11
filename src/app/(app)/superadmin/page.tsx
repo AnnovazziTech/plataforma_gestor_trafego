@@ -201,7 +201,7 @@ export default function SuperadminPage() {
     try {
       const res = await fetch('/api/superadmin/stats')
       if (res.ok) setStats(await res.json())
-    } catch (e) { console.error(e) }
+    } catch (e) { /* handled */ }
     setLoadingStats(false)
   }, [])
 
@@ -217,7 +217,7 @@ export default function SuperadminPage() {
         setOrganizations(data.organizations)
         setOrgPagination(data.pagination)
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { /* handled */ }
     setLoadingOrgs(false)
   }, [orgSearch, orgStatusFilter])
 
@@ -233,7 +233,7 @@ export default function SuperadminPage() {
         setUsers(data.users)
         setUserPagination(data.pagination)
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { /* handled */ }
     setLoadingUsers(false)
   }, [userSearch, userActiveFilter])
 
@@ -246,7 +246,7 @@ export default function SuperadminPage() {
         setPlans(data.plans)
         setAllPlans(data.plans.map((p: Plan) => ({ id: p.id, name: p.name })))
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { /* handled */ }
     setLoadingPlans(false)
   }, [])
 
@@ -260,7 +260,7 @@ export default function SuperadminPage() {
         setAuditLogs(data.logs)
         setLogPagination(data.pagination)
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { /* handled */ }
     setLoadingLogs(false)
   }, [])
 
@@ -272,7 +272,7 @@ export default function SuperadminPage() {
         const data = await res.json()
         setSysModules(data.modules)
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { /* handled */ }
     setLoadingModules(false)
   }, [])
 
@@ -293,7 +293,7 @@ export default function SuperadminPage() {
         const data = await res.json()
         setNewsPosts(data.posts)
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { /* handled */ }
     setLoadingNews(false)
   }, [])
 

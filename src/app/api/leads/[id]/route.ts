@@ -71,7 +71,6 @@ export const GET = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ lead })
   } catch (error) {
-    console.error('Erro ao buscar lead:', error)
     return NextResponse.json(
       { error: 'Erro ao buscar lead' },
       { status: 500 }
@@ -164,8 +163,6 @@ export const PATCH = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ lead })
   } catch (error) {
-    console.error('Erro ao atualizar lead:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },
@@ -224,7 +221,6 @@ export const DELETE = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Erro ao deletar lead:', error)
     return NextResponse.json(
       { error: 'Erro ao deletar lead' },
       { status: 500 }

@@ -107,7 +107,6 @@ export const GET = withAuth(async (req, ctx) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao listar relatórios:', error)
     return NextResponse.json(
       { error: 'Erro ao listar relatórios' },
       { status: 500 }
@@ -311,8 +310,6 @@ export const POST = withAuth(async (req, ctx) => {
       report: formattedReport,
     })
   } catch (error) {
-    console.error('Erro ao criar relatório:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },

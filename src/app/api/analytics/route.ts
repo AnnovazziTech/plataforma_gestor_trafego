@@ -153,7 +153,6 @@ export const GET = withAuth(async (req, ctx) => {
       hourlyPerformance,
     })
   } catch (error) {
-    console.error('Erro ao buscar analytics:', error)
     return NextResponse.json(
       { error: 'Erro ao buscar analytics' },
       { status: 500 }

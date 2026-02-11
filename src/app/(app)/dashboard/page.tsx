@@ -60,7 +60,6 @@ export default function DashboardPage() {
         setClients(Array.isArray(clientsData) ? clientsData : clientsData.clients || [])
       }
     } catch (error) {
-      console.error('Erro ao buscar dashboard:', error)
     } finally {
       setIsLoading(false)
     }

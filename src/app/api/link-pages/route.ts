@@ -24,7 +24,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(linkPage)
   } catch (error) {
-    console.error('Error fetching link page:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -65,7 +64,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(linkPage, { status: 201 })
   } catch (error) {
-    console.error('Error creating link page:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -127,7 +125,6 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(linkPage)
   } catch (error) {
-    console.error('Error updating link page:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

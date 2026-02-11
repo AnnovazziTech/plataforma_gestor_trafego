@@ -59,7 +59,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(coursesWithProgress)
   } catch (error) {
-    console.error('Error fetching courses:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -95,7 +95,6 @@ export const GET = withAuth(async (req, ctx) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao listar automações:', error)
     return NextResponse.json(
       { error: 'Erro ao listar automações' },
       { status: 500 }
@@ -146,8 +145,6 @@ export const POST = withAuth(async (req, ctx) => {
       automation: automationData,
     }, { status: 201 })
   } catch (error) {
-    console.error('Erro ao criar automação:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },

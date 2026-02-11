@@ -46,7 +46,6 @@ export default function ResumoPage() {
         setClients(Array.isArray(data) ? data : data.clients || [])
       }
     } catch (error) {
-      console.error('Erro ao buscar clientes:', error)
     } finally {
       setIsLoading(false)
     }

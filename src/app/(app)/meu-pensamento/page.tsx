@@ -109,7 +109,6 @@ export default function MeuPensamentoPage() {
         setGoals(data)
       }
     } catch (error) {
-      console.error('Erro ao carregar dados:', error)
     } finally {
       setIsLoading(false)
     }
@@ -163,7 +162,6 @@ export default function MeuPensamentoPage() {
       setEditingNote(null)
       setNewNote({ title: '', content: '', category: 'Estratégia', tags: '' })
     } catch (error) {
-      console.error('Erro ao salvar nota:', error)
       showToast('Erro ao salvar nota', 'error')
     }
   }
@@ -189,7 +187,6 @@ export default function MeuPensamentoPage() {
         showToast('Ideia salva!', 'success')
       }
     } catch (error) {
-      console.error('Erro ao salvar ideia:', error)
       showToast('Erro ao salvar ideia', 'error')
     }
   }
@@ -208,7 +205,6 @@ export default function MeuPensamentoPage() {
         setNotes(prev => prev.map(n => n.id === id ? { ...n, isFavorite: !n.isFavorite } : n))
       }
     } catch (error) {
-      console.error('Erro ao atualizar favorito:', error)
     }
   }
 
@@ -226,7 +222,6 @@ export default function MeuPensamentoPage() {
         setNotes(prev => prev.map(n => n.id === id ? { ...n, isPinned: !n.isPinned } : n))
       }
     } catch (error) {
-      console.error('Erro ao atualizar pin:', error)
     }
   }
 
@@ -238,7 +233,6 @@ export default function MeuPensamentoPage() {
         showToast('Nota removida!', 'info')
       }
     } catch (error) {
-      console.error('Erro ao deletar nota:', error)
       showToast('Erro ao deletar nota', 'error')
     }
   }
@@ -255,7 +249,6 @@ export default function MeuPensamentoPage() {
         showToast('Status atualizado!', 'success')
       }
     } catch (error) {
-      console.error('Erro ao atualizar status:', error)
       showToast('Erro ao atualizar status', 'error')
     }
   }

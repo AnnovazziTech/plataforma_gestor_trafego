@@ -277,7 +277,6 @@ export default function CampaignsPage() {
         })
       }
     } catch (error) {
-      console.error('Erro ao buscar comparação:', error)
       // Erro ao carregar - mostrar estado vazio
       setWeeklyData([])
       setAiAnalysis({

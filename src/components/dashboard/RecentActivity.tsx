@@ -46,7 +46,6 @@ export function RecentActivity() {
         setActivities([])
       }
     } catch (error) {
-      console.error('Erro ao buscar atividades:', error)
       setActivities([])
     } finally {
       setIsLoading(false)

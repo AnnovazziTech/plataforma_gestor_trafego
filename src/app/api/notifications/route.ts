@@ -122,7 +122,6 @@ export const GET = withAuth(async (req, ctx) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao listar notificações:', error)
     return NextResponse.json(
       { error: 'Erro ao listar notificações' },
       { status: 500 }

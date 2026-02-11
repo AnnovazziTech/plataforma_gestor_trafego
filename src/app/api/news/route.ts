@@ -12,7 +12,6 @@ export async function GET(req: NextRequest) {
     })
     return NextResponse.json({ posts })
   } catch (error) {
-    console.error('Erro ao buscar noticias:', error)
     return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
   }
 }

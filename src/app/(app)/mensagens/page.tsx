@@ -280,7 +280,6 @@ export default function MensagensPage() {
     try {
       await contextSendMessage(selectedContact.id, newMessage)
     } catch (error) {
-      console.error('Error sending message:', error)
     }
 
     setNewMessage('')

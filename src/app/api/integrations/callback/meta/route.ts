@@ -1,6 +1,7 @@
 // API Route: Callback OAuth do Meta (Facebook/Instagram)
 
 import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'crypto'
 import prisma from '@/lib/db/prisma'
 import { encrypt } from '@/lib/crypto/encryption'
 import { exchangeMetaCode, getMetaAdAccounts } from '@/lib/integrations/meta'
@@ -18,7 +19,6 @@ export async function GET(req: NextRequest) {
 
     // Erro do OAuth
     if (error) {
-      console.error('Erro OAuth Meta:', error, errorDescription)
       return NextResponse.redirect(
         `${baseUrl}/settings/integrations?error=${encodeURIComponent(errorDescription || error)}`
       )
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // Decodificar state
+    // Decodificar e validar state com HMAC
     let stateData: {
       organizationId: string
       userId: string
@@ -40,7 +40,23 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-      stateData = JSON.parse(Buffer.from(state, 'base64url').toString())
+      const decoded = Buffer.from(state, 'base64url').toString()
+      const pipeIndex = decoded.lastIndexOf('|')
+      if (pipeIndex === -1) throw new Error('Invalid state format')
+
+      const payload = decoded.substring(0, pipeIndex)
+      const receivedHmac = decoded.substring(pipeIndex + 1)
+
+      // Validar HMAC
+      const hmacSecret = process.env.NEXTAUTH_SECRET || ''
+      const expectedHmac = crypto
+        .createHmac('sha256', hmacSecret)
+        .update(payload)
+        .digest('base64url')
+
+      if (receivedHmac !== expectedHmac) throw new Error('Invalid state signature')
+
+      stateData = JSON.parse(payload)
     } catch {
       return NextResponse.redirect(
         `${baseUrl}/settings/integrations?error=State invalido`
@@ -124,7 +140,6 @@ export async function GET(req: NextRequest) {
       `${baseUrl}/settings/integrations?success=Meta Ads conectado com sucesso`
     )
   } catch (error) {
-    console.error('Erro no callback Meta:', error)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     return NextResponse.redirect(
       `${baseUrl}/settings/integrations?error=Erro ao conectar Meta Ads`

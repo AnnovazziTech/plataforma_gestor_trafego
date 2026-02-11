@@ -99,7 +99,6 @@ export const GET = withAuth(async (req, ctx) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao listar campanhas:', error)
     return NextResponse.json(
       { error: 'Erro ao listar campanhas' },
       { status: 500 }
@@ -183,8 +182,6 @@ export const POST = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ campaign }, { status: 201 })
   } catch (error) {
-    console.error('Erro ao criar campanha:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },

@@ -307,7 +307,6 @@ export const GET = withAuth(async (req, ctx) => {
       })),
     })
   } catch (error) {
-    console.error('Erro ao buscar dashboard:', error)
     return NextResponse.json(
       { error: 'Erro ao buscar dashboard' },
       { status: 500 }

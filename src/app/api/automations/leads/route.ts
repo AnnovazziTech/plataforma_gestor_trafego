@@ -122,7 +122,6 @@ export const GET = withAuth(async (req, ctx) => {
       stats,
     })
   } catch (error) {
-    console.error('Erro ao listar automações de leads:', error)
     return NextResponse.json(
       { error: 'Erro ao listar automações de leads' },
       { status: 500 }
@@ -173,8 +172,6 @@ export const POST = withAuth(async (req, ctx) => {
       automation: automationData,
     }, { status: 201 })
   } catch (error) {
-    console.error('Erro ao criar automação de lead:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },

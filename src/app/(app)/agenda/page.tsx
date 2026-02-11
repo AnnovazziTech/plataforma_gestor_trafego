@@ -53,7 +53,6 @@ export default function AgendaPage() {
         setClients(Array.isArray(data) ? data : data.clients || [])
       }
     } catch (error) {
-      console.error('Erro ao buscar clientes:', error)
     }
   }, [])
 

@@ -53,7 +53,6 @@ export const PATCH = withSuperAdmin(async (req, ctx) => {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Dados invalidos', details: error.issues }, { status: 400 })
     }
-    console.error('Erro ao atualizar organizacao:', error)
     return NextResponse.json({ error: 'Erro ao atualizar organizacao' }, { status: 500 })
   }
 })

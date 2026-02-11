@@ -2,8 +2,28 @@
 // Recebe mensagens de Evolution API e Cloud API
 
 import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'crypto'
 import prisma from '@/lib/db/prisma'
 import { parseWhatsAppWebhook, formatPhoneNumber } from '@/lib/integrations/whatsapp'
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/api/rate-limit'
+
+function verifyWhatsAppSignature(rawBody: string, signature: string | null): boolean {
+  const appSecret = process.env.META_APP_SECRET
+  if (!appSecret) return false
+  if (!signature) return false
+
+  const expectedSig = crypto
+    .createHmac('sha256', appSecret)
+    .update(rawBody)
+    .digest('hex')
+
+  const sig = signature.replace('sha256=', '')
+  try {
+    return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))
+  } catch {
+    return false
+  }
+}
 
 // GET - Verificacao do webhook (WhatsApp Cloud API)
 export async function GET(req: NextRequest) {
@@ -13,11 +33,13 @@ export async function GET(req: NextRequest) {
   const token = searchParams.get('hub.verify_token')
   const challenge = searchParams.get('hub.challenge')
 
-  // Verificar token
-  const verifyToken = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || 'trafficpro-webhook'
+  // Verificar token (obrigatorio via env var)
+  const verifyToken = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN
+  if (!verifyToken) {
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 })
+  }
 
   if (mode === 'subscribe' && token === verifyToken) {
-    console.log('Webhook WhatsApp verificado')
     return new NextResponse(challenge, { status: 200 })
   }
 
@@ -27,7 +49,24 @@ export async function GET(req: NextRequest) {
 // POST - Receber mensagens
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
+    // Rate limiting
+    const ip = getClientIp(req)
+    const rl = checkRateLimit(`webhook-wa:${ip}`, RATE_LIMITS.webhook)
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
+
+    const rawBody = await req.text()
+
+    // Validar assinatura HMAC se META_APP_SECRET configurado (Cloud API)
+    const signature = req.headers.get('x-hub-signature-256')
+    if (process.env.META_APP_SECRET) {
+      if (!verifyWhatsAppSignature(rawBody, signature)) {
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 403 })
+      }
+    }
+
+    const body = JSON.parse(rawBody)
     const parsed = parseWhatsAppWebhook(body)
 
     if (parsed.type === 'unknown') {
@@ -46,7 +85,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('Erro no webhook WhatsApp:', error)
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }
 }
@@ -112,7 +150,6 @@ async function processIncomingMessage(data: any) {
     }
 
     if (!integration) {
-      console.log('Integracao WhatsApp nao encontrada para:', instanceName || 'cloud')
       return
     }
 
@@ -181,9 +218,7 @@ async function processIncomingMessage(data: any) {
       },
     })
 
-    console.log(`Mensagem recebida de ${formattedPhone} na org ${integration.organizationId}`)
   } catch (error) {
-    console.error('Erro ao processar mensagem:', error)
   }
 }
 
@@ -204,7 +239,6 @@ async function processStatusUpdate(data: any) {
       }
     }
   } catch (error) {
-    console.error('Erro ao atualizar status:', error)
   }
 }
 

@@ -64,7 +64,6 @@ export default function OrcamentoPage() {
         setQuotes(Array.isArray(data) ? data : [])
       }
     } catch (error) {
-      console.error('Erro ao buscar orçamentos:', error)
     } finally {
       setIsLoading(false)
     }

@@ -79,7 +79,6 @@ export default function SocialPage() {
         setPostStats(data.stats || { total: 0, scheduled: 0, published: 0, failed: 0 })
       }
     } catch (error) {
-      console.error('Erro ao buscar posts:', error)
     } finally {
       setLoading(false)
     }
@@ -131,7 +130,6 @@ export default function SocialPage() {
         showToast(error.error || 'Erro ao agendar post', 'error')
       }
     } catch (error) {
-      console.error('Erro ao criar post:', error)
       showToast('Erro ao agendar post', 'error')
     } finally {
       setSaving(false)
@@ -154,7 +152,6 @@ export default function SocialPage() {
         showToast(error.error || 'Erro ao remover post', 'error')
       }
     } catch (error) {
-      console.error('Erro ao deletar post:', error)
       showToast('Erro ao remover post', 'error')
     }
   }
@@ -270,7 +267,6 @@ export default function SocialPage() {
         showToast(error.error || 'Erro ao atualizar post', 'error')
       }
     } catch (error) {
-      console.error('Erro ao atualizar post:', error)
       showToast('Erro ao atualizar post', 'error')
     } finally {
       setSaving(false)

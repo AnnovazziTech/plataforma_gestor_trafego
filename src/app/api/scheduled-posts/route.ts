@@ -103,7 +103,6 @@ export const GET = withAuth(async (req, ctx) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao listar posts agendados:', error)
     return NextResponse.json(
       { error: 'Erro ao listar posts agendados' },
       { status: 500 }
@@ -179,8 +178,6 @@ export const POST = withAuth(async (req, ctx) => {
       },
     }, { status: 201 })
   } catch (error) {
-    console.error('Erro ao criar post agendado:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },

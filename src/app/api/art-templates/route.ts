@@ -100,7 +100,6 @@ export const GET = withAuth(async (req, ctx) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao listar templates:', error)
     return NextResponse.json(
       { error: 'Erro ao listar templates' },
       { status: 500 }

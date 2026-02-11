@@ -92,7 +92,6 @@ export const GET = withAuth(async (req, ctx) => {
       organizationCount,
     })
   } catch (error) {
-    console.error('Erro ao buscar perfil:', error)
     return NextResponse.json(
       { error: 'Erro ao buscar perfil' },
       { status: 500 }
@@ -176,8 +175,6 @@ export const PATCH = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ user })
   } catch (error) {
-    console.error('Erro ao atualizar perfil:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },

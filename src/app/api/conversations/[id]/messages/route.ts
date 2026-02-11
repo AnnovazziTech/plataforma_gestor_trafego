@@ -71,7 +71,6 @@ export const GET = withAuth(async (
       },
     })
   } catch (error) {
-    console.error('Erro ao listar mensagens:', error)
     return NextResponse.json(
       { error: 'Erro ao listar mensagens' },
       { status: 500 }

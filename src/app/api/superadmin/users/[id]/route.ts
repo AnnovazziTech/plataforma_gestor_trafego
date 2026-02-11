@@ -44,7 +44,6 @@ export const PATCH = withSuperAdmin(async (req, ctx) => {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Dados inválidos', details: error.issues }, { status: 400 })
     }
-    console.error('Erro ao atualizar usuário:', error)
     return NextResponse.json({ error: 'Erro ao atualizar usuário' }, { status: 500 })
   }
 })

@@ -1279,7 +1279,6 @@ function PreferencesSection({ showToast }: { showToast: (msg: string, type: any)
         body: JSON.stringify({ [key]: value }),
       })
     } catch (error) {
-      console.error('Erro ao salvar preferência:', error)
     }
   }
 

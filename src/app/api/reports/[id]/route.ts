@@ -68,7 +68,6 @@ export const GET = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ report: formattedReport })
   } catch (error) {
-    console.error('Erro ao buscar relatório:', error)
     return NextResponse.json(
       { error: 'Erro ao buscar relatório' },
       { status: 500 }
@@ -160,8 +159,6 @@ export const PATCH = withAuth(async (req, ctx) => {
       report: formattedReport,
     })
   } catch (error) {
-    console.error('Erro ao atualizar relatório:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },
@@ -227,7 +224,6 @@ export const DELETE = withAuth(async (req, ctx) => {
       message: 'Relatório removido com sucesso',
     })
   } catch (error) {
-    console.error('Erro ao remover relatório:', error)
     return NextResponse.json(
       { error: 'Erro ao remover relatório' },
       { status: 500 }

@@ -106,7 +106,6 @@ export default function ProspeccaoPage() {
         setProspects(data)
       }
     } catch (error) {
-      console.error('Erro ao carregar prospectos:', error)
       showToast('Erro ao carregar prospectos', 'error')
     } finally {
       setIsLoading(false)
@@ -153,7 +152,6 @@ export default function ProspeccaoPage() {
         showToast('Erro ao adicionar prospecto', 'error')
       }
     } catch (error) {
-      console.error('Erro ao adicionar prospecto:', error)
       showToast('Erro ao adicionar prospecto', 'error')
     }
   }
@@ -175,7 +173,6 @@ export default function ProspeccaoPage() {
         ))
       }
     } catch (error) {
-      console.error('Erro ao atualizar favorito:', error)
     }
   }
 
@@ -196,7 +193,6 @@ export default function ProspeccaoPage() {
         showToast('Erro ao atualizar status', 'error')
       }
     } catch (error) {
-      console.error('Erro ao atualizar status:', error)
       showToast('Erro ao atualizar status', 'error')
     }
   }

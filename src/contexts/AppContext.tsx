@@ -513,7 +513,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api(`/api/campaigns${accountParam}`)
       setCampaigns(data.campaigns || [])
     } catch (error: any) {
-      console.error('Erro ao buscar campanhas:', error)
     } finally {
       setCampaignsLoading(false)
     }
@@ -596,7 +595,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api('/api/reports')
       setReports(data.reports || [])
     } catch (error: any) {
-      console.error('Erro ao buscar relatórios:', error)
     } finally {
       setReportsLoading(false)
     }
@@ -635,7 +633,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api('/api/automations')
       setAutomations(data.automations || [])
     } catch (error: any) {
-      console.error('Erro ao buscar automações:', error)
     } finally {
       setAutomationsLoading(false)
     }
@@ -703,7 +700,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setNotifications(data.notifications || [])
       setUnreadCount(data.unreadCount || 0)
     } catch (error: any) {
-      console.error('Erro ao buscar notificações:', error)
     } finally {
       setNotificationsLoading(false)
     }
@@ -742,7 +738,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }))
       setConnectedAccounts(accounts)
     } catch (error: any) {
-      console.error('Erro ao buscar integrações:', error)
     } finally {
       setIntegrationsLoading(false)
     }
@@ -796,7 +791,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api('/api/leads')
       setLeads(data.leads || [])
     } catch (error: any) {
-      console.error('Erro ao buscar leads:', error)
     } finally {
       setLeadsLoading(false)
     }
@@ -855,7 +849,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCreatives(data.creatives || [])
       setCreativesStats(data.stats || { total: 0, byType: {}, favorites: 0 })
     } catch (error: any) {
-      console.error('Erro ao buscar criativos:', error)
     } finally {
       setCreativesLoading(false)
     }
@@ -930,7 +923,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api(`/api/art-templates?${params.toString()}`)
       setArtTemplates(data.templates || [])
     } catch (error: any) {
-      console.error('Erro ao buscar templates:', error)
     } finally {
       setArtTemplatesLoading(false)
     }
@@ -945,7 +937,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api(`/api/conversations${params}`)
       setConversations(data.conversations || [])
     } catch (error: any) {
-      console.error('Erro ao buscar conversas:', error)
     } finally {
       setConversationsLoading(false)
     }
@@ -988,7 +979,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api(`/api/financial-entries?${params.toString()}`)
       setFinancialEntries(data.entries || [])
     } catch (error: any) {
-      console.error('Erro ao buscar lançamentos:', error)
     } finally {
       setFinancialEntriesLoading(false)
     }
@@ -1028,7 +1018,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api(`/api/client-tasks${params}`)
       setClientTasks(data.tasks || [])
     } catch (error: any) {
-      console.error('Erro ao buscar tarefas:', error)
     } finally {
       setClientTasksLoading(false)
     }
@@ -1083,7 +1072,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api(`/api/budget-strategies${params}`)
       setBudgetStrategies(data.strategies || [])
     } catch (error: any) {
-      console.error('Erro ao buscar estratégias:', error)
     } finally {
       setBudgetStrategiesLoading(false)
     }
@@ -1138,7 +1126,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api(`/api/budget-campaigns?${params.toString()}`)
       setBudgetCampaigns(data.campaigns || [])
     } catch (error: any) {
-      console.error('Erro ao buscar campanhas de orçamento:', error)
     } finally {
       setBudgetCampaignsLoading(false)
     }
@@ -1189,7 +1176,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api('/api/news')
       setNewsPosts(data.posts || [])
     } catch (error: any) {
-      console.error('Erro ao buscar notícias:', error)
     } finally {
       setNewsPostsLoading(false)
     }
@@ -1202,7 +1188,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const data = await api('/api/modules')
       setModules(data.modules || [])
     } catch (error: any) {
-      console.error('Erro ao buscar módulos:', error)
     } finally {
       setModulesLoading(false)
     }

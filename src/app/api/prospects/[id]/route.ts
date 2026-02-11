@@ -28,7 +28,6 @@ export async function GET(
 
     return NextResponse.json(prospect)
   } catch (error) {
-    console.error('Error fetching prospect:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -79,7 +78,6 @@ export async function PUT(
 
     return NextResponse.json(updated)
   } catch (error) {
-    console.error('Error updating prospect:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -109,7 +107,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting prospect:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -53,7 +53,6 @@ export const GET = withAuth(async (req: NextRequest, ctx: AuthContext) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao buscar post:', error)
     return NextResponse.json(
       { error: 'Erro ao buscar post' },
       { status: 500 }
@@ -171,8 +170,6 @@ export const PUT = withAuth(async (req: NextRequest, ctx: AuthContext) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao atualizar post:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },
@@ -239,7 +236,6 @@ export const DELETE = withAuth(async (req: NextRequest, ctx: AuthContext) => {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Erro ao excluir post:', error)
     return NextResponse.json(
       { error: 'Erro ao excluir post' },
       { status: 500 }

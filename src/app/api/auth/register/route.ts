@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import prisma from '@/lib/db/prisma'
 import { sendConversionEvent, extractClientIp, extractUserAgent } from '@/lib/meta/conversions-api'
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/api/rate-limit'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -14,6 +15,16 @@ const registerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = getClientIp(request)
+    const rl = checkRateLimit(`register:${ip}`, RATE_LIMITS.register)
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Muitas tentativas. Tente novamente em alguns minutos.' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      )
+    }
+
     const body = await request.json()
 
     // Validar dados
@@ -202,8 +213,6 @@ export async function POST(request: NextRequest) {
         : null,
     })
   } catch (error) {
-    console.error('Erro no registro:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },

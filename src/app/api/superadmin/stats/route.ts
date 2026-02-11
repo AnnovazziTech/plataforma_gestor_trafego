@@ -73,7 +73,6 @@ export const GET = withSuperAdmin(async (req, ctx) => {
       })),
     })
   } catch (error) {
-    console.error('Erro ao buscar stats:', error)
     return NextResponse.json({ error: 'Erro ao buscar metricas' }, { status: 500 })
   }
 })

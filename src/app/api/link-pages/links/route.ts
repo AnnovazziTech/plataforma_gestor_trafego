@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(link, { status: 201 })
   } catch (error) {
-    console.error('Error creating link:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -89,7 +88,6 @@ export async function PUT(request: NextRequest) {
     const updated = await prisma.linkItem.findFirst({ where: { id: data.id } })
     return NextResponse.json(updated)
   } catch (error) {
-    console.error('Error updating link:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -133,7 +131,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting link:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

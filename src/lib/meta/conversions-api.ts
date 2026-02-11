@@ -93,11 +93,9 @@ export async function sendConversionEvent(event: MetaEventData): Promise<void> {
     .then(async (res) => {
       if (!res.ok) {
         const body = await res.text()
-        console.error(`[Meta CAPI] Error sending ${event.event_name}:`, res.status, body)
       }
     })
     .catch((err) => {
-      console.error(`[Meta CAPI] Network error sending ${event.event_name}:`, err)
     })
 }
 

@@ -163,7 +163,6 @@ export default function AdminPage() {
         setClients(data)
       }
     } catch (error) {
-      console.error('Erro ao carregar clientes:', error)
     }
   }
 
@@ -175,7 +174,6 @@ export default function AdminPage() {
         setExpenses(data)
       }
     } catch (error) {
-      console.error('Erro ao carregar despesas:', error)
     }
   }
 
@@ -206,7 +204,6 @@ export default function AdminPage() {
         })))
       }
     } catch (error) {
-      console.error('Erro ao carregar orçamentos:', error)
     }
   }
 
@@ -361,7 +358,6 @@ export default function AdminPage() {
         showToast('Erro ao criar orçamento', 'error')
       }
     } catch (error) {
-      console.error('Erro ao criar orçamento:', error)
       showToast('Erro ao criar orçamento', 'error')
     }
   }
@@ -402,7 +398,6 @@ export default function AdminPage() {
         showToast('Erro ao remover orçamento', 'error')
       }
     } catch (error) {
-      console.error('Erro ao remover orçamento:', error)
       showToast('Erro ao remover orçamento', 'error')
     }
   }
@@ -466,7 +461,6 @@ export default function AdminPage() {
         showToast('Erro ao adicionar despesa', 'error')
       }
     } catch (error) {
-      console.error('Erro ao adicionar despesa:', error)
       showToast('Erro ao adicionar despesa', 'error')
     }
   }
@@ -547,7 +541,6 @@ export default function AdminPage() {
         }
       }
     } catch (error) {
-      console.error('Erro ao salvar cliente:', error)
       showToast('Erro ao salvar cliente', 'error')
     }
   }

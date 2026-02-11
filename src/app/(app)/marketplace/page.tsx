@@ -81,7 +81,6 @@ export default function MarketplacePage() {
         setProducts(data)
       }
     } catch (error) {
-      console.error('Erro ao carregar produtos:', error)
     } finally {
       setIsLoading(false)
     }
@@ -127,7 +126,6 @@ export default function MarketplacePage() {
         showToast('Erro ao processar compra', 'error')
       }
     } catch (error) {
-      console.error('Erro ao processar compra:', error)
       showToast('Erro ao processar compra', 'error')
     }
   }

@@ -3,9 +3,20 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/db/prisma'
 import bcrypt from 'bcryptjs'
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/api/rate-limit'
 
 export async function PUT(request: Request) {
   try {
+    // Rate limiting
+    const ip = getClientIp(request)
+    const rl = checkRateLimit(`password:${ip}`, RATE_LIMITS.password)
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Muitas tentativas. Tente novamente em alguns minutos.' },
+        { status: 429 }
+      )
+    }
+
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.email) {
@@ -18,8 +29,8 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Senha atual e nova senha sao obrigatorias' }, { status: 400 })
     }
 
-    if (newPassword.length < 6) {
-      return NextResponse.json({ error: 'A nova senha deve ter pelo menos 6 caracteres' }, { status: 400 })
+    if (newPassword.length < 8) {
+      return NextResponse.json({ error: 'A nova senha deve ter pelo menos 8 caracteres' }, { status: 400 })
     }
 
     // Buscar usuario
@@ -54,7 +65,6 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ message: 'Senha alterada com sucesso!' })
   } catch (error) {
-    console.error('Erro ao alterar senha:', error)
     return NextResponse.json({ error: 'Erro ao alterar senha' }, { status: 500 })
   }
 }

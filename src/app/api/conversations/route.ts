@@ -86,7 +86,6 @@ export const GET = withAuth(async (req, ctx) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao listar conversas:', error)
     return NextResponse.json(
       { error: 'Erro ao listar conversas' },
       { status: 500 }
@@ -214,8 +213,6 @@ export const POST = withAuth(async (req, ctx) => {
       conversationId: conversation.id,
     })
   } catch (error) {
-    console.error('Erro ao enviar mensagem:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },

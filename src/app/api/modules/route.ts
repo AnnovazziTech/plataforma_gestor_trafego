@@ -9,7 +9,6 @@ export async function GET() {
     })
     return NextResponse.json({ modules })
   } catch (error) {
-    console.error('Erro ao buscar modulos:', error)
     return NextResponse.json({ error: 'Erro interno' }, { status: 500 })
   }
 }

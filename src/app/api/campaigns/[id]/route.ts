@@ -65,7 +65,6 @@ export const GET = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ campaign })
   } catch (error) {
-    console.error('Erro ao buscar campanha:', error)
     return NextResponse.json(
       { error: 'Erro ao buscar campanha' },
       { status: 500 }
@@ -153,8 +152,6 @@ export const PATCH = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ campaign })
   } catch (error) {
-    console.error('Erro ao atualizar campanha:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },
@@ -218,7 +215,6 @@ export const DELETE = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Erro ao deletar campanha:', error)
     return NextResponse.json(
       { error: 'Erro ao deletar campanha' },
       { status: 500 }

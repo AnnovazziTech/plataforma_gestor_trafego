@@ -109,7 +109,6 @@ export default function AnalyticsPage() {
         setAnalyticsData(data)
       }
     } catch (error) {
-      console.error('Erro ao buscar analytics:', error)
     } finally {
       setIsLoading(false)
     }

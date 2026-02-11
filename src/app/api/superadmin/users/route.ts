@@ -56,7 +56,6 @@ export const GET = withSuperAdmin(async (req, ctx) => {
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     })
   } catch (error) {
-    console.error('Erro ao buscar usuarios:', error)
     return NextResponse.json({ error: 'Erro ao buscar usuarios' }, { status: 500 })
   }
 })

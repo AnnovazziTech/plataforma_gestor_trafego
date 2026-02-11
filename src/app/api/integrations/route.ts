@@ -39,7 +39,6 @@ export const GET = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ integrations })
   } catch (error) {
-    console.error('Erro ao listar integrações:', error)
     return NextResponse.json(
       { error: 'Erro ao listar integrações' },
       { status: 500 }
@@ -67,15 +66,19 @@ export const POST = withAuth(async (req, ctx) => {
       )
     }
 
-    // Gerar state para OAuth
-    const state = Buffer.from(
-      JSON.stringify({
-        organizationId: ctx.organizationId,
-        userId: ctx.userId,
-        platform,
-        timestamp: Date.now(),
-      })
-    ).toString('base64url')
+    // Gerar state para OAuth com HMAC para prevenir CSRF
+    const statePayload = JSON.stringify({
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      platform,
+      timestamp: Date.now(),
+    })
+    const hmacSecret = process.env.NEXTAUTH_SECRET || ''
+    const stateHmac = (await import('crypto')).default
+      .createHmac('sha256', hmacSecret)
+      .update(statePayload)
+      .digest('base64url')
+    const state = Buffer.from(`${statePayload}|${stateHmac}`).toString('base64url')
 
     // URL de callback
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
@@ -129,8 +132,6 @@ export const POST = withAuth(async (req, ctx) => {
       redirectUri,
     })
   } catch (error) {
-    console.error('Erro ao iniciar integração:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },

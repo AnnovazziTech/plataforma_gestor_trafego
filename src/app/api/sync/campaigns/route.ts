@@ -235,7 +235,6 @@ export const POST = withAuth(async (req, ctx) => {
                 syncedMetrics++
               }
             } catch (e) {
-              console.error(`Erro ao buscar insights da campanha ${campaign.id}:`, e)
             }
           }
         }
@@ -357,7 +356,6 @@ export const POST = withAuth(async (req, ctx) => {
       message: `Sincronizadas ${syncedCampaigns} campanhas e ${syncedMetrics} metricas`,
     })
   } catch (error) {
-    console.error('Erro ao sincronizar campanhas:', error)
     return NextResponse.json(
       { error: 'Erro ao sincronizar campanhas' },
       { status: 500 }

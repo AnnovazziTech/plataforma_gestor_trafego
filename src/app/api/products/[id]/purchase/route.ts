@@ -73,7 +73,6 @@ export async function POST(
 
     return NextResponse.json(purchase, { status: 201 })
   } catch (error) {
-    console.error('Error purchasing product:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

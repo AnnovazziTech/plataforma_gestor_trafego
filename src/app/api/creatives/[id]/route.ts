@@ -47,7 +47,6 @@ export const GET = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ creative })
   } catch (error) {
-    console.error('Erro ao buscar criativo:', error)
     return NextResponse.json(
       { error: 'Erro ao buscar criativo' },
       { status: 500 }
@@ -103,8 +102,6 @@ export const PATCH = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ creative })
   } catch (error) {
-    console.error('Erro ao atualizar criativo:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },
@@ -162,7 +159,6 @@ export const DELETE = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Erro ao deletar criativo:', error)
     return NextResponse.json(
       { error: 'Erro ao deletar criativo' },
       { status: 500 }

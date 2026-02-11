@@ -121,8 +121,6 @@ export const POST = withAuth(async (req, ctx) => {
       })
     }
   } catch (error) {
-    console.error('Erro ao configurar WhatsApp:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },
@@ -195,7 +193,6 @@ export const GET = withAuth(async (req, ctx) => {
       phone: integration.whatsappPhoneNumber,
     })
   } catch (error) {
-    console.error('Erro ao verificar status WhatsApp:', error)
     return NextResponse.json(
       { error: 'Erro ao verificar status' },
       { status: 500 }

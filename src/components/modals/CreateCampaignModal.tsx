@@ -81,7 +81,6 @@ export function CreateCampaignModal() {
         resetForm()
       }
     } catch (error) {
-      console.error('Erro ao criar campanha:', error)
     } finally {
       setIsLoading(false)
     }

@@ -72,7 +72,6 @@ export const GET = withAuth(async (req, ctx) => {
       })),
     })
   } catch (error) {
-    console.error('Erro ao buscar automação:', error)
     return NextResponse.json(
       { error: 'Erro ao buscar automação' },
       { status: 500 }
@@ -140,8 +139,6 @@ export const PATCH = withAuth(async (req, ctx) => {
       },
     })
   } catch (error) {
-    console.error('Erro ao atualizar automação:', error)
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },
@@ -198,7 +195,6 @@ export const DELETE = withAuth(async (req, ctx) => {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Erro ao deletar automação:', error)
     return NextResponse.json(
       { error: 'Erro ao deletar automação' },
       { status: 500 }

@@ -148,7 +148,6 @@ export default function ReportsPage() {
       generateReportPDF(report)
       showToast('PDF gerado com sucesso!', 'success')
     } catch (error) {
-      console.error('Erro ao gerar PDF:', error)
       showToast('Erro ao gerar PDF', 'error')
     }
   }
@@ -606,7 +605,6 @@ function CreateReportModal({ isOpen, onClose, connectedAccounts }: { isOpen: boo
             )
             showToast('Relatório salvo e PDF gerado!', 'success')
           } catch (error) {
-            console.error('Erro ao gerar PDF:', error)
             showToast('Relatório salvo, mas erro ao gerar PDF', 'warning')
           }
         } else if (type === 'email') {
@@ -620,7 +618,6 @@ function CreateReportModal({ isOpen, onClose, connectedAccounts }: { isOpen: boo
         onClose()
       }
     } catch (error) {
-      console.error('Erro ao criar relatório:', error)
       showToast('Erro ao criar relatório', 'error')
     } finally {
       setIsLoading(false)

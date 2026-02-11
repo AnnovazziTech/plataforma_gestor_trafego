@@ -28,7 +28,6 @@ export default function ForgotPasswordPage() {
       await new Promise(resolve => setTimeout(resolve, 1000))
       setSent(true)
     } catch (error) {
-      console.error('Erro ao enviar email:', error)
     } finally {
       setLoading(false)
     }

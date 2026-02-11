@@ -36,7 +36,6 @@ export async function PUT(
     const updated = await prisma.idea.findFirst({ where: { id } })
     return NextResponse.json(updated)
   } catch (error) {
-    console.error('Error updating idea:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -67,7 +66,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting idea:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

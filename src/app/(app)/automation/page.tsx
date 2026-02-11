@@ -219,7 +219,6 @@ export default function AutomationPage() {
         })
       }
     } catch (error) {
-      console.error('Erro ao buscar automações de leads:', error)
     } finally {
       setLeadAutomationsLoading(false)
     }

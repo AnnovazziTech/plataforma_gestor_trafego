@@ -50,7 +50,6 @@ export async function POST(
 
     return NextResponse.json(enrollment, { status: 201 })
   } catch (error) {
-    console.error('Error enrolling in course:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

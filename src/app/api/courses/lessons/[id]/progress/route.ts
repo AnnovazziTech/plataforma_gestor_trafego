@@ -80,7 +80,6 @@ export async function POST(
 
     return NextResponse.json({ progress, courseProgress })
   } catch (error) {
-    console.error('Error updating lesson progress:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

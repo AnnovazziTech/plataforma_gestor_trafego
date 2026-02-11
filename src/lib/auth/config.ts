@@ -102,7 +102,6 @@ export const authOptions: NextAuthOptions = {
             avatar: user.avatar,
           }
         } catch (error) {
-          console.error('[NextAuth] Erro no authorize:', error)
           return null
         }
       },
@@ -114,7 +113,6 @@ export const authOptions: NextAuthOptions = {
           GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            allowDangerousEmailAccountLinking: true,
           }),
         ]
       : []),
@@ -217,7 +215,6 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, isNewUser }) {
       if (isNewUser) {
         // Log de novo usuário
-        console.log(`Novo usuário cadastrado: ${user.email}`)
       }
     },
   },
