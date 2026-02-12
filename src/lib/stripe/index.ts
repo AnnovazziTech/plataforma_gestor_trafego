@@ -1,34 +1,24 @@
-// Stripe Client Singleton (lazy — safe during Next.js build phase)
+// Stripe Client Singleton
+// Nao lanca erro no import — seguro durante build do Next.js/Vercel
 import Stripe from 'stripe'
 
 const globalForStripe = globalThis as unknown as {
   stripe: Stripe | undefined
 }
 
-function getStripe(): Stripe {
-  if (!globalForStripe.stripe) {
-    const secretKey = process.env.STRIPE_SECRET_KEY
-    if (!secretKey) {
-      throw new Error('STRIPE_SECRET_KEY nao configurado')
-    }
-    globalForStripe.stripe = new Stripe(secretKey, {
-      apiVersion: '2025-11-17.clover',
-      typescript: true,
-    })
-  }
-  return globalForStripe.stripe
+function createStripeClient(): Stripe | null {
+  const secretKey = process.env.STRIPE_SECRET_KEY
+  if (!secretKey) return null
+  return new Stripe(secretKey, {
+    apiVersion: '2025-11-17.clover',
+    typescript: true,
+  })
 }
 
-// Proxy that defers instantiation to first method access (build-safe)
-export const stripe = new Proxy({} as Stripe, {
-  get(_target, prop) {
-    const real = getStripe()
-    const value = (real as any)[prop]
-    if (typeof value === 'function') {
-      return value.bind(real)
-    }
-    return value
-  },
-})
+if (!globalForStripe.stripe) {
+  globalForStripe.stripe = createStripeClient() ?? undefined
+}
+
+export const stripe = globalForStripe.stripe as Stripe
 
 export default stripe
