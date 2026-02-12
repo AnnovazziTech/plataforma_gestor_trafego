@@ -5,21 +5,25 @@ import { getOrganizationModules } from '@/lib/stripe/access-control'
 
 export async function GET(req: NextRequest) {
   try {
-    const modules = await prisma.systemModule.findMany({
-      where: { isEnabled: true },
-      orderBy: { sortOrder: 'asc' },
-    })
-
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
-    // SuperAdmin tem acesso a TODOS os modulos
+    // SuperAdmin: ve TODOS os modulos (inclusive inativos), todos acessiveis
     if (token?.isSuperAdmin) {
-      const modulesWithAccess = modules.map(mod => ({
+      const allModules = await prisma.systemModule.findMany({
+        orderBy: { sortOrder: 'asc' },
+      })
+      const modulesWithAccess = allModules.map(mod => ({
         ...mod,
         isAccessible: true,
       }))
       return NextResponse.json({ modules: modulesWithAccess })
     }
+
+    // Usuarios normais: so modulos ativos (isEnabled = true)
+    const modules = await prisma.systemModule.findMany({
+      where: { isEnabled: true },
+      orderBy: { sortOrder: 'asc' },
+    })
 
     // Se autenticado, adicionar isAccessible baseado em pacotes
     if (token?.organizationId) {
