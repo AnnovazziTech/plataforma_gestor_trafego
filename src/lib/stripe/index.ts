@@ -1,4 +1,4 @@
-// Stripe Client Singleton
+// Stripe Client Singleton (lazy — safe during Next.js build phase)
 import Stripe from 'stripe'
 
 const globalForStripe = globalThis as unknown as {
@@ -17,10 +17,17 @@ function createStripeClient() {
   })
 }
 
-export const stripe = globalForStripe.stripe ?? createStripeClient()
-
-if (process.env.NODE_ENV !== 'production') {
-  globalForStripe.stripe = stripe
+function getStripe(): Stripe {
+  if (!globalForStripe.stripe) {
+    globalForStripe.stripe = createStripeClient()
+  }
+  return globalForStripe.stripe
 }
+
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getStripe(), prop, receiver)
+  },
+})
 
 export default stripe
