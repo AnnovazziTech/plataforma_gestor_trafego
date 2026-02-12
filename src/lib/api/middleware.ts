@@ -289,6 +289,12 @@ export function withModuleAccess(
   }
 ) {
   return withAuth(async (req: NextRequest, ctx: AuthContext) => {
+    // SuperAdmin tem acesso a todos os modulos
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+    if (token?.isSuperAdmin) {
+      return handler(req, ctx)
+    }
+
     const hasAccess = await canAccessModule(ctx.organizationId, moduleSlug)
     if (!hasAccess) {
       return NextResponse.json(

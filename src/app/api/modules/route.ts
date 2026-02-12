@@ -10,9 +10,18 @@ export async function GET(req: NextRequest) {
       orderBy: { sortOrder: 'asc' },
     })
 
-    // Se autenticado, adicionar isAccessible
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
+    // SuperAdmin tem acesso a TODOS os modulos
+    if (token?.isSuperAdmin) {
+      const modulesWithAccess = modules.map(mod => ({
+        ...mod,
+        isAccessible: true,
+      }))
+      return NextResponse.json({ modules: modulesWithAccess })
+    }
+
+    // Se autenticado, adicionar isAccessible baseado em pacotes
     if (token?.organizationId) {
       const accessibleSlugs = await getOrganizationModules(token.organizationId as string)
       const modulesWithAccess = modules.map(mod => ({

@@ -30,6 +30,14 @@ interface Stats {
   subscriptionDistribution: { status: string; count: number }[]
 }
 
+interface OrgPackage {
+  id: string
+  status: string
+  currentPeriodEnd: string | null
+  cancelAtPeriodEnd: boolean
+  package: { id: string; name: string; slug: string; priceMonthly: number; isFree: boolean; isBundle: boolean }
+}
+
 interface Organization {
   id: string
   name: string
@@ -39,6 +47,7 @@ interface Organization {
   trialEndsAt: string | null
   createdAt: string
   plan: { id: string; name: string; priceMonthly: number }
+  packages: OrgPackage[]
   membersCount: number
   campaignsCount: number
   leadsCount: number
@@ -385,7 +394,7 @@ export default function SuperadminPage() {
   useEffect(() => {
     if (status !== 'authenticated' || !(session?.user as any)?.isSuperAdmin) return
     if (activeTab === 'overview') fetchStats()
-    if (activeTab === 'organizations') { fetchOrganizations(); fetchPlans() }
+    if (activeTab === 'organizations') { fetchOrganizations(); fetchPlans(); fetchPackages() }
     if (activeTab === 'users') fetchUsers()
     if (activeTab === 'plans') fetchPlans()
     if (activeTab === 'packages') { fetchPackages(); fetchSysModules() }
@@ -409,6 +418,24 @@ export default function SuperadminPage() {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ planId }),
+    })
+    if (res.ok) fetchOrganizations(orgPagination.page)
+  }
+
+  const assignPackageToOrg = async (orgId: string, packageId: string) => {
+    const res = await fetch(`/api/superadmin/organizations/${orgId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assignPackageId: packageId }),
+    })
+    if (res.ok) fetchOrganizations(orgPagination.page)
+  }
+
+  const removePackageFromOrg = async (orgId: string, packageId: string) => {
+    const res = await fetch(`/api/superadmin/organizations/${orgId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ removePackageId: packageId }),
     })
     if (res.ok) fetchOrganizations(orgPagination.page)
   }
@@ -511,7 +538,8 @@ export default function SuperadminPage() {
           search={orgSearch} setSearch={setOrgSearch} statusFilter={orgStatusFilter} setStatusFilter={setOrgStatusFilter}
           onSearch={() => fetchOrganizations(1)} onPageChange={fetchOrganizations}
           onToggleActive={toggleOrgActive} onChangePlan={changeOrgPlan}
-          allPlans={allPlans} formatDate={formatDate} formatCurrency={formatCurrency}
+          onAssignPackage={assignPackageToOrg} onRemovePackage={removePackageFromOrg}
+          allPlans={allPlans} allPackages={packages} formatDate={formatDate} formatCurrency={formatCurrency}
         />
       )}
       {activeTab === 'users' && (
@@ -752,7 +780,9 @@ function OverviewTab({ stats, loading, formatCurrency }: { stats: Stats | null; 
 }
 
 // ===== TAB: ORGANIZATIONS =====
-function OrganizationsTab({ organizations, pagination, loading, search, setSearch, statusFilter, setStatusFilter, onSearch, onPageChange, onToggleActive, onChangePlan, allPlans, formatDate, formatCurrency }: any) {
+function OrganizationsTab({ organizations, pagination, loading, search, setSearch, statusFilter, setStatusFilter, onSearch, onPageChange, onToggleActive, onChangePlan, onAssignPackage, onRemovePackage, allPlans, allPackages, formatDate, formatCurrency }: any) {
+  const [addingPkgOrgId, setAddingPkgOrgId] = useState<string | null>(null)
+
   return (
     <div>
       <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', alignItems: 'center' }}>
@@ -784,10 +814,8 @@ function OrganizationsTab({ organizations, pagination, loading, search, setSearc
               <thead>
                 <tr>
                   <th style={thStyle}>Organização</th>
-                  <th style={thStyle}>Plano</th>
+                  <th style={thStyle}>Pacotes Ativos</th>
                   <th style={thStyle}>Membros</th>
-                  <th style={thStyle}>Campanhas</th>
-                  <th style={thStyle}>Leads</th>
                   <th style={thStyle}>Status</th>
                   <th style={thStyle}>Ativo</th>
                   <th style={thStyle}>Criado em</th>
@@ -795,37 +823,94 @@ function OrganizationsTab({ organizations, pagination, loading, search, setSearc
                 </tr>
               </thead>
               <tbody>
-                {organizations.map((org: Organization) => (
-                  <tr key={org.id} style={{ transition: 'background 0.2s' }}>
-                    <td style={tdStyle}>
-                      <div>
-                        <div style={{ fontWeight: 600, color: '#FFFFFF' }}>{org.name}</div>
-                        <div style={{ fontSize: '11px', color: '#6B6B7B' }}>{org.slug}</div>
-                      </div>
-                    </td>
-                    <td style={tdStyle}>
-                      <select
-                        value={org.plan.id}
-                        onChange={e => onChangePlan(org.id, e.target.value)}
-                        style={{ ...selectStyle, padding: '4px 8px', fontSize: '12px' }}
-                      >
-                        {allPlans.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                      </select>
-                    </td>
-                    <td style={tdStyle}>{org.membersCount}</td>
-                    <td style={tdStyle}>{org.campaignsCount}</td>
-                    <td style={tdStyle}>{org.leadsCount}</td>
-                    <td style={tdStyle}><StatusBadge status={org.subscriptionStatus} /></td>
-                    <td style={tdStyle}><ActiveBadge active={org.isActive} /></td>
-                    <td style={tdStyle}>{formatDate(org.createdAt)}</td>
-                    <td style={tdStyle}>
-                      <button onClick={() => onToggleActive(org.id, org.isActive)} style={{ ...btnSmall, fontSize: '11px' }}>
-                        {org.isActive ? <XCircle size={14} /> : <CheckCircle size={14} />}
-                        {org.isActive ? 'Desativar' : 'Ativar'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {organizations.map((org: Organization) => {
+                  const activePackages = (org.packages || []).filter((op: OrgPackage) =>
+                    op.status === 'ACTIVE' || op.status === 'TRIALING'
+                  )
+                  const activePackageIds = activePackages.map((op: OrgPackage) => op.package.id)
+                  const availableToAdd = (allPackages || []).filter((p: any) =>
+                    p.isActive && !activePackageIds.includes(p.id)
+                  )
+
+                  return (
+                    <tr key={org.id} style={{ transition: 'background 0.2s' }}>
+                      <td style={tdStyle}>
+                        <div>
+                          <div style={{ fontWeight: 600, color: '#FFFFFF' }}>{org.name}</div>
+                          <div style={{ fontSize: '11px', color: '#6B6B7B' }}>{org.slug}</div>
+                        </div>
+                      </td>
+                      <td style={{ ...tdStyle, minWidth: '220px' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+                          {activePackages.length === 0 && (
+                            <span style={{ fontSize: '11px', color: '#6B6B7B', fontStyle: 'italic' }}>Nenhum pacote</span>
+                          )}
+                          {activePackages.map((op: OrgPackage) => (
+                            <span key={op.id} style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '4px',
+                              padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 500,
+                              backgroundColor: op.package.isBundle ? 'rgba(168, 85, 247, 0.15)' : op.package.isFree ? 'rgba(34, 197, 94, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                              color: op.package.isBundle ? '#C084FC' : op.package.isFree ? '#4ADE80' : '#60A5FA',
+                              border: `1px solid ${op.package.isBundle ? 'rgba(168, 85, 247, 0.3)' : op.package.isFree ? 'rgba(34, 197, 94, 0.3)' : 'rgba(59, 130, 246, 0.3)'}`,
+                            }}>
+                              {op.package.name}
+                              {!op.package.isFree && (
+                                <button
+                                  onClick={() => onRemovePackage(org.id, op.package.id)}
+                                  title="Remover pacote"
+                                  style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0', display: 'flex', opacity: 0.7 }}
+                                >
+                                  <XCircle size={12} />
+                                </button>
+                              )}
+                            </span>
+                          ))}
+                          {/* Botão adicionar pacote */}
+                          {addingPkgOrgId === org.id ? (
+                            <select
+                              autoFocus
+                              onChange={e => {
+                                if (e.target.value) {
+                                  onAssignPackage(org.id, e.target.value)
+                                }
+                                setAddingPkgOrgId(null)
+                              }}
+                              onBlur={() => setAddingPkgOrgId(null)}
+                              style={{ ...selectStyle, padding: '2px 6px', fontSize: '11px', minWidth: '120px' }}
+                            >
+                              <option value="">Selecionar...</option>
+                              {availableToAdd.map((p: any) => (
+                                <option key={p.id} value={p.id}>{p.name} {p.isFree ? '(Free)' : `(R$${p.priceMonthly})`}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <button
+                              onClick={() => setAddingPkgOrgId(org.id)}
+                              title="Adicionar pacote"
+                              style={{
+                                background: 'none', border: '1px dashed rgba(255,255,255,0.15)', borderRadius: '6px',
+                                color: '#6B6B7B', cursor: 'pointer', padding: '2px 6px', fontSize: '11px',
+                                display: 'flex', alignItems: 'center', gap: '2px',
+                              }}
+                            >
+                              <Plus size={10} /> Pacote
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                      <td style={tdStyle}>{org.membersCount}</td>
+                      <td style={tdStyle}><StatusBadge status={org.subscriptionStatus} /></td>
+                      <td style={tdStyle}><ActiveBadge active={org.isActive} /></td>
+                      <td style={tdStyle}>{formatDate(org.createdAt)}</td>
+                      <td style={tdStyle}>
+                        <button onClick={() => onToggleActive(org.id, org.isActive)} style={{ ...btnSmall, fontSize: '11px' }}>
+                          {org.isActive ? <XCircle size={14} /> : <CheckCircle size={14} />}
+                          {org.isActive ? 'Desativar' : 'Ativar'}
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
