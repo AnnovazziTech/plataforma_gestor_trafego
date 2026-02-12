@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Logo } from '@/components/ui'
-import { LegalModal } from '@/components/modals/LegalModal'
 import {
   Mail,
   Lock,
@@ -30,10 +29,6 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const [termsAccepted, setTermsAccepted] = useState(false)
-  const [privacyAccepted, setPrivacyAccepted] = useState(false)
-  const [showTermsModal, setShowTermsModal] = useState(false)
-  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -410,92 +405,33 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* Terms */}
-              <div style={{ marginBottom: '24px' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '12px',
-                    marginBottom: '12px',
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={termsAccepted && privacyAccepted}
-                    readOnly
-                    style={{
-                      width: '18px',
-                      height: '18px',
-                      marginTop: '2px',
-                      accentColor: '#00F5FF',
-                      cursor: 'default',
-                      opacity: termsAccepted && privacyAccepted ? 1 : 0.5,
-                    }}
-                  />
-                  <span style={{ fontSize: '13px', color: '#6B6B7B', lineHeight: 1.5 }}>
-                    Li e concordo com os{' '}
-                    <button
-                      type="button"
-                      onClick={() => setShowTermsModal(true)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: termsAccepted ? '#22C55E' : '#00F5FF',
-                        cursor: 'pointer',
-                        padding: 0,
-                        fontSize: '13px',
-                        textDecoration: termsAccepted ? 'none' : 'underline',
-                        textUnderlineOffset: '2px',
-                        fontWeight: termsAccepted ? 600 : 400,
-                      }}
-                    >
-                      Termos de Uso {termsAccepted && '✓'}
-                    </button>{' '}
-                    e a{' '}
-                    <button
-                      type="button"
-                      onClick={() => setShowPrivacyModal(true)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: privacyAccepted ? '#22C55E' : '#00F5FF',
-                        cursor: 'pointer',
-                        padding: 0,
-                        fontSize: '13px',
-                        textDecoration: privacyAccepted ? 'none' : 'underline',
-                        textUnderlineOffset: '2px',
-                        fontWeight: privacyAccepted ? 600 : 400,
-                      }}
-                    >
-                      Política de Privacidade {privacyAccepted && '✓'}
-                    </button>
-                  </span>
-                </div>
-                {!(termsAccepted && privacyAccepted) && (
-                  <p style={{ fontSize: '12px', color: '#4B4B5B', marginLeft: '30px' }}>
-                    Clique nos links acima para ler e aceitar
-                  </p>
-                )}
-              </div>
+              {/* Terms notice */}
+              <p style={{ fontSize: '13px', color: '#6B6B7B', lineHeight: 1.5, textAlign: 'center', marginBottom: '24px' }}>
+                Ao criar sua conta, voce concorda com os{' '}
+                <a href="/terms" target="_blank" style={{ color: '#00F5FF', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
+                  Termos de Uso
+                </a>{' '}
+                e a{' '}
+                <a href="/privacy" target="_blank" style={{ color: '#00F5FF', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
+                  Politica de Privacidade
+                </a>
+              </p>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading || !termsAccepted || !privacyAccepted}
+                disabled={isLoading}
                 style={{
                   width: '100%',
                   padding: '16px 24px',
-                  background: (termsAccepted && privacyAccepted)
-                    ? 'linear-gradient(90deg, #00F5FF, #BF00FF, #FF00E5)'
-                    : 'rgba(255, 255, 255, 0.1)',
+                  background: 'linear-gradient(90deg, #00F5FF, #BF00FF, #FF00E5)',
                   border: 'none',
                   borderRadius: '12px',
                   color: 'white',
                   fontSize: '16px',
                   fontWeight: 600,
-                  cursor: (isLoading || !termsAccepted || !privacyAccepted) ? 'not-allowed' : 'pointer',
-                  opacity: (isLoading || !termsAccepted || !privacyAccepted) ? 0.5 : 1,
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  opacity: isLoading ? 0.5 : 1,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -503,7 +439,7 @@ export default function RegisterPage() {
                   transition: 'transform 0.2s, box-shadow 0.2s',
                 }}
                 onMouseEnter={(e) => {
-                  if (!isLoading && termsAccepted && privacyAccepted) {
+                  if (!isLoading) {
                     e.currentTarget.style.transform = 'translateY(-2px)'
                     e.currentTarget.style.boxShadow = '0 8px 32px rgba(191, 0, 255, 0.4)'
                   }
@@ -751,25 +687,6 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Legal Modals */}
-      <LegalModal
-        isOpen={showTermsModal}
-        onClose={() => setShowTermsModal(false)}
-        onAccept={() => {
-          setTermsAccepted(true)
-          setShowTermsModal(false)
-        }}
-        type="terms"
-      />
-      <LegalModal
-        isOpen={showPrivacyModal}
-        onClose={() => setShowPrivacyModal(false)}
-        onAccept={() => {
-          setPrivacyAccepted(true)
-          setShowPrivacyModal(false)
-        }}
-        type="privacy"
-      />
     </div>
   )
 }
