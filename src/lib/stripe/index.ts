@@ -5,28 +5,29 @@ const globalForStripe = globalThis as unknown as {
   stripe: Stripe | undefined
 }
 
-function createStripeClient() {
-  const secretKey = process.env.STRIPE_SECRET_KEY
-  if (!secretKey) {
-    throw new Error('STRIPE_SECRET_KEY nao configurado')
-  }
-
-  return new Stripe(secretKey, {
-    apiVersion: '2025-11-17.clover',
-    typescript: true,
-  })
-}
-
 function getStripe(): Stripe {
   if (!globalForStripe.stripe) {
-    globalForStripe.stripe = createStripeClient()
+    const secretKey = process.env.STRIPE_SECRET_KEY
+    if (!secretKey) {
+      throw new Error('STRIPE_SECRET_KEY nao configurado')
+    }
+    globalForStripe.stripe = new Stripe(secretKey, {
+      apiVersion: '2025-11-17.clover',
+      typescript: true,
+    })
   }
   return globalForStripe.stripe
 }
 
+// Proxy that defers instantiation to first method access (build-safe)
 export const stripe = new Proxy({} as Stripe, {
-  get(_target, prop, receiver) {
-    return Reflect.get(getStripe(), prop, receiver)
+  get(_target, prop) {
+    const real = getStripe()
+    const value = (real as any)[prop]
+    if (typeof value === 'function') {
+      return value.bind(real)
+    }
+    return value
   },
 })
 
