@@ -10,6 +10,7 @@ import {
   Edit3, ChevronLeft, ChevronRight, Search, Filter,
   Plus, X, Save, Eye, EyeOff, Zap, Layers, ToggleLeft, ToggleRight,
   GripVertical, Lock, Unlock, Newspaper, Trash2, ImageIcon, Calendar,
+  Package, AlertTriangle,
 } from 'lucide-react'
 
 // ===== TYPES =====
@@ -113,6 +114,26 @@ interface AuditLog {
   organization: { id: string; name: string } | null
 }
 
+interface PackageData {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  priceMonthly: number
+  currency: string
+  stripePriceId: string | null
+  stripeProductId: string | null
+  modulesSlugs: string[]
+  isBundle: boolean
+  isFree: boolean
+  isActive: boolean
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+  subscriberCount: number
+  activeSubscriberCount: number
+}
+
 interface Pagination {
   page: number
   limit: number
@@ -120,7 +141,7 @@ interface Pagination {
   pages: number
 }
 
-type Tab = 'overview' | 'organizations' | 'users' | 'plans' | 'modules' | 'news' | 'audit-logs'
+type Tab = 'overview' | 'organizations' | 'users' | 'plans' | 'packages' | 'modules' | 'news' | 'audit-logs'
 
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE: '#22C55E',
@@ -169,6 +190,12 @@ export default function SuperadminPage() {
   const [loadingPlans, setLoadingPlans] = useState(false)
   const [showPlanModal, setShowPlanModal] = useState(false)
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null)
+
+  // Packages state
+  const [packages, setPackages] = useState<PackageData[]>([])
+  const [loadingPackages, setLoadingPackages] = useState(false)
+  const [showPackageModal, setShowPackageModal] = useState(false)
+  const [editingPackage, setEditingPackage] = useState<PackageData | null>(null)
 
   // Audit logs state
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
@@ -297,6 +324,34 @@ export default function SuperadminPage() {
     setLoadingNews(false)
   }, [])
 
+  const fetchPackages = useCallback(async () => {
+    setLoadingPackages(true)
+    try {
+      const res = await fetch('/api/superadmin/packages')
+      if (res.ok) {
+        const data = await res.json()
+        setPackages(data.packages)
+      }
+    } catch (e) { /* handled */ }
+    setLoadingPackages(false)
+  }, [])
+
+  const savePackage = async (pkgData: any) => {
+    const isEdit = !!editingPackage
+    const url = isEdit ? `/api/superadmin/packages/${editingPackage!.id}` : '/api/superadmin/packages'
+    const res = await fetch(url, {
+      method: isEdit ? 'PATCH' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(pkgData),
+    })
+    if (res.ok) {
+      setShowPackageModal(false)
+      setEditingPackage(null)
+      fetchPackages()
+    }
+    return res
+  }
+
   const saveNews = async (data: { title: string; content: string; imageUrl: string; isPublished: boolean }) => {
     const isEdit = !!editingNews
     const url = isEdit ? `/api/news/${editingNews!.id}` : '/api/news'
@@ -333,10 +388,11 @@ export default function SuperadminPage() {
     if (activeTab === 'organizations') { fetchOrganizations(); fetchPlans() }
     if (activeTab === 'users') fetchUsers()
     if (activeTab === 'plans') fetchPlans()
+    if (activeTab === 'packages') { fetchPackages(); fetchSysModules() }
     if (activeTab === 'modules') fetchSysModules()
     if (activeTab === 'news') fetchNews()
     if (activeTab === 'audit-logs') fetchAuditLogs()
-  }, [activeTab, status, session, fetchStats, fetchOrganizations, fetchUsers, fetchPlans, fetchSysModules, fetchNews, fetchAuditLogs])
+  }, [activeTab, status, session, fetchStats, fetchOrganizations, fetchUsers, fetchPlans, fetchPackages, fetchSysModules, fetchNews, fetchAuditLogs])
 
   // Actions
   const toggleOrgActive = async (id: string, isActive: boolean) => {
@@ -408,6 +464,7 @@ export default function SuperadminPage() {
     { id: 'organizations', label: 'Organizações', icon: Building2 },
     { id: 'users', label: 'Usuários', icon: Users },
     { id: 'plans', label: 'Planos', icon: CreditCard },
+    { id: 'packages', label: 'Pacotes', icon: Package },
     { id: 'modules', label: 'Módulos', icon: Layers },
     { id: 'news', label: 'Notícias', icon: Newspaper },
     { id: 'audit-logs', label: 'Audit Logs', icon: FileSearch },
@@ -475,6 +532,14 @@ export default function SuperadminPage() {
           formatCurrency={formatCurrency}
         />
       )}
+      {activeTab === 'packages' && (
+        <PackagesTab
+          packages={packages} loading={loadingPackages}
+          onEdit={(p: PackageData) => { setEditingPackage(p); setShowPackageModal(true) }}
+          onCreate={() => { setEditingPackage(null); setShowPackageModal(true) }}
+          formatCurrency={formatCurrency}
+        />
+      )}
       {activeTab === 'modules' && (
         <ModulesTab
           modules={sysModules} loading={loadingModules}
@@ -513,6 +578,16 @@ export default function SuperadminPage() {
           post={editingNews}
           onSave={saveNews}
           onClose={() => { setShowNewsModal(false); setEditingNews(null) }}
+        />
+      )}
+
+      {/* Package Modal */}
+      {showPackageModal && (
+        <PackageModal
+          pkg={editingPackage}
+          modules={sysModules}
+          onSave={savePackage}
+          onClose={() => { setShowPackageModal(false); setEditingPackage(null) }}
         />
       )}
     </div>
@@ -1053,6 +1128,107 @@ function ModulesTab({ modules, loading, onToggleEnabled }: { modules: SystemModu
   )
 }
 
+// ===== TAB: PACKAGES =====
+function PackagesTab({ packages, loading, onEdit, onCreate, formatCurrency }: {
+  packages: PackageData[]; loading: boolean;
+  onEdit: (p: PackageData) => void; onCreate: () => void;
+  formatCurrency: (v: number) => string;
+}) {
+  const activePackages = packages.filter(p => p.isActive)
+  const totalSubscribers = packages.reduce((s, p) => s + p.activeSubscriberCount, 0)
+
+  if (loading) return <div style={{ color: '#6B6B7B', padding: '40px', textAlign: 'center' }}>Carregando pacotes...</div>
+
+  return (
+    <div>
+      {/* Summary */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
+        <MetricBox label="Total Pacotes" value={packages.length} icon={Package} color="#3B82F6" />
+        <MetricBox label="Pacotes Ativos" value={activePackages.length} icon={CheckCircle} color="#22C55E" />
+        <MetricBox label="Assinantes Ativos" value={totalSubscribers} icon={Users} color="#A855F7" />
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+        <button onClick={onCreate} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', border: 'none', backgroundColor: '#A855F7', color: '#FFFFFF', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
+          <Plus size={16} /> Criar Pacote
+        </button>
+      </div>
+
+      <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+        <table style={tableStyle}>
+          <thead>
+            <tr>
+              <th style={thStyle}>Pacote</th>
+              <th style={thStyle}>Preco</th>
+              <th style={thStyle}>Modulos</th>
+              <th style={thStyle}>Tipo</th>
+              <th style={thStyle}>Assinantes</th>
+              <th style={thStyle}>Stripe</th>
+              <th style={thStyle}>Ativo</th>
+              <th style={thStyle}>Acoes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {packages.map((pkg) => (
+              <tr key={pkg.id}>
+                <td style={tdStyle}>
+                  <div>
+                    <div style={{ fontWeight: 600, color: '#FFFFFF' }}>{pkg.name}</div>
+                    <div style={{ fontSize: '11px', color: '#6B6B7B' }}>{pkg.slug}</div>
+                  </div>
+                </td>
+                <td style={tdStyle}>
+                  {pkg.isFree ? (
+                    <span style={{ padding: '2px 8px', fontSize: '11px', fontWeight: 600, borderRadius: '4px', backgroundColor: 'rgba(34,197,94,0.15)', color: '#22C55E' }}>FREE</span>
+                  ) : (
+                    <span style={{ color: '#FFFFFF', fontWeight: 600 }}>{formatCurrency(pkg.priceMonthly)}</span>
+                  )}
+                </td>
+                <td style={tdStyle}>
+                  <span style={{ color: '#8B8B9B', fontSize: '12px' }}>{pkg.modulesSlugs.length} modulos</span>
+                </td>
+                <td style={tdStyle}>
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                    {pkg.isBundle && <FeatureTag label="Bundle" />}
+                    {pkg.isFree && <span style={{ padding: '2px 6px', fontSize: '10px', fontWeight: 600, borderRadius: '4px', backgroundColor: 'rgba(34,197,94,0.15)', color: '#22C55E' }}>Free</span>}
+                  </div>
+                </td>
+                <td style={tdStyle}>
+                  <div>
+                    <span style={{ color: '#FFFFFF', fontWeight: 600 }}>{pkg.activeSubscriberCount}</span>
+                    <span style={{ color: '#6B6B7B', fontSize: '11px', marginLeft: '4px' }}>ativos</span>
+                  </div>
+                  {pkg.subscriberCount > pkg.activeSubscriberCount && (
+                    <div style={{ fontSize: '11px', color: '#6B6B7B' }}>{pkg.subscriberCount} total</div>
+                  )}
+                </td>
+                <td style={tdStyle}>
+                  {pkg.isFree ? (
+                    <span style={{ color: '#6B6B7B', fontSize: '11px' }}>N/A</span>
+                  ) : pkg.stripePriceId ? (
+                    <span style={{ padding: '2px 8px', fontSize: '10px', fontWeight: 600, borderRadius: '4px', backgroundColor: 'rgba(34,197,94,0.15)', color: '#22C55E' }}>Sincronizado</span>
+                  ) : (
+                    <span style={{ padding: '2px 8px', fontSize: '10px', fontWeight: 600, borderRadius: '4px', backgroundColor: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>Sem Price</span>
+                  )}
+                </td>
+                <td style={tdStyle}><ActiveBadge active={pkg.isActive} /></td>
+                <td style={tdStyle}>
+                  <button onClick={() => onEdit(pkg)} style={{ ...btnSmall, fontSize: '11px' }}>
+                    <Edit3 size={14} /> Editar
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {packages.length === 0 && (
+              <tr><td colSpan={8} style={{ ...tdStyle, textAlign: 'center', color: '#6B6B7B', padding: '40px' }}>Nenhum pacote cadastrado</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 // ===== TAB: NEWS =====
 function NewsTab({ posts, loading, onEdit, onCreate, onTogglePublished, onDelete, formatDate }: {
   posts: NewsPost[]; loading: boolean;
@@ -1450,6 +1626,260 @@ function PlanModal({ plan, onSave, onClose }: { plan: Plan | null; onSave: (data
             <Save size={16} /> {plan ? 'Salvar' : 'Criar'}
           </button>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// ===== PACKAGE MODAL =====
+function PackageModal({ pkg, modules, onSave, onClose }: {
+  pkg: PackageData | null;
+  modules: SystemModule[];
+  onSave: (data: any) => Promise<Response>;
+  onClose: () => void;
+}) {
+  const [form, setForm] = useState({
+    name: pkg?.name || '',
+    slug: pkg?.slug || '',
+    description: pkg?.description || '',
+    priceMonthly: pkg?.priceMonthly || 0,
+    currency: pkg?.currency || 'BRL',
+    modulesSlugs: pkg?.modulesSlugs || [],
+    isBundle: pkg?.isBundle || false,
+    isFree: pkg?.isFree || false,
+    isActive: pkg?.isActive ?? true,
+    sortOrder: pkg?.sortOrder || 0,
+  })
+  const [saving, setSaving] = useState(false)
+  const [showPriceConfirm, setShowPriceConfirm] = useState(false)
+
+  const set = (key: string, value: any) => setForm(prev => ({ ...prev, [key]: value }))
+
+  const priceChanged = pkg && form.priceMonthly !== pkg.priceMonthly
+  const canSave = form.name.trim() && form.slug.trim()
+
+  const paidModules = modules.filter(m => !m.isFree)
+  const freeModules = modules.filter(m => m.isFree)
+
+  const toggleModule = (slug: string) => {
+    setForm(prev => ({
+      ...prev,
+      modulesSlugs: prev.modulesSlugs.includes(slug)
+        ? prev.modulesSlugs.filter(s => s !== slug)
+        : [...prev.modulesSlugs, slug],
+    }))
+  }
+
+  const handleSave = async () => {
+    if (!canSave) return
+    // Se preco mudou e nao e free, mostrar confirmacao
+    if (priceChanged && !form.isFree && form.priceMonthly > 0 && !showPriceConfirm) {
+      setShowPriceConfirm(true)
+      return
+    }
+    setSaving(true)
+    await onSave(form)
+    setSaving(false)
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.7)' }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#1A1A24', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', padding: '32px', width: '680px', maxHeight: '85vh', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <h2 style={{ color: '#FFFFFF', fontSize: '20px', fontWeight: 700, margin: 0 }}>
+            {pkg ? 'Editar Pacote' : 'Criar Pacote'}
+          </h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}><X size={20} /></button>
+        </div>
+
+        {/* Price change confirmation */}
+        {showPriceConfirm && (
+          <div style={{
+            padding: '16px', borderRadius: '12px', marginBottom: '20px',
+            backgroundColor: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <AlertTriangle size={18} style={{ color: '#F59E0B' }} />
+              <span style={{ color: '#F59E0B', fontWeight: 600, fontSize: '14px' }}>Confirmacao de alteracao de preco</span>
+            </div>
+            <p style={{ color: '#CACADB', fontSize: '13px', margin: '0 0 12px 0', lineHeight: '1.5' }}>
+              O preco sera atualizado no Stripe: R$ {pkg?.priceMonthly?.toFixed(2)} → R$ {form.priceMonthly.toFixed(2)}.
+              Um novo Price sera criado e o anterior sera arquivado.
+              Assinantes atuais mantem o preco antigo. Novos checkouts usarao o preco novo.
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={async () => { setSaving(true); await onSave(form); setSaving(false) }}
+                disabled={saving}
+                style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', backgroundColor: '#F59E0B', color: '#000', fontSize: '12px', fontWeight: 600, cursor: saving ? 'wait' : 'pointer' }}
+              >
+                {saving ? 'Salvando...' : 'Confirmar alteracao'}
+              </button>
+              <button
+                onClick={() => setShowPriceConfirm(false)}
+                style={{ ...btnSmall, padding: '8px 16px' }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div>
+            <label style={labelStyle}>Nome *</label>
+            <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="Nome do pacote" style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Slug *</label>
+            <input value={form.slug} onChange={e => set('slug', e.target.value)} placeholder="meu-pacote" style={inputStyle} disabled={!!pkg} />
+          </div>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <label style={labelStyle}>Descricao</label>
+            <input value={form.description || ''} onChange={e => set('description', e.target.value)} placeholder="Descricao do pacote" style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>
+              Preco Mensal (R$)
+              {priceChanged && !form.isFree && (
+                <span style={{ color: '#F59E0B', marginLeft: '8px', fontSize: '11px' }}>
+                  (alterado: {pkg?.priceMonthly} → {form.priceMonthly})
+                </span>
+              )}
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              value={form.priceMonthly}
+              onChange={e => set('priceMonthly', Number(e.target.value))}
+              style={inputStyle}
+              disabled={form.isFree}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Ordem</label>
+            <input type="number" value={form.sortOrder} onChange={e => set('sortOrder', Number(e.target.value))} style={inputStyle} />
+          </div>
+
+          {/* Flags */}
+          <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+            {[
+              { key: 'isFree', label: 'Gratuito' },
+              { key: 'isBundle', label: 'Bundle (todos modulos)' },
+              { key: 'isActive', label: 'Ativo' },
+            ].map(({ key, label }) => (
+              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#CACADB', fontSize: '13px', cursor: 'pointer' }}>
+                <input type="checkbox" checked={(form as any)[key]} onChange={e => set(key, e.target.checked)} />
+                {label}
+              </label>
+            ))}
+          </div>
+
+          {/* Modules selection */}
+          <div style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', marginTop: '8px' }}>
+            <p style={{ color: '#6B6B7B', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 12px 0' }}>
+              Modulos inclusos ({form.modulesSlugs.length} selecionados)
+            </p>
+
+            {/* Free modules */}
+            {freeModules.length > 0 && (
+              <div style={{ marginBottom: '12px' }}>
+                <p style={{ color: '#8B8B9B', fontSize: '11px', margin: '0 0 8px 0' }}>Gratuitos:</p>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {freeModules.map(mod => (
+                    <label key={mod.slug} style={{
+                      display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px',
+                      borderRadius: '8px', fontSize: '12px', cursor: 'pointer',
+                      backgroundColor: form.modulesSlugs.includes(mod.slug) ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.03)',
+                      color: form.modulesSlugs.includes(mod.slug) ? '#22C55E' : '#6B6B7B',
+                      border: `1px solid ${form.modulesSlugs.includes(mod.slug) ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.06)'}`,
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={form.modulesSlugs.includes(mod.slug)}
+                        onChange={() => toggleModule(mod.slug)}
+                        style={{ display: 'none' }}
+                      />
+                      {mod.name}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Paid modules */}
+            {paidModules.length > 0 && (
+              <div>
+                <p style={{ color: '#8B8B9B', fontSize: '11px', margin: '0 0 8px 0' }}>Pagos:</p>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {paidModules.map(mod => (
+                    <label key={mod.slug} style={{
+                      display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px',
+                      borderRadius: '8px', fontSize: '12px', cursor: 'pointer',
+                      backgroundColor: form.modulesSlugs.includes(mod.slug) ? 'rgba(168,85,247,0.15)' : 'rgba(255,255,255,0.03)',
+                      color: form.modulesSlugs.includes(mod.slug) ? '#A855F7' : '#6B6B7B',
+                      border: `1px solid ${form.modulesSlugs.includes(mod.slug) ? 'rgba(168,85,247,0.3)' : 'rgba(255,255,255,0.06)'}`,
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={form.modulesSlugs.includes(mod.slug)}
+                        onChange={() => toggleModule(mod.slug)}
+                        style={{ display: 'none' }}
+                      />
+                      {mod.name}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Stripe info (read-only) */}
+          {pkg && (
+            <div style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', marginTop: '8px' }}>
+              <p style={{ color: '#6B6B7B', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 12px 0' }}>
+                Informacoes Stripe
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div>
+                  <span style={{ color: '#6B6B7B', fontSize: '11px' }}>Product ID:</span>
+                  <div style={{ color: '#8B8B9B', fontSize: '12px', fontFamily: 'monospace' }}>{pkg.stripeProductId || '—'}</div>
+                </div>
+                <div>
+                  <span style={{ color: '#6B6B7B', fontSize: '11px' }}>Price ID:</span>
+                  <div style={{ color: '#8B8B9B', fontSize: '12px', fontFamily: 'monospace' }}>{pkg.stripePriceId || '—'}</div>
+                </div>
+                <div>
+                  <span style={{ color: '#6B6B7B', fontSize: '11px' }}>Assinantes ativos:</span>
+                  <div style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 600 }}>{pkg.activeSubscriberCount}</div>
+                </div>
+                <div>
+                  <span style={{ color: '#6B6B7B', fontSize: '11px' }}>Total assinantes:</span>
+                  <div style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 600 }}>{pkg.subscriberCount}</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {!showPriceConfirm && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <button onClick={onClose} style={{ ...btnSmall, padding: '10px 20px' }}>Cancelar</button>
+            <button
+              onClick={handleSave}
+              disabled={!canSave || saving}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px',
+                borderRadius: '10px', border: 'none', fontSize: '13px', fontWeight: 600,
+                cursor: canSave && !saving ? 'pointer' : 'not-allowed',
+                backgroundColor: canSave && !saving ? '#A855F7' : '#4B4B5B', color: '#FFFFFF',
+                opacity: canSave && !saving ? 1 : 0.5,
+              }}
+            >
+              <Save size={16} /> {saving ? 'Salvando...' : pkg ? 'Salvar' : 'Criar Pacote'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
