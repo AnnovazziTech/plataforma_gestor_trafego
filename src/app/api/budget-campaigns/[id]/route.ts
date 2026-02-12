@@ -17,14 +17,15 @@ export const PATCH = withAuth(async (req: NextRequest, ctx) => {
   const updateData: any = {}
   if (data.spentMeta != null) updateData.spentMeta = data.spentMeta
   if (data.spentGoogle != null) updateData.spentGoogle = data.spentGoogle
-  if (data.previousLeadCost != null) updateData.previousLeadCost = data.previousLeadCost
-  if (data.currentLeadCost != null) updateData.currentLeadCost = data.currentLeadCost
-  if (data.previousDate) updateData.previousDate = new Date(data.previousDate)
-  if (data.currentDate) updateData.currentDate = new Date(data.currentDate)
+  if ('previousLeadCost' in data) updateData.previousLeadCost = data.previousLeadCost
+  if ('currentLeadCost' in data) updateData.currentLeadCost = data.currentLeadCost
+  if ('previousDate' in data) updateData.previousDate = data.previousDate ? new Date(data.previousDate) : null
+  if ('currentDate' in data) updateData.currentDate = data.currentDate ? new Date(data.currentDate) : null
   if (data.name) updateData.name = data.name
   if (data.maxMeta != null) updateData.maxMeta = data.maxMeta
   if (data.maxGoogle != null) updateData.maxGoogle = data.maxGoogle
   if (data.dailyBudget != null) updateData.dailyBudget = data.dailyBudget
+  if (data.startDate) updateData.startDate = new Date(data.startDate)
 
   const campaign = await prisma.budgetCampaign.update({
     where: { id },

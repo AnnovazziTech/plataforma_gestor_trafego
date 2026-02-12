@@ -19,6 +19,8 @@ export const PATCH = withAuth(async (req: NextRequest, ctx) => {
     data: {
       completed: typeof data.completed === 'boolean' ? data.completed : existing.completed,
       description: data.description || existing.description,
+      date: data.date ? new Date(data.date) : existing.date,
+      clientId: data.clientId || existing.clientId,
     },
     include: { client: { select: { id: true, name: true } } },
   })

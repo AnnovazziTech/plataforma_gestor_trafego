@@ -1442,6 +1442,7 @@ model NewsPost {
   title       String
   content     String
   imageUrl    String?
+  linkUrl     String?
   isPublished Boolean  @default(true)
   authorId    String?
   createdAt   DateTime @default(now())

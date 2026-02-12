@@ -50,11 +50,30 @@ export default function NoticiasPage() {
                 }}
               >
                 {post.imageUrl && (
-                  <div style={{
-                    width: '100%', height: '200px',
-                    backgroundImage: `url(${post.imageUrl})`,
-                    backgroundSize: 'cover', backgroundPosition: 'center',
-                  }} />
+                  post.linkUrl ? (
+                    <a
+                      href={post.linkUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ display: 'block', cursor: 'pointer' }}
+                    >
+                      <div style={{
+                        width: '100%', height: '200px',
+                        backgroundImage: `url(${post.imageUrl})`,
+                        backgroundSize: 'cover', backgroundPosition: 'center',
+                        transition: 'opacity 0.2s ease',
+                      }}
+                        onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
+                        onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+                      />
+                    </a>
+                  ) : (
+                    <div style={{
+                      width: '100%', height: '200px',
+                      backgroundImage: `url(${post.imageUrl})`,
+                      backgroundSize: 'cover', backgroundPosition: 'center',
+                    }} />
+                  )
                 )}
                 <div style={{ padding: '20px' }}>
                   <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#FFF', marginBottom: '8px' }}>

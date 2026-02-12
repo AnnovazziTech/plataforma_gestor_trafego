@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Header } from '@/components/layout'
 import { useApp } from '@/contexts'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Image, Video, Plus, Trash2, Edit3, X, Loader2, Search,
-  Tag, Calendar, Clock, Users,
+  Tag, Calendar, Clock, Users, Upload,
 } from 'lucide-react'
 
 interface Creative {
@@ -34,6 +34,9 @@ export default function CriativosPage() {
     title: '', type: 'IMAGE' as string, mediaUrl: '', tags: '',
     clientName: '',
   })
+  const [uploadedFileName, setUploadedFileName] = useState('')
+  const [uploadPreview, setUploadPreview] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const fetchCreatives = useCallback(async () => {
     try {
@@ -68,6 +71,8 @@ export default function CriativosPage() {
   const openAdd = () => {
     setEditing(null)
     setFormData({ title: '', type: 'IMAGE', mediaUrl: '', tags: '', clientName: '' })
+    setUploadedFileName('')
+    setUploadPreview('')
     setShowModal(true)
   }
 
@@ -80,12 +85,48 @@ export default function CriativosPage() {
       tags: (c.tags || []).join(', '),
       clientName: c.sourceAdvertiser || '',
     })
+    setUploadedFileName('')
+    setUploadPreview('')
     setShowModal(true)
   }
 
   const closeModal = () => {
     setShowModal(false)
     setEditing(null)
+    setUploadedFileName('')
+    setUploadPreview('')
+  }
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Limit to 2MB for base64 storage
+    const MAX_SIZE = 2 * 1024 * 1024
+    if (file.size > MAX_SIZE) {
+      showToast('Arquivo muito grande. Maximo: 2MB', 'error')
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const dataUrl = reader.result as string
+      setFormData(p => ({ ...p, mediaUrl: dataUrl }))
+      setUploadedFileName(file.name)
+      setUploadPreview(dataUrl)
+    }
+    reader.onerror = () => {
+      showToast('Erro ao ler arquivo', 'error')
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const clearUpload = () => {
+    setUploadedFileName('')
+    setUploadPreview('')
+    setFormData(p => ({ ...p, mediaUrl: '' }))
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -435,10 +476,95 @@ export default function CriativosPage() {
                 <div style={{ marginBottom: '12px' }}>
                   <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>URL da Midia</label>
                   <input
-                    type="url" value={formData.mediaUrl}
+                    type="url"
+                    value={uploadedFileName ? '' : formData.mediaUrl}
                     onChange={e => setFormData(p => ({ ...p, mediaUrl: e.target.value }))}
-                    style={inputStyle} placeholder="https://..."
+                    style={{ ...inputStyle, opacity: uploadedFileName ? 0.4 : 1 }}
+                    placeholder="https://..."
+                    disabled={!!uploadedFileName}
                   />
+                </div>
+
+                {/* Divider */}
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                  marginBottom: '12px',
+                }}>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.08)' }} />
+                  <span style={{ fontSize: '12px', color: '#6B6B7B', fontWeight: 500 }}>ou</span>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.08)' }} />
+                </div>
+
+                {/* File Upload */}
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>
+                    Fazer upload de uma imagem
+                  </label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={handleFileUpload}
+                    style={{ display: 'none' }}
+                  />
+
+                  {!uploadedFileName ? (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={!!formData.mediaUrl && !uploadedFileName}
+                      style={{
+                        width: '100%', padding: '16px', borderRadius: '10px',
+                        border: '2px dashed rgba(255,255,255,0.12)',
+                        backgroundColor: 'transparent',
+                        color: (formData.mediaUrl && !uploadedFileName) ? '#3a3a4a' : '#A0A0B0',
+                        fontSize: '13px', cursor: (formData.mediaUrl && !uploadedFileName) ? 'not-allowed' : 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                        transition: 'border-color 0.2s, color 0.2s',
+                      }}
+                    >
+                      <Upload size={16} />
+                      Clique para selecionar arquivo (max 2MB)
+                    </button>
+                  ) : (
+                    <div style={{
+                      borderRadius: '10px', border: '1px solid rgba(59,130,246,0.3)',
+                      backgroundColor: 'rgba(59,130,246,0.05)', padding: '12px',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: uploadPreview ? '10px' : '0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                          <Upload size={14} style={{ color: '#3B82F6', flexShrink: 0 }} />
+                          <span style={{
+                            fontSize: '13px', color: '#3B82F6',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>
+                            {uploadedFileName}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={clearUpload}
+                          style={{
+                            background: 'none', border: 'none', color: '#6B6B7B',
+                            cursor: 'pointer', padding: '2px', flexShrink: 0,
+                          }}
+                          title="Remover arquivo"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                      {uploadPreview && (
+                        <img
+                          src={uploadPreview}
+                          alt="Preview"
+                          style={{
+                            width: '100%', maxHeight: '160px', objectFit: 'contain',
+                            borderRadius: '8px', backgroundColor: '#0A0A0F',
+                          }}
+                        />
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div style={{ marginBottom: '12px' }}>
                   <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '6px', display: 'block' }}>Cliente</label>

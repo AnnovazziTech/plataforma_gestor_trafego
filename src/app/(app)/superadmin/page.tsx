@@ -1372,13 +1372,14 @@ function NewsTab({ posts, loading, onEdit, onCreate, onTogglePublished, onDelete
 // ===== NEWS MODAL =====
 function NewsModal({ post, onSave, onClose }: {
   post: NewsPost | null;
-  onSave: (data: { title: string; content: string; imageUrl: string; isPublished: boolean }) => void;
+  onSave: (data: { title: string; content: string; imageUrl: string; linkUrl: string; isPublished: boolean }) => void;
   onClose: () => void;
 }) {
   const [form, setForm] = useState({
     title: post?.title || '',
     content: post?.content || '',
     imageUrl: post?.imageUrl || '',
+    linkUrl: (post as any)?.linkUrl || '',
     isPublished: post?.isPublished ?? true,
   })
 
@@ -1425,13 +1426,27 @@ function NewsModal({ post, onSave, onClose }: {
             )}
           </div>
 
+          {/* Link URL */}
+          <div>
+            <label style={labelStyle}>Link da imagem (opcional)</label>
+            <input
+              value={form.linkUrl}
+              onChange={e => set('linkUrl', e.target.value)}
+              placeholder="https://exemplo.com/destino"
+              style={inputStyle}
+            />
+            <span style={{ fontSize: '11px', color: '#6B6B7B', marginTop: '4px', display: 'block' }}>
+              Ao clicar na imagem, o usuario sera redirecionado para este link
+            </span>
+          </div>
+
           {/* Content */}
           <div>
-            <label style={labelStyle}>Conteúdo *</label>
+            <label style={labelStyle}>Conteudo *</label>
             <textarea
               value={form.content}
               onChange={e => set('content', e.target.value)}
-              placeholder="Escreva o conteúdo da notícia..."
+              placeholder="Escreva o conteudo da noticia..."
               rows={10}
               style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit', lineHeight: '1.6' }}
             />

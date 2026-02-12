@@ -28,6 +28,7 @@ export const POST = withSuperAdmin(async (req: NextRequest, ctx) => {
       title: data.title,
       content: data.content,
       imageUrl: data.imageUrl,
+      linkUrl: data.linkUrl || null,
       isPublished: data.isPublished !== false,
       authorId: ctx.userId,
     },

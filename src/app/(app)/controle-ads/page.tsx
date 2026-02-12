@@ -32,12 +32,14 @@ export default function ControleAdsPage() {
     clientId: '', strategyId: '', name: '',
     maxMeta: '', maxGoogle: '', dailyBudget: '', startDate: new Date().toISOString().split('T')[0],
     spentMeta: '', spentGoogle: '', currentLeadCost: '', previousLeadCost: '',
+    currentDate: '', previousDate: '',
   })
 
   const emptyCampaignForm = {
     clientId: '', strategyId: '', name: '',
     maxMeta: '', maxGoogle: '', dailyBudget: '', startDate: new Date().toISOString().split('T')[0],
     spentMeta: '', spentGoogle: '', currentLeadCost: '', previousLeadCost: '',
+    currentDate: '', previousDate: '',
   }
 
   useEffect(() => {
@@ -111,6 +113,8 @@ export default function ControleAdsPage() {
       spentGoogle: parseFloat(campaignForm.spentGoogle) || 0,
       currentLeadCost: campaignForm.currentLeadCost ? parseFloat(campaignForm.currentLeadCost) : undefined,
       previousLeadCost: campaignForm.previousLeadCost ? parseFloat(campaignForm.previousLeadCost) : undefined,
+      currentDate: campaignForm.currentDate || undefined,
+      previousDate: campaignForm.previousDate || undefined,
     })
     if (result) {
       setShowCampaignModal(false)
@@ -205,18 +209,59 @@ export default function ControleAdsPage() {
         {/* Filters & Actions */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <select
-              value={selectedClientFilter}
-              onChange={e => { setSelectedClientFilter(e.target.value); setSelectedStrategy(null); }}
-              style={{
-                padding: '8px 12px', borderRadius: '10px',
-                backgroundColor: '#0D0D14', border: '1px solid rgba(255,255,255,0.1)',
-                color: '#FFF', fontSize: '13px', outline: 'none',
-              }}
-            >
-              <option value="">Todos os clientes</option>
-              {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            <div style={{
+              position: 'relative',
+              display: 'flex', alignItems: 'center',
+            }}>
+              <div style={{
+                position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)',
+                color: '#3B82F6', display: 'flex', alignItems: 'center', pointerEvents: 'none',
+                zIndex: 1,
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <select
+                value={selectedClientFilter}
+                onChange={e => { setSelectedClientFilter(e.target.value); setSelectedStrategy(null); }}
+                style={{
+                  padding: '10px 36px 10px 34px', borderRadius: '12px',
+                  backgroundColor: 'rgba(13,13,20,0.9)',
+                  border: selectedClientFilter ? '1px solid rgba(59,130,246,0.4)' : '1px solid rgba(255,255,255,0.08)',
+                  color: '#FFF', fontSize: '13px', fontWeight: 500, outline: 'none',
+                  cursor: 'pointer', appearance: 'none' as const, WebkitAppearance: 'none' as const,
+                  backdropFilter: 'blur(8px)',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236B6B7B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 12px center',
+                  transition: 'border-color 0.2s, box-shadow 0.2s',
+                  boxShadow: selectedClientFilter ? '0 0 12px rgba(59,130,246,0.1)' : 'none',
+                  minWidth: '200px',
+                }}
+              >
+                <option value="">Todos os clientes</option>
+                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            {selectedClientFilter && (
+              <button
+                onClick={() => { setSelectedClientFilter(''); setSelectedStrategy(null); }}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: '32px', height: '32px', borderRadius: '8px',
+                  backgroundColor: 'rgba(239,68,68,0.08)',
+                  border: '1px solid rgba(239,68,68,0.2)',
+                  color: '#EF4444', cursor: 'pointer', transition: 'all 0.2s',
+                }}
+                title="Limpar filtro"
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
@@ -257,27 +302,57 @@ export default function ControleAdsPage() {
 
         {/* Strategies (horizontal scroll) */}
         <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#A0A0B0', marginBottom: '12px' }}>Estratégias</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+            <div style={{
+              width: '3px', height: '16px', borderRadius: '2px',
+              background: 'linear-gradient(180deg, #3B82F6, #8B5CF6)',
+            }} />
+            <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#A0A0B0', letterSpacing: '0.02em' }}>
+              Estrategias
+              {filteredStrategies.length > 0 && (
+                <span style={{
+                  fontSize: '11px', color: '#3B82F6', marginLeft: '8px',
+                  backgroundColor: 'rgba(59,130,246,0.1)', padding: '2px 8px',
+                  borderRadius: '10px', fontWeight: 500,
+                }}>
+                  {filteredStrategies.length}
+                </span>
+              )}
+            </h3>
+          </div>
           {filteredStrategies.length > 0 ? (
-            <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
+            <div style={{
+              display: 'flex', gap: '14px', overflowX: 'auto', paddingBottom: '8px',
+              scrollSnapType: 'x mandatory',
+            }}>
               {filteredStrategies.map(s => (
-                <StrategyCard
-                  key={s.id}
-                  strategy={s}
-                  isSelected={selectedStrategy === s.id}
-                  onClick={() => setSelectedStrategy(selectedStrategy === s.id ? null : s.id)}
-                  onRemove={() => removeBudgetStrategy(s.id)}
-                  onEdit={() => openEditStrategy(s)}
-                />
+                <div key={s.id} style={{ scrollSnapAlign: 'start' }}>
+                  <StrategyCard
+                    strategy={s}
+                    isSelected={selectedStrategy === s.id}
+                    onClick={() => setSelectedStrategy(selectedStrategy === s.id ? null : s.id)}
+                    onRemove={() => removeBudgetStrategy(s.id)}
+                    onEdit={() => openEditStrategy(s)}
+                  />
+                </div>
               ))}
             </div>
           ) : (
             <div style={{
-              padding: '32px', borderRadius: '14px', backgroundColor: '#0D0D14',
-              border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center',
+              padding: '36px', borderRadius: '16px',
+              background: 'linear-gradient(135deg, rgba(13,13,20,0.9), rgba(18,18,26,0.8))',
+              border: '1px solid rgba(255,255,255,0.04)', textAlign: 'center',
+              backdropFilter: 'blur(8px)',
             }}>
-              <Target size={32} style={{ color: '#6B6B7B', margin: '0 auto 8px' }} />
-              <p style={{ color: '#6B6B7B', fontSize: '13px' }}>Nenhuma estratégia criada</p>
+              <div style={{
+                width: '48px', height: '48px', borderRadius: '14px', margin: '0 auto 12px',
+                background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Target size={24} style={{ color: '#3B82F6' }} />
+              </div>
+              <p style={{ color: '#6B6B7B', fontSize: '13px' }}>Nenhuma estrategia criada</p>
+              <p style={{ color: '#4A4A5A', fontSize: '11px', marginTop: '4px' }}>Clique em &quot;+ Estrategia&quot; para comecar</p>
             </div>
           )}
         </div>
@@ -422,7 +497,7 @@ export default function ControleAdsPage() {
                     </div>
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                   <div>
                     <label style={{ fontSize: '11px', color: '#6B6B7B', marginBottom: '4px', display: 'block' }}>Custo/Lead Atual (R$)</label>
                     <input type="number" step="0.01" value={campaignForm.currentLeadCost} onChange={e => setCampaignForm(p => ({ ...p, currentLeadCost: e.target.value }))} style={inputStyle} placeholder="0.00" />
@@ -430,6 +505,19 @@ export default function ControleAdsPage() {
                   <div>
                     <label style={{ fontSize: '11px', color: '#6B6B7B', marginBottom: '4px', display: 'block' }}>Custo/Lead Anterior (R$)</label>
                     <input type="number" step="0.01" value={campaignForm.previousLeadCost} onChange={e => setCampaignForm(p => ({ ...p, previousLeadCost: e.target.value }))} style={inputStyle} placeholder="0.00" />
+                  </div>
+                </div>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px', marginBottom: '20px' }}>
+                  <label style={{ fontSize: '13px', color: '#A0A0B0', marginBottom: '10px', display: 'block', fontWeight: 600 }}>Datas de Otimizacao (opcional)</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ fontSize: '11px', color: '#6B6B7B', marginBottom: '4px', display: 'block' }}>Otimizacao Atual</label>
+                      <input type="date" value={campaignForm.currentDate} onChange={e => setCampaignForm(p => ({ ...p, currentDate: e.target.value }))} style={inputStyle} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '11px', color: '#6B6B7B', marginBottom: '4px', display: 'block' }}>Otimizacao Anterior</label>
+                      <input type="date" value={campaignForm.previousDate} onChange={e => setCampaignForm(p => ({ ...p, previousDate: e.target.value }))} style={inputStyle} />
+                    </div>
                   </div>
                 </div>
 

@@ -41,6 +41,12 @@ export const POST = withAuth(async (req: NextRequest, ctx) => {
       maxGoogle: data.maxGoogle || 0,
       dailyBudget: data.dailyBudget || 0,
       startDate: new Date(data.startDate),
+      spentMeta: data.spentMeta || 0,
+      spentGoogle: data.spentGoogle || 0,
+      currentLeadCost: data.currentLeadCost || null,
+      previousLeadCost: data.previousLeadCost || null,
+      currentDate: data.currentDate ? new Date(data.currentDate) : null,
+      previousDate: data.previousDate ? new Date(data.previousDate) : null,
     },
     include: {
       client: { select: { id: true, name: true } },

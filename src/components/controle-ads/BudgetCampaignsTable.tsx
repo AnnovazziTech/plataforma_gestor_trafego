@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Trash2, Edit3, Check, X } from 'lucide-react'
+import { Trash2, Edit3, Check, X, Calendar } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils/financial'
 import { calcularPrevisao30D, calcularFinalizaraEm } from '@/lib/utils/financial'
 
@@ -17,6 +17,8 @@ interface BudgetCampaign {
   spentGoogle: number
   previousLeadCost?: number
   currentLeadCost?: number
+  previousDate?: string
+  currentDate?: string
   strategy?: { id: string; name: string; totalBudget: number }
 }
 
@@ -26,6 +28,15 @@ interface Props {
   onRemove: (id: string) => void
 }
 
+function toDateInputValue(dateStr?: string): string {
+  if (!dateStr) return ''
+  try {
+    return new Date(dateStr).toISOString().split('T')[0]
+  } catch {
+    return ''
+  }
+}
+
 export function BudgetCampaignsTable({ campaigns, onUpdate, onRemove }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editData, setEditData] = useState<any>({})
@@ -33,19 +44,33 @@ export function BudgetCampaignsTable({ campaigns, onUpdate, onRemove }: Props) {
   const startEditing = (c: BudgetCampaign) => {
     setEditingId(c.id)
     setEditData({
+      name: c.name,
+      maxMeta: c.maxMeta.toString(),
+      maxGoogle: c.maxGoogle.toString(),
+      dailyBudget: c.dailyBudget.toString(),
+      startDate: toDateInputValue(c.startDate),
       spentMeta: c.spentMeta.toString(),
       spentGoogle: c.spentGoogle.toString(),
       currentLeadCost: c.currentLeadCost?.toString() || '',
       previousLeadCost: c.previousLeadCost?.toString() || '',
+      currentDate: toDateInputValue(c.currentDate),
+      previousDate: toDateInputValue(c.previousDate),
     })
   }
 
   const saveEdit = (id: string) => {
     onUpdate(id, {
+      name: editData.name,
+      maxMeta: parseFloat(editData.maxMeta) || 0,
+      maxGoogle: parseFloat(editData.maxGoogle) || 0,
+      dailyBudget: parseFloat(editData.dailyBudget) || 0,
+      startDate: editData.startDate || undefined,
       spentMeta: parseFloat(editData.spentMeta) || 0,
       spentGoogle: parseFloat(editData.spentGoogle) || 0,
       currentLeadCost: editData.currentLeadCost ? parseFloat(editData.currentLeadCost) : null,
       previousLeadCost: editData.previousLeadCost ? parseFloat(editData.previousLeadCost) : null,
+      currentDate: editData.currentDate || null,
+      previousDate: editData.previousDate || null,
     })
     setEditingId(null)
   }
@@ -59,20 +84,37 @@ export function BudgetCampaignsTable({ campaigns, onUpdate, onRemove }: Props) {
   }
 
   const editInputStyle: React.CSSProperties = {
-    width: '80px', padding: '4px 6px', borderRadius: '6px',
-    backgroundColor: '#0A0A0F', border: '1px solid rgba(59,130,246,0.3)',
+    width: '90px', padding: '5px 7px', borderRadius: '8px',
+    backgroundColor: 'rgba(10,10,15,0.8)', border: '1px solid rgba(59,130,246,0.3)',
     color: '#FFF', fontSize: '12px', outline: 'none', textAlign: 'right',
+    transition: 'border-color 0.2s',
   }
+
+  const editDateInputStyle: React.CSSProperties = {
+    ...editInputStyle,
+    width: '130px',
+    textAlign: 'left',
+    colorScheme: 'dark',
+  }
+
+  const editNameInputStyle: React.CSSProperties = {
+    ...editInputStyle,
+    width: '140px',
+    textAlign: 'left',
+  }
+
+  const headers = ['Campanha', 'Meta (Max)', 'Google (Max)', 'Diario', 'Gasto Meta', 'Gasto Google', 'Previsao 30D', 'Custo/Lead', 'Otimizacao', 'Acoes']
 
   return (
     <div style={{ overflowX: 'auto' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            {['Campanha', 'Meta (Max)', 'Google (Max)', 'Diario', 'Gasto Meta', 'Gasto Google', 'Previsao 30D', 'Custo/Lead', 'Acoes'].map(h => (
+            {headers.map(h => (
               <th key={h} style={{
                 padding: '10px 12px', fontSize: '11px', fontWeight: 600, color: '#6B6B7B',
                 textTransform: 'uppercase', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.06)',
+                whiteSpace: 'nowrap',
               }}>
                 {h}
               </th>
@@ -92,15 +134,72 @@ export function BudgetCampaignsTable({ campaigns, onUpdate, onRemove }: Props) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: i * 0.05 }}
-                style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                style={{
+                  borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  backgroundColor: isEditing ? 'rgba(59,130,246,0.03)' : 'transparent',
+                  transition: 'background-color 0.2s',
+                }}
               >
+                {/* Campanha */}
                 <td style={{ padding: '12px', fontSize: '13px', fontWeight: 500, color: '#FFF' }}>
-                  {c.name}
-                  <div style={{ fontSize: '11px', color: '#6B6B7B' }}>Inicio: {formatDate(c.startDate)}</div>
+                  {isEditing ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <input
+                        type="text" value={editData.name}
+                        onChange={e => setEditData((p: any) => ({ ...p, name: e.target.value }))}
+                        style={editNameInputStyle}
+                        placeholder="Nome"
+                      />
+                      <input
+                        type="date" value={editData.startDate}
+                        onChange={e => setEditData((p: any) => ({ ...p, startDate: e.target.value }))}
+                        style={{ ...editDateInputStyle, width: '140px', fontSize: '11px' }}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      {c.name}
+                      <div style={{ fontSize: '11px', color: '#6B6B7B' }}>Inicio: {formatDate(c.startDate)}</div>
+                    </>
+                  )}
                 </td>
-                <td style={{ padding: '12px', fontSize: '13px', color: '#A0A0B0' }}>{formatCurrency(c.maxMeta)}</td>
-                <td style={{ padding: '12px', fontSize: '13px', color: '#A0A0B0' }}>{formatCurrency(c.maxGoogle)}</td>
-                <td style={{ padding: '12px', fontSize: '13px', color: '#3B82F6', fontWeight: 500 }}>{formatCurrency(c.dailyBudget)}</td>
+                {/* Meta (Max) */}
+                <td style={{ padding: '12px' }}>
+                  {isEditing ? (
+                    <input
+                      type="number" step="0.01" value={editData.maxMeta}
+                      onChange={e => setEditData((p: any) => ({ ...p, maxMeta: e.target.value }))}
+                      style={editInputStyle}
+                    />
+                  ) : (
+                    <span style={{ fontSize: '13px', color: '#A0A0B0' }}>{formatCurrency(c.maxMeta)}</span>
+                  )}
+                </td>
+                {/* Google (Max) */}
+                <td style={{ padding: '12px' }}>
+                  {isEditing ? (
+                    <input
+                      type="number" step="0.01" value={editData.maxGoogle}
+                      onChange={e => setEditData((p: any) => ({ ...p, maxGoogle: e.target.value }))}
+                      style={editInputStyle}
+                    />
+                  ) : (
+                    <span style={{ fontSize: '13px', color: '#A0A0B0' }}>{formatCurrency(c.maxGoogle)}</span>
+                  )}
+                </td>
+                {/* Diario */}
+                <td style={{ padding: '12px' }}>
+                  {isEditing ? (
+                    <input
+                      type="number" step="0.01" value={editData.dailyBudget}
+                      onChange={e => setEditData((p: any) => ({ ...p, dailyBudget: e.target.value }))}
+                      style={editInputStyle}
+                    />
+                  ) : (
+                    <span style={{ fontSize: '13px', color: '#3B82F6', fontWeight: 500 }}>{formatCurrency(c.dailyBudget)}</span>
+                  )}
+                </td>
+                {/* Gasto Meta */}
                 <td style={{ padding: '12px' }}>
                   {isEditing ? (
                     <input
@@ -114,6 +213,7 @@ export function BudgetCampaignsTable({ campaigns, onUpdate, onRemove }: Props) {
                     </span>
                   )}
                 </td>
+                {/* Gasto Google */}
                 <td style={{ padding: '12px' }}>
                   {isEditing ? (
                     <input
@@ -127,12 +227,14 @@ export function BudgetCampaignsTable({ campaigns, onUpdate, onRemove }: Props) {
                     </span>
                   )}
                 </td>
+                {/* Previsao 30D */}
                 <td style={{ padding: '12px', fontSize: '13px', color: '#A0A0B0' }}>
                   {formatCurrency(calcularPrevisao30D(c.dailyBudget))}
                   <div style={{ fontSize: '11px', color: '#6B6B7B' }}>
                     {daysLeft === Infinity ? '-' : `~${daysLeft} dias restantes`}
                   </div>
                 </td>
+                {/* Custo/Lead */}
                 <td style={{ padding: '12px' }}>
                   {isEditing ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -157,48 +259,111 @@ export function BudgetCampaignsTable({ campaigns, onUpdate, onRemove }: Props) {
                           fontSize: '11px', marginLeft: '4px',
                           color: c.currentLeadCost <= c.previousLeadCost ? '#10B981' : '#EF4444',
                         }}>
-                          {c.currentLeadCost <= c.previousLeadCost ? '↓' : '↑'}
+                          {c.currentLeadCost <= c.previousLeadCost ? '\u2193' : '\u2191'}
                         </span>
+                      )}
+                      {c.previousLeadCost != null && (
+                        <div style={{ fontSize: '11px', color: '#6B6B7B' }}>
+                          Ant: {formatCurrency(c.previousLeadCost)}
+                        </div>
                       )}
                     </div>
                   ) : (
                     <span style={{ fontSize: '13px', color: '#6B6B7B' }}>-</span>
                   )}
                 </td>
+                {/* Otimizacao (datas) */}
+                <td style={{ padding: '12px' }}>
+                  {isEditing ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ fontSize: '10px', color: '#6B6B7B', minWidth: '28px' }}>Atual</span>
+                        <input
+                          type="date" value={editData.currentDate}
+                          onChange={e => setEditData((p: any) => ({ ...p, currentDate: e.target.value }))}
+                          style={editDateInputStyle}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ fontSize: '10px', color: '#6B6B7B', minWidth: '28px' }}>Ant.</span>
+                        <input
+                          type="date" value={editData.previousDate}
+                          onChange={e => setEditData((p: any) => ({ ...p, previousDate: e.target.value }))}
+                          style={editDateInputStyle}
+                        />
+                      </div>
+                    </div>
+                  ) : (c.currentDate || c.previousDate) ? (
+                    <div style={{ fontSize: '12px' }}>
+                      {c.currentDate && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#A0A0B0' }}>
+                          <Calendar size={11} style={{ color: '#3B82F6' }} />
+                          <span>{formatDate(c.currentDate)}</span>
+                        </div>
+                      )}
+                      {c.previousDate && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#6B6B7B', marginTop: '2px' }}>
+                          <Calendar size={11} style={{ color: '#6B6B7B' }} />
+                          <span style={{ fontSize: '11px' }}>{formatDate(c.previousDate)}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span style={{ fontSize: '13px', color: '#6B6B7B' }}>-</span>
+                  )}
+                </td>
+                {/* Acoes */}
                 <td style={{ padding: '12px' }}>
                   <div style={{ display: 'flex', gap: '4px' }}>
                     {isEditing ? (
                       <>
                         <button
                           onClick={() => saveEdit(c.id)}
-                          style={{ background: 'none', border: 'none', color: '#10B981', cursor: 'pointer', padding: '4px' }}
+                          style={{
+                            background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)',
+                            borderRadius: '6px', color: '#10B981', cursor: 'pointer', padding: '4px 8px',
+                            display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px',
+                          }}
                           title="Salvar"
                         >
-                          <Check size={14} />
+                          <Check size={13} /> Salvar
                         </button>
                         <button
                           onClick={() => setEditingId(null)}
-                          style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '4px' }}
+                          style={{
+                            background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
+                            borderRadius: '6px', color: '#EF4444', cursor: 'pointer', padding: '4px 8px',
+                            display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px',
+                          }}
                           title="Cancelar"
                         >
-                          <X size={14} />
+                          <X size={13} />
                         </button>
                       </>
                     ) : (
                       <>
                         <button
                           onClick={() => startEditing(c)}
-                          style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer', padding: '4px' }}
-                          title="Editar gastos"
+                          style={{
+                            background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)',
+                            borderRadius: '6px', color: '#3B82F6', cursor: 'pointer', padding: '4px 8px',
+                            display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px',
+                            transition: 'all 0.2s',
+                          }}
+                          title="Editar campanha"
                         >
-                          <Edit3 size={14} />
+                          <Edit3 size={13} /> Editar
                         </button>
                         <button
                           onClick={() => onRemove(c.id)}
-                          style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer', padding: '4px' }}
+                          style={{
+                            background: 'none', border: '1px solid rgba(255,255,255,0.06)',
+                            borderRadius: '6px', color: '#6B6B7B', cursor: 'pointer', padding: '4px 6px',
+                            transition: 'all 0.2s',
+                          }}
                           title="Remover"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={13} />
                         </button>
                       </>
                     )}

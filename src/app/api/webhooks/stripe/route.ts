@@ -8,6 +8,7 @@ import prisma from '@/lib/db/prisma'
 import stripe from '@/lib/stripe'
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/api/rate-limit'
 import type Stripe from 'stripe'
+import { SubscriptionStatus } from '@/generated/prisma'
 
 // Helper: extrair periodo da subscription (v20 moveu para items)
 function getSubscriptionPeriod(subscription: Stripe.Subscription) {
@@ -44,14 +45,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing stripe-signature header' }, { status: 400 })
   }
 
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET is not configured')
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 })
+  }
+
   let event: Stripe.Event
 
   try {
-    event = stripe.webhooks.constructEvent(
-      rawBody,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    )
+    event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret)
   } catch (err: any) {
     console.error('Webhook signature verification failed:', err.message)
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
@@ -137,7 +140,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
   if (!orgPkg) return
 
-  const statusMap: Record<string, string> = {
+  const statusMap: Record<string, SubscriptionStatus> = {
     active: 'ACTIVE',
     trialing: 'TRIALING',
     past_due: 'PAST_DUE',
@@ -146,13 +149,18 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     incomplete: 'INCOMPLETE',
   }
 
-  const newStatus = statusMap[subscription.status] || 'ACTIVE'
+  const newStatus = statusMap[subscription.status]
+  if (!newStatus) {
+    console.error(`Unknown Stripe subscription status: "${subscription.status}" for subscription ${subscription.id}`)
+    return
+  }
+
   const period = getSubscriptionPeriod(subscription)
 
   await prisma.organizationPackage.update({
     where: { id: orgPkg.id },
     data: {
-      status: newStatus as any,
+      status: newStatus,
       currentPeriodStart: period.start,
       currentPeriodEnd: period.end,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
@@ -175,13 +183,19 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
   const subscriptionId = getInvoiceSubscriptionId(invoice)
-  if (!subscriptionId) return
+  if (!subscriptionId) {
+    console.warn(`invoice.paid: No subscription ID found for invoice ${invoice.id}`)
+    return
+  }
 
   const orgPkg = await prisma.organizationPackage.findUnique({
     where: { stripeSubscriptionId: subscriptionId },
   })
 
-  if (!orgPkg) return
+  if (!orgPkg) {
+    console.warn(`invoice.paid: No organization package found for subscription ${subscriptionId}`)
+    return
+  }
 
   // Buscar subscription atualizada para periodo correto
   const subscription = await stripe.subscriptions.retrieve(subscriptionId)
@@ -198,13 +212,19 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   const subscriptionId = getInvoiceSubscriptionId(invoice)
-  if (!subscriptionId) return
+  if (!subscriptionId) {
+    console.warn(`invoice.payment_failed: No subscription ID found for invoice ${invoice.id}`)
+    return
+  }
 
   const orgPkg = await prisma.organizationPackage.findUnique({
     where: { stripeSubscriptionId: subscriptionId },
   })
 
-  if (!orgPkg) return
+  if (!orgPkg) {
+    console.warn(`invoice.payment_failed: No organization package found for subscription ${subscriptionId}`)
+    return
+  }
 
   await prisma.organizationPackage.update({
     where: { id: orgPkg.id },

@@ -15,6 +15,7 @@ export const PATCH = withSuperAdmin(async (req: NextRequest) => {
   if (data.title) updateData.title = data.title
   if (data.content) updateData.content = data.content
   if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl
+  if (data.linkUrl !== undefined) updateData.linkUrl = data.linkUrl || null
   if (typeof data.isPublished === 'boolean') updateData.isPublished = data.isPublished
 
   const post = await prisma.newsPost.update({

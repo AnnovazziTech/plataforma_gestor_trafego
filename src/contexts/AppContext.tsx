@@ -194,6 +194,7 @@ interface NewsPostItem {
   title: string
   content: string
   imageUrl?: string
+  linkUrl?: string
   isPublished: boolean
   authorId?: string
   author?: { id: string; name: string }

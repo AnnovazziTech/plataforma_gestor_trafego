@@ -6,7 +6,7 @@ import { useApp } from '@/contexts'
 import { formatDate } from '@/lib/utils/financial'
 import {
   Loader2, Plus, Check, Circle, Trash2, CalendarDays, Tag, Clock,
-  ChevronDown, ChevronRight, X, Filter,
+  ChevronDown, ChevronRight, X, Filter, Edit3,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -44,6 +44,7 @@ export default function AgendaPage() {
   const [formData, setFormData] = useState({ clientId: '', description: '', date: '', time: '' })
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
+  const [editingTask, setEditingTask] = useState<TaskItem | null>(null)
 
   const fetchClients = useCallback(async () => {
     try {
@@ -118,18 +119,33 @@ export default function AgendaPage() {
       const fullDesc = tagPrefix ? `${tagPrefix} ${formData.description}` : formData.description
       const dateStr = formData.time ? `${formData.date}T${formData.time}:00` : `${formData.date}T12:00:00`
 
-      await addClientTask({
-        clientId: formData.clientId,
-        description: fullDesc,
-        date: dateStr,
-      })
-      showToast('Tarefa criada!', 'success')
+      if (editingTask) {
+        const res = await fetch(`/api/client-tasks/${editingTask.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            description: fullDesc,
+            date: dateStr,
+            clientId: formData.clientId,
+          }),
+        })
+        if (!res.ok) throw new Error('Erro ao atualizar')
+        showToast('Tarefa atualizada!', 'success')
+      } else {
+        await addClientTask({
+          clientId: formData.clientId,
+          description: fullDesc,
+          date: dateStr,
+        })
+        showToast('Tarefa criada!', 'success')
+      }
       setShowModal(false)
+      setEditingTask(null)
       setFormData({ clientId: '', description: '', date: '', time: '' })
       setSelectedTags([])
       fetchClientTasks()
     } catch {
-      showToast('Erro ao criar tarefa', 'error')
+      showToast(editingTask ? 'Erro ao atualizar tarefa' : 'Erro ao criar tarefa', 'error')
     } finally {
       setSaving(false)
     }
@@ -150,6 +166,23 @@ export default function AgendaPage() {
     } catch {
       showToast('Erro ao remover tarefa', 'error')
     }
+  }
+
+  const handleEdit = (task: TaskItem) => {
+    const parsed = parseTask(task)
+    const d = new Date(task.date)
+    const h = d.getHours()
+    const m = d.getMinutes()
+    const timeStr = (h === 12 && m === 0) ? '' : `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+    setFormData({
+      clientId: task.clientId,
+      description: parsed.cleanDesc,
+      date: new Date(task.date).toISOString().split('T')[0],
+      time: timeStr,
+    })
+    setSelectedTags(parsed.tags)
+    setEditingTask(task)
+    setShowModal(true)
   }
 
   const pendingCount = parsedTasks.filter(t => !t.completed).length
@@ -231,7 +264,7 @@ export default function AgendaPage() {
               ))}
             </div>
             <button
-              onClick={() => setShowModal(true)}
+              onClick={() => { setEditingTask(null); setFormData({ clientId: '', description: '', date: '', time: '' }); setSelectedTags([]); setShowModal(true) }}
               style={{
                 display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
                 borderRadius: '10px', border: 'none',
@@ -342,7 +375,14 @@ export default function AgendaPage() {
                           </div>
                         </div>
 
-                        {/* Delete */}
+                        {/* Edit + Delete */}
+                        <button
+                          onClick={() => handleEdit(task)}
+                          style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer', padding: '4px', flexShrink: 0 }}
+                          title="Editar tarefa"
+                        >
+                          <Edit3 size={14} />
+                        </button>
                         <button
                           onClick={() => handleDelete(task.id)}
                           style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer', padding: '4px', flexShrink: 0 }}
@@ -366,7 +406,7 @@ export default function AgendaPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowModal(false)}
+            onClick={() => { setShowModal(false); setEditingTask(null) }}
             style={{
               position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)',
               backdropFilter: 'blur(4px)', zIndex: 9999,
@@ -385,8 +425,8 @@ export default function AgendaPage() {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFF' }}>Nova Tarefa</h2>
-                <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#FFF' }}>{editingTask ? 'Editar Tarefa' : 'Nova Tarefa'}</h2>
+                <button onClick={() => { setShowModal(false); setEditingTask(null) }} style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer' }}>
                   <X size={20} />
                 </button>
               </div>
@@ -483,7 +523,7 @@ export default function AgendaPage() {
                     opacity: saving ? 0.7 : 1,
                   }}
                 >
-                  {saving ? 'Salvando...' : 'Criar Tarefa'}
+                  {saving ? 'Salvando...' : editingTask ? 'Salvar Alteracoes' : 'Criar Tarefa'}
                 </button>
               </form>
             </motion.div>
