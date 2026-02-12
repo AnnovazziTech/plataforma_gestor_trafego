@@ -46,3 +46,9 @@ next-env.d.ts
 # logos para marketing
 /public/logo*.png
 /public/logo*.svg
+
+# docs internos (nao versionar)
+/docs/
+
+# credenciais (NUNCA versionar)
+documentacao_trafficpro/03_CREDENCIAIS.md
