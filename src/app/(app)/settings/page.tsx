@@ -1338,7 +1338,6 @@ function BillingSection({ showToast }: { showToast: (msg: string, type: any) => 
 
 function PreferencesSection({ showToast }: { showToast: (msg: string, type: any) => void }) {
   const [timezone, setTimezone] = useState('America/Sao_Paulo')
-  const [currency, setCurrency] = useState('BRL')
 
   const savePreference = async (key: string, value: string) => {
     try {
@@ -1430,37 +1429,6 @@ function PreferencesSection({ showToast }: { showToast: (msg: string, type: any)
           </select>
         </div>
 
-        {/* Currency */}
-        <div>
-          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>
-            Moeda Padrão
-          </label>
-          <select
-            value={currency}
-            onChange={(e) => {
-              setCurrency(e.target.value)
-              savePreference('currency', e.target.value)
-              showToast('Moeda alterada!', 'success')
-            }}
-            style={{
-              width: '100%',
-              height: '44px',
-              padding: '0 16px',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              fontSize: '14px',
-              color: '#FFFFFF',
-              outline: 'none',
-              appearance: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            <option value="BRL" style={{ backgroundColor: '#12121A' }}>Real Brasileiro (R$)</option>
-            <option value="USD" style={{ backgroundColor: '#12121A' }}>Dólar Americano ($)</option>
-            <option value="EUR" style={{ backgroundColor: '#12121A' }}>Euro (€)</option>
-          </select>
-        </div>
       </div>
     </motion.div>
   )
