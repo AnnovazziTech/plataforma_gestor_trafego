@@ -6,7 +6,7 @@ import { useApp } from '@/contexts'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Image, Video, Plus, Trash2, Edit3, X, Loader2, Search,
-  Tag, Calendar, Clock, Users, Upload,
+  Tag, Calendar, Clock, Users, Upload, Download,
 } from 'lucide-react'
 
 interface Creative {
@@ -97,29 +97,47 @@ export default function CriativosPage() {
     setUploadPreview('')
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const compressImage = (file: File, maxWidth = 1200, quality = 0.7): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new window.Image()
+      img.onload = () => {
+        let { width, height } = img
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width)
+          width = maxWidth
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(img, 0, 0, width, height)
+        const dataUrl = canvas.toDataURL('image/jpeg', quality)
+        resolve(dataUrl)
+      }
+      img.onerror = reject
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Limit to 2MB for base64 storage
-    const MAX_SIZE = 2 * 1024 * 1024
+    const MAX_SIZE = 10 * 1024 * 1024
     if (file.size > MAX_SIZE) {
-      showToast('Arquivo muito grande. Maximo: 2MB', 'error')
+      showToast('Arquivo muito grande. Maximo: 10MB', 'error')
       if (fileInputRef.current) fileInputRef.current.value = ''
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = () => {
-      const dataUrl = reader.result as string
+    try {
+      const dataUrl = await compressImage(file)
       setFormData(p => ({ ...p, mediaUrl: dataUrl }))
       setUploadedFileName(file.name)
       setUploadPreview(dataUrl)
+    } catch {
+      showToast('Erro ao processar imagem', 'error')
     }
-    reader.onerror = () => {
-      showToast('Erro ao ler arquivo', 'error')
-    }
-    reader.readAsDataURL(file)
   }
 
   const clearUpload = () => {
@@ -171,6 +189,42 @@ export default function CriativosPage() {
       }
     } catch {
       showToast('Erro ao salvar criativo', 'error')
+    }
+  }
+
+  const handleDownload = async (creative: Creative) => {
+    try {
+      const url = creative.mediaUrl || creative.thumbnailUrl
+      if (!url) {
+        showToast('Nenhuma mídia disponível para download', 'error')
+        return
+      }
+
+      const link = document.createElement('a')
+      const ext = creative.type === 'VIDEO' ? 'mp4' : 'png'
+      const fileName = `${creative.title.replace(/[^a-zA-Z0-9]/g, '_')}.${ext}`
+
+      if (url.startsWith('data:')) {
+        link.href = url
+        link.download = fileName
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      } else {
+        const res = await fetch(url)
+        const blob = await res.blob()
+        const blobUrl = URL.createObjectURL(blob)
+        link.href = blobUrl
+        link.download = fileName
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(blobUrl)
+      }
+
+      showToast('Download iniciado!', 'success')
+    } catch {
+      showToast('Erro ao baixar criativo', 'error')
     }
   }
 
@@ -401,6 +455,13 @@ export default function CriativosPage() {
                         {new Date(creative.createdAt).toLocaleDateString('pt-BR')}
                       </span>
                       <div style={{ display: 'flex', gap: '4px' }}>
+                        <button
+                          onClick={() => handleDownload(creative)}
+                          style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer', padding: '4px' }}
+                          title="Baixar"
+                        >
+                          <Download size={14} />
+                        </button>
                         <button
                           onClick={() => openEdit(creative)}
                           style={{ background: 'none', border: 'none', color: '#6B6B7B', cursor: 'pointer', padding: '4px' }}
