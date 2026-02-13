@@ -18,7 +18,6 @@ import {
   X,
   Upload,
   Moon,
-  Globe,
   Mail,
   Save,
   ChevronRight,
@@ -1338,7 +1337,6 @@ function BillingSection({ showToast }: { showToast: (msg: string, type: any) => 
 }
 
 function PreferencesSection({ showToast }: { showToast: (msg: string, type: any) => void }) {
-  const [language, setLanguage] = useState('pt-BR')
   const [timezone, setTimezone] = useState('America/Sao_Paulo')
   const [currency, setCurrency] = useState('BRL')
 
@@ -1397,38 +1395,6 @@ function PreferencesSection({ showToast }: { showToast: (msg: string, type: any)
           }}>
             <Moon size={20} style={{ color: '#3B82F6' }} />
             <span style={{ fontSize: '14px', color: '#FFFFFF' }}>Escuro</span>
-          </div>
-        </div>
-
-        {/* Language */}
-        <div>
-          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>
-            Idioma
-          </label>
-          <div style={{ position: 'relative' }}>
-            <Globe style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#6B6B7B' }} />
-            <select
-              value={language}
-              onChange={(e) => { setLanguage(e.target.value); showToast('Idioma alterado!', 'success'); }}
-              style={{
-                width: '100%',
-                height: '44px',
-                paddingLeft: '48px',
-                paddingRight: '16px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                fontSize: '14px',
-                color: '#FFFFFF',
-                outline: 'none',
-                appearance: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <option value="pt-BR" style={{ backgroundColor: '#12121A' }}>Português (Brasil)</option>
-              <option value="en-US" style={{ backgroundColor: '#12121A' }}>English (US)</option>
-              <option value="es-ES" style={{ backgroundColor: '#12121A' }}>Español</option>
-            </select>
           </div>
         </div>
 
