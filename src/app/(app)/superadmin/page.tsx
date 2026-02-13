@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
@@ -1467,9 +1467,36 @@ function NewsModal({ post, onSave, onClose }: {
     linkUrl: (post as any)?.linkUrl || '',
     isPublished: post?.isPublished ?? true,
   })
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploadPreview, setUploadPreview] = useState<string | null>(null)
+  const [uploadFileName, setUploadFileName] = useState<string | null>(null)
 
   const set = (key: string, value: any) => setForm(prev => ({ ...prev, [key]: value }))
   const canSave = form.title.trim() && form.content.trim()
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Arquivo muito grande. Maximo 2MB.')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => {
+      const base64 = reader.result as string
+      set('imageUrl', base64)
+      setUploadPreview(base64)
+      setUploadFileName(file.name)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const clearUpload = () => {
+    set('imageUrl', '')
+    setUploadPreview(null)
+    setUploadFileName(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.7)' }} onClick={onClose}>
@@ -1493,21 +1520,54 @@ function NewsModal({ post, onSave, onClose }: {
             />
           </div>
 
-          {/* Image URL */}
+          {/* Image Upload */}
           <div>
-            <label style={labelStyle}>URL da Imagem (opcional)</label>
+            <label style={labelStyle}>Imagem (opcional)</label>
             <input
-              value={form.imageUrl}
-              onChange={e => set('imageUrl', e.target.value)}
-              placeholder="https://exemplo.com/imagem.jpg"
-              style={inputStyle}
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              style={{ display: 'none' }}
             />
-            {form.imageUrl && (
-              <div style={{
-                marginTop: '8px', width: '100%', height: '160px', borderRadius: '8px',
-                backgroundImage: `url(${form.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center',
-                border: '1px solid rgba(255,255,255,0.06)',
-              }} />
+
+            {/* Preview ou botao de upload */}
+            {form.imageUrl ? (
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  width: '100%', height: '180px', borderRadius: '10px',
+                  backgroundImage: `url(${form.imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }} />
+                {uploadFileName && (
+                  <span style={{ fontSize: '11px', color: '#A0A0B0', marginTop: '4px', display: 'block' }}>{uploadFileName}</span>
+                )}
+                <button
+                  onClick={clearUpload}
+                  style={{
+                    position: 'absolute', top: '8px', right: '8px',
+                    background: 'rgba(0,0,0,0.7)', border: 'none', borderRadius: '8px',
+                    color: '#EF4444', cursor: 'pointer', padding: '4px 8px',
+                    display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px',
+                  }}
+                >
+                  <X size={12} /> Remover
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  width: '100%', padding: '24px', borderRadius: '10px',
+                  border: '2px dashed rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.02)',
+                  color: '#6B6B7B', cursor: 'pointer', display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: '8px', transition: 'all 0.2s',
+                }}
+              >
+                <ImageIcon size={28} style={{ color: '#4B4B5B' }} />
+                <span style={{ fontSize: '13px', fontWeight: 500 }}>Clique para fazer upload</span>
+                <span style={{ fontSize: '11px', color: '#4B4B5B' }}>JPG, PNG, GIF - Max 2MB</span>
+              </button>
             )}
           </div>
 
