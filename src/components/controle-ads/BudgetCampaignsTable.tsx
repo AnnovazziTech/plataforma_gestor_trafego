@@ -4,10 +4,10 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Trash2, Edit3, Check, X, Calendar } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils/financial'
-import { calcularPrevisao30D, calcularFinalizaraEm } from '@/lib/utils/financial'
 
 interface BudgetCampaign {
   id: string
+  strategyId: string
   name: string
   maxMeta: number
   maxGoogle: number
@@ -24,6 +24,7 @@ interface BudgetCampaign {
 
 interface Props {
   campaigns: BudgetCampaign[]
+  allCampaigns: BudgetCampaign[]
   onUpdate: (id: string, data: any) => void
   onRemove: (id: string) => void
 }
@@ -37,9 +38,22 @@ function toDateInputValue(dateStr?: string): string {
   }
 }
 
-export function BudgetCampaignsTable({ campaigns, onUpdate, onRemove }: Props) {
+export function BudgetCampaignsTable({ campaigns, allCampaigns, onUpdate, onRemove }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editData, setEditData] = useState<any>({})
+
+  // Calcula totais por estrategia usando TODAS as campanhas (nao apenas as filtradas)
+  const strategyTotals = (() => {
+    const map = new Map<string, { totalSpent: number; totalDaily: number; budget: number }>()
+    allCampaigns.forEach(c => {
+      const existing = map.get(c.strategyId) || { totalSpent: 0, totalDaily: 0, budget: c.strategy?.totalBudget || 0 }
+      existing.totalSpent += (c.spentMeta || 0) + (c.spentGoogle || 0)
+      existing.totalDaily += c.dailyBudget || 0
+      if (c.strategy?.totalBudget) existing.budget = c.strategy.totalBudget
+      map.set(c.strategyId, existing)
+    })
+    return map
+  })()
 
   const startEditing = (c: BudgetCampaign) => {
     setEditingId(c.id)
@@ -103,7 +117,7 @@ export function BudgetCampaignsTable({ campaigns, onUpdate, onRemove }: Props) {
     textAlign: 'left',
   }
 
-  const headers = ['Campanha', 'Meta (Max)', 'Google (Max)', 'Diario', 'Gasto Meta', 'Gasto Google', 'Previsao 30D', 'Custo/Lead', 'Otimizacao', 'Acoes']
+  const headers = ['Campanha', 'Meta (Max)', 'Google (Max)', 'Diario', 'Gasto Meta', 'Gasto Google', 'Gasto Total', 'Saldo / Dias', 'Custo/Lead', 'Otimizacao', 'Acoes']
 
   return (
     <div style={{ overflowX: 'auto' }}>
@@ -124,8 +138,12 @@ export function BudgetCampaignsTable({ campaigns, onUpdate, onRemove }: Props) {
         <tbody>
           {campaigns.map((c, i) => {
             const totalSpent = c.spentMeta + c.spentGoogle
-            const totalMax = c.maxMeta + c.maxGoogle
-            const daysLeft = calcularFinalizaraEm(totalMax, totalSpent, c.dailyBudget)
+            const stTotals = strategyTotals.get(c.strategyId)
+            const strategyBudget = stTotals?.budget || c.strategy?.totalBudget || 0
+            const totalStrategySpent = stTotals?.totalSpent || totalSpent
+            const saldoRestante = strategyBudget - totalStrategySpent
+            const totalDaily = stTotals?.totalDaily || c.dailyBudget
+            const daysLeft = totalDaily > 0 ? Math.max(0, Math.ceil(saldoRestante / totalDaily)) : Infinity
             const isEditing = editingId === c.id
 
             return (
@@ -227,9 +245,23 @@ export function BudgetCampaignsTable({ campaigns, onUpdate, onRemove }: Props) {
                     </span>
                   )}
                 </td>
-                {/* Previsao 30D */}
-                <td style={{ padding: '12px', fontSize: '13px', color: '#A0A0B0' }}>
-                  {formatCurrency(calcularPrevisao30D(c.dailyBudget))}
+                {/* Gasto Total (Meta + Google) */}
+                <td style={{ padding: '12px' }}>
+                  <span style={{
+                    fontSize: '13px', fontWeight: 600,
+                    color: totalSpent > strategyBudget ? '#EF4444' : '#FFF',
+                  }}>
+                    {formatCurrency(totalSpent)}
+                  </span>
+                </td>
+                {/* Saldo Restante / Dias */}
+                <td style={{ padding: '12px' }}>
+                  <span style={{
+                    fontSize: '13px', fontWeight: 500,
+                    color: saldoRestante >= 0 ? '#10B981' : '#EF4444',
+                  }}>
+                    {formatCurrency(saldoRestante)}
+                  </span>
                   <div style={{ fontSize: '11px', color: '#6B6B7B' }}>
                     {daysLeft === Infinity ? '-' : `~${daysLeft} dias restantes`}
                   </div>

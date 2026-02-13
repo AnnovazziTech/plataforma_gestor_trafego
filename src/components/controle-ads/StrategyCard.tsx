@@ -22,8 +22,10 @@ interface Props {
 
 export function StrategyCard({ strategy, isSelected, onClick, onRemove, onEdit }: Props) {
   const totalSpent = strategy.campaigns.reduce((sum: number, c: any) => sum + (c.spentMeta || 0) + (c.spentGoogle || 0), 0)
+  const totalDaily = strategy.campaigns.reduce((sum: number, c: any) => sum + (c.dailyBudget || 0), 0)
   const remaining = strategy.totalBudget - totalSpent
   const percentUsed = strategy.totalBudget > 0 ? (totalSpent / strategy.totalBudget) * 100 : 0
+  const daysLeft = totalDaily > 0 ? Math.max(0, Math.ceil(remaining / totalDaily)) : Infinity
 
   const barColor = percentUsed > 90 ? '#EF4444' : percentUsed > 70 ? '#FACC15' : '#10B981'
 
@@ -139,7 +141,7 @@ export function StrategyCard({ strategy, isSelected, onClick, onRemove, onEdit }
         </div>
 
         <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px',
+          display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px',
           padding: '10px', borderRadius: '10px',
           backgroundColor: 'rgba(255,255,255,0.02)',
           border: '1px solid rgba(255,255,255,0.04)',
@@ -148,10 +150,16 @@ export function StrategyCard({ strategy, isSelected, onClick, onRemove, onEdit }
             <div style={{ fontSize: '10px', color: '#6B6B7B', marginBottom: '2px' }}>Gasto</div>
             <div style={{ fontSize: '13px', fontWeight: 600, color: '#A0A0B0' }}>{formatCurrency(totalSpent)}</div>
           </div>
-          <div style={{ textAlign: 'right' }}>
+          <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '10px', color: '#6B6B7B', marginBottom: '2px' }}>Restante</div>
             <div style={{ fontSize: '13px', fontWeight: 600, color: remaining >= 0 ? '#10B981' : '#EF4444' }}>
               {formatCurrency(remaining)}
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '10px', color: '#6B6B7B', marginBottom: '2px' }}>Dias Rest.</div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: daysLeft <= 7 ? '#EF4444' : daysLeft <= 15 ? '#FACC15' : '#3B82F6' }}>
+              {daysLeft === Infinity ? '-' : `${daysLeft}d`}
             </div>
           </div>
         </div>

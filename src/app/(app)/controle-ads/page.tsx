@@ -131,7 +131,7 @@ export default function ControleAdsPage() {
 
     const totalMeta = campaigns.reduce((s, c) => s + c.spentMeta, 0)
     const totalGoogle = campaigns.reduce((s, c) => s + c.spentGoogle, 0)
-    const totalBudget = campaigns.reduce((s, c) => s + c.maxMeta + c.maxGoogle, 0)
+    const totalGasto = totalMeta + totalGoogle
 
     const rows = campaigns.map(c => `
       <tr>
@@ -140,6 +140,7 @@ export default function ControleAdsPage() {
         <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;text-align:right">${formatCurrency(c.maxGoogle)}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;text-align:right;color:${c.spentMeta > c.maxMeta ? '#EF4444' : '#10B981'}">${formatCurrency(c.spentMeta)}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;text-align:right;color:${c.spentGoogle > c.maxGoogle ? '#EF4444' : '#10B981'}">${formatCurrency(c.spentGoogle)}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;text-align:right;font-weight:600">${formatCurrency(c.spentMeta + c.spentGoogle)}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;text-align:right">${formatCurrency(c.dailyBudget)}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;text-align:right">${c.currentLeadCost != null ? formatCurrency(c.currentLeadCost) : '-'}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px">${formatDate(c.startDate)}</td>
@@ -163,13 +164,13 @@ export default function ControleAdsPage() {
       <div class="summary">
         <div class="summary-box" style="background:#0081FB"><span class="summary-label">Gasto Meta</span>${formatCurrency(totalMeta)}</div>
         <div class="summary-box" style="background:#4285F4"><span class="summary-label">Gasto Google</span>${formatCurrency(totalGoogle)}</div>
-        <div class="summary-box" style="background:#3B82F6"><span class="summary-label">Orçamento Total</span>${formatCurrency(totalBudget)}</div>
+        <div class="summary-box" style="background:#8B5CF6"><span class="summary-label">Gasto Total</span>${formatCurrency(totalGasto)}</div>
       </div>
       <table>
         <thead><tr>
           <th>Campanha</th><th class="right">Max Meta</th><th class="right">Max Google</th>
           <th class="right">Gasto Meta</th><th class="right">Gasto Google</th>
-          <th class="right">Diário</th><th class="right">Custo/Lead</th><th>Início</th>
+          <th class="right">Gasto Total</th><th class="right">Diário</th><th class="right">Custo/Lead</th><th>Início</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -367,6 +368,7 @@ export default function ControleAdsPage() {
           </h3>
           <BudgetCampaignsTable
             campaigns={filteredCampaigns}
+            allCampaigns={budgetCampaigns}
             onUpdate={updateBudgetCampaign}
             onRemove={removeBudgetCampaign}
           />
