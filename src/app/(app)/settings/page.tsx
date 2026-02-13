@@ -18,7 +18,6 @@ import {
   X,
   Upload,
   Moon,
-  Sun,
   Globe,
   Mail,
   Save,
@@ -1339,7 +1338,6 @@ function BillingSection({ showToast }: { showToast: (msg: string, type: any) => 
 }
 
 function PreferencesSection({ showToast }: { showToast: (msg: string, type: any) => void }) {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
   const [language, setLanguage] = useState('pt-BR')
   const [timezone, setTimezone] = useState('America/Sao_Paulo')
   const [currency, setCurrency] = useState('BRL')
@@ -1383,44 +1381,22 @@ function PreferencesSection({ showToast }: { showToast: (msg: string, type: any)
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        {/* Theme */}
+        {/* Theme - Dark only */}
         <div>
           <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#FFFFFF', marginBottom: '12px' }}>
             Tema
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-            <button
-              onClick={() => { setTheme('dark'); showToast('Tema alterado!', 'success'); }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '16px',
-                borderRadius: '12px',
-                border: theme === 'dark' ? '2px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
-                backgroundColor: theme === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                cursor: 'pointer',
-              }}
-            >
-              <Moon size={20} style={{ color: theme === 'dark' ? '#3B82F6' : '#6B6B7B' }} />
-              <span style={{ fontSize: '14px', color: '#FFFFFF' }}>Escuro</span>
-            </button>
-            <button
-              onClick={() => { setTheme('light'); showToast('Tema alterado!', 'success'); }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '16px',
-                borderRadius: '12px',
-                border: theme === 'light' ? '2px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
-                backgroundColor: theme === 'light' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                cursor: 'pointer',
-              }}
-            >
-              <Sun size={20} style={{ color: theme === 'light' ? '#3B82F6' : '#6B6B7B' }} />
-              <span style={{ fontSize: '14px', color: '#FFFFFF' }}>Claro</span>
-            </button>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '16px',
+            borderRadius: '12px',
+            border: '2px solid #3B82F6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          }}>
+            <Moon size={20} style={{ color: '#3B82F6' }} />
+            <span style={{ fontSize: '14px', color: '#FFFFFF' }}>Escuro</span>
           </div>
         </div>
 

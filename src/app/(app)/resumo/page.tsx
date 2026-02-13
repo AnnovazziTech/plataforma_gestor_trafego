@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Header } from '@/components/layout'
 import { useApp } from '@/contexts'
-import { formatCurrency, formatDate, calcularFinalizaraEm } from '@/lib/utils/financial'
+import { formatCurrency, formatDate } from '@/lib/utils/financial'
 import {
   Loader2, TrendingDown, TrendingUp, Minus, CalendarDays, DollarSign,
   Target, Clock, BarChart3, Users,
@@ -68,11 +68,19 @@ export default function ResumoPage() {
     const result: CampaignSummary[] = []
     for (const [clientId, campaigns] of byClient) {
       const client = clients.find(c => c.id === clientId)
-      const totalMaxBudget = campaigns.reduce((s, c) => s + c.maxMeta + c.maxGoogle, 0)
+      // Soma totalBudget das estrategias unicas (nao dos maxes individuais)
+      const seenStrategies = new Set<string>()
+      let totalMaxBudget = 0
+      for (const c of campaigns) {
+        if (c.strategyId && !seenStrategies.has(c.strategyId)) {
+          seenStrategies.add(c.strategyId)
+          totalMaxBudget += c.strategy?.totalBudget || 0
+        }
+      }
       const totalSpent = campaigns.reduce((s, c) => s + c.spentMeta + c.spentGoogle, 0)
       const remaining = totalMaxBudget - totalSpent
       const totalDailyBudget = campaigns.reduce((s, c) => s + c.dailyBudget, 0)
-      const finalizaEm = calcularFinalizaraEm(totalMaxBudget, totalSpent, totalDailyBudget)
+      const finalizaEm = totalDailyBudget > 0 ? Math.max(0, Math.ceil(remaining / totalDailyBudget)) : Infinity
 
       // Average lead cost across campaigns that have it
       const withLeadCost = campaigns.filter(c => c.currentLeadCost != null)
