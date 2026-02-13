@@ -10,7 +10,7 @@ import {
   Edit3, ChevronLeft, ChevronRight, Search, Filter,
   Plus, X, Save, Eye, EyeOff, Zap, Layers, ToggleLeft, ToggleRight,
   GripVertical, Lock, Unlock, Newspaper, Trash2, ImageIcon, Calendar,
-  Package, AlertTriangle,
+  Package, AlertTriangle, Wifi,
 } from 'lucide-react'
 
 // ===== TYPES =====
@@ -717,6 +717,127 @@ const selectStyle: React.CSSProperties = {
   ...inputStyle, width: 'auto', cursor: 'pointer',
 }
 
+// ===== ONLINE USERS CARD =====
+interface OnlineUser {
+  id: string
+  name: string | null
+  email: string
+  avatar: string | null
+  lastActivityAt: string
+}
+
+function OnlineUsersCard() {
+  const [count, setCount] = useState(0)
+  const [users, setUsers] = useState<OnlineUser[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchOnline = useCallback(async () => {
+    try {
+      const res = await fetch('/api/superadmin/online-users')
+      if (res.ok) {
+        const data = await res.json()
+        setCount(data.count)
+        setUsers(data.users)
+      }
+    } catch { /* silent */ }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    fetchOnline()
+    const interval = setInterval(fetchOnline, 30_000)
+    return () => clearInterval(interval)
+  }, [fetchOnline])
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.06)',
+        borderRadius: '16px',
+        padding: '24px',
+        marginBottom: '32px',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            width: '40px', height: '40px', borderRadius: '12px',
+            backgroundColor: 'rgba(34,197,94,0.15)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Wifi size={20} style={{ color: '#22C55E' }} />
+          </div>
+          <div>
+            <p style={{ fontSize: '13px', color: '#6B6B7B', margin: 0 }}>Usuários Online</p>
+            <p style={{ fontSize: '28px', fontWeight: 700, color: '#FFFFFF', margin: 0, lineHeight: 1.2 }}>
+              {loading ? '...' : count}
+            </p>
+          </div>
+        </div>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '6px',
+          padding: '4px 10px', borderRadius: '9999px',
+          backgroundColor: 'rgba(34,197,94,0.15)',
+        }}>
+          <span style={{
+            width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22C55E',
+            animation: 'pulse-dot 2s ease-in-out infinite',
+          }} />
+          <span style={{ fontSize: '11px', fontWeight: 600, color: '#22C55E' }}>AO VIVO</span>
+        </div>
+      </div>
+
+      {!loading && users.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {users.slice(0, 10).map(u => (
+            <div key={u.id} style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              padding: '6px 12px', borderRadius: '10px',
+              backgroundColor: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              {u.avatar ? (
+                <img src={u.avatar} alt="" style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{
+                  width: '22px', height: '22px', borderRadius: '50%',
+                  backgroundColor: 'rgba(34,197,94,0.2)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '10px', fontWeight: 700, color: '#22C55E',
+                }}>
+                  {(u.name || u.email)[0].toUpperCase()}
+                </div>
+              )}
+              <span style={{ fontSize: '12px', color: '#CACADB' }}>{u.name || u.email.split('@')[0]}</span>
+            </div>
+          ))}
+          {users.length > 10 && (
+            <div style={{
+              display: 'flex', alignItems: 'center',
+              padding: '6px 12px', borderRadius: '10px',
+              backgroundColor: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              fontSize: '12px', color: '#6B6B7B',
+            }}>
+              +{users.length - 10} mais
+            </div>
+          )}
+        </div>
+      )}
+
+      <style>{`
+        @keyframes pulse-dot {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
+      `}</style>
+    </motion.div>
+  )
+}
+
 // ===== TAB: OVERVIEW =====
 function OverviewTab({ stats, loading, formatCurrency }: { stats: Stats | null; loading: boolean; formatCurrency: (v: number) => string }) {
   if (loading || !stats) return <div style={{ color: '#6B6B7B', padding: '40px', textAlign: 'center' }}>Carregando métricas...</div>
@@ -724,6 +845,8 @@ function OverviewTab({ stats, loading, formatCurrency }: { stats: Stats | null; 
   const m = stats.metrics
   return (
     <div>
+      <OnlineUsersCard />
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
         <MetricBox label="Total Organizações" value={m.totalOrganizations} icon={Building2} color="#3B82F6" />
         <MetricBox label="Usuários Ativos" value={m.activeUsers} icon={Users} color="#22C55E" />

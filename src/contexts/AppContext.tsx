@@ -1205,6 +1205,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [api])
 
+  // === HEARTBEAT ===
+  useEffect(() => {
+    if (!isAuthenticated) return
+
+    const sendHeartbeat = () => {
+      fetch('/api/heartbeat', { method: 'POST' }).catch(() => {})
+    }
+
+    sendHeartbeat()
+    const interval = setInterval(sendHeartbeat, 60_000)
+    return () => clearInterval(interval)
+  }, [isAuthenticated])
+
   // === INITIAL DATA LOAD ===
   useEffect(() => {
     if (isAuthenticated) {
