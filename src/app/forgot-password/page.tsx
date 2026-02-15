@@ -23,11 +23,21 @@ export default function ForgotPasswordPage() {
     setLoading(true)
 
     try {
-      // TODO: Implementar API de recuperação de senha
-      // Por enquanto, apenas mostra mensagem de sucesso
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error || 'Erro ao enviar email')
+        return
+      }
+
       setSent(true)
-    } catch (error) {
+    } catch {
+      setError('Erro de conexao. Tente novamente.')
     } finally {
       setLoading(false)
     }
