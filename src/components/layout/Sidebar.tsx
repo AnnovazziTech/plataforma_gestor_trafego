@@ -36,7 +36,6 @@ import {
   Lock,
   LucideIcon,
 } from 'lucide-react'
-import { PlatformIcon } from '@/components/ui'
 import { useApp } from '@/contexts'
 import { useState } from 'react'
 
@@ -48,13 +47,6 @@ const iconMap: Record<string, LucideIcon> = {
   LayoutDashboard, CalendarDays, Receipt,
 }
 
-const platforms = [
-  { id: 'meta', connected: true },
-  { id: 'google', connected: true },
-  { id: 'tiktok', connected: true },
-  { id: 'linkedin', connected: false },
-  { id: 'twitter', connected: false },
-] as const
 
 interface SidebarProps {
   isCollapsed: boolean
@@ -66,7 +58,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const router = useRouter()
   const { data: session } = useSession()
   const isSuperAdmin = (session?.user as any)?.isSuperAdmin === true
-  const { setIsConnectAccountsModalOpen, showToast, modules, accessibleModules } = useApp()
+  const { showToast, modules, accessibleModules } = useApp()
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(true)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
@@ -74,14 +66,6 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const allPaidModulesAccessible = modules
     .filter(m => !m.isFree)
     .every(m => accessibleModules.includes(m.slug))
-
-  const handlePlatformClick = (platformId: string, connected: boolean) => {
-    if (connected) {
-      showToast(`${platformId.charAt(0).toUpperCase() + platformId.slice(1)} já está conectado`, 'info')
-    } else {
-      setIsConnectAccountsModalOpen(true)
-    }
-  }
 
   const handleUpgrade = () => {
     router.push('/planos')
@@ -365,80 +349,6 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
       {/* Footer */}
       <div style={{ flexShrink: 0 }}>
-        {/* Connected Platforms */}
-        <div
-          style={{
-            borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-            padding: isCollapsed ? '12px' : '12px 16px',
-          }}
-        >
-          {!isCollapsed && (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '8px',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 600,
-                  color: '#4B4B5B',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                }}
-              >
-                Plataformas
-              </span>
-              <span style={{ fontSize: '10px', color: '#3B82F6', fontWeight: 500 }}>3/5</span>
-            </div>
-          )}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              flexDirection: isCollapsed ? 'column' : 'row',
-              flexWrap: isCollapsed ? 'nowrap' : 'wrap',
-            }}
-          >
-            {platforms.map((platform) => (
-              <motion.div
-                key={platform.id}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handlePlatformClick(platform.id, platform.connected)}
-                style={{
-                  position: 'relative',
-                  padding: '8px',
-                  borderRadius: '8px',
-                  backgroundColor: platform.connected ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.02)',
-                  opacity: platform.connected ? 1 : 0.5,
-                  cursor: 'pointer',
-                }}
-                title={`${platform.id}${platform.connected ? ' (Conectado)' : ' (Clique para conectar)'}`}
-              >
-                <PlatformIcon platform={platform.id} size={16} />
-                {platform.connected && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '-2px',
-                      right: '-2px',
-                      width: '6px',
-                      height: '6px',
-                      backgroundColor: '#22C55E',
-                      borderRadius: '50%',
-                    }}
-                  />
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
         {/* Upgrade Banner */}
         <AnimatePresence>
           {!isCollapsed && showUpgradeBanner && !allPaidModulesAccessible && (
