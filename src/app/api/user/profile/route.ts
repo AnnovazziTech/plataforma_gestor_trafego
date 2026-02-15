@@ -11,7 +11,10 @@ import bcrypt from 'bcryptjs'
 const updateProfileSchema = z.object({
   name: z.string().min(1).optional(),
   phone: z.string().nullable().optional(),
-  avatar: z.string().url().nullable().optional(),
+  avatar: z.string().nullable().optional(),
+  notificationPrefs: z.record(z.string(), z.boolean()).optional(),
+  organizationName: z.string().min(1).optional(),
+  organizationWebsite: z.string().nullable().optional(),
 })
 
 const changePasswordSchema = z.object({
@@ -31,6 +34,7 @@ export const GET = withAuth(async (req, ctx) => {
         avatar: true,
         phone: true,
         emailVerified: true,
+        notificationPrefs: true,
         createdAt: true,
         lastLoginAt: true,
       },
@@ -77,6 +81,19 @@ export const GET = withAuth(async (req, ctx) => {
       },
     })
 
+    // Buscar sessoes ativas
+    const sessions = await prisma.session.findMany({
+      where: {
+        userId: ctx.userId,
+        expires: { gt: new Date() },
+      },
+      select: {
+        id: true,
+        expires: true,
+      },
+      orderBy: { expires: 'desc' },
+    })
+
     return NextResponse.json({
       user,
       currentOrganization: membership?.organization,
@@ -90,6 +107,7 @@ export const GET = withAuth(async (req, ctx) => {
         canViewReports: membership?.canViewReports,
       },
       organizationCount,
+      sessions,
     })
   } catch (error) {
     return NextResponse.json(
@@ -151,17 +169,46 @@ export const PATCH = withAuth(async (req, ctx) => {
     // Atualizar dados do perfil
     const data = updateProfileSchema.parse(body)
 
+    // Separar campos do user e da organization
+    const { organizationName, organizationWebsite, notificationPrefs, ...userData } = data
+
     const user = await prisma.user.update({
       where: { id: ctx.userId },
-      data,
+      data: {
+        ...userData,
+        ...(notificationPrefs !== undefined ? { notificationPrefs } : {}),
+      },
       select: {
         id: true,
         email: true,
         name: true,
         avatar: true,
         phone: true,
+        notificationPrefs: true,
       },
     })
+
+    // Atualizar organization se OWNER ou ADMIN
+    if (organizationName !== undefined || organizationWebsite !== undefined) {
+      const membership = await prisma.organizationMember.findFirst({
+        where: {
+          userId: ctx.userId,
+          organizationId: ctx.organizationId,
+          isActive: true,
+          role: { in: ['OWNER', 'ADMIN'] },
+        },
+      })
+
+      if (membership) {
+        await prisma.organization.update({
+          where: { id: ctx.organizationId },
+          data: {
+            ...(organizationName !== undefined ? { name: organizationName } : {}),
+            ...(organizationWebsite !== undefined ? { website: organizationWebsite } : {}),
+          },
+        })
+      }
+    }
 
     await createAuditLog({
       organizationId: ctx.organizationId,

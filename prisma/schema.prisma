@@ -103,6 +103,7 @@ model User {
   isActive      Boolean              @default(true)
   isSuperAdmin  Boolean              @default(false)
   lastLoginAt    DateTime?
+  notificationPrefs Json?
   lastActivityAt DateTime?
   createdAt      DateTime             @default(now())
   updatedAt     DateTime             @updatedAt
